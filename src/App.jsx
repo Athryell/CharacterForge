@@ -4,6 +4,9 @@ import {
   ABILITIES, ABILITY_NAMES, SKILLS, CLASSES, ALIGNMENTS,
   SPELLCASTING_CLASS, SLOT_TABLE, getMod, fmtMod,
 } from './data/dnd5e';
+import CharacterCreator from './components/CharacterCreator';
+import ConditionTracker from './components/ConditionTracker';
+import WeaponManager from './components/WeaponManager';
 import './App.css';
 
 // ── Utility ─────────────────────────────────────────────────────
@@ -117,6 +120,7 @@ export default function App() {
   const [spellFilter, setSpellFilter] = useState('all');
   const [toast, setToast] = useState('');
   const [hpAmount, setHpAmount] = useState(0);
+  const [showCreator, setShowCreator] = useState(false);
   const fileInputRef = useRef();
   const toastTimer = useRef();
 
@@ -124,6 +128,12 @@ export default function App() {
     setToast(msg);
     clearTimeout(toastTimer.current);
     toastTimer.current = setTimeout(() => setToast(''), 2500);
+  }
+
+  function handleCreatorComplete(newState) {
+    char.importState({ ...char.state, ...newState });
+    setShowCreator(false);
+    showToast(`Personaggio "${newState.charName}" creato!`);
   }
 
   function handleRoll(notation, name) {
@@ -209,6 +219,13 @@ export default function App() {
     <div className="sheet">
       <Toast message={toast} />
 
+      {showCreator && (
+        <CharacterCreator
+          onComplete={handleCreatorComplete}
+          onCancel={() => setShowCreator(false)}
+        />
+      )}
+
       {/* Template bar */}
       <div className="template-bar">
         <span className="template-label">Sistema:</span>
@@ -222,6 +239,7 @@ export default function App() {
           </button>
         ))}
         <div style={{ flex: 1 }} />
+        <button className="io-btn primary" onClick={() => setShowCreator(true)}>⚔ Nuovo personaggio</button>
         <button className="io-btn" onClick={handleExport}>⬇ Esporta JSON</button>
         <button className="io-btn primary" onClick={() => fileInputRef.current?.click()}>⬆ Importa</button>
         <input ref={fileInputRef} type="file" accept=".json" style={{ display: 'none' }} onChange={handleImport} />
@@ -234,6 +252,7 @@ export default function App() {
         <div className="tab-group">
           {[
             ['main', 'Personaggio'], ['combat', 'Combattimento'],
+            ['weapons', 'Armi'],
             ['spells', 'Magie'], ['inventory', 'Inventario'], ['notes', 'Note'],
           ].map(([id, label]) => (
             <button
@@ -438,6 +457,15 @@ export default function App() {
             </div>
           </div>
 
+          {/* Conditions */}
+          <div className="card">
+            <div className="card-title">🔮 Condizioni</div>
+            <ConditionTracker
+              active={state.conditions || []}
+              onChange={conditions => update({ conditions })}
+            />
+          </div>
+
           {/* Actions */}
           <div className="card">
             <div className="card-title">⚡ Azioni</div>
@@ -452,6 +480,22 @@ export default function App() {
               ))}
             </div>
             <button className="add-action-btn" onClick={handleAddAction}>+ Aggiungi azione</button>
+          </div>
+        </div>
+      )}
+
+      {/* ── WEAPONS PANEL ── */}
+      {activeTab === 'weapons' && (
+        <div className="panel">
+          <div className="card">
+            <div className="card-title">⚔ Armi</div>
+            <WeaponManager
+              weapons={state.weapons || []}
+              abilities={state.abilities}
+              profBonus={char.profBonus}
+              onUpdate={weapons => update({ weapons })}
+              onRoll={handleRoll}
+            />
           </div>
         </div>
       )}

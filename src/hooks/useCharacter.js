@@ -204,3 +204,12 @@ export function useCharacter() {
     importState, exportState, resetState,
   };
 }
+
+// Patch for new features — appended
+export function extendState(state) {
+  return {
+    conditions: [],
+    weapons: [],
+    ...state,
+  };
+}
