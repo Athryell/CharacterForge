@@ -7,6 +7,7 @@ import {
 import CharacterCreator from './components/CharacterCreator';
 import ConditionTracker from './components/ConditionTracker';
 import WeaponManager from './components/WeaponManager';
+import TabBar from './components/TabBar';
 import './App.css';
 
 // ── Utility ─────────────────────────────────────────────────────
@@ -245,26 +246,7 @@ export default function App() {
         <input ref={fileInputRef} type="file" accept=".json" style={{ display: 'none' }} onChange={handleImport} />
       </div>
 
-      {/* Tab bar */}
-      <div className="topbar">
-        <span className="topbar-brand">⚔ CharacterForge</span>
-        <div style={{ flex: 1 }} />
-        <div className="tab-group">
-          {[
-            ['main', 'Personaggio'], ['combat', 'Combattimento'],
-            ['weapons', 'Armi'],
-            ['spells', 'Magie'], ['inventory', 'Inventario'], ['notes', 'Note'],
-          ].map(([id, label]) => (
-            <button
-              key={id}
-              className={`tab-btn ${activeTab === id ? 'active' : ''}`}
-              onClick={() => setActiveTab(id)}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      </div>
+      <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* ── MAIN PANEL ── */}
       {activeTab === 'main' && (

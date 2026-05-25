@@ -650,3 +650,67 @@ body {
 .weapon-custom-form { display: flex; flex-direction: column; gap: 6px; }
 
 .io-btn.disabled { opacity: .4; cursor: not-allowed; }
+
+/* ── TAB BAR REORDER ───────────────────────────────────────────── */
+.tab-btn-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.tab-btn-wrapper.edit-mode .tab-btn {
+  cursor: grab;
+  padding-left: 6px;
+}
+.tab-btn-wrapper.edit-mode .tab-btn:active {
+  cursor: grabbing;
+}
+.tab-btn-wrapper.tab-hidden .tab-btn {
+  text-decoration: line-through;
+}
+.drag-handle {
+  font-size: 12px;
+  color: var(--c-hint);
+  margin-right: 3px;
+  cursor: grab;
+  user-select: none;
+}
+.tab-eye {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 16px;
+  height: 16px;
+  font-size: 10px;
+  border: none;
+  background: var(--c-bg);
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+  padding: 0;
+  line-height: 1;
+  z-index: 10;
+}
+.tab-eye:hover { transform: scale(1.2); }
+.icon-btn {
+  background: none;
+  border: 0.5px solid var(--c-border);
+  border-radius: var(--r);
+  padding: 5px 8px;
+  cursor: pointer;
+  color: var(--c-muted);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.icon-btn:hover { border-color: var(--c-border-mid); color: var(--c-ink); }
+.icon-btn.active {
+  border-color: var(--c-accent);
+  color: var(--c-accent-text);
+  background: var(--c-accent-light);
+}
