@@ -26,22 +26,26 @@ function Toast({ message }) {
   return message ? <div className="toast show">{message}</div> : null;
 }
 
-function AbilityBox({ attr, score, onAdjust, onInput }) {
+function AbilityBox({ attr, score, onAdjust, onInput, editing }) {
   const mod = getMod(score);
   return (
-    <div className="ability-box">
+    <div className={`ability-box ${editing ? 'editing' : ''}`}>
       <div className="ability-label">{attr}</div>
       <div className="ability-mod">{fmtMod(mod)}</div>
-      <div className="ability-score-row">
-        <button className="mod-btn" onClick={() => onAdjust(attr, -1)}>−</button>
-        <input
-          className="ability-score-input"
-          type="number" min="1" max="30"
-          value={score}
-          onChange={e => onInput(attr, e.target.value)}
-        />
-        <button className="mod-btn" onClick={() => onAdjust(attr, 1)}>+</button>
-      </div>
+      {editing ? (
+        <div className="ability-score-row">
+          <button className="mod-btn" onClick={() => onAdjust(attr, -1)}>−</button>
+          <input
+            className="ability-score-input"
+            type="number" min="1" max="30"
+            value={score}
+            onChange={e => onInput(attr, e.target.value)}
+          />
+          <button className="mod-btn" onClick={() => onAdjust(attr, 1)}>+</button>
+        </div>
+      ) : (
+        <div className="ability-score-static">{score}</div>
+      )}
     </div>
   );
 }
@@ -122,6 +126,7 @@ export default function App() {
   const [toast, setToast] = useState('');
   const [hpAmount, setHpAmount] = useState(0);
   const [showCreator, setShowCreator] = useState(false);
+  const [editingAbilities, setEditingAbilities] = useState(false);
   const fileInputRef = useRef();
   const toastTimer = useRef();
 
@@ -192,8 +197,9 @@ export default function App() {
     const name = window.prompt('Nome incantesimo:');
     if (!name) return;
     const level = parseInt(window.prompt('Livello (0 = trucchetto):') || '0');
-    const school = window.prompt('Scuola:') || '';
-    const concentration = window.confirm('Concentrazione?');
+    const school = window.prompt('Scuola (es. Evocazione, Necromanzia...):') || '';
+    const concInput = window.prompt('Concentrazione? (s/n):') || 'n';
+    const concentration = concInput.toLowerCase().startsWith('s');
     char.addSpell({ name, level, school, concentration, prepared: false });
   }
 
@@ -290,7 +296,15 @@ export default function App() {
 
           {/* Ability Scores */}
           <div className="card">
-            <div className="card-title">🎲 Caratteristiche</div>
+            <div className="card-title" style={{ justifyContent: 'space-between' }}>
+              <span>🎲 Caratteristiche</span>
+              <button
+                className={`icon-btn ${editingAbilities ? 'active' : ''}`}
+                onClick={() => setEditingAbilities(e => !e)}
+              >
+                {editingAbilities ? '✓ Fine' : '✏ Modifica'}
+              </button>
+            </div>
             <div className="grid-6">
               {ABILITIES.map(attr => (
                 <AbilityBox
@@ -299,6 +313,7 @@ export default function App() {
                   score={state.abilities[attr]}
                   onAdjust={(a, d) => char.setAbility(a, (state.abilities[a] || 10) + d)}
                   onInput={char.setAbility}
+                  editing={editingAbilities}
                 />
               ))}
             </div>
@@ -415,7 +430,7 @@ export default function App() {
                   <div key={type} className="save-group">
                     <div className="save-group-label">{type === 'success' ? 'Successi' : 'Fallimenti'}</div>
                     <div className="save-pips">
-                      {(type === 'success' ? state.deathSuccess : state.deathFail).map((on, i) => (
+                      {(type === 'success' ? (state.deathSuccess || [false,false,false]) : (state.deathFail || [false,false,false])).map((on, i) => (
                         <div
                           key={i}
                           className={`save-pip ${on ? type + '-on' : ''}`}
@@ -528,6 +543,7 @@ export default function App() {
                   <div className="spell-school">{spell.school}</div>
                   <div className="spell-level">{spell.level === 0 ? 'Trucco' : `Liv.${spell.level}`}</div>
                   {spell.concentration && <div className="spell-conc">C</div>}
+                  <button className="equip-remove" onClick={() => char.removeSpell(spell.name)}>✕</button>
                 </div>
               ))}
             </div>

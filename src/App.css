@@ -714,3 +714,22 @@ body {
   color: var(--c-accent-text);
   background: var(--c-accent-light);
 }
+
+/* ── ABILITY BOX EDIT MODE ─────────────────────────────────────── */
+.ability-score-static {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--c-muted);
+  padding: 2px 0;
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ability-box.editing {
+  border-color: var(--c-accent);
+  background: var(--c-accent-light);
+}
+.ability-box.editing .ability-mod {
+  color: var(--c-accent-text);
+}
