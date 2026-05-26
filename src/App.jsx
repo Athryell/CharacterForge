@@ -4,23 +4,24 @@ import {
   ABILITIES, ABILITY_NAMES, SKILLS, CLASSES, ALIGNMENTS,
   SPELLCASTING_CLASS, SLOT_TABLE, getMod, fmtMod,
 } from './data/dnd5e';
-
-const SPECIES_LIST = [
-  'Umano','Elfo (Alto)','Elfo (Silvano)','Nano (Collina)','Nano (Montagna)',
-  'Halfling (Pieditozzo)','Halfling (Selvatico)','Mezzelfo','Tiefling','Draconico',
-  'Gnomo (Roccia)','Gnomo (Foresta)','Mezz'orco','Aasimar',
-];
-const BACKGROUNDS_LIST = [
-  'Accolito','Artigiano','Criminale','Eremita','Eroe Popolare',
-  'Intrattenitore','Marinaio','Nobile','Saggio','Soldato',
-  'Orfano di strada','Seguace di gilda',
-];
 import CharacterCreator from './components/CharacterCreator';
 import ConditionTracker from './components/ConditionTracker';
 import WeaponManager from './components/WeaponManager';
 import TabBar from './components/TabBar';
 import SpellManager from './components/SpellManager';
 import './App.css';
+
+const SPECIES_LIST = [
+  "Umano",'Elfo (Alto)','Elfo (Silvano)','Nano (Collina)','Nano (Montagna)',
+  'Halfling (Pieditozzo)','Halfling (Selvatico)','Mezzelfo','Tiefling','Draconico',
+  'Gnomo (Roccia)','Gnomo (Foresta)',"Mezz'orco",'Aasimar',
+];
+const BACKGROUNDS_LIST = [
+  'Accolito','Artigiano','Criminale','Eremita','Eroe Popolare',
+  'Intrattenitore','Marinaio','Nobile','Saggio','Soldato',
+  'Orfano di strada','Seguace di gilda',
+];
+
 
 // ── Utility ─────────────────────────────────────────────────────
 function rollDice(notation) {
