@@ -1,0 +1,190 @@
+// Incantesimi SRD 5.2 (CC BY 4.0 — Wizards of the Coast)
+// Subset rappresentativo — tutte le magie core SRD
+
+export const SCHOOLS = [
+  'Ammaliamento', 'Divinazione', 'Evocazione', 'Illusione',
+  'Invocazione', 'Necromanzia', 'Trasmutazione', 'Abiurazione',
+];
+
+export const SPELL_CLASSES = [
+  'Bardo', 'Chierico', 'Druido', 'Mago',
+  'Paladino', 'Ranger', 'Stregone', 'Warlock',
+];
+
+// c = concentration, r = ritual
+export const SRD_SPELLS = [
+  // ── TRUCCHETTI (0) ──────────────────────────────────────────────
+  { name: 'Amici',               level: 0, school: 'Ammaliamento',  classes: ['Bardo','Mago','Stregone','Warlock'],         c: true,  r: false, desc: 'Hai vantaggio alle prove di CAR contro una creatura non ostile per 1 minuto.' },
+  { name: 'Aspersione acida',    level: 0, school: 'Invocazione',   classes: ['Mago','Stregone'],                           c: false, r: false, desc: 'Lanci una bolla di acido. 1d6 danni da acido, TS DES o colpisce.' },
+  { name: 'Bardatura',           level: 0, school: 'Trasmutazione', classes: ['Chierico','Druido'],                         c: false, r: false, desc: 'Tocchi una creatura: recupera 1 HP.' },
+  { name: 'Buio magico',         level: 0, school: 'Evocazione',    classes: ['Warlock'],                                   c: false, r: false, desc: '1d8 danni necrotici a distanza.' },
+  { name: 'Dardo di fuoco',      level: 0, school: 'Evocazione',    classes: ['Mago','Stregone'],                           c: false, r: false, desc: 'Dardo infuocato a distanza. 1d10 danni da fuoco.' },
+  { name: 'Dardo incantato',     level: 0, school: 'Evocazione',    classes: ['Mago','Stregone','Warlock'],                 c: false, r: false, desc: '1d8+mod danni da forza. Colpo automatico. Scala fino a 5d8.' },
+  { name: 'Fiamma sacra',        level: 0, school: 'Evocazione',    classes: ['Chierico'],                                  c: false, r: false, desc: 'Fiamma radiante. TS DES CD incantatore o 1d8 danni radianti. Non coperto.' },
+  { name: 'Folata di vento',     level: 0, school: 'Invocazione',   classes: ['Druido'],                                    c: false, r: false, desc: '1d8 danni da fulmine. Tiro attacco in mischia con magia.' },
+  { name: 'Freccia acida di Melf',level:0, school: 'Evocazione',    classes: ['Mago'],                                      c: false, r: false, desc: 'Freccia di puro acido. 4d4 danni, poi 2d4 fine turno.' },
+  { name: 'Luce',                level: 0, school: 'Evocazione',    classes: ['Bardo','Chierico','Mago','Stregone'],        c: false, r: false, desc: 'Un oggetto emette luce per 1 ora.' },
+  { name: 'Mano magica',         level: 0, school: 'Invocazione',   classes: ['Bardo','Mago','Stregone','Warlock'],         c: false, r: false, desc: 'Mano spettrale che manipola oggetti a distanza.' },
+  { name: 'Messaggio',           level: 0, school: 'Trasmutazione', classes: ['Bardo','Mago','Stregone'],                   c: false, r: false, desc: 'Sussurri a distanza, solo il bersaglio sente.' },
+  { name: 'Minor Illusion',      level: 0, school: 'Illusione',     classes: ['Bardo','Mago','Stregone','Warlock'],         c: false, r: false, desc: 'Crei suono o immagine illusoria per 1 minuto.' },
+  { name: 'Prestidigitazione',   level: 0, school: 'Trasmutazione', classes: ['Bardo','Mago','Stregone','Warlock'],         c: false, r: false, desc: 'Effetti magici minori: accendi candele, pulisci oggetti, ecc.' },
+  { name: 'Produzione di fiamma',level: 0, school: 'Invocazione',   classes: ['Druido'],                                    c: false, r: false, desc: 'Fiamma in mano. 1d8 danni da fuoco in mischia o a distanza.' },
+  { name: 'Resistenza',          level: 0, school: 'Abiurazione',   classes: ['Chierico','Druido'],                         c: true,  r: false, desc: '+1d4 a un tiro salvezza entro 1 minuto.' },
+  { name: 'Riorientamento',      level: 0, school: 'Trasmutazione', classes: ['Druido'],                                    c: false, r: false, desc: 'Conosci la direzione del nord magnetico.' },
+  { name: 'Saggio consiglio',    level: 0, school: 'Divinazione',   classes: ['Bardo','Chierico','Druido','Mago','Warlock'],c: false, r: false, desc: '+1d4 alla prossima prova di caratteristica entro 1 minuto.' },
+  { name: 'Scossa',              level: 0, school: 'Evocazione',    classes: ['Mago','Stregone'],                           c: false, r: false, desc: '1d8 danni da fulmine. Tiro attacco in mischia.' },
+  { name: 'Thaumaturgia',        level: 0, school: 'Trasmutazione', classes: ['Chierico'],                                  c: false, r: false, desc: 'Manifesti un segno del potere divino.' },
+  { name: 'Tocco gelido',        level: 0, school: 'Necromanzia',   classes: ['Mago','Stregone','Warlock'],                 c: false, r: false, desc: '1d8 danni necrotici. Bersaglio non recupera HP fino al tuo prossimo turno.' },
+  { name: 'Velenosa nebbia',     level: 0, school: 'Invocazione',   classes: ['Druido'],                                    c: false, r: false, desc: '1d12 danni da veleno a contatto.' },
+  { name: 'Verbo divino',        level: 0, school: 'Evocazione',    classes: ['Chierico'],                                  c: false, r: false, desc: '1d8 danni radianti. Tiro attacco con magia.' },
+
+  // ── 1° LIVELLO ──────────────────────────────────────────────────
+  { name: 'Allarme',             level: 1, school: 'Abiurazione',   classes: ['Mago','Ranger'],                             c: false, r: true,  desc: 'Imposta un allarme magico su un\'area per 8 ore.' },
+  { name: 'Armatura di Mago',    level: 1, school: 'Abiurazione',   classes: ['Mago','Stregone'],                           c: false, r: false, desc: 'CA = 13 + mod DES finché non indossi armatura.' },
+  { name: 'Benedizione',         level: 1, school: 'Ammaliamento',  classes: ['Chierico','Paladino'],                       c: true,  r: false, desc: 'Fino a 3 creature: +1d4 a tiri attacco e TS per 1 min.' },
+  { name: 'Breccia',             level: 1, school: 'Evocazione',    classes: ['Mago','Stregone','Warlock'],                 c: false, r: false, desc: 'Proiettile di fuoco puro. 3d10 danni da fuoco.' },
+  { name: 'Caduta morbida',      level: 1, school: 'Trasmutazione', classes: ['Bardo','Mago','Stregone'],                   c: false, r: false, desc: 'Fino a 5 creature cadono lentamente per 1 min.' },
+  { name: 'Calore metallico',    level: 1, school: 'Trasmutazione', classes: ['Chierico','Druido'],                         c: false, r: false, desc: 'Surriscaldi un metallo. 2d8 danni da fuoco.' },
+  { name: 'Capanna di Leomund',  level: 1, school: 'Evocazione',    classes: ['Bardo','Mago'],                              c: false, r: true,  desc: 'Cupola magica sicura per 8 ore.' },
+  { name: 'Charme su persone',   level: 1, school: 'Ammaliamento',  classes: ['Bardo','Druido','Mago','Stregone','Warlock'],c: false, r: false, desc: 'Affascina un umanoide. TS SAG o ti considera amico per 1h.' },
+  { name: 'Colpo dello stregone',level: 1, school: 'Evocazione',    classes: ['Warlock'],                                   c: true,  r: false, desc: 'Prossimo attacco: +1d6 danni psichici.' },
+  { name: 'Colpo tonante',       level: 1, school: 'Evocazione',    classes: ['Ranger'],                                    c: true,  r: false, desc: 'Prossimo attacco: +1d6 danni da tuono, bersaglio spinto 3m se fallisce TS FOR.' },
+  { name: 'Comando',             level: 1, school: 'Ammaliamento',  classes: ['Chierico','Paladino'],                       c: false, r: false, desc: 'Una parola di comando. Il bersaglio obbedisce per 1 turno.' },
+  { name: 'Comprensione lingue', level: 1, school: 'Divinazione',   classes: ['Bardo','Mago','Stregone','Warlock'],         c: false, r: true,  desc: 'Capisci ogni lingua parlata o scritta per 1h.' },
+  { name: 'Cura ferite',         level: 1, school: 'Evocazione',    classes: ['Bardo','Chierico','Druido','Paladino','Ranger'],c:false,r: false, desc: 'Tocchi una creatura: recupera 1d8+mod HP.' },
+  { name: 'Dardo magico',        level: 1, school: 'Evocazione',    classes: ['Mago','Stregone'],                           c: false, r: false, desc: '3 dardi da 1d4+1 danni da forza. Colpiscono automaticamente.' },
+  { name: 'Disguise Self',       level: 1, school: 'Illusione',     classes: ['Bardo','Mago','Stregone'],                   c: false, r: false, desc: 'Cambia il tuo aspetto per 1 ora.' },
+  { name: 'Dote eroica',         level: 1, school: 'Abiurazione',   classes: ['Bardo','Chierico'],                          c: true,  r: false, desc: 'Bersaglio ottiene 5 HP temporanei + vantaggio alle prove FOR.' },
+  { name: 'Entangle',            level: 1, school: 'Invocazione',   classes: ['Druido'],                                    c: true,  r: false, desc: 'Erbe e radici intralciano creature in 6m². TS FOR o trattenuti.' },
+  { name: 'Foglio di fiamme',    level: 1, school: 'Evocazione',    classes: ['Chierico','Druido'],                         c: true,  r: false, desc: 'Rivesti le mani di fiamme. 2d6 danni da fuoco in mischia.' },
+  { name: 'Grasso',              level: 1, school: 'Invocazione',   classes: ['Mago'],                                      c: false, r: false, desc: 'Area scivolosa 3m². TS DES o caduti a terra.' },
+  { name: 'Identificazione',     level: 1, school: 'Divinazione',   classes: ['Bardo','Mago'],                              c: false, r: true,  desc: 'Rivela le proprietà magiche di un oggetto.' },
+  { name: 'Immagine silenziosa', level: 1, school: 'Illusione',     classes: ['Bardo','Mago','Stregone'],                   c: true,  r: false, desc: 'Illlusione visiva di un oggetto fino a 4,5m³.' },
+  { name: 'Infliggere ferite',   level: 1, school: 'Necromanzia',   classes: ['Chierico'],                                  c: false, r: false, desc: 'Tocco necrotico. 3d10 danni necrotici. Tiro attacco in mischia.' },
+  { name: 'Maledizione',         level: 1, school: 'Necromanzia',   classes: ['Chierico','Warlock'],                        c: true,  r: false, desc: 'Malediazione su bersaglio: +1d6 danni necrotici su attacchi.' },
+  { name: 'Missili magici',      level: 1, school: 'Evocazione',    classes: ['Mago','Stregone'],                           c: false, r: false, desc: '3 dardi da 1d4+1 danni forza. Scala di 1 dardo per slot.' },
+  { name: 'Protezione dal male', level: 1, school: 'Abiurazione',   classes: ['Chierico','Druido','Paladino','Stregone','Warlock','Mago'], c: true, r: false, desc: 'Protezione contro creature aberranti, non-morti, elementali, fate, demoni per 10 min.' },
+  { name: 'Rete di ragno',       level: 1, school: 'Invocazione',   classes: ['Mago','Stregone'],                           c: true,  r: false, desc: 'Ragnatela difficile 6m³. TS FOR o trattenuti.' },
+  { name: 'Rifugio',             level: 1, school: 'Abiurazione',   classes: ['Chierico'],                                  c: false, r: false, desc: 'Protezione su una creatura. Chi attacca deve superare TS SAG.' },
+  { name: 'Scudo',               level: 1, school: 'Abiurazione',   classes: ['Mago','Stregone'],                           c: false, r: false, desc: 'Reazione: +5 CA fino al tuo prossimo turno. Blocca dardo magico.' },
+  { name: 'Scudo della fede',    level: 1, school: 'Abiurazione',   classes: ['Chierico','Paladino'],                       c: true,  r: false, desc: '+2 CA a una creatura per 10 min.' },
+  { name: 'Sonno',               level: 1, school: 'Ammaliamento',  classes: ['Bardo','Mago','Stregone'],                   c: false, r: false, desc: 'Addormenta creature per HP totali (5d8, non-morti e immuni esclusi).' },
+  { name: 'Trovare trappole',    level: 1, school: 'Divinazione',   classes: ['Chierico','Druido','Ranger'],                c: false, r: false, desc: 'Percepisci le trappole entro 9m.' },
+  { name: 'Ululato di tuono',    level: 1, school: 'Evocazione',    classes: ['Bardo','Druido','Mago','Stregone'],          c: false, r: false, desc: 'Impulso di tuono 3m. 2d8 danni da tuono, TS COS o spinto 3m.' },
+  { name: 'Voce del destino',    level: 1, school: 'Divinazione',   classes: ['Bardo','Chierico'],                          c: false, r: false, desc: '+1d4 a prossima prova di caratteristica di un alleato.' },
+
+  // ── 2° LIVELLO ──────────────────────────────────────────────────
+  { name: 'Arma magica',         level: 2, school: 'Trasmutazione', classes: ['Mago','Paladino','Stregone','Warlock'],       c: true,  r: false, desc: 'Un\'arma non magica diventa +1.' },
+  { name: 'Bloccare persona',    level: 2, school: 'Ammaliamento',  classes: ['Bardo','Chierico','Druido','Mago','Stregone','Warlock'], c: true, r: false, desc: 'Paralizza un umanoide. TS SAG ogni turno.' },
+  { name: 'Cecità/Sordità',      level: 2, school: 'Necromanzia',   classes: ['Bardo','Chierico','Mago','Stregone'],         c: false, r: false, desc: 'Rendi una creatura cieca o sorda. TS COS ogni turno.' },
+  { name: 'Dardo acido di Melf', level: 2, school: 'Evocazione',    classes: ['Mago'],                                      c: false, r: false, desc: '4d4 danni acido ora + 2d4 fine prossimo turno.' },
+  { name: 'Individuare pensieri',level: 2, school: 'Divinazione',   classes: ['Bardo','Mago','Stregone'],                   c: true,  r: false, desc: 'Leggi i pensieri superficiali di una creatura.' },
+  { name: 'Invisibilità',        level: 2, school: 'Illusione',     classes: ['Bardo','Mago','Stregone','Warlock'],         c: true,  r: false, desc: 'Una creatura diventa invisibile per 1h o finché attacca.' },
+  { name: 'Levitazione',         level: 2, school: 'Trasmutazione', classes: ['Mago','Stregone'],                           c: true,  r: false, desc: 'Una creatura sale fino a 6m. Controllo verticale.' },
+  { name: 'Legame divino',       level: 2, school: 'Evocazione',    classes: ['Paladino'],                                  c: false, r: false, desc: 'Lega un\'arma all\'energia divina. +2d8 danni radianti o necrotici.' },
+  { name: 'Luce del giorno',     level: 2, school: 'Evocazione',    classes: ['Chierico','Druido','Paladino','Ranger','Stregone'], c: false, r: false, desc: 'Sfera di luce brillante raggio 18m per 1h.' },
+  { name: 'Nebbia fittissima',   level: 2, school: 'Invocazione',   classes: ['Druido','Mago','Stregone'],                  c: true,  r: false, desc: 'Nube di nebbia pesante 6m raggio. Area oscura.' },
+  { name: 'Passare senza tracce',level: 2, school: 'Abiurazione',   classes: ['Druido','Ranger'],                           c: true,  r: false, desc: '+10 alle prove Furtività per te e alleati entro 9m. Senza tracce.' },
+  { name: 'Porta dimensionale',  level: 2, school: 'Invocazione',   classes: ['Bardo','Mago','Stregone','Warlock'],         c: false, r: false, desc: 'Portale entro 9m. Teletrasporto immediato attraverso.' },
+  { name: 'Presa del ghiaccio',  level: 2, school: 'Evocazione',    classes: ['Druido','Mago','Stregone'],                  c: false, r: false, desc: '3d6 danni da freddo. TS COS o trattenuto nel ghiaccio.' },
+  { name: 'Preveggenza',         level: 2, school: 'Divinazione',   classes: ['Bardo','Chierico','Druido','Mago','Stregone','Warlock'], c: false, r: true, desc: 'Vantaggio alla prossima prova, tiro attacco o TS entro 1 min.' },
+  { name: 'Ragnatela',           level: 2, school: 'Invocazione',   classes: ['Mago','Stregone'],                           c: true,  r: false, desc: 'Ragnatele in 6m³. Terreno difficile. TS DES o trattenuti.' },
+  { name: 'Raggio di luna',      level: 2, school: 'Evocazione',    classes: ['Druido'],                                    c: true,  r: false, desc: 'Fascio di luce lunare. 2d10 danni radianti ogni turno.' },
+  { name: 'Restituire vista',    level: 2, school: 'Trasmutazione', classes: ['Chierico','Druido','Paladino'],               c: false, r: false, desc: 'Rimuovi cecità, sordità o malattia.' },
+  { name: 'Silenzio',            level: 2, school: 'Illusione',     classes: ['Bardo','Chierico','Ranger'],                 c: true,  r: true,  desc: 'Nessun suono in sfera 6m. Nessun incantesimo verbale.' },
+  { name: 'Suggestione',         level: 2, school: 'Ammaliamento',  classes: ['Bardo','Mago','Stregone','Warlock'],         c: true,  r: false, desc: 'Suggerisci un\'azione plausibile. TS SAG o obbedisce per 8h.' },
+  { name: 'Tiro di scudi',       level: 2, school: 'Abiurazione',   classes: ['Mago'],                                      c: false, r: false, desc: 'Scudi magici. Protezione su più creature.' },
+
+  // ── 3° LIVELLO ──────────────────────────────────────────────────
+  { name: 'Chiamata del fulmine',level: 3, school: 'Invocazione',   classes: ['Druido'],                                    c: true,  r: false, desc: 'Nube temporalesca. 3d10 danni da fulmine ogni turno per 10 min.' },
+  { name: 'Contaminazione',      level: 3, school: 'Necromanzia',   classes: ['Chierico','Druido'],                         c: false, r: false, desc: 'Maledizione su bersaglio. 3d6 danni necrotici ogni ora.' },
+  { name: 'Contrincantesimo',    level: 3, school: 'Abiurazione',   classes: ['Mago','Stregone','Warlock'],                 c: false, r: false, desc: 'Reazione: interrompi un incantesimo entro 18m (3° o inferiore automatico).' },
+  { name: 'Dispel Magic',        level: 3, school: 'Abiurazione',   classes: ['Bardo','Chierico','Druido','Mago','Paladino','Ranger','Stregone','Warlock'], c: false, r: false, desc: 'Termina tutti gli effetti magici sul bersaglio (3° o inferiore automatico).' },
+  { name: 'Forma gassosa',       level: 3, school: 'Trasmutazione', classes: ['Mago','Stregone','Warlock'],                 c: true,  r: false, desc: 'Trasformi una creatura in vapore. Immunità danni, vola 3m.' },
+  { name: 'Frecce di fulmine',   level: 3, school: 'Trasmutazione', classes: ['Ranger'],                                    c: true,  r: false, desc: 'Le frecce diventano fulmini. 1d8 danni aggiuntivi da fulmine.' },
+  { name: 'Guardiani spirituali',level: 3, school: 'Invocazione',   classes: ['Chierico'],                                  c: true,  r: false, desc: 'Spiriti tutelari in 4,5m raggio. 3d8 danni a nemici che entrano.' },
+  { name: 'Intelletto spia',     level: 3, school: 'Trasmutazione', classes: ['Mago'],                                      c: false, r: false, desc: 'Lanci un insetto spia. Puoi vedere/sentire attraverso di esso.' },
+  { name: 'Lampada di Evard',    level: 3, school: 'Invocazione',   classes: ['Mago','Warlock'],                            c: true,  r: false, desc: 'Tentacoli neri 6m². 3d6 danni contundenti, trattenuto.' },
+  { name: 'Lentezza',            level: 3, school: 'Trasmutazione', classes: ['Mago','Stregone'],                           c: true,  r: false, desc: 'Fino a 6 creature rallentate. -2 CA e TS DES, 1 azione per turno.' },
+  { name: 'Palla di fuoco',      level: 3, school: 'Evocazione',    classes: ['Mago','Stregone'],                           c: false, r: false, desc: 'Sfera infuocata 6m raggio. 8d6 danni da fuoco. TS DES dimezza.' },
+  { name: 'Protezione da energia',level:3, school: 'Abiurazione',   classes: ['Chierico','Druido','Mago','Ranger','Stregone'], c: true,r: false, desc: 'Resistenza a un tipo di danno scelto per 1h.' },
+  { name: 'Rimuovere maledizione',level:3, school: 'Abiurazione',   classes: ['Chierico','Mago','Paladino','Stregone','Warlock'], c: false, r: false, desc: 'Rimuovi maledizioni e attunamenti magici negativi.' },
+  { name: 'Ritardo nel veleno',  level: 3, school: 'Abiurazione',   classes: ['Chierico','Druido','Paladino','Ranger'],     c: false, r: false, desc: 'Neutralizza veleni attivi. Immunità veleno per 1h.' },
+  { name: 'Saetta',              level: 3, school: 'Evocazione',    classes: ['Mago','Stregone'],                           c: false, r: false, desc: 'Fulmine 30m × 1,5m. 8d6 danni da fulmine. TS DES dimezza.' },
+  { name: 'Tempesta di neve',    level: 3, school: 'Invocazione',   classes: ['Druido','Mago','Stregone'],                  c: false, r: false, desc: '2d8 danni da freddo + bersaglio cieco in area cilindrica.' },
+  { name: 'Volare',              level: 3, school: 'Trasmutazione', classes: ['Mago','Stregone','Warlock'],                 c: true,  r: false, desc: 'Velocità di volo 18m per 10 min.' },
+  { name: 'Zona di verità',      level: 3, school: 'Ammaliamento',  classes: ['Bardo','Chierico','Paladino'],               c: false, r: false, desc: 'Sfera 4,5m. Le creature non possono mentire deliberatamente.' },
+
+  // ── 4° LIVELLO ──────────────────────────────────────────────────
+  { name: 'Arcano occhio',       level: 4, school: 'Divinazione',   classes: ['Mago'],                                      c: true,  r: false, desc: 'Occhio invisibile che si muove 9m/turno. Visione nel buio.' },
+  { name: 'Banishment',          level: 4, school: 'Abiurazione',   classes: ['Chierico','Mago','Paladino','Stregone','Warlock'], c: true, r: false, desc: 'Esilia una creatura. TS CAR o viene bandita per 1 min.' },
+  { name: 'Blight',              level: 4, school: 'Necromanzia',   classes: ['Druido','Mago','Stregone','Warlock'],         c: false, r: false, desc: 'Drena vita. 8d8 danni necrotici. TS COS dimezza.' },
+  { name: 'Confusione',          level: 4, school: 'Ammaliamento',  classes: ['Bardo','Druido','Mago','Stregone'],           c: true,  r: false, desc: 'Fino a 6 creature agiscono in modo caotico per 1 min.' },
+  { name: 'Crescita spinosa',    level: 4, school: 'Trasmutazione', classes: ['Druido','Ranger'],                            c: true,  r: false, desc: 'Spine 4,5m raggio. 2d4 danni perforanti per metro percorso.' },
+  { name: 'Dimensione porta',    level: 4, school: 'Invocazione',   classes: ['Bardo','Mago','Stregone','Warlock'],         c: false, r: false, desc: 'Teletrasporto entro 500m verso luogo conosciuto.' },
+  { name: 'Fabbricare',          level: 4, school: 'Trasmutazione', classes: ['Mago'],                                      c: false, r: false, desc: 'Crei un oggetto da materie prime.' },
+  { name: 'Guarigione di massa', level: 4, school: 'Evocazione',    classes: ['Bardo','Chierico','Druido'],                  c: false, r: false, desc: 'Fino a 6 creature recuperano 4d8+mod HP.' },
+  { name: 'Muro di fuoco',       level: 4, school: 'Evocazione',    classes: ['Druido','Mago','Stregone'],                  c: true,  r: false, desc: 'Muro di fiamme opaco. 5d8 danni da fuoco per attraversamento.' },
+  { name: 'Resilienza',          level: 4, school: 'Abiurazione',   classes: ['Mago'],                                      c: false, r: false, desc: 'Competenza in un tiro salvezza per 24h.' },
+  { name: 'Sfera di invulnerabilità minore', level: 4, school: 'Abiurazione', classes: ['Mago','Stregone'], c: true, r: false, desc: 'Bolla 3m. Gli incantesimi di 3° o inferiore non possono entrare.' },
+
+  // ── 5° LIVELLO ──────────────────────────────────────────────────
+  { name: 'Animare morti',       level: 5, school: 'Necromanzia',   classes: ['Chierico','Mago'],                           c: false, r: false, desc: 'Anima fino a 3 non-morti (scheletri o zombie) come servitori.' },
+  { name: 'Cono di freddo',      level: 5, school: 'Evocazione',    classes: ['Mago','Stregone'],                           c: false, r: false, desc: 'Cono 18m. 8d8 danni da freddo. TS COS dimezza.' },
+  { name: 'Contatto con altri piani', level: 5, school: 'Divinazione', classes: ['Mago','Warlock'],                         c: false, r: true,  desc: 'Contatta un\'entità planare. 5 domande sì/no.' },
+  { name: 'Controllo dei venti', level: 5, school: 'Trasmutazione', classes: ['Druido','Mago','Stregone'],                  c: true,  r: false, desc: 'Controlli la direzione e intensità del vento in 90m.' },
+  { name: 'Dominare persona',    level: 5, school: 'Ammaliamento',  classes: ['Bardo','Mago','Stregone'],                   c: true,  r: false, desc: 'Controllo completo su un umanoide. TS SAG ogni turno.' },
+  { name: 'Flaming sphere',      level: 5, school: 'Evocazione',    classes: ['Druido','Mago'],                             c: true,  r: false, desc: 'Sfera volante. 5d6 danni da fuoco per contatto.' },
+  { name: 'Grande restaurazione',level: 5, school: 'Abiurazione',   classes: ['Bardo','Chierico','Druido'],                 c: false, r: false, desc: 'Rimuovi affaticamento, incantesimi, maledizioni, paralisi, pietrificazione.' },
+  { name: 'Muro di pietra',      level: 5, school: 'Evocazione',    classes: ['Druido','Mago','Stregone'],                  c: true,  r: false, desc: 'Crea un muro di pietra non magica fino a 10 pannelli 3×3m.' },
+  { name: 'Ristabilire',         level: 5, school: 'Abiurazione',   classes: ['Chierico','Druido','Paladino'],              c: false, r: false, desc: 'Rimuovi condizioni e riduzioni caratteristiche.' },
+  { name: 'Scagliare incantesimo',level:5, school: 'Trasmutazione', classes: ['Mago'],                                      c: false, r: false, desc: 'Trasferisci un incantesimo in un\'arma o oggetto.' },
+  { name: 'Telecinesi',          level: 5, school: 'Trasmutazione', classes: ['Mago','Stregone'],                           c: true,  r: false, desc: 'Muovi oggetti o creature a distanza con la mente.' },
+  { name: 'Telepatia',           level: 5, school: 'Evocazione',    classes: ['Mago'],                                      c: true,  r: false, desc: 'Comunicazione mentale con una creatura ovunque si trovi.' },
+
+  // ── 6° LIVELLO ──────────────────────────────────────────────────
+  { name: 'Barriera di lame',    level: 6, school: 'Evocazione',    classes: ['Chierico'],                                  c: true,  r: false, desc: 'Muro di lame rotanti. 6d10 danni taglienti per attraversamento.' },
+  { name: 'Catena di fulmini',   level: 6, school: 'Evocazione',    classes: ['Mago','Stregone'],                           c: false, r: false, desc: 'Fulmine che rimbalza su 4 bersagli. 10d8 danni da fulmine.' },
+  { name: 'Dissolvi magia',      level: 6, school: 'Abiurazione',   classes: ['Bardo','Chierico','Druido','Mago','Paladino','Stregone','Warlock'], c: false, r: false, desc: 'Termina tutti gli effetti magici su area o bersaglio.' },
+  { name: 'Globe of Invulnerability', level: 6, school: 'Abiurazione', classes: ['Mago','Stregone'],                        c: true,  r: false, desc: 'Sfera 3m. Incantesimi 5° o inferiori non possono entrare.' },
+  { name: 'Harm',                level: 6, school: 'Necromanzia',   classes: ['Chierico'],                                  c: false, r: false, desc: '14d6 danni necrotici. TS COS dimezza. Riduce HP massimi.' },
+  { name: 'Heal',                level: 6, school: 'Evocazione',    classes: ['Chierico','Druido'],                         c: false, r: false, desc: 'Ripristina 70 HP. Rimuovi cecità, sordità e malattie.' },
+  { name: 'True Seeing',         level: 6, school: 'Divinazione',   classes: ['Bardo','Chierico','Mago','Stregone','Warlock'], c: true, r: false, desc: 'Vista vera: invisibile, piani, illusioni vere, buio magico. 60m per 1h.' },
+
+  // ── 7° LIVELLO ──────────────────────────────────────────────────
+  { name: 'Dito della morte',    level: 7, school: 'Necromanzia',   classes: ['Mago','Stregone','Warlock'],                 c: false, r: false, desc: '7d8+30 danni necrotici. TS COS dimezza. Se muore: zombie permanente.' },
+  { name: 'Fire Storm',          level: 7, school: 'Evocazione',    classes: ['Chierico','Druido','Stregone'],              c: false, r: false, desc: 'Area di fiamme 10 cubi 3m. 7d10 danni fuoco. TS DES dimezza.' },
+  { name: 'Regenerate',          level: 7, school: 'Trasmutazione', classes: ['Bardo','Chierico','Druido'],                 c: false, r: false, desc: 'Rigenera arti mancanti. 4d8+15 HP + 1 HP/turno per 1h.' },
+  { name: 'Resurrection',        level: 7, school: 'Necromanzia',   classes: ['Bardo','Chierico'],                          c: false, r: false, desc: 'Resuscita un morto da meno di 100 anni. Recupera tutti gli HP.' },
+  { name: 'Symbol',              level: 7, school: 'Abiurazione',   classes: ['Bardo','Chierico','Mago'],                   c: false, r: false, desc: 'Glifo con effetto scelto (morte, dolore, follia, ecc.).' },
+  { name: 'Teleport',            level: 7, school: 'Invocazione',   classes: ['Bardo','Mago','Stregone'],                   c: false, r: false, desc: 'Teletrasporto in qualsiasi luogo dello stesso piano.' },
+
+  // ── 8° LIVELLO ──────────────────────────────────────────────────
+  { name: 'Antimagic Field',     level: 8, school: 'Abiurazione',   classes: ['Chierico','Mago'],                           c: true,  r: false, desc: 'Sfera 3m senza magia. Incantesimi e oggetti magici non funzionano.' },
+  { name: 'Clone',               level: 8, school: 'Necromanzia',   classes: ['Mago'],                                      c: false, r: false, desc: 'Crei un clone del tuo corpo come rifugio per la tua anima.' },
+  { name: 'Dominate Monster',    level: 8, school: 'Ammaliamento',  classes: ['Bardo','Mago','Stregone','Warlock'],         c: true,  r: false, desc: 'Controllo totale su qualsiasi creatura per 1h. TS SAG ogni turno.' },
+  { name: 'Earthquake',          level: 8, school: 'Invocazione',   classes: ['Chierico','Druido','Stregone'],              c: true,  r: false, desc: 'Terremoto 30m raggio per 1 min. Terrain difficile, danni da crollo.' },
+  { name: 'Incendiary Cloud',    level: 8, school: 'Invocazione',   classes: ['Mago','Stregone'],                           c: true,  r: false, desc: 'Nube infuocata 6m raggio. 10d8 danni fuoco ogni turno.' },
+  { name: 'Sunburst',            level: 8, school: 'Evocazione',    classes: ['Druido','Mago','Stregone'],                  c: false, r: false, desc: 'Esplosione solare 18m raggio. 12d6 danni radianti. Cecità.' },
+
+  // ── 9° LIVELLO ──────────────────────────────────────────────────
+  { name: 'Astral Projection',   level: 9, school: 'Necromanzia',   classes: ['Chierico','Mago','Warlock'],                 c: false, r: false, desc: 'Proietta te e alleati nel Piano Astrale.' },
+  { name: 'Foresight',           level: 9, school: 'Divinazione',   classes: ['Bardo','Druido','Mago','Warlock'],           c: false, r: false, desc: 'Non puoi essere sorpreso. Vantaggio a tutto. Svantaggio contro di te. 8h.' },
+  { name: 'Gate',                level: 9, school: 'Invocazione',   classes: ['Chierico','Mago','Stregone'],                c: true,  r: false, desc: 'Portale verso un altro piano. Puoi evocare una creatura specifica.' },
+  { name: 'Imprisonment',        level: 9, school: 'Abiurazione',   classes: ['Mago','Warlock'],                            c: false, r: false, desc: 'Prigione magica permanente. 6 forme diverse.' },
+  { name: 'Meteor Swarm',        level: 9, school: 'Evocazione',    classes: ['Mago','Stregone'],                           c: false, r: false, desc: '4 meteore su punti entro 1,5km. 20d6 fuoco + 20d6 contundenti ciascuna.' },
+  { name: 'Power Word Kill',     level: 9, school: 'Ammaliamento',  classes: ['Bardo','Mago','Stregone','Warlock'],         c: false, r: false, desc: 'Una parola. Una creatura con 100 HP o meno muore istantaneamente.' },
+  { name: 'Time Stop',           level: 9, school: 'Trasmutazione', classes: ['Mago','Stregone'],                           c: false, r: false, desc: 'Fermi il tempo. Ottieni 1d4+1 turni da solo.' },
+  { name: 'True Polymorph',      level: 9, school: 'Trasmutazione', classes: ['Bardo','Mago','Warlock'],                    c: true,  r: false, desc: 'Trasforma permanentemente una creatura o oggetto.' },
+  { name: 'Wish',                level: 9, school: 'Invocazione',   classes: ['Mago','Stregone'],                           c: false, r: false, desc: 'Replica qualsiasi incantesimo 8° o inferiore, o esprimi un desiderio.' },
+];
+
+export function filterSpells({ spells = SRD_SPELLS, level, school, cls, search }) {
+  return spells.filter(s => {
+    if (level !== undefined && level !== null && level !== '' && s.level !== parseInt(level)) return false;
+    if (school && s.school !== school) return false;
+    if (cls && !s.classes.includes(cls)) return false;
+    if (search && !s.name.toLowerCase().includes(search.toLowerCase())) return false;
+    return true;
+  });
+}

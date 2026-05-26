@@ -733,3 +733,133 @@ body {
 .ability-box.editing .ability-mod {
   color: var(--c-accent-text);
 }
+
+/* ── SPELL MANAGER ─────────────────────────────────────────────── */
+.spell-level-header {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--c-hint);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: 4px 0 4px 2px;
+  border-bottom: 0.5px solid var(--c-border);
+  margin-bottom: 4px;
+}
+
+.spell-item.expanded {
+  border-color: var(--c-border-mid);
+  background: var(--c-surface);
+}
+.spell-desc {
+  font-size: 12px;
+  color: var(--c-muted);
+  line-height: 1.5;
+  margin-top: 5px;
+  padding-top: 5px;
+  border-top: 0.5px solid var(--c-border);
+}
+.spell-level-badge {
+  font-size: 10px;
+  color: var(--c-hint);
+  background: var(--c-surface);
+  border: 0.5px solid var(--c-border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  white-space: nowrap;
+}
+.spell-ritual {
+  font-size: 10px;
+  color: #185FA5;
+  font-weight: 500;
+}
+
+/* Browser */
+.spell-browser-filters {
+  margin-bottom: 10px;
+}
+.spell-search {
+  width: 100%;
+  border: 0.5px solid var(--c-border);
+  border-radius: var(--r);
+  padding: 7px 10px;
+  font-size: 13px;
+  background: var(--c-bg);
+  color: var(--c-ink);
+}
+.spell-search:focus { outline: none; border-color: var(--c-accent); }
+.spell-filter-select {
+  border: 0.5px solid var(--c-border);
+  border-radius: var(--r);
+  padding: 5px 8px;
+  font-size: 12px;
+  background: var(--c-bg);
+  color: var(--c-ink);
+  cursor: pointer;
+}
+.spell-filter-select:focus { outline: none; border-color: var(--c-accent); }
+
+.spell-browser-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+.spell-browser-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 0.5px solid var(--c-border);
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: all .12s;
+  background: var(--c-bg);
+}
+.spell-browser-item:hover { border-color: var(--c-border-mid); background: var(--c-surface); }
+.spell-browser-item.already-known { opacity: .5; }
+.spell-browser-item.expanded { border-color: var(--c-accent); background: var(--c-accent-light); }
+.spell-browser-main { flex: 1; }
+.spell-browser-name { font-size: 13px; font-weight: 500; margin-bottom: 3px; }
+.spell-browser-tags { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; margin-bottom: 2px; }
+.spell-school-badge {
+  font-size: 10px;
+  color: var(--c-hint);
+  background: var(--c-surface);
+  border: 0.5px solid var(--c-border);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+.spell-browser-classes { font-size: 11px; color: var(--c-hint); }
+.spell-browser-desc {
+  font-size: 12px;
+  color: var(--c-muted);
+  line-height: 1.5;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 0.5px solid var(--c-border);
+  width: 100%;
+}
+.spell-add-btn {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 1.5px solid var(--c-accent);
+  background: none;
+  color: var(--c-accent-text);
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: all .15s;
+  line-height: 1;
+}
+.spell-add-btn:hover:not(:disabled) {
+  background: var(--c-accent);
+  color: #fff;
+}
+.spell-add-btn.known {
+  border-color: var(--c-border);
+  color: var(--c-hint);
+  cursor: default;
+}

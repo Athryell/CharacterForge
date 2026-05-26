@@ -8,6 +8,7 @@ import CharacterCreator from './components/CharacterCreator';
 import ConditionTracker from './components/ConditionTracker';
 import WeaponManager from './components/WeaponManager';
 import TabBar from './components/TabBar';
+import SpellManager from './components/SpellManager';
 import './App.css';
 
 // ── Utility ─────────────────────────────────────────────────────
