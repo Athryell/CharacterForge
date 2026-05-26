@@ -9,6 +9,8 @@ import ConditionTracker from './components/ConditionTracker';
 import WeaponManager from './components/WeaponManager';
 import TabBar from './components/TabBar';
 import SpellManager from './components/SpellManager';
+import InventoryManager from './components/InventoryManager';
+import DiceText from './components/DiceText';
 import './App.css';
 
 const SPECIES_LIST = [
@@ -98,7 +100,7 @@ function ActionItem({ action, onRoll }) {
         <div className="action-desc-short">{action.descShort}</div>
         {expanded && (
           <div className="action-desc-full">
-            {action.desc}
+            <DiceText text={action.desc} onRoll={onRoll} label={action.name} />
             {action.dice && (
               <div className="action-roll" onClick={e => { e.stopPropagation(); onRoll(action.dice, action.name); }}>
                 🎲 Lancia {action.dice}
@@ -554,7 +556,7 @@ export default function App() {
             <div className="card">
               <div className="card-title">💀 Tiri salvezza morte</div>
               <div className="death-saves">
-                {['success', 'failure'].map(type => (
+                {['success', 'fail'].map(type => (
                   <div key={type} className="save-group">
                     <div className="save-group-label">{type === 'success' ? 'Successi' : 'Fallimenti'}</div>
                     <div className="save-pips">
@@ -689,14 +691,11 @@ export default function App() {
           </div>
           <div className="card">
             <div className="card-title">🎒 Equipaggiamento</div>
-            {state.equipment.map((item, i) => (
-              <div key={i} className="equip-item">
-                <span className="equip-name">{item.name}</span>
-                <span className="equip-qty">×{item.qty}</span>
-                <button className="equip-remove" onClick={() => char.removeEquipment(i)}>✕</button>
-              </div>
-            ))}
-            <button className="add-action-btn" onClick={handleAddEquip}>+ Aggiungi oggetto</button>
+            <InventoryManager
+              items={state.equipment || []}
+              onUpdate={equipment => update({ equipment })}
+              onRoll={handleRoll}
+            />
           </div>
         </div>
       )}

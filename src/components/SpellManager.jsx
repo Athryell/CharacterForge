@@ -1,3 +1,4 @@
+import DiceText from './DiceText';
 import React, { useState, useMemo } from 'react';
 import { SRD_SPELLS, SCHOOLS, SPELL_CLASSES, filterSpells } from '../data/spells';
 
@@ -11,7 +12,7 @@ const EMPTY_CUSTOM = {
   ritual: false, desc: '',
 };
 
-export default function SpellManager({ spells = [], charClass, onUpdate }) {
+export default function SpellManager({ spells = [], charClass, onUpdate, onRoll }) {
   const [view, setView] = useState('list');
   const [filterLevel, setFilterLevel] = useState('');
   const [filterSchool, setFilterSchool] = useState('');
@@ -221,7 +222,7 @@ export default function SpellManager({ spells = [], charClass, onUpdate }) {
                     <div style={{ flex: 1 }}>
                       <div className="spell-name">{spell.name}</div>
                       {expanded === spell.name && spell.desc && (
-                        <div className="spell-desc">{spell.desc}</div>
+                        <div className="spell-desc"><DiceText text={spell.desc} onRoll={onRoll} label={spell.name} /></div>
                       )}
                     </div>
                     <div className="spell-school">{spell.school}</div>

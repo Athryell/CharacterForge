@@ -1,3 +1,4 @@
+import DiceText from './DiceText';
 import React, { useState } from 'react';
 import { WEAPON_PRESETS, WEAPON_PROPERTIES, calcWeaponAttack, fmtWeaponDmg } from '../data/weapons';
 
