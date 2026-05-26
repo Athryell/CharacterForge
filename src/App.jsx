@@ -530,25 +530,12 @@ export default function App() {
 
           <div className="card">
             <div className="card-title">📖 Incantesimi</div>
-            <div className="filter-bar">
-              {[['all','Tutti'],['0','Trucchetti'],['prepared','Preparati']].map(([v,l]) => (
-                <button key={v} className={`filter-chip ${spellFilter === v ? 'active' : ''}`} onClick={() => setSpellFilter(v)}>{l}</button>
-              ))}
-            </div>
-            <div className="spell-list">
-              {filteredSpells.map(spell => (
-                <div key={spell.name} className={`spell-item ${spell.prepared ? 'prepared' : ''}`}>
-                  <div className={`spell-prepared-dot ${spell.prepared ? 'on' : ''}`}
-                    onClick={() => spell.level > 0 && char.toggleSpellPrepared(spell.name)} />
-                  <div className="spell-name">{spell.name}</div>
-                  <div className="spell-school">{spell.school}</div>
-                  <div className="spell-level">{spell.level === 0 ? 'Trucco' : `Liv.${spell.level}`}</div>
-                  {spell.concentration && <div className="spell-conc">C</div>}
-                  <button className="equip-remove" onClick={() => char.removeSpell(spell.name)}>✕</button>
-                </div>
-              ))}
-            </div>
-            <button className="add-action-btn" onClick={handleAddSpell}>+ Aggiungi incantesimo</button>
+            <SpellManager
+              spells={state.spells}
+              charClass={state.charClass}
+              onUpdate={spells => update({ spells })}
+              onRoll={handleRoll}
+            />
           </div>
         </div>
       )}
