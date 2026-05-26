@@ -69,7 +69,7 @@ export function useCharacter() {
   function setAbility(attr, value) {
     update(prev => ({
       ...prev,
-      abilities: { ...prev.abilities, [attr]: Math.max(1, Math.min(30, parseInt(value) || 10)) },
+      abilities: { ...prev.abilities, [attr]: Math.max(3, Math.min(30, parseInt(value) || 10)) },
     }));
   }
 

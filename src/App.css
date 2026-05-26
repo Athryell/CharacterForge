@@ -863,3 +863,73 @@ body {
   color: var(--c-hint);
   cursor: default;
 }
+
+/* ── TOUCH-FRIENDLY SIZING ─────────────────────────────────────── */
+
+/* Dot preparazione magia — più grande */
+.spell-prepared-dot {
+  width: 18px !important;
+  height: 18px !important;
+  border-width: 2px !important;
+  flex-shrink: 0;
+}
+
+/* Check dot abilità/tiri salvezza */
+.check-dot {
+  width: 16px !important;
+  height: 16px !important;
+  border-width: 2px !important;
+  flex-shrink: 0;
+}
+
+/* Slot magie */
+.slot-pip {
+  width: 20px !important;
+  height: 20px !important;
+  border-width: 2px !important;
+}
+
+/* Death save pips */
+.save-pip {
+  width: 22px !important;
+  height: 22px !important;
+  border-width: 2px !important;
+}
+
+/* Spell add button nel browser */
+.spell-add-btn {
+  width: 34px !important;
+  height: 34px !important;
+  font-size: 18px !important;
+  flex-shrink: 0;
+}
+
+/* Toggle checkbox */
+.toggle-box input[type=checkbox] {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+/* mod-btn caratteristiche */
+.mod-btn {
+  width: 24px !important;
+  height: 24px !important;
+  font-size: 16px !important;
+}
+
+/* Bottoni rimozione ✕ */
+.equip-remove {
+  padding: 4px 8px !important;
+  font-size: 14px !important;
+  min-width: 28px;
+  min-height: 28px;
+}
+
+/* Condition chip */
+.condition-chip {
+  padding: 6px 12px !important;
+  font-size: 13px !important;
+}
+.condition-icon {
+  font-size: 16px !important;
+}
