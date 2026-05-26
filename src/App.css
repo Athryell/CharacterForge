@@ -933,3 +933,75 @@ body {
 .condition-icon {
   font-size: 16px !important;
 }
+
+/* ── ATTR HIGHLIGHT ────────────────────────────────────────────── */
+.check-item.attr-highlight {
+  background: var(--c-accent-light);
+  border-radius: 5px;
+}
+.check-item.attr-highlight .check-name {
+  color: var(--c-accent-text);
+  font-weight: 500;
+}
+.check-item.attr-highlight .check-val {
+  color: var(--c-accent-text);
+}
+
+/* ── INSPIRATION BUTTON ────────────────────────────────────────── */
+.inspiration-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 2.5px solid var(--c-border-mid);
+  background: var(--c-surface);
+  font-size: 22px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .2s;
+  flex-shrink: 0;
+  filter: grayscale(1);
+  opacity: .5;
+}
+.inspiration-btn:hover {
+  border-color: #D4A017;
+  filter: grayscale(0);
+  opacity: .8;
+  transform: scale(1.05);
+}
+.inspiration-btn.active {
+  border-color: #D4A017;
+  background: #FFF8DC;
+  filter: grayscale(0);
+  opacity: 1;
+  box-shadow: 0 0 12px rgba(212,160,23,.4);
+  transform: scale(1.08);
+}
+
+/* ── TEMP HP ───────────────────────────────────────────────────── */
+.hp-bar-wrap {
+  position: relative;
+}
+.hp-bar-temp {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  background: #4A90D9;
+  border-radius: 3px;
+  opacity: .8;
+}
+.hp-temp-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #E6F1FB;
+  border: 0.5px solid #4A90D9;
+  border-radius: var(--r);
+  padding: 4px 10px;
+  font-size: 12px;
+  color: #185FA5;
+  font-weight: 500;
+  margin-top: 6px;
+}

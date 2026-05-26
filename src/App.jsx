@@ -4,6 +4,17 @@ import {
   ABILITIES, ABILITY_NAMES, SKILLS, CLASSES, ALIGNMENTS,
   SPELLCASTING_CLASS, SLOT_TABLE, getMod, fmtMod,
 } from './data/dnd5e';
+
+const SPECIES_LIST = [
+  'Umano','Elfo (Alto)','Elfo (Silvano)','Nano (Collina)','Nano (Montagna)',
+  'Halfling (Pieditozzo)','Halfling (Selvatico)','Mezzelfo','Tiefling','Draconico',
+  'Gnomo (Roccia)','Gnomo (Foresta)','Mezz'orco','Aasimar',
+];
+const BACKGROUNDS_LIST = [
+  'Accolito','Artigiano','Criminale','Eremita','Eroe Popolare',
+  'Intrattenitore','Marinaio','Nobile','Saggio','Soldato',
+  'Orfano di strada','Seguace di gilda',
+];
 import CharacterCreator from './components/CharacterCreator';
 import ConditionTracker from './components/ConditionTracker';
 import WeaponManager from './components/WeaponManager';
@@ -27,10 +38,14 @@ function Toast({ message }) {
   return message ? <div className="toast show">{message}</div> : null;
 }
 
-function AbilityBox({ attr, score, onAdjust, onInput, editing }) {
+function AbilityBox({ attr, score, onAdjust, onInput, editing, onHover }) {
   const mod = getMod(score);
   return (
-    <div className={`ability-box ${editing ? 'editing' : ''}`}>
+    <div
+      className={`ability-box ${editing ? 'editing' : ''}`}
+      onMouseEnter={() => onHover && onHover(attr)}
+      onMouseLeave={() => onHover && onHover(null)}
+    >
       <div className="ability-label">{attr}</div>
       <div className="ability-mod">{fmtMod(mod)}</div>
       {editing ? (
@@ -51,12 +66,16 @@ function AbilityBox({ attr, score, onAdjust, onInput, editing }) {
   );
 }
 
-function HPBar({ current, max }) {
+function HPBar({ current, max, tempHP = 0 }) {
   const pct = Math.max(0, Math.min(100, (current / Math.max(1, max)) * 100));
+  const tempPct = Math.min(20, (tempHP / Math.max(1, max)) * 100); // max 20% visual
   const color = pct > 50 ? '#3B6D11' : pct > 25 ? '#854F0B' : '#A32D2D';
   return (
     <div className="hp-bar-wrap">
       <div className="hp-bar-fill" style={{ width: `${pct}%`, background: color }} />
+      {tempHP > 0 && (
+        <div className="hp-bar-temp" style={{ width: `${tempPct}%` }} />
+      )}
     </div>
   );
 }
@@ -128,6 +147,7 @@ export default function App() {
   const [hpAmount, setHpAmount] = useState(0);
   const [showCreator, setShowCreator] = useState(false);
   const [editingAbilities, setEditingAbilities] = useState(false);
+  const [hoveredAttr, setHoveredAttr] = useState(null);
   const fileInputRef = useRef();
   const toastTimer = useRef();
 
@@ -272,10 +292,34 @@ export default function App() {
                 </select>
               </Field>
               <Field label="Razza / Specie">
-                <input value={state.charRace} onChange={e => update({ charRace: e.target.value })} placeholder="Es. Elfo, Umano..." />
+                <select value={state.charRace} onChange={e => update({ charRace: e.target.value })}>
+                  <option value="">— Scegli specie —</option>
+                  {SPECIES_LIST.map(r => <option key={r}>{r}</option>)}
+                  <option value="__custom__">Personalizzata...</option>
+                </select>
+                {state.charRace === '__custom__' && (
+                  <input
+                    style={{ marginTop: 4 }}
+                    value={state.charRaceCustom || ''}
+                    onChange={e => update({ charRaceCustom: e.target.value })}
+                    placeholder="Scrivi la specie..."
+                  />
+                )}
               </Field>
               <Field label="Background">
-                <input value={state.charBackground} onChange={e => update({ charBackground: e.target.value })} placeholder="Es. Soldato, Criminale..." />
+                <select value={state.charBackground} onChange={e => update({ charBackground: e.target.value })}>
+                  <option value="">— Scegli background —</option>
+                  {BACKGROUNDS_LIST.map(b => <option key={b}>{b}</option>)}
+                  <option value="__custom__">Personalizzato...</option>
+                </select>
+                {state.charBackground === '__custom__' && (
+                  <input
+                    style={{ marginTop: 4 }}
+                    value={state.charBackgroundCustom || ''}
+                    onChange={e => update({ charBackgroundCustom: e.target.value })}
+                    placeholder="Scrivi il background..."
+                  />
+                )}
               </Field>
               <Field label="Livello">
                 <input type="number" min="1" max="20" value={state.charLevel}
@@ -315,6 +359,7 @@ export default function App() {
                   onAdjust={(a, d) => char.setAbility(a, (state.abilities[a] || 10) + d)}
                   onInput={char.setAbility}
                   editing={editingAbilities}
+                  onHover={setHoveredAttr}
                 />
               ))}
             </div>
@@ -327,8 +372,9 @@ export default function App() {
               <div className="check-list">
                 {ABILITIES.map(attr => {
                   const prof = state.saveProficiencies.includes(attr);
+                  const highlighted = hoveredAttr === attr;
                   return (
-                    <div key={attr} className="check-item" onClick={() => char.toggleSaveProficiency(attr)}>
+                    <div key={attr} className={`check-item ${highlighted ? 'attr-highlight' : ''}`} onClick={() => char.toggleSaveProficiency(attr)}>
                       <div className={`check-dot ${prof ? 'proficient' : ''}`} />
                       <span className="check-val">{fmtMod(char.calcSaveMod(attr))}</span>
                       <span className="check-name">{ABILITY_NAMES[attr]}</span>
@@ -343,8 +389,9 @@ export default function App() {
                 {SKILLS.map(sk => {
                   const prof = state.skillProficiencies.includes(sk.name);
                   const exp = state.skillExpertise.includes(sk.name);
+                  const highlighted = hoveredAttr === sk.attr;
                   return (
-                    <div key={sk.name} className="check-item" onClick={() => char.toggleSkillProficiency(sk.name)}>
+                    <div key={sk.name} className={`check-item ${highlighted ? 'attr-highlight' : ''}`} onClick={() => char.toggleSkillProficiency(sk.name)}>
                       <div className={`check-dot ${exp ? 'expertise' : prof ? 'proficient' : ''}`} />
                       <span className="check-val">{fmtMod(char.calcSkillMod(sk))}</span>
                       <span className="check-name">{sk.name}</span>
@@ -388,11 +435,30 @@ export default function App() {
                 onChange={e => update({ hpMax: parseInt(e.target.value) || 1 })}
               />
             </div>
-            <HPBar current={state.hpCurrent} max={state.hpMax} />
+            <HPBar current={state.hpCurrent} max={state.hpMax} tempHP={state.hpTemp || 0} />
+            {(state.hpTemp > 0) && (
+              <div className="hp-temp-badge">
+                🛡 {state.hpTemp} HP temporanei
+                <button className="equip-remove" onClick={() => update({ hpTemp: 0 })}>✕</button>
+              </div>
+            )}
             <div className="hp-actions">
               <input className="hp-amount" type="number" min="0" value={hpAmount} onChange={e => setHpAmount(parseInt(e.target.value) || 0)} />
-              <button className="hp-action-btn danger" onClick={() => char.modHP(-hpAmount)}>💔 Danno</button>
+              <button className="hp-action-btn danger" onClick={() => {
+                const temp = state.hpTemp || 0;
+                if (temp > 0) {
+                  const remaining = temp - hpAmount;
+                  if (remaining >= 0) { update({ hpTemp: remaining }); }
+                  else { update({ hpTemp: 0, hpCurrent: Math.max(0, state.hpCurrent + remaining) }); }
+                } else {
+                  char.modHP(-hpAmount);
+                }
+              }}>💔 Danno</button>
               <button className="hp-action-btn success" onClick={() => char.modHP(hpAmount)}>💚 Cura</button>
+              <button className="hp-action-btn" onClick={() => update({ hpTemp: (state.hpTemp || 0) + hpAmount })}
+                title="Aggiungi HP temporanei (non si sommano tra loro, prendi il valore più alto)">
+                🛡 Temp
+              </button>
             </div>
           </div>
 
@@ -419,10 +485,18 @@ export default function App() {
           <div className="grid-2">
             <div className="card">
               <div className="card-title">⭐ Ispirazione</div>
-              <label className="toggle-box">
-                <input type="checkbox" checked={state.inspiration} onChange={e => update({ inspiration: e.target.checked })} />
-                <span className="toggle-label">Hai ispirazione</span>
-              </label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <button
+                  className={`inspiration-btn ${state.inspiration ? 'active' : ''}`}
+                  onClick={() => update({ inspiration: !state.inspiration })}
+                  title={state.inspiration ? 'Clicca per rimuovere ispirazione' : 'Clicca per ottenere ispirazione'}
+                >
+                  ⭐
+                </button>
+                <span className="toggle-label" style={{ color: state.inspiration ? '#856404' : 'var(--c-hint)' }}>
+                  {state.inspiration ? 'Hai ispirazione!' : 'Nessuna ispirazione'}
+                </span>
+              </div>
             </div>
             <div className="card">
               <div className="card-title">💀 Tiri salvezza morte</div>
@@ -431,17 +505,20 @@ export default function App() {
                   <div key={type} className="save-group">
                     <div className="save-group-label">{type === 'success' ? 'Successi' : 'Fallimenti'}</div>
                     <div className="save-pips">
-                      {(type === 'success' ? (state.deathSuccess || [false,false,false]) : (state.deathFail || [false,false,false])).map((on, i) => (
+                      {(type === 'success'
+                        ? (state.deathSuccess && state.deathSuccess.length === 3 ? state.deathSuccess : [false,false,false])
+                        : (state.deathFail && state.deathFail.length === 3 ? state.deathFail : [false,false,false])
+                      ).map((on, i) => (
                         <div
                           key={i}
                           className={`save-pip ${on ? type + '-on' : ''}`}
                           onClick={() => {
                             if (type === 'success') {
-                              const arr = [...state.deathSuccess];
+                              const arr = [...(state.deathSuccess || [false,false,false])];
                               arr[i] = !arr[i];
                               update({ deathSuccess: arr });
                             } else {
-                              const arr = [...state.deathFail];
+                              const arr = [...(state.deathFail || [false,false,false])];
                               arr[i] = !arr[i];
                               update({ deathFail: arr });
                             }
