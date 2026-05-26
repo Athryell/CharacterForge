@@ -554,7 +554,7 @@ export default function App() {
             <div className="card">
               <div className="card-title">💀 Tiri salvezza morte</div>
               <div className="death-saves">
-                {['success', 'fail'].map(type => (
+                {['success', 'failure'].map(type => (
                   <div key={type} className="save-group">
                     <div className="save-group-label">{type === 'success' ? 'Successi' : 'Fallimenti'}</div>
                     <div className="save-pips">
