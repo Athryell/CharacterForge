@@ -1,4 +1,5 @@
 import DiceText from './DiceText';
+import { TagPill, TagSelector, TagFilterBar } from './Tags';
 import React, { useState, useMemo } from 'react';
 import { SRD_SPELLS, SCHOOLS, SPELL_CLASSES, filterSpells } from '../data/spells';
 
@@ -12,7 +13,7 @@ const EMPTY_CUSTOM = {
   ritual: false, desc: '',
 };
 
-export default function SpellManager({ spells = [], charClass, onUpdate, onRoll }) {
+export default function SpellManager({ spells = [], charClass, onUpdate, onRoll, allTags = [], onUpdateTags, onCreateTag }) {
   const [view, setView] = useState('list');
   const [filterLevel, setFilterLevel] = useState('');
   const [filterSchool, setFilterSchool] = useState('');
@@ -21,6 +22,8 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll 
   const [expanded, setExpanded] = useState(null);
   const [spellFilter, setSpellFilter] = useState('all');
   const [showCustomForm, setShowCustomForm] = useState(false);
+  const [spellTagFilter, setSpellTagFilter] = useState(null);
+  const [editingTagsFor, setEditingTagsFor] = useState(null);
   const [customForm, setCustomForm] = useState(EMPTY_CUSTOM);
 
   const knownNames = useMemo(() => new Set(spells.map(s => s.name)), [spells]);
@@ -69,12 +72,13 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll 
 
   // Filtered known spells
   const filteredKnown = useMemo(() => {
-    if (spellFilter === 'all') return spells;
-    if (spellFilter === '0') return spells.filter(s => s.level === 0);
-    if (spellFilter === 'prepared') return spells.filter(s => s.prepared);
-    const lvl = parseInt(spellFilter);
-    return spells.filter(s => s.level === lvl);
-  }, [spells, spellFilter]);
+    let result = spells;
+    if (spellFilter === '0') result = result.filter(s => s.level === 0);
+    else if (spellFilter === 'prepared') result = result.filter(s => s.prepared);
+    else if (spellFilter !== 'all') { const lvl = parseInt(spellFilter); result = result.filter(s => s.level === lvl); }
+    if (spellTagFilter) result = result.filter(s => (s.tags||[]).includes(spellTagFilter));
+    return result;
+  }, [spells, spellFilter, spellTagFilter]);
 
   // Group by level
   const byLevel = {};
@@ -200,6 +204,10 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll 
             )}
           </div>
 
+          {allTags.length > 0 && (
+            <TagFilterBar allTags={allTags} activeTag={spellTagFilter} onSelect={setSpellTagFilter} />
+          )}
+
           {spells.length === 0 && (
             <div className="hint-text">Nessun incantesimo. Usa "Sfoglia SRD" per aggiungerne o crea un "Personalizzato".</div>
           )}
@@ -220,9 +228,31 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll 
                       title={spell.level === 0 ? 'I trucchetti non si preparano' : (spell.prepared ? 'Rimuovi preparazione' : 'Segna come preparato')}
                     />
                     <div style={{ flex: 1 }}>
-                      <div className="spell-name">{spell.name}</div>
-                      {expanded === spell.name && spell.desc && (
-                        <div className="spell-desc"><DiceText text={spell.desc} onRoll={onRoll} label={spell.name} /></div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
+                        <div className="spell-name">{spell.name}</div>
+                        {(spell.tags||[]).map(t => <TagPill key={t} tag={t} allTags={allTags} small />)}
+                      </div>
+                      {expanded === spell.name && (
+                        <>
+                          {spell.desc && <div className="spell-desc"><DiceText text={spell.desc} onRoll={onRoll} label={spell.name} /></div>}
+                          <div style={{ marginTop: 6 }} onClick={e => e.stopPropagation()}>
+                            {editingTagsFor === spell.name ? (
+                              <>
+                                <TagSelector
+                                  selected={spell.tags || []}
+                                  allTags={allTags}
+                                  onChange={tags => { onUpdateTags && onUpdateTags(spell.name, tags); }}
+                                  onCreateTag={onCreateTag}
+                                />
+                                <button className="tag-edit-btn" style={{ marginTop: 4 }} onClick={() => setEditingTagsFor(null)}>✓ Fine</button>
+                              </>
+                            ) : (
+                              <button className="tag-edit-btn" onClick={() => setEditingTagsFor(spell.name)}>
+                                🏷 {(spell.tags||[]).length === 0 ? 'Aggiungi tag' : 'Modifica tag'}
+                              </button>
+                            )}
+                          </div>
+                        </>
                       )}
                     </div>
                     <div className="spell-school">{spell.school}</div>

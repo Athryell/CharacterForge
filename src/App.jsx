@@ -11,6 +11,7 @@ import TabBar from './components/TabBar';
 import SpellManager from './components/SpellManager';
 import InventoryManager from './components/InventoryManager';
 import DiceText from './components/DiceText';
+import { TagPill, TagSelector, TagFilterBar } from './components/Tags';
 import './App.css';
 
 const SPECIES_LIST = [
@@ -82,8 +83,9 @@ function HPBar({ current, max, tempHP = 0 }) {
   );
 }
 
-function ActionItem({ action, onRoll }) {
+function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag }) {
   const [expanded, setExpanded] = useState(false);
+  const [editingTags, setEditingTags] = useState(false);
   const badgeClass = {
     action: 'badge-action', bonus: 'badge-bonus',
     reaction: 'badge-reaction', free: 'badge-free',
@@ -93,19 +95,43 @@ function ActionItem({ action, onRoll }) {
   }[action.type] || action.type;
 
   return (
-    <div className={`action-item ${expanded ? 'expanded' : ''}`} onClick={() => setExpanded(e => !e)}>
+    <div className={`action-item ${expanded ? 'expanded' : ''}`} onClick={() => !editingTags && setExpanded(e => !e)}>
       <div className={`action-badge ${badgeClass}`}>{typeLabel}</div>
       <div className="action-content">
-        <div className="action-name">{action.name}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <div className="action-name" style={{ flex: 1 }}>{action.name}</div>
+          {(action.tags||[]).map(t => (
+            <TagPill key={t} tag={t} allTags={allTags} small />
+          ))}
+        </div>
         <div className="action-desc-short">{action.descShort}</div>
         {expanded && (
-          <div className="action-desc-full">
+          <div className="action-desc-full" onClick={e => e.stopPropagation()}>
             <DiceText text={action.desc} onRoll={onRoll} label={action.name} />
             {action.dice && (
               <div className="action-roll" onClick={e => { e.stopPropagation(); onRoll(action.dice, action.name); }}>
                 🎲 Lancia {action.dice}
               </div>
             )}
+            <div style={{ marginTop: 8 }}>
+              {editingTags ? (
+                <TagSelector
+                  selected={action.tags || []}
+                  allTags={allTags}
+                  onChange={tags => onUpdateTags && onUpdateTags(action.id, tags)}
+                  onCreateTag={onCreateTag}
+                />
+              ) : (
+                <button className="tag-edit-btn" onClick={e => { e.stopPropagation(); setEditingTags(true); }}>
+                  🏷 {(action.tags||[]).length === 0 ? 'Aggiungi tag' : 'Modifica tag'}
+                </button>
+              )}
+              {editingTags && (
+                <button className="tag-edit-btn" style={{ marginLeft: 6 }} onClick={e => { e.stopPropagation(); setEditingTags(false); }}>
+                  ✓ Fine
+                </button>
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -150,6 +176,7 @@ export default function App() {
   const [showCreator, setShowCreator] = useState(false);
   const [editingAbilities, setEditingAbilities] = useState(false);
   const [editingHP, setEditingHP] = useState(false);
+  const [actionTagFilter, setActionTagFilter] = useState(null);
   const [hoveredAttr, setHoveredAttr] = useState(null);
   const fileInputRef = useRef();
   const toastTimer = useRef();
@@ -158,6 +185,16 @@ export default function App() {
     setToast(msg);
     clearTimeout(toastTimer.current);
     toastTimer.current = setTimeout(() => setToast(''), 2500);
+  }
+
+  // Collect all tags from actions + spells
+  const allTags = [...new Set([
+    ...(state.actions || []).flatMap(a => a.tags || []),
+    ...(state.spells || []).flatMap(s => s.tags || []),
+  ])];
+
+  function createTag(tag) {
+    // tags are stored inline on items, no global list needed
   }
 
   function handleCreatorComplete(newState) {
@@ -466,6 +503,18 @@ export default function App() {
                   {editingHP && <button className="mod-btn" onClick={() => update({ hpMax: state.hpMax + 1 })}>+</button>}
                 </div>
               </div>
+
+              {/* Temp HP quick-add icon */}
+              <div className="hp-labeled-group" style={{ marginLeft: 4 }}>
+                <div className="hp-label">Temp HP</div>
+                <button
+                  className={`temp-hp-icon-btn ${(state.hpTemp||0) > 0 ? 'active' : ''}`}
+                  title="HP Temporanei"
+                  onClick={() => setEditingHP(true)}
+                >
+                  🛡 {(state.hpTemp||0) > 0 ? state.hpTemp : '+'}
+                </button>
+              </div>
             </div>
 
             {/* HP bar */}
@@ -496,7 +545,11 @@ export default function App() {
 
             {/* Quick damage/heal */}
             <div className="hp-actions">
-              <input className="hp-amount" type="number" min="0" value={hpAmount} onChange={e => setHpAmount(parseInt(e.target.value) || 0)} />
+              <div className="hp-stepper">
+                <button className="mod-btn" onClick={() => setHpAmount(a => Math.max(0, a - 1))}>−</button>
+                <input className="hp-amount" type="number" min="0" value={hpAmount} onChange={e => setHpAmount(Math.max(0, parseInt(e.target.value) || 0))} />
+                <button className="mod-btn" onClick={() => setHpAmount(a => a + 1)}>+</button>
+              </div>
               <button className="hp-action-btn danger" onClick={() => {
                 const temp = state.hpTemp || 0;
                 if (temp > 0) {
@@ -508,12 +561,6 @@ export default function App() {
                 }
               }}>💔 Danno</button>
               <button className="hp-action-btn success" onClick={() => char.modHP(hpAmount)}>💚 Cura</button>
-              {editingHP && (
-                <button className="hp-action-btn" onClick={() => update({ hpTemp: Math.max(state.hpTemp||0, hpAmount) })}
-                  title="Gli HP temporanei non si sommano: prendi il valore più alto">
-                  🛡 Imposta Temp
-                </button>
-              )}
             </div>
           </div>
 
@@ -604,9 +651,23 @@ export default function App() {
                 <button key={v} className={`filter-chip ${actionFilter === v ? 'active' : ''}`} onClick={() => setActionFilter(v)}>{l}</button>
               ))}
             </div>
+            {allTags.length > 0 && (
+              <TagFilterBar allTags={allTags} activeTag={actionTagFilter} onSelect={setActionTagFilter} />
+            )}
             <div className="action-list">
-              {filteredActions.map(action => (
-                <ActionItem key={action.id || action.name} action={action} onRoll={handleRoll} />
+              {filteredActions
+                .filter(a => !actionTagFilter || (a.tags||[]).includes(actionTagFilter))
+                .map(action => (
+                <ActionItem
+                  key={action.id || action.name}
+                  action={action}
+                  allTags={allTags}
+                  onRoll={handleRoll}
+                  onUpdateTags={(id, tags) => {
+                    update({ actions: state.actions.map(a => a.id === id ? { ...a, tags } : a) });
+                  }}
+                  onCreateTag={createTag}
+                />
               ))}
             </div>
             <button className="add-action-btn" onClick={handleAddAction}>+ Aggiungi azione</button>
@@ -667,6 +728,9 @@ export default function App() {
               charClass={state.charClass}
               onUpdate={spells => update({ spells })}
               onRoll={handleRoll}
+              allTags={allTags}
+              onUpdateTags={(name, tags) => update({ spells: state.spells.map(s => s.name === name ? { ...s, tags } : s) })}
+              onCreateTag={createTag}
             />
           </div>
         </div>
