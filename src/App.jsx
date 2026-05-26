@@ -12,16 +12,15 @@ import SpellManager from './components/SpellManager';
 import './App.css';
 
 const SPECIES_LIST = [
-  "Umano",'Elfo (Alto)','Elfo (Silvano)','Nano (Collina)','Nano (Montagna)',
-  'Halfling (Pieditozzo)','Halfling (Selvatico)','Mezzelfo','Tiefling','Draconico',
-  'Gnomo (Roccia)','Gnomo (Foresta)',"Mezz'orco",'Aasimar',
+  'Umano', 'Elfo (Alto)', 'Elfo (Silvano)', 'Nano (Collina)', 'Nano (Montagna)',
+  'Halfling (Pieditozzo)', 'Halfling (Selvatico)', 'Mezzelfo', 'Tiefling', 'Draconico',
+  'Gnomo (Roccia)', 'Gnomo (Foresta)', "Mezz'orco", 'Aasimar',
 ];
 const BACKGROUNDS_LIST = [
-  'Accolito','Artigiano','Criminale','Eremita','Eroe Popolare',
-  'Intrattenitore','Marinaio','Nobile','Saggio','Soldato',
-  'Orfano di strada','Seguace di gilda',
+  'Accolito', 'Artigiano', 'Criminale', 'Eremita', 'Eroe Popolare',
+  'Intrattenitore', 'Marinaio', 'Nobile', 'Saggio', 'Soldato',
+  'Orfano di strada', 'Seguace di gilda',
 ];
-
 
 // ── Utility ─────────────────────────────────────────────────────
 function rollDice(notation) {
@@ -148,6 +147,7 @@ export default function App() {
   const [hpAmount, setHpAmount] = useState(0);
   const [showCreator, setShowCreator] = useState(false);
   const [editingAbilities, setEditingAbilities] = useState(false);
+  const [editingHP, setEditingHP] = useState(false);
   const [hoveredAttr, setHoveredAttr] = useState(null);
   const fileInputRef = useRef();
   const toastTimer = useRef();
@@ -424,42 +424,94 @@ export default function App() {
         <div className="panel">
           {/* HP */}
           <div className="card">
-            <div className="card-title">❤ Punti ferita</div>
-            <div className="hp-row">
-              <input className="hp-big" type="number"
-                value={state.hpCurrent}
-                onChange={e => update({ hpCurrent: parseInt(e.target.value) || 0 })}
-              />
-              <span className="hp-sep">/</span>
-              <input className="hp-max" type="number"
-                value={state.hpMax}
-                onChange={e => update({ hpMax: parseInt(e.target.value) || 1 })}
-              />
+            <div className="card-title" style={{ justifyContent: 'space-between' }}>
+              <span>❤ Punti ferita</span>
+              <button
+                className={`icon-btn ${editingHP ? 'active' : ''}`}
+                onClick={() => setEditingHP(e => !e)}
+              >
+                {editingHP ? '✓ Fine' : '✏ Modifica'}
+              </button>
             </div>
-            <HPBar current={state.hpCurrent} max={state.hpMax} tempHP={state.hpTemp || 0} />
-            {(state.hpTemp > 0) && (
-              <div className="hp-temp-badge">
-                🛡 {state.hpTemp} HP temporanei
-                <button className="equip-remove" onClick={() => update({ hpTemp: 0 })}>✕</button>
+
+            {/* Current HP — always editable via +/- */}
+            <div className="hp-labeled-row">
+              <div className="hp-labeled-group">
+                <div className="hp-label">Attuali</div>
+                <div className="hp-stepper">
+                  <button className="mod-btn" onClick={() => update({ hpCurrent: Math.max(0, state.hpCurrent - 1) })}>−</button>
+                  <input className="hp-big" type="number"
+                    value={state.hpCurrent}
+                    onChange={e => update({ hpCurrent: Math.max(0, parseInt(e.target.value) || 0) })}
+                  />
+                  <button className="mod-btn" onClick={() => update({ hpCurrent: Math.min(state.hpMax, state.hpCurrent + 1) })}>+</button>
+                </div>
+              </div>
+
+              <span className="hp-sep">/</span>
+
+              {/* Max HP — only editable in edit mode */}
+              <div className="hp-labeled-group">
+                <div className="hp-label">Massimi</div>
+                <div className="hp-stepper">
+                  {editingHP && <button className="mod-btn" onClick={() => update({ hpMax: Math.max(1, state.hpMax - 1) })}>−</button>}
+                  <input className="hp-big" type="number"
+                    value={state.hpMax}
+                    readOnly={!editingHP}
+                    style={{ background: editingHP ? 'var(--c-bg)' : 'var(--c-surface)', color: editingHP ? 'var(--c-ink)' : 'var(--c-muted)' }}
+                    onChange={e => editingHP && update({ hpMax: Math.max(1, parseInt(e.target.value) || 1) })}
+                  />
+                  {editingHP && <button className="mod-btn" onClick={() => update({ hpMax: state.hpMax + 1 })}>+</button>}
+                </div>
+              </div>
+            </div>
+
+            {/* HP bar */}
+            <HPBar current={state.hpCurrent} max={state.hpMax} />
+
+            {/* Temp HP bar — separate */}
+            {(state.hpTemp > 0 || editingHP) && (
+              <div className="hp-temp-section">
+                <div className="hp-label" style={{ marginBottom: 4 }}>🛡 HP Temporanei</div>
+                <div className="hp-stepper">
+                  {editingHP && <button className="mod-btn" onClick={() => update({ hpTemp: Math.max(0, (state.hpTemp||0) - 1) })}>−</button>}
+                  <input className="hp-big" type="number"
+                    value={state.hpTemp || 0}
+                    readOnly={!editingHP}
+                    style={{ background: editingHP ? 'var(--c-bg)' : 'var(--c-surface)', color: editingHP ? 'var(--c-ink)' : '#185FA5', fontSize: 20 }}
+                    onChange={e => editingHP && update({ hpTemp: Math.max(0, parseInt(e.target.value) || 0) })}
+                  />
+                  {editingHP && <button className="mod-btn" onClick={() => update({ hpTemp: (state.hpTemp||0) + 1 })}>+</button>}
+                </div>
+                <div className="hp-bar-wrap" style={{ marginTop: 4 }}>
+                  <div className="hp-bar-fill" style={{
+                    width: `${Math.min(100, ((state.hpTemp||0) / Math.max(1, state.hpMax)) * 100)}%`,
+                    background: '#4A90D9'
+                  }} />
+                </div>
               </div>
             )}
+
+            {/* Quick damage/heal */}
             <div className="hp-actions">
               <input className="hp-amount" type="number" min="0" value={hpAmount} onChange={e => setHpAmount(parseInt(e.target.value) || 0)} />
               <button className="hp-action-btn danger" onClick={() => {
                 const temp = state.hpTemp || 0;
                 if (temp > 0) {
                   const remaining = temp - hpAmount;
-                  if (remaining >= 0) { update({ hpTemp: remaining }); }
-                  else { update({ hpTemp: 0, hpCurrent: Math.max(0, state.hpCurrent + remaining) }); }
+                  if (remaining >= 0) update({ hpTemp: remaining });
+                  else update({ hpTemp: 0, hpCurrent: Math.max(0, state.hpCurrent + remaining) });
                 } else {
                   char.modHP(-hpAmount);
                 }
               }}>💔 Danno</button>
               <button className="hp-action-btn success" onClick={() => char.modHP(hpAmount)}>💚 Cura</button>
-              <button className="hp-action-btn" onClick={() => update({ hpTemp: (state.hpTemp || 0) + hpAmount })}
-                title="Aggiungi HP temporanei (non si sommano tra loro, prendi il valore più alto)">
-                🛡 Temp
-              </button>
+              {editingHP && (
+                <button className="hp-action-btn" onClick={() => update({ hpTemp: Math.max(state.hpTemp||0, hpAmount) })}
+                  title="Gli HP temporanei non si sommano: prendi il valore più alto">
+                  🛡 Imposta Temp
+                </button>
+              )}
             </div>
           </div>
 
@@ -506,26 +558,26 @@ export default function App() {
                   <div key={type} className="save-group">
                     <div className="save-group-label">{type === 'success' ? 'Successi' : 'Fallimenti'}</div>
                     <div className="save-pips">
-                      {(type === 'success'
-                        ? (state.deathSuccess && state.deathSuccess.length === 3 ? state.deathSuccess : [false,false,false])
-                        : (state.deathFail && state.deathFail.length === 3 ? state.deathFail : [false,false,false])
-                      ).map((on, i) => (
-                        <div
-                          key={i}
-                          className={`save-pip ${on ? type + '-on' : ''}`}
-                          onClick={() => {
-                            if (type === 'success') {
-                              const arr = [...(state.deathSuccess || [false,false,false])];
-                              arr[i] = !arr[i];
-                              update({ deathSuccess: arr });
-                            } else {
-                              const arr = [...(state.deathFail || [false,false,false])];
-                              arr[i] = !arr[i];
-                              update({ deathFail: arr });
-                            }
-                          }}
-                        />
-                      ))}
+                      {[0,1,2].map(i => {
+                        const arr = type === 'success'
+                          ? (state.deathSuccess || [false,false,false])
+                          : (state.deathFail || [false,false,false]);
+                        const on = arr[i] === true;
+                        return (
+                          <div
+                            key={i}
+                            className={`save-pip ${on ? type + '-on' : ''}`}
+                            onClick={() => {
+                              const current = type === 'success'
+                                ? [...(state.deathSuccess || [false,false,false])]
+                                : [...(state.deathFail || [false,false,false])];
+                              current[i] = !current[i];
+                              if (type === 'success') update({ deathSuccess: current });
+                              else update({ deathFail: current });
+                            }}
+                          />
+                        );
+                      })}
                     </div>
                   </div>
                 ))}

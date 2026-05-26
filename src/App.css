@@ -1005,3 +1005,46 @@ body {
   font-weight: 500;
   margin-top: 6px;
 }
+
+/* ── HP LABELED ROW ────────────────────────────────────────────── */
+.hp-labeled-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.hp-labeled-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.hp-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--c-hint);
+  text-transform: uppercase;
+  letter-spacing: .07em;
+}
+.hp-stepper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Remove browser default number input arrows */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* Temp HP section */
+.hp-temp-section {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 0.5px dashed var(--c-border-mid);
+}
