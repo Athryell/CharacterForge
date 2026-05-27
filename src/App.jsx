@@ -13,7 +13,7 @@ import InventoryManager from './components/InventoryManager';
 import { TagFilterBar } from './components/Tags';
 import { KeywordText } from './components/Tooltip';
 import WidgetGrid from './components/WidgetGrid';
-import { loadLayout, saveLayout, getDefaultLayout, getWidgetsForTab, WIDGET_DEFS, ALL_TABS } from './layout';
+import { loadLayout, saveLayout, getDefaultLayout, getWidgetsForTab, WIDGET_DEFS, ALL_TABS, loadTabs, saveTabs, DEFAULT_TABS } from './layout';
 import './App.css';
 
 const SPECIES_LIST = [
@@ -159,6 +159,9 @@ export default function App() {
   // Layout state
   const [layout, setLayout] = useState(loadLayout);
   const [editMode, setEditMode] = useState(false);
+  const [tabs, setTabs] = useState(loadTabs);
+  const tabDragIdx = React.useRef(null);
+  const tabDragOverIdx = React.useRef(null);
 
   // UI state
   const [activeTab, setActiveTab] = useState('main');
@@ -186,6 +189,37 @@ export default function App() {
     ...(state.spells||[]).flatMap(s => s.tags||[]),
   ])];
   function createTag() {}
+
+  function handleTabChange(id) {
+    if (id.startsWith('__toggle__')) {
+      const tabId = id.replace('__toggle__', '');
+      const visibleCount = tabs.filter(t => t.visible).length;
+      const tab = tabs.find(t => t.id === tabId);
+      if (!tab) return;
+      if (tab.visible && (visibleCount <= 1 || tabId === activeTab)) return;
+      const next = tabs.map(t => t.id === tabId ? { ...t, visible: !t.visible } : t);
+      setTabs(next); saveTabs(next);
+      if (tabId === activeTab) {
+        const first = next.find(t => t.visible && t.id !== tabId);
+        if (first) setActiveTab(first.id);
+      }
+    } else {
+      setActiveTab(id);
+    }
+  }
+
+  function handleTabDrag(i) { tabDragIdx.current = i; }
+  function handleTabDragOver(i) { tabDragOverIdx.current = i; }
+  function handleTabDrop() {
+    const from = tabDragIdx.current;
+    const to = tabDragOverIdx.current;
+    if (from === null || to === null || from === to) return;
+    const next = [...tabs];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    setTabs(next); saveTabs(next);
+    tabDragIdx.current = null; tabDragOverIdx.current = null;
+  }
 
   function handleRoll(notation, name) {
     const result = rollDice(notation);
@@ -657,7 +691,10 @@ export default function App() {
           {editMode ? '✓ Fine layout' : '⠿ Layout'}
         </button>
         {editMode && (
-          <button className="icon-btn" onClick={() => { const d = getDefaultLayout(); setLayout(d); saveLayout(d); }}>↺ Reset</button>
+          <button className="icon-btn" onClick={() => {
+            const d = getDefaultLayout(); setLayout(d); saveLayout(d);
+            setTabs(DEFAULT_TABS); saveTabs(DEFAULT_TABS);
+          }}>↺ Reset</button>
         )}
         <button className="io-btn primary" onClick={() => setShowCreator(true)}>⚔ Nuovo</button>
         <button className="io-btn" onClick={handleExport}>⬇ Esporta</button>
@@ -665,11 +702,19 @@ export default function App() {
         <input ref={fileInputRef} type="file" accept=".json" style={{ display:'none' }} onChange={handleImport} />
       </div>
 
-      <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
+      <TabBar
+        tabs={tabs}
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        editMode={editMode}
+        onDragTab={handleTabDrag}
+        onDropTab={handleTabDrop}
+        onDragOverTab={handleTabDragOver}
+      />
 
       {editMode && (
         <div className="layout-edit-banner">
-          ⠿ Trascina i widget per riordinarli · Usa "Sposta" per cambiarli di tab · 🚫 per nasconderli
+          ⠿ Trascina widget e tab · ▬/⬛ per larghezza piena/mezza · ↗ per cambiare tab · 🚫 per nascondere
         </div>
       )}
 

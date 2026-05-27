@@ -1455,3 +1455,11 @@ input[type=number] {
   padding: 6px 16px;
   opacity: .85;
 }
+
+/* ── WIDGET FULL WIDTH ─────────────────────────────────────────── */
+/* Full-width widgets are rendered ABOVE the two-column grid by WidgetGrid,
+   so they naturally take 100% width — no extra CSS needed.
+   The widget-shell.full-width class is just a visual marker. */
+.widget-shell.full-width > .widget-edit-bar {
+  border-left: 3px solid var(--c-accent);
+}
