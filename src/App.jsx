@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useCharacter } from './hooks/useCharacter';
 import {
   ABILITIES, ABILITY_NAMES, SKILLS, CLASSES, ALIGNMENTS,
-  SPELLCASTING_CLASS, SLOT_TABLE, getMod, fmtMod,
+  SPELLCASTING_CLASS, getMod, fmtMod,
 } from './data/dnd5e';
 import CharacterCreator from './components/CharacterCreator';
 import ConditionTracker from './components/ConditionTracker';
@@ -10,9 +10,10 @@ import WeaponManager from './components/WeaponManager';
 import TabBar from './components/TabBar';
 import SpellManager from './components/SpellManager';
 import InventoryManager from './components/InventoryManager';
-import DiceText from './components/DiceText';
-import { TagPill, TagSelector, TagFilterBar } from './components/Tags';
+import { TagFilterBar } from './components/Tags';
 import { KeywordText } from './components/Tooltip';
+import WidgetGrid from './components/WidgetGrid';
+import { loadLayout, saveLayout, getDefaultLayout, getWidgetsForTab, WIDGET_DEFS, ALL_TABS } from './layout';
 import './App.css';
 
 const SPECIES_LIST = [
@@ -26,7 +27,7 @@ const BACKGROUNDS_LIST = [
   'Orfano di strada', 'Seguace di gilda',
 ];
 
-// ── Utility ─────────────────────────────────────────────────────
+// ── Utilities ───────────────────────────────────────────────────
 function rollDice(notation) {
   const m = notation.match(/(\d+)d(\d+)([+-]\d+)?/);
   if (!m) return null;
@@ -37,7 +38,15 @@ function rollDice(notation) {
   return total;
 }
 
-// ── Sub-components ───────────────────────────────────────────────
+function Field({ label, children }) {
+  return (
+    <div className="field">
+      <label>{label}</label>
+      {children}
+    </div>
+  );
+}
+
 function Toast({ message }) {
   return message ? <div className="toast show">{message}</div> : null;
 }
@@ -55,12 +64,8 @@ function AbilityBox({ attr, score, onAdjust, onInput, editing, onHover }) {
       {editing ? (
         <div className="ability-score-row">
           <button className="mod-btn" onClick={() => onAdjust(attr, -1)}>−</button>
-          <input
-            className="ability-score-input"
-            type="number" min="1" max="30"
-            value={score}
-            onChange={e => onInput(attr, e.target.value)}
-          />
+          <input className="ability-score-input" type="number" min="3" max="30"
+            value={score} onChange={e => onInput(attr, e.target.value)} />
           <button className="mod-btn" onClick={() => onAdjust(attr, 1)}>+</button>
         </div>
       ) : (
@@ -70,72 +75,12 @@ function AbilityBox({ attr, score, onAdjust, onInput, editing, onHover }) {
   );
 }
 
-function HPBar({ current, max, tempHP = 0 }) {
+function HPBar({ current, max }) {
   const pct = Math.max(0, Math.min(100, (current / Math.max(1, max)) * 100));
-  const tempPct = Math.min(20, (tempHP / Math.max(1, max)) * 100); // max 20% visual
   const color = pct > 50 ? '#3B6D11' : pct > 25 ? '#854F0B' : '#A32D2D';
   return (
     <div className="hp-bar-wrap">
       <div className="hp-bar-fill" style={{ width: `${pct}%`, background: color }} />
-      {tempHP > 0 && (
-        <div className="hp-bar-temp" style={{ width: `${tempPct}%` }} />
-      )}
-    </div>
-  );
-}
-
-function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag }) {
-  const [expanded, setExpanded] = useState(false);
-  const [editingTags, setEditingTags] = useState(false);
-  const badgeClass = {
-    action: 'badge-action', bonus: 'badge-bonus',
-    reaction: 'badge-reaction', free: 'badge-free',
-  }[action.type] || 'badge-free';
-  const typeLabel = {
-    action: 'Azione', bonus: 'Bonus', reaction: 'Reazione', free: 'Gratuita',
-  }[action.type] || action.type;
-
-  return (
-    <div className={`action-item ${expanded ? 'expanded' : ''}`} onClick={() => !editingTags && setExpanded(e => !e)}>
-      <div className={`action-badge ${badgeClass}`}>{typeLabel}</div>
-      <div className="action-content">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <div className="action-name" style={{ flex: 1 }}>{action.name}</div>
-          {(action.tags||[]).map(t => (
-            <TagPill key={t} tag={t} allTags={allTags} small />
-          ))}
-        </div>
-        <div className="action-desc-short">{action.descShort}</div>
-        {expanded && (
-          <div className="action-desc-full" onClick={e => e.stopPropagation()}>
-            <KeywordText text={action.desc} onRoll={onRoll} label={action.name} />
-            {action.dice && (
-              <div className="action-roll" onClick={e => { e.stopPropagation(); onRoll(action.dice, action.name); }}>
-                🎲 Lancia {action.dice}
-              </div>
-            )}
-            <div style={{ marginTop: 8 }}>
-              {editingTags ? (
-                <TagSelector
-                  selected={action.tags || []}
-                  allTags={allTags}
-                  onChange={tags => onUpdateTags && onUpdateTags(action.id, tags)}
-                  onCreateTag={onCreateTag}
-                />
-              ) : (
-                <button className="tag-edit-btn" onClick={e => { e.stopPropagation(); setEditingTags(true); }}>
-                  🏷 {(action.tags||[]).length === 0 ? 'Aggiungi tag' : 'Modifica tag'}
-                </button>
-              )}
-              {editingTags && (
-                <button className="tag-edit-btn" style={{ marginLeft: 6 }} onClick={e => { e.stopPropagation(); setEditingTags(false); }}>
-                  ✓ Fine
-                </button>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
     </div>
   );
 }
@@ -150,11 +95,8 @@ function SpellSlots({ slots, onToggle }) {
             <div className="slot-level">{i + 1}° liv.</div>
             <div className="slot-pips">
               {Array.from({ length: slot.max }, (_, j) => (
-                <div
-                  key={j}
-                  className={`slot-pip ${j >= slot.used ? 'available' : 'used'}`}
-                  onClick={() => onToggle(i, j)}
-                />
+                <div key={j} className={`slot-pip ${j >= slot.used ? 'available' : 'used'}`}
+                  onClick={() => onToggle(i, j)} />
               ))}
             </div>
             <div className="slot-count">{slot.max - slot.used}/{slot.max}</div>
@@ -165,13 +107,62 @@ function SpellSlots({ slots, onToggle }) {
   );
 }
 
-// ── Main App ─────────────────────────────────────────────────────
+function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag }) {
+  const [expanded, setExpanded] = useState(false);
+  const [editingTags, setEditingTags] = useState(false);
+  const { TagPill, TagSelector } = require('./components/Tags');
+  const badgeClass = { action:'badge-action', bonus:'badge-bonus', reaction:'badge-reaction', free:'badge-free' }[action.type] || 'badge-free';
+  const typeLabel = { action:'Azione', bonus:'Bonus', reaction:'Reazione', free:'Gratuita' }[action.type] || action.type;
+  return (
+    <div className={`action-item ${expanded ? 'expanded' : ''}`} onClick={() => !editingTags && setExpanded(e => !e)}>
+      <div className={`action-badge ${badgeClass}`}>{typeLabel}</div>
+      <div className="action-content">
+        <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+          <div className="action-name" style={{ flex:1 }}>{action.name}</div>
+          {(action.tags||[]).map(t => <TagPill key={t} tag={t} allTags={allTags} small />)}
+        </div>
+        <div className="action-desc-short">{action.descShort}</div>
+        {expanded && (
+          <div className="action-desc-full" onClick={e => e.stopPropagation()}>
+            <KeywordText text={action.desc} onRoll={onRoll} label={action.name} />
+            {action.dice && (
+              <div className="action-roll" onClick={e => { e.stopPropagation(); onRoll(action.dice, action.name); }}>
+                🎲 Lancia {action.dice}
+              </div>
+            )}
+            <div style={{ marginTop:8 }}>
+              {editingTags ? (
+                <>
+                  <TagSelector selected={action.tags||[]} allTags={allTags}
+                    onChange={tags => onUpdateTags && onUpdateTags(action.id, tags)}
+                    onCreateTag={onCreateTag} />
+                  <button className="tag-edit-btn" style={{ marginLeft:6 }} onClick={e => { e.stopPropagation(); setEditingTags(false); }}>✓ Fine</button>
+                </>
+              ) : (
+                <button className="tag-edit-btn" onClick={e => { e.stopPropagation(); setEditingTags(true); }}>
+                  🏷 {(action.tags||[]).length === 0 ? 'Aggiungi tag' : 'Modifica tag'}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Main App ────────────────────────────────────────────────────
 export default function App() {
   const char = useCharacter();
   const { state, update } = char;
+
+  // Layout state
+  const [layout, setLayout] = useState(loadLayout);
+  const [editMode, setEditMode] = useState(false);
+
+  // UI state
   const [activeTab, setActiveTab] = useState('main');
   const [actionFilter, setActionFilter] = useState('all');
-  const [spellFilter, setSpellFilter] = useState('all');
   const [toast, setToast] = useState('');
   const [hpAmount, setHpAmount] = useState(0);
   const [showCreator, setShowCreator] = useState(false);
@@ -190,648 +181,508 @@ export default function App() {
   }
 
   const BASE_ACTION_IDS = ['atk','dash','disengage','dodge','help','hide','ready','opportunity'];
-
-  // Collect all tags from actions + spells
   const allTags = [...new Set([
-    ...(state.actions || []).flatMap(a => a.tags || []),
-    ...(state.spells || []).flatMap(s => s.tags || []),
+    ...(state.actions||[]).flatMap(a => a.tags||[]),
+    ...(state.spells||[]).flatMap(s => s.tags||[]),
   ])];
-
-  function createTag(tag) {
-    // tags are stored inline on items, no global list needed
-  }
-
-  function handleCreatorComplete(newState) {
-    char.importState({ ...char.state, ...newState });
-    setShowCreator(false);
-    showToast(`Personaggio "${newState.charName}" creato!`);
-  }
+  function createTag() {}
 
   function handleRoll(notation, name) {
     const result = rollDice(notation);
     if (result !== null) showToast(`${name}: ${notation} = ${result}`);
   }
-
-  function handleLongRest() {
-    char.longRest();
-    showToast('Riposo lungo: HP e slot ripristinati!');
+  function handleLongRest() { char.longRest(); showToast('Riposo lungo: HP e slot ripristinati!'); }
+  function handleShortRest() { showToast(char.shortRest()); }
+  function handleCreatorComplete(newState) {
+    char.importState({ ...char.state, ...newState });
+    setShowCreator(false);
+    showToast(`Personaggio "${newState.charName}" creato!`);
   }
-
-  function handleShortRest() {
-    showToast(char.shortRest());
-  }
-
   function handleImport(e) {
-    const file = e.target.files[0];
-    if (!file) return;
+    const file = e.target.files[0]; if (!file) return;
     const reader = new FileReader();
     reader.onload = ev => {
-      try {
-        char.importState(JSON.parse(ev.target.result));
-        showToast('Personaggio importato!');
-      } catch {
-        showToast('Errore: file JSON non valido.');
-      }
+      try { char.importState(JSON.parse(ev.target.result)); showToast('Personaggio importato!'); }
+      catch { showToast('Errore: file JSON non valido.'); }
     };
-    reader.readAsText(file);
-    e.target.value = '';
+    reader.readAsText(file); e.target.value = '';
   }
-
   function handleExport() {
-    const blob = new Blob([char.exportState()], { type: 'application/json' });
+    const blob = new Blob([char.exportState()], { type:'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = `${state.charName || 'personaggio'}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    a.href = url; a.download = `${state.charName||'personaggio'}.json`;
+    a.click(); URL.revokeObjectURL(url);
   }
-
   function handleAddAction() {
-    const name = window.prompt('Nome azione:');
-    if (!name) return;
-    const types = ['action', 'bonus', 'reaction', 'free'];
-    const idx = parseInt(window.prompt('Tipo:\n0 = Azione\n1 = Bonus\n2 = Reazione\n3 = Gratuita') || '0');
-    const type = types[idx] || 'action';
-    const desc = window.prompt('Descrizione:') || '';
-    const dice = window.prompt('Dado (es. 1d8+3, lascia vuoto se no):') || '';
-    char.addAction({ id: Date.now().toString(), name, type, descShort: desc.slice(0, 50), desc, dice });
+    const name = window.prompt('Nome azione:'); if (!name) return;
+    const types = ['action','bonus','reaction','free'];
+    const idx = parseInt(window.prompt('Tipo:\n0=Azione\n1=Bonus\n2=Reazione\n3=Gratuita')||'0');
+    const type = types[idx]||'action';
+    const desc = window.prompt('Descrizione:')||'';
+    const dice = window.prompt('Dado (es. 1d8+3, vuoto se no):')||'';
+    char.addAction({ id: Date.now().toString(), name, type, descShort: desc.slice(0,50), desc, dice });
   }
 
-  function handleAddSpell() {
-    const name = window.prompt('Nome incantesimo:');
-    if (!name) return;
-    const level = parseInt(window.prompt('Livello (0 = trucchetto):') || '0');
-    const school = window.prompt('Scuola (es. Evocazione, Necromanzia...):') || '';
-    const concInput = window.prompt('Concentrazione? (s/n):') || 'n';
-    const concentration = concInput.toLowerCase().startsWith('s');
-    char.addSpell({ name, level, school, concentration, prepared: false });
-  }
-
-  function handleAddEquip() {
-    const name = window.prompt('Oggetto:');
-    if (!name) return;
-    const qty = parseInt(window.prompt('Quantità:') || '1');
-    char.addEquipment({ name, qty });
-  }
-
-  const filteredActions = state.actions
+  const filteredActions = (state.actions||[])
     .filter(a => showBaseActions || !BASE_ACTION_IDS.includes(a.id))
     .filter(a => actionFilter === 'all' || a.type === actionFilter);
-
-  const filteredSpells = spellFilter === 'all'
-    ? state.spells
-    : spellFilter === '0'
-    ? state.spells.filter(s => s.level === 0)
-    : state.spells.filter(s => s.prepared);
-
   const hasSpells = !!SPELLCASTING_CLASS[state.charClass];
+
+  // ── Layout management ──────────────────────────────────────────
+  function handleLayoutChange(newWidgets, action) {
+    let next = [...layout];
+    if (action?.type === 'moveTab') {
+      next = next.map(w => w.id === action.widgetId ? { ...w, tab: action.tabId } : w);
+    } else if (action?.type === 'hide') {
+      next = next.map(w => w.id === action.widgetId ? { ...w, visible: false } : w);
+    } else if (newWidgets) {
+      // Replace widgets for current tab
+      const otherTabs = next.filter(w => !newWidgets.find(nw => nw.id === w.id));
+      next = [...otherTabs, ...newWidgets];
+    }
+    setLayout(next);
+    saveLayout(next);
+  }
+
+  function restoreWidget(id) {
+    const next = layout.map(w => w.id === id ? { ...w, visible: true, tab: activeTab } : w);
+    setLayout(next); saveLayout(next);
+  }
+
+  const tabWidgets = getWidgetsForTab(layout, activeTab);
+  const hiddenWidgets = layout
+    .filter(w => w.visible === false)
+    .map(w => ({ ...w, label: WIDGET_DEFS.find(d => d.id === w.id)?.label || w.id }));
+
+  // ── Widget renderer ────────────────────────────────────────────
+  function renderWidget(id) {
+    switch (id) {
+
+      case 'identity': return (
+        <div className="card">
+          <div className="card-title">👤 Identità</div>
+          <div className="grid-2">
+            <Field label="Nome"><input value={state.charName} onChange={e => update({ charName: e.target.value })} placeholder="Es. Aldric Voss" /></Field>
+            <Field label="Classe">
+              <select value={state.charClass} onChange={e => char.onClassOrLevelChange({ charClass: e.target.value })}>
+                <option value="">— Scegli classe —</option>
+                {CLASSES.map(c => <option key={c}>{c}</option>)}
+              </select>
+            </Field>
+            <Field label="Razza / Specie">
+              <select value={state.charRace} onChange={e => update({ charRace: e.target.value })}>
+                <option value="">— Scegli specie —</option>
+                {SPECIES_LIST.map(r => <option key={r}>{r}</option>)}
+                <option value="__custom__">Personalizzata...</option>
+              </select>
+              {state.charRace === '__custom__' && (
+                <input style={{ marginTop:4 }} value={state.charRaceCustom||''} onChange={e => update({ charRaceCustom: e.target.value })} placeholder="Scrivi la specie..." />
+              )}
+            </Field>
+            <Field label="Background">
+              <select value={state.charBackground} onChange={e => update({ charBackground: e.target.value })}>
+                <option value="">— Scegli background —</option>
+                {BACKGROUNDS_LIST.map(b => <option key={b}>{b}</option>)}
+                <option value="__custom__">Personalizzato...</option>
+              </select>
+              {state.charBackground === '__custom__' && (
+                <input style={{ marginTop:4 }} value={state.charBackgroundCustom||''} onChange={e => update({ charBackgroundCustom: e.target.value })} placeholder="Scrivi il background..." />
+              )}
+            </Field>
+            <Field label="Livello">
+              <input type="number" min="1" max="20" value={state.charLevel} onChange={e => char.onClassOrLevelChange({ charLevel: parseInt(e.target.value)||1 })} />
+            </Field>
+            <Field label="Bonus competenza"><input value={`+${char.profBonus}`} readOnly /></Field>
+            <Field label="Allineamento">
+              <select value={state.charAlignment} onChange={e => update({ charAlignment: e.target.value })}>
+                {ALIGNMENTS.map(a => <option key={a}>{a}</option>)}
+              </select>
+            </Field>
+            <Field label="Esperienza (XP)">
+              <input type="number" min="0" value={state.charXP} onChange={e => update({ charXP: parseInt(e.target.value)||0 })} />
+            </Field>
+          </div>
+        </div>
+      );
+
+      case 'abilities': return (
+        <div className="card">
+          <div className="card-title" style={{ justifyContent:'space-between' }}>
+            <span>🎲 Caratteristiche</span>
+            <button className={`icon-btn ${editingAbilities ? 'active' : ''}`} onClick={() => setEditingAbilities(e => !e)}>
+              {editingAbilities ? '✓ Fine' : '✏ Modifica'}
+            </button>
+          </div>
+          <div className="grid-6">
+            {ABILITIES.map(attr => (
+              <AbilityBox key={attr} attr={attr} score={state.abilities[attr]}
+                onAdjust={(a,d) => char.setAbility(a, (state.abilities[a]||10)+d)}
+                onInput={char.setAbility} editing={editingAbilities} onHover={setHoveredAttr} />
+            ))}
+          </div>
+        </div>
+      );
+
+      case 'saves': return (
+        <div className="card">
+          <div className="card-title">🛡 Tiri salvezza</div>
+          <div className="check-list">
+            {ABILITIES.map(attr => {
+              const prof = state.saveProficiencies.includes(attr);
+              return (
+                <div key={attr} className={`check-item ${hoveredAttr === attr ? 'attr-highlight' : ''}`} onClick={() => char.toggleSaveProficiency(attr)}>
+                  <div className={`check-dot ${prof ? 'proficient' : ''}`} />
+                  <span className="check-val">{fmtMod(char.calcSaveMod(attr))}</span>
+                  <span className="check-name">{ABILITY_NAMES[attr]}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+
+      case 'skills': return (
+        <div className="card">
+          <div className="card-title">🔧 Abilità</div>
+          <div className="check-list">
+            {SKILLS.map(sk => {
+              const prof = state.skillProficiencies.includes(sk.name);
+              const exp = state.skillExpertise.includes(sk.name);
+              return (
+                <div key={sk.name} className={`check-item ${hoveredAttr === sk.attr ? 'attr-highlight' : ''}`} onClick={() => char.toggleSkillProficiency(sk.name)}>
+                  <div className={`check-dot ${exp ? 'expertise' : prof ? 'proficient' : ''}`} />
+                  <span className="check-val">{fmtMod(char.calcSkillMod(sk))}</span>
+                  <span className="check-name">{sk.name}</span>
+                  <span className="check-attr">{sk.attr}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+
+      case 'senses': return (
+        <div className="card">
+          <div className="card-title">👁 Sensi & movimento</div>
+          <div className="field-row">
+            <Field label="Percezione passiva"><input value={char.passivePerception} readOnly /></Field>
+            <Field label="Iniziativa"><input value={char.initiative} readOnly /></Field>
+            <Field label="Velocità"><input value={state.speed} onChange={e => update({ speed: e.target.value })} placeholder="9m" /></Field>
+            <Field label="Dadi vita"><input value={char.hitDice} readOnly /></Field>
+          </div>
+        </div>
+      );
+
+      case 'hp': return (
+        <div className="card">
+          <div className="card-title" style={{ justifyContent:'space-between' }}>
+            <span>❤ Punti ferita</span>
+            <button className={`icon-btn ${editingHP ? 'active' : ''}`} onClick={() => setEditingHP(e => !e)}>
+              {editingHP ? '✓ Fine' : '✏ Modifica'}
+            </button>
+          </div>
+          <div className="hp-labeled-row">
+            <div className="hp-labeled-group">
+              <div className="hp-label">Attuali</div>
+              <div className="hp-stepper">
+                <button className="mod-btn" onClick={() => update({ hpCurrent: Math.max(0, state.hpCurrent-1) })}>−</button>
+                <input className="hp-big" type="number" value={state.hpCurrent} onChange={e => update({ hpCurrent: Math.max(0, parseInt(e.target.value)||0) })} />
+                <button className="mod-btn" onClick={() => update({ hpCurrent: Math.min(state.hpMax, state.hpCurrent+1) })}>+</button>
+              </div>
+            </div>
+            <span className="hp-sep">/</span>
+            <div className="hp-labeled-group">
+              <div className="hp-label">Massimi</div>
+              <div className="hp-stepper">
+                {editingHP && <button className="mod-btn" onClick={() => update({ hpMax: Math.max(1, state.hpMax-1) })}>−</button>}
+                <input className="hp-big" type="number" value={state.hpMax} readOnly={!editingHP}
+                  style={{ background: editingHP ? 'var(--c-bg)' : 'var(--c-surface)', color: editingHP ? 'var(--c-ink)' : 'var(--c-muted)' }}
+                  onChange={e => editingHP && update({ hpMax: Math.max(1, parseInt(e.target.value)||1) })} />
+                {editingHP && <button className="mod-btn" onClick={() => update({ hpMax: state.hpMax+1 })}>+</button>}
+              </div>
+            </div>
+            <div className="hp-labeled-group" style={{ marginLeft:4 }}>
+              <div className="hp-label">Temp HP</div>
+              <button className={`temp-hp-icon-btn ${(state.hpTemp||0) > 0 ? 'active' : ''}`} onClick={() => setEditingHP(true)}>
+                🛡 {(state.hpTemp||0) > 0 ? state.hpTemp : '+'}
+              </button>
+            </div>
+          </div>
+          <HPBar current={state.hpCurrent} max={state.hpMax} />
+          {(state.hpTemp > 0 || editingHP) && (
+            <div className="hp-temp-section">
+              <div className="hp-label" style={{ marginBottom:4 }}>🛡 HP Temporanei</div>
+              <div className="hp-stepper">
+                {editingHP && <button className="mod-btn" onClick={() => update({ hpTemp: Math.max(0,(state.hpTemp||0)-1) })}>−</button>}
+                <input className="hp-big" type="number" value={state.hpTemp||0} readOnly={!editingHP}
+                  style={{ background: editingHP ? 'var(--c-bg)' : 'var(--c-surface)', color: editingHP ? 'var(--c-ink)' : '#185FA5', fontSize:20 }}
+                  onChange={e => editingHP && update({ hpTemp: Math.max(0, parseInt(e.target.value)||0) })} />
+                {editingHP && <button className="mod-btn" onClick={() => update({ hpTemp:(state.hpTemp||0)+1 })}>+</button>}
+              </div>
+              <div className="hp-bar-wrap" style={{ marginTop:4 }}>
+                <div className="hp-bar-fill" style={{ width:`${Math.min(100,((state.hpTemp||0)/Math.max(1,state.hpMax))*100)}%`, background:'#4A90D9' }} />
+              </div>
+            </div>
+          )}
+          <div className="hp-actions">
+            <div className="hp-stepper">
+              <button className="mod-btn" onClick={() => setHpAmount(a => Math.max(0,a-1))}>−</button>
+              <input className="hp-amount" type="number" min="0" value={hpAmount} onChange={e => setHpAmount(Math.max(0,parseInt(e.target.value)||0))} />
+              <button className="mod-btn" onClick={() => setHpAmount(a => a+1)}>+</button>
+            </div>
+            <button className="hp-action-btn danger" onClick={() => {
+              const temp = state.hpTemp||0;
+              if (temp > 0) { const r = temp-hpAmount; r >= 0 ? update({ hpTemp:r }) : update({ hpTemp:0, hpCurrent:Math.max(0,state.hpCurrent+r) }); }
+              else char.modHP(-hpAmount);
+            }}>💔 Danno</button>
+            <button className="hp-action-btn success" onClick={() => char.modHP(hpAmount)}>💚 Cura</button>
+          </div>
+        </div>
+      );
+
+      case 'combatStats': return (
+        <div className="card">
+          <div className="card-title">⚔ Statistiche combattimento</div>
+          <div className="grid-3">
+            <div className="stat-pill"><div className="stat-pill-label">CA</div><input className="stat-pill-input" type="number" value={state.ac} onChange={e => update({ ac:parseInt(e.target.value)||10 })} /></div>
+            <div className="stat-pill"><div className="stat-pill-label">Iniziativa</div><div className="stat-pill-val">{char.initiative}</div></div>
+            <div className="stat-pill"><div className="stat-pill-label">Velocità</div><input className="stat-pill-input" type="text" value={state.speed} onChange={e => update({ speed:e.target.value })} /></div>
+          </div>
+        </div>
+      );
+
+      case 'inspiration': return (
+        <div className="card">
+          <div className="card-title" style={{ marginBottom:12 }}>⭐ / 🎯 Stato</div>
+          <div style={{ display:'flex', gap:16, flexWrap:'wrap' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+              <button className={`inspiration-btn ${state.inspiration ? 'active' : ''}`} onClick={() => update({ inspiration:!state.inspiration })}>⭐</button>
+              <span className="toggle-label" style={{ color: state.inspiration ? '#856404' : 'var(--c-hint)' }}>
+                {state.inspiration ? 'Ispirazione!' : 'Nessuna'}
+              </span>
+            </div>
+            <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+              <button className={`inspiration-btn ${state.concentrating ? 'active' : ''}`}
+                style={state.concentrating ? { borderColor:'#185FA5', background:'#E6F1FB', boxShadow:'0 0 12px rgba(24,95,165,.35)' } : {}}
+                onClick={() => update({ concentrating:!state.concentrating })}>🎯</button>
+              <span className="toggle-label" style={{ color: state.concentrating ? '#185FA5' : 'var(--c-hint)' }}>
+                {state.concentrating ? 'Concentrazione' : 'Nessuna'}
+              </span>
+            </div>
+          </div>
+        </div>
+      );
+
+      case 'deathSaves': return (
+        <div className="card">
+          <div className="card-title">💀 Tiri salvezza morte</div>
+          <div className="death-saves">
+            {['success','failure'].map(type => (
+              <div key={type} className="save-group">
+                <div className="save-group-label">{type === 'success' ? 'Successi' : 'Fallimenti'}</div>
+                <div className="save-pips">
+                  {[0,1,2].map(i => {
+                    const arr = type === 'success' ? (state.deathSuccess||[false,false,false]) : (state.deathFail||[false,false,false]);
+                    const on = arr[i] === true;
+                    return (
+                      <div key={i} className={`save-pip ${on ? type+'-on' : ''}`} onClick={() => {
+                        const cur = [...(type === 'success' ? (state.deathSuccess||[false,false,false]) : (state.deathFail||[false,false,false]))];
+                        cur[i] = !cur[i];
+                        type === 'success' ? update({ deathSuccess:cur }) : update({ deathFail:cur });
+                      }} />
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+
+      case 'conditions': return (
+        <div className="card">
+          <div className="card-title">🔮 Condizioni</div>
+          <ConditionTracker active={state.conditions||[]} onChange={conditions => update({ conditions })} />
+        </div>
+      );
+
+      case 'actions': return (
+        <div className="card">
+          <div className="card-title" style={{ justifyContent:'space-between' }}>
+            <span>⚡ Azioni</span>
+            <button className="icon-btn" style={{ fontSize:11 }} onClick={() => setShowBaseActions(v => !v)}>
+              {showBaseActions ? '🙈 Nascondi base' : '👁 Mostra base'}
+            </button>
+          </div>
+          <div className="filter-bar">
+            {[['all','Tutte'],['action','Azione'],['bonus','Bonus'],['reaction','Reazione'],['free','Gratuita']].map(([v,l]) => (
+              <button key={v} className={`filter-chip ${actionFilter === v ? 'active' : ''}`} onClick={() => setActionFilter(v)}>{l}</button>
+            ))}
+          </div>
+          {allTags.length > 0 && <TagFilterBar allTags={allTags} activeTag={actionTagFilter} onSelect={setActionTagFilter} />}
+          <div className="action-list">
+            {filteredActions.filter(a => !actionTagFilter || (a.tags||[]).includes(actionTagFilter)).map(action => (
+              <ActionItem key={action.id||action.name} action={action} allTags={allTags} onRoll={handleRoll}
+                onUpdateTags={(id,tags) => update({ actions: state.actions.map(a => a.id===id ? {...a,tags} : a) })}
+                onCreateTag={createTag} />
+            ))}
+          </div>
+          <button className="add-action-btn" onClick={handleAddAction}>+ Aggiungi azione</button>
+        </div>
+      );
+
+      case 'weapons': return (
+        <div className="card">
+          <div className="card-title">⚔ Armi</div>
+          <WeaponManager weapons={state.weapons||[]} abilities={state.abilities} profBonus={char.profBonus}
+            onUpdate={weapons => update({ weapons })} onRoll={handleRoll} />
+        </div>
+      );
+
+      case 'spellStats': return (
+        <div className="card">
+          <div className="card-title">✨ Statistiche lancio</div>
+          {hasSpells ? (
+            <div className="field-row">
+              <Field label="Stat. lancio"><input value={char.spellStat||'—'} readOnly /></Field>
+              <Field label="CD salvezza"><input value={char.spellSaveDC??'—'} readOnly /></Field>
+              <Field label="Bonus attacco"><input value={char.spellAttackBonus??'—'} readOnly /></Field>
+            </div>
+          ) : <p className="hint-text">Seleziona una classe incantatore.</p>}
+        </div>
+      );
+
+      case 'spellSlots': return (
+        <div className="card">
+          <div className="card-title" style={{ justifyContent:'space-between' }}>
+            <span>🔥 Slot incantesimo</span>
+            <div style={{ display:'flex', gap:6 }}>
+              <button className="rest-btn" onClick={handleShortRest}>🌙 Riposo breve</button>
+              <button className="rest-btn" onClick={handleLongRest}>🛏 Riposo lungo</button>
+            </div>
+          </div>
+          {hasSpells && state.spellSlots.length > 0
+            ? <SpellSlots slots={state.spellSlots} onToggle={char.toggleSpellSlot} />
+            : <p className="hint-text">Nessuno slot disponibile.</p>}
+        </div>
+      );
+
+      case 'spells': return (
+        <div className="card">
+          <div className="card-title">📖 Incantesimi</div>
+          <SpellManager spells={state.spells} charClass={state.charClass} onUpdate={spells => update({ spells })}
+            onRoll={handleRoll} allTags={allTags}
+            onUpdateTags={(name,tags) => update({ spells: state.spells.map(s => s.name===name ? {...s,tags} : s) })}
+            onCreateTag={createTag} />
+        </div>
+      );
+
+      case 'currency': return (
+        <div className="card">
+          <div className="card-title">💰 Valuta</div>
+          <div className="currency-row">
+            {[['GP','MO','#633806'],['SP','MA','#888780'],['CP','MR','#854F0B'],['PP','PE','#185FA5']].map(([key,label,color]) => (
+              <div key={key} className="currency-item">
+                <div className="currency-label" style={{ color }}>{label}</div>
+                <input className="currency-input" type="number" min="0"
+                  value={state.currency[key]||0}
+                  onChange={e => update({ currency: {...state.currency, [key]:parseInt(e.target.value)||0} })} />
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+
+      case 'inventory': return (
+        <div className="card">
+          <div className="card-title">🎒 Equipaggiamento</div>
+          <InventoryManager items={state.equipment||[]} onUpdate={equipment => update({ equipment })} onRoll={handleRoll} />
+        </div>
+      );
+
+      case 'traits': return (
+        <div className="card">
+          <div className="card-title">👤 Tratti personaggio</div>
+          <div className="trait-grid">
+            {[['personality','Tratti della personalità','Come ti comporti?'],['ideals','Ideali','Cosa credi?'],
+              ['bonds','Legami','Chi o cosa ti lega al mondo?'],['flaws','Difetti','Qual è il tuo tallone d\'Achille?']
+            ].map(([key,label,ph]) => (
+              <Field key={key} label={label}>
+                <textarea className="notes-area" placeholder={ph} value={state.notes[key]||''}
+                  onChange={e => update({ notes:{...state.notes,[key]:e.target.value} })} />
+              </Field>
+            ))}
+          </div>
+        </div>
+      );
+
+      case 'freeNotes': return (
+        <div className="card">
+          <div className="card-title">📝 Note libere</div>
+          <textarea className="notes-area" style={{ minHeight:180 }}
+            placeholder="Appunti di sessione, dettagli NPC, misteri da risolvere..."
+            value={state.notes.free||''} onChange={e => update({ notes:{...state.notes,free:e.target.value} })} />
+        </div>
+      );
+
+      case 'classFeatures': return (
+        <div className="card">
+          <div className="card-title">✨ Feature di classe e tratti</div>
+          <textarea className="notes-area" style={{ minHeight:140 }}
+            placeholder="Feature di classe, tratti razziali, talenti..."
+            value={state.notes.classFeatures||''} onChange={e => update({ notes:{...state.notes,classFeatures:e.target.value} })} />
+        </div>
+      );
+
+      default: return <div className="card"><div className="hint-text">Widget "{id}" non trovato.</div></div>;
+    }
+  }
 
   return (
     <div className="sheet">
       <Toast message={toast} />
-
-      {showCreator && (
-        <CharacterCreator
-          onComplete={handleCreatorComplete}
-          onCancel={() => setShowCreator(false)}
-        />
-      )}
+      {showCreator && <CharacterCreator onComplete={handleCreatorComplete} onCancel={() => setShowCreator(false)} />}
 
       {/* Template bar */}
       <div className="template-bar">
         <span className="template-label">Sistema:</span>
-        {['dnd5e', 'custom'].map(t => (
-          <button
-            key={t}
-            className={`template-chip ${state.template === t ? 'active' : ''}`}
-            onClick={() => update({ template: t })}
-          >
+        {['dnd5e','custom'].map(t => (
+          <button key={t} className={`template-chip ${state.template===t ? 'active' : ''}`} onClick={() => update({ template:t })}>
             {t === 'dnd5e' ? 'D&D 5e / 2024' : 'Personalizzato'}
           </button>
         ))}
-        <div style={{ flex: 1 }} />
-        <button className="io-btn primary" onClick={() => setShowCreator(true)}>⚔ Nuovo personaggio</button>
-        <button className="io-btn" onClick={handleExport}>⬇ Esporta JSON</button>
+        <div style={{ flex:1 }} />
+        <button className={`icon-btn ${editMode ? 'active' : ''}`} onClick={() => setEditMode(v => !v)} title="Modalità layout">
+          {editMode ? '✓ Fine layout' : '⠿ Layout'}
+        </button>
+        {editMode && (
+          <button className="icon-btn" onClick={() => { const d = getDefaultLayout(); setLayout(d); saveLayout(d); }}>↺ Reset</button>
+        )}
+        <button className="io-btn primary" onClick={() => setShowCreator(true)}>⚔ Nuovo</button>
+        <button className="io-btn" onClick={handleExport}>⬇ Esporta</button>
         <button className="io-btn primary" onClick={() => fileInputRef.current?.click()}>⬆ Importa</button>
-        <input ref={fileInputRef} type="file" accept=".json" style={{ display: 'none' }} onChange={handleImport} />
+        <input ref={fileInputRef} type="file" accept=".json" style={{ display:'none' }} onChange={handleImport} />
       </div>
 
       <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
 
-      {/* ── MAIN PANEL ── */}
-      {activeTab === 'main' && (
-        <div className="panel">
-          {/* Identity */}
-          <div className="card">
-            <div className="card-title">👤 Identità</div>
-            <div className="grid-2">
-              <Field label="Nome personaggio">
-                <input value={state.charName} onChange={e => update({ charName: e.target.value })} placeholder="Es. Aldric Voss" />
-              </Field>
-              <Field label="Classe">
-                <select value={state.charClass} onChange={e => char.onClassOrLevelChange({ charClass: e.target.value })}>
-                  <option value="">— Scegli classe —</option>
-                  {CLASSES.map(c => <option key={c}>{c}</option>)}
-                </select>
-              </Field>
-              <Field label="Razza / Specie">
-                <select value={state.charRace} onChange={e => update({ charRace: e.target.value })}>
-                  <option value="">— Scegli specie —</option>
-                  {SPECIES_LIST.map(r => <option key={r}>{r}</option>)}
-                  <option value="__custom__">Personalizzata...</option>
-                </select>
-                {state.charRace === '__custom__' && (
-                  <input
-                    style={{ marginTop: 4 }}
-                    value={state.charRaceCustom || ''}
-                    onChange={e => update({ charRaceCustom: e.target.value })}
-                    placeholder="Scrivi la specie..."
-                  />
-                )}
-              </Field>
-              <Field label="Background">
-                <select value={state.charBackground} onChange={e => update({ charBackground: e.target.value })}>
-                  <option value="">— Scegli background —</option>
-                  {BACKGROUNDS_LIST.map(b => <option key={b}>{b}</option>)}
-                  <option value="__custom__">Personalizzato...</option>
-                </select>
-                {state.charBackground === '__custom__' && (
-                  <input
-                    style={{ marginTop: 4 }}
-                    value={state.charBackgroundCustom || ''}
-                    onChange={e => update({ charBackgroundCustom: e.target.value })}
-                    placeholder="Scrivi il background..."
-                  />
-                )}
-              </Field>
-              <Field label="Livello">
-                <input type="number" min="1" max="20" value={state.charLevel}
-                  onChange={e => char.onClassOrLevelChange({ charLevel: parseInt(e.target.value) || 1 })} />
-              </Field>
-              <Field label="Bonus competenza">
-                <input value={`+${char.profBonus}`} readOnly />
-              </Field>
-              <Field label="Allineamento">
-                <select value={state.charAlignment} onChange={e => update({ charAlignment: e.target.value })}>
-                  {ALIGNMENTS.map(a => <option key={a}>{a}</option>)}
-                </select>
-              </Field>
-              <Field label="Esperienza (XP)">
-                <input type="number" min="0" value={state.charXP} onChange={e => update({ charXP: parseInt(e.target.value) || 0 })} />
-              </Field>
-            </div>
-          </div>
-
-          {/* Ability Scores */}
-          <div className="card">
-            <div className="card-title" style={{ justifyContent: 'space-between' }}>
-              <span>🎲 Caratteristiche</span>
-              <button
-                className={`icon-btn ${editingAbilities ? 'active' : ''}`}
-                onClick={() => setEditingAbilities(e => !e)}
-              >
-                {editingAbilities ? '✓ Fine' : '✏ Modifica'}
-              </button>
-            </div>
-            <div className="grid-6">
-              {ABILITIES.map(attr => (
-                <AbilityBox
-                  key={attr}
-                  attr={attr}
-                  score={state.abilities[attr]}
-                  onAdjust={(a, d) => char.setAbility(a, (state.abilities[a] || 10) + d)}
-                  onInput={char.setAbility}
-                  editing={editingAbilities}
-                  onHover={setHoveredAttr}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Saves + Skills */}
-          <div className="grid-2">
-            <div className="card">
-              <div className="card-title">🛡 Tiri salvezza</div>
-              <div className="check-list">
-                {ABILITIES.map(attr => {
-                  const prof = state.saveProficiencies.includes(attr);
-                  const highlighted = hoveredAttr === attr;
-                  return (
-                    <div key={attr} className={`check-item ${highlighted ? 'attr-highlight' : ''}`} onClick={() => char.toggleSaveProficiency(attr)}>
-                      <div className={`check-dot ${prof ? 'proficient' : ''}`} />
-                      <span className="check-val">{fmtMod(char.calcSaveMod(attr))}</span>
-                      <span className="check-name">{ABILITY_NAMES[attr]}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-            <div className="card">
-              <div className="card-title">🔧 Abilità</div>
-              <div className="check-list">
-                {SKILLS.map(sk => {
-                  const prof = state.skillProficiencies.includes(sk.name);
-                  const exp = state.skillExpertise.includes(sk.name);
-                  const highlighted = hoveredAttr === sk.attr;
-                  return (
-                    <div key={sk.name} className={`check-item ${highlighted ? 'attr-highlight' : ''}`} onClick={() => char.toggleSkillProficiency(sk.name)}>
-                      <div className={`check-dot ${exp ? 'expertise' : prof ? 'proficient' : ''}`} />
-                      <span className="check-val">{fmtMod(char.calcSkillMod(sk))}</span>
-                      <span className="check-name">{sk.name}</span>
-                      <span className="check-attr">{sk.attr}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* Senses */}
-          <div className="card">
-            <div className="card-title">👁 Sensi & movimento</div>
-            <div className="field-row">
-              <Field label="Percezione passiva"><input value={char.passivePerception} readOnly /></Field>
-              <Field label="Iniziativa"><input value={char.initiative} readOnly /></Field>
-              <Field label="Velocità">
-                <input value={state.speed} onChange={e => update({ speed: e.target.value })} placeholder="9m" />
-              </Field>
-              <Field label="Dadi vita"><input value={char.hitDice} readOnly /></Field>
-            </div>
-          </div>
+      {editMode && (
+        <div className="layout-edit-banner">
+          ⠿ Trascina i widget per riordinarli · Usa "Sposta" per cambiarli di tab · 🚫 per nasconderli
         </div>
       )}
 
-      {/* ── COMBAT PANEL ── */}
-      {activeTab === 'combat' && (
-        <div className="panel">
-          {/* HP */}
-          <div className="card">
-            <div className="card-title" style={{ justifyContent: 'space-between' }}>
-              <span>❤ Punti ferita</span>
-              <button
-                className={`icon-btn ${editingHP ? 'active' : ''}`}
-                onClick={() => setEditingHP(e => !e)}
-              >
-                {editingHP ? '✓ Fine' : '✏ Modifica'}
-              </button>
-            </div>
-
-            {/* Current HP — always editable via +/- */}
-            <div className="hp-labeled-row">
-              <div className="hp-labeled-group">
-                <div className="hp-label">Attuali</div>
-                <div className="hp-stepper">
-                  <button className="mod-btn" onClick={() => update({ hpCurrent: Math.max(0, state.hpCurrent - 1) })}>−</button>
-                  <input className="hp-big" type="number"
-                    value={state.hpCurrent}
-                    onChange={e => update({ hpCurrent: Math.max(0, parseInt(e.target.value) || 0) })}
-                  />
-                  <button className="mod-btn" onClick={() => update({ hpCurrent: Math.min(state.hpMax, state.hpCurrent + 1) })}>+</button>
-                </div>
-              </div>
-
-              <span className="hp-sep">/</span>
-
-              {/* Max HP — only editable in edit mode */}
-              <div className="hp-labeled-group">
-                <div className="hp-label">Massimi</div>
-                <div className="hp-stepper">
-                  {editingHP && <button className="mod-btn" onClick={() => update({ hpMax: Math.max(1, state.hpMax - 1) })}>−</button>}
-                  <input className="hp-big" type="number"
-                    value={state.hpMax}
-                    readOnly={!editingHP}
-                    style={{ background: editingHP ? 'var(--c-bg)' : 'var(--c-surface)', color: editingHP ? 'var(--c-ink)' : 'var(--c-muted)' }}
-                    onChange={e => editingHP && update({ hpMax: Math.max(1, parseInt(e.target.value) || 1) })}
-                  />
-                  {editingHP && <button className="mod-btn" onClick={() => update({ hpMax: state.hpMax + 1 })}>+</button>}
-                </div>
-              </div>
-
-              {/* Temp HP quick-add icon */}
-              <div className="hp-labeled-group" style={{ marginLeft: 4 }}>
-                <div className="hp-label">Temp HP</div>
-                <button
-                  className={`temp-hp-icon-btn ${(state.hpTemp||0) > 0 ? 'active' : ''}`}
-                  title="HP Temporanei"
-                  onClick={() => setEditingHP(true)}
-                >
-                  🛡 {(state.hpTemp||0) > 0 ? state.hpTemp : '+'}
-                </button>
-              </div>
-            </div>
-
-            {/* HP bar */}
-            <HPBar current={state.hpCurrent} max={state.hpMax} />
-
-            {/* Temp HP bar — separate */}
-            {(state.hpTemp > 0 || editingHP) && (
-              <div className="hp-temp-section">
-                <div className="hp-label" style={{ marginBottom: 4 }}>🛡 HP Temporanei</div>
-                <div className="hp-stepper">
-                  {editingHP && <button className="mod-btn" onClick={() => update({ hpTemp: Math.max(0, (state.hpTemp||0) - 1) })}>−</button>}
-                  <input className="hp-big" type="number"
-                    value={state.hpTemp || 0}
-                    readOnly={!editingHP}
-                    style={{ background: editingHP ? 'var(--c-bg)' : 'var(--c-surface)', color: editingHP ? 'var(--c-ink)' : '#185FA5', fontSize: 20 }}
-                    onChange={e => editingHP && update({ hpTemp: Math.max(0, parseInt(e.target.value) || 0) })}
-                  />
-                  {editingHP && <button className="mod-btn" onClick={() => update({ hpTemp: (state.hpTemp||0) + 1 })}>+</button>}
-                </div>
-                <div className="hp-bar-wrap" style={{ marginTop: 4 }}>
-                  <div className="hp-bar-fill" style={{
-                    width: `${Math.min(100, ((state.hpTemp||0) / Math.max(1, state.hpMax)) * 100)}%`,
-                    background: '#4A90D9'
-                  }} />
-                </div>
-              </div>
-            )}
-
-            {/* Quick damage/heal */}
-            <div className="hp-actions">
-              <div className="hp-stepper">
-                <button className="mod-btn" onClick={() => setHpAmount(a => Math.max(0, a - 1))}>−</button>
-                <input className="hp-amount" type="number" min="0" value={hpAmount} onChange={e => setHpAmount(Math.max(0, parseInt(e.target.value) || 0))} />
-                <button className="mod-btn" onClick={() => setHpAmount(a => a + 1)}>+</button>
-              </div>
-              <button className="hp-action-btn danger" onClick={() => {
-                const temp = state.hpTemp || 0;
-                if (temp > 0) {
-                  const remaining = temp - hpAmount;
-                  if (remaining >= 0) update({ hpTemp: remaining });
-                  else update({ hpTemp: 0, hpCurrent: Math.max(0, state.hpCurrent + remaining) });
-                } else {
-                  char.modHP(-hpAmount);
-                }
-              }}>💔 Danno</button>
-              <button className="hp-action-btn success" onClick={() => char.modHP(hpAmount)}>💚 Cura</button>
-            </div>
-          </div>
-
-          {/* Combat stats */}
-          <div className="card">
-            <div className="card-title">⚔ Statistiche combattimento</div>
-            <div className="grid-3">
-              <div className="stat-pill">
-                <div className="stat-pill-label">CA</div>
-                <input className="stat-pill-input" type="number" value={state.ac} onChange={e => update({ ac: parseInt(e.target.value) || 10 })} />
-              </div>
-              <div className="stat-pill">
-                <div className="stat-pill-label">Iniziativa</div>
-                <div className="stat-pill-val">{char.initiative}</div>
-              </div>
-              <div className="stat-pill">
-                <div className="stat-pill-label">Velocità</div>
-                <input className="stat-pill-input" type="text" value={state.speed} onChange={e => update({ speed: e.target.value })} />
-              </div>
-            </div>
-          </div>
-
-          {/* Inspiration + Death saves */}
-          <div className="grid-2">
-            <div className="card">
-              <div className="card-title">⭐ Ispirazione</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <button
-                  className={`inspiration-btn ${state.inspiration ? 'active' : ''}`}
-                  onClick={() => update({ inspiration: !state.inspiration })}
-                  title={state.inspiration ? 'Clicca per rimuovere ispirazione' : 'Clicca per ottenere ispirazione'}
-                >
-                  ⭐
-                </button>
-                <span className="toggle-label" style={{ color: state.inspiration ? '#856404' : 'var(--c-hint)' }}>
-                  {state.inspiration ? 'Hai ispirazione!' : 'Nessuna ispirazione'}
-                </span>
-              </div>
-            </div>
-            <div className="card">
-              <div className="card-title">🎯 Concentrazione</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <button
-                  className={`inspiration-btn ${state.concentrating ? 'active' : ''}`}
-                  style={state.concentrating ? { borderColor: '#185FA5', background: '#E6F1FB', boxShadow: '0 0 12px rgba(24,95,165,.35)' } : {}}
-                  onClick={() => update({ concentrating: !state.concentrating })}
-                  title="Stai mantenendo un incantesimo di concentrazione?"
-                >
-                  🎯
-                </button>
-                <span className="toggle-label" style={{ color: state.concentrating ? '#185FA5' : 'var(--c-hint)' }}>
-                  {state.concentrating ? 'In concentrazione' : 'Nessuna concentrazione'}
-                </span>
-              </div>
-            </div>
-            <div className="card">
-              <div className="card-title">💀 Tiri salvezza morte</div>
-              <div className="death-saves">
-                {['success', 'fail'].map(type => (
-                  <div key={type} className="save-group">
-                    <div className="save-group-label">{type === 'success' ? 'Successi' : 'Fallimenti'}</div>
-                    <div className="save-pips">
-                      {[0,1,2].map(i => {
-                        const arr = type === 'success'
-                          ? (state.deathSuccess || [false,false,false])
-                          : (state.deathFail || [false,false,false]);
-                        const on = arr[i] === true;
-                        return (
-                          <div
-                            key={i}
-                            className={`save-pip ${on ? type + '-on' : ''}`}
-                            onClick={() => {
-                              const current = type === 'success'
-                                ? [...(state.deathSuccess || [false,false,false])]
-                                : [...(state.deathFail || [false,false,false])];
-                              current[i] = !current[i];
-                              if (type === 'success') update({ deathSuccess: current });
-                              else update({ deathFail: current });
-                            }}
-                          />
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Conditions */}
-          <div className="card">
-            <div className="card-title">🔮 Condizioni</div>
-            <ConditionTracker
-              active={state.conditions || []}
-              onChange={conditions => update({ conditions })}
-            />
-          </div>
-
-          {/* Actions */}
-          <div className="card">
-            <div className="card-title">⚡ Azioni</div>
-            <div className="filter-bar">
-              {[['all','Tutte'],['action','Azione'],['bonus','Bonus'],['reaction','Reazione'],['free','Gratuita']].map(([v,l]) => (
-                <button key={v} className={`filter-chip ${actionFilter === v ? 'active' : ''}`} onClick={() => setActionFilter(v)}>{l}</button>
-              ))}
-            </div>
-            {allTags.length > 0 && (
-              <TagFilterBar allTags={allTags} activeTag={actionTagFilter} onSelect={setActionTagFilter} />
-            )}
-            <div className="action-list">
-              {filteredActions
-                .filter(a => !actionTagFilter || (a.tags||[]).includes(actionTagFilter))
-                .map(action => (
-                <ActionItem
-                  key={action.id || action.name}
-                  action={action}
-                  allTags={allTags}
-                  onRoll={handleRoll}
-                  onUpdateTags={(id, tags) => {
-                    update({ actions: state.actions.map(a => a.id === id ? { ...a, tags } : a) });
-                  }}
-                  onCreateTag={createTag}
-                />
-              ))}
-            </div>
-            <button className="add-action-btn" onClick={handleAddAction}>+ Aggiungi azione</button>
-          </div>
-        </div>
-      )}
-
-      {/* ── WEAPONS PANEL ── */}
-      {activeTab === 'weapons' && (
-        <div className="panel">
-          <div className="card">
-            <div className="card-title">⚔ Armi</div>
-            <WeaponManager
-              weapons={state.weapons || []}
-              abilities={state.abilities}
-              profBonus={char.profBonus}
-              onUpdate={weapons => update({ weapons })}
-              onRoll={handleRoll}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* ── SPELLS PANEL ── */}
-      {activeTab === 'spells' && (
-        <div className="panel">
-          <div className="card">
-            <div className="card-title">✨ Statistiche lancio</div>
-            {hasSpells ? (
-              <div className="field-row">
-                <Field label="Stat. lancio"><input value={char.spellStat || '—'} readOnly /></Field>
-                <Field label="CD salvezza"><input value={char.spellSaveDC ?? '—'} readOnly /></Field>
-                <Field label="Bonus attacco"><input value={char.spellAttackBonus ?? '—'} readOnly /></Field>
-              </div>
-            ) : (
-              <p className="hint-text">Seleziona una classe incantatore nella scheda personaggio.</p>
-            )}
-          </div>
-
-          <div className="card">
-            <div className="card-title" style={{ justifyContent: 'space-between' }}>
-              <span>🔥 Slot incantesimo</span>
-              <div style={{ display: 'flex', gap: '6px' }}>
-                <button className="rest-btn" onClick={handleShortRest}>🌙 Riposo breve</button>
-                <button className="rest-btn" onClick={handleLongRest}>🛏 Riposo lungo</button>
-              </div>
-            </div>
-            {hasSpells && state.spellSlots.length > 0
-              ? <SpellSlots slots={state.spellSlots} onToggle={char.toggleSpellSlot} />
-              : <p className="hint-text">Nessuno slot disponibile per questa classe/livello.</p>
-            }
-          </div>
-
-          <div className="card">
-            <div className="card-title">📖 Incantesimi</div>
-            <SpellManager
-              spells={state.spells}
-              charClass={state.charClass}
-              onUpdate={spells => update({ spells })}
-              onRoll={handleRoll}
-              allTags={allTags}
-              onUpdateTags={(name, tags) => update({ spells: state.spells.map(s => s.name === name ? { ...s, tags } : s) })}
-              onCreateTag={createTag}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* ── INVENTORY PANEL ── */}
-      {activeTab === 'inventory' && (
-        <div className="panel">
-          <div className="card">
-            <div className="card-title">💰 Valuta</div>
-            <div className="currency-row">
-              {[['GP','MO','#633806'],['SP','MA','#888780'],['CP','MR','#854F0B'],['PP','PE','#185FA5']].map(([key,label,color]) => (
-                <div key={key} className="currency-item">
-                  <div className="currency-label" style={{ color }}>{label}</div>
-                  <input className="currency-input" type="number" min="0"
-                    value={state.currency[key] || 0}
-                    onChange={e => update({ currency: { ...state.currency, [key]: parseInt(e.target.value) || 0 } })}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="card">
-            <div className="card-title">🎒 Equipaggiamento</div>
-            <InventoryManager
-              items={state.equipment || []}
-              onUpdate={equipment => update({ equipment })}
-              onRoll={handleRoll}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* ── NOTES PANEL ── */}
-      {activeTab === 'notes' && (
-        <div className="panel">
-          <div className="card">
-            <div className="card-title">👤 Tratti personaggio</div>
-            <div className="trait-grid">
-              {[
-                ['personality','Tratti della personalità','Come ti comporti?'],
-                ['ideals','Ideali','Cosa credi?'],
-                ['bonds','Legami','Chi o cosa ti lega al mondo?'],
-                ['flaws','Difetti','Qual è il tuo tallone d\'Achille?'],
-              ].map(([key,label,ph]) => (
-                <Field key={key} label={label}>
-                  <textarea className="notes-area" placeholder={ph}
-                    value={state.notes[key] || ''}
-                    onChange={e => update({ notes: { ...state.notes, [key]: e.target.value } })}
-                  />
-                </Field>
-              ))}
-            </div>
-          </div>
-          <div className="card">
-            <div className="card-title">📝 Note libere</div>
-            <textarea className="notes-area" style={{ minHeight: '180px' }}
-              placeholder="Appunti di sessione, dettagli NPC, misteri da risolvere..."
-              value={state.notes.free || ''}
-              onChange={e => update({ notes: { ...state.notes, free: e.target.value } })}
-            />
-          </div>
-          <div className="card">
-            <div className="card-title">✨ Feature di classe e tratti</div>
-            <textarea className="notes-area" style={{ minHeight: '140px' }}
-              placeholder="Feature di classe, tratti razziali, talenti..."
-              value={state.notes.classFeatures || ''}
-              onChange={e => update({ notes: { ...state.notes, classFeatures: e.target.value } })}
-            />
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function Field({ label, children }) {
-  return (
-    <div className="field">
-      <label>{label}</label>
-      {children}
+      <div className="panel">
+        <WidgetGrid
+          widgets={tabWidgets}
+          editMode={editMode}
+          onLayoutChange={handleLayoutChange}
+          renderWidget={renderWidget}
+          hiddenWidgets={hiddenWidgets}
+          onRestoreWidget={restoreWidget}
+        />
+      </div>
     </div>
   );
 }
