@@ -12,6 +12,7 @@ import SpellManager from './components/SpellManager';
 import InventoryManager from './components/InventoryManager';
 import DiceText from './components/DiceText';
 import { TagPill, TagSelector, TagFilterBar } from './components/Tags';
+import { KeywordText } from './components/Tooltip';
 import './App.css';
 
 const SPECIES_LIST = [
@@ -107,7 +108,7 @@ function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag })
         <div className="action-desc-short">{action.descShort}</div>
         {expanded && (
           <div className="action-desc-full" onClick={e => e.stopPropagation()}>
-            <DiceText text={action.desc} onRoll={onRoll} label={action.name} />
+            <KeywordText text={action.desc} onRoll={onRoll} label={action.name} />
             {action.dice && (
               <div className="action-roll" onClick={e => { e.stopPropagation(); onRoll(action.dice, action.name); }}>
                 🎲 Lancia {action.dice}
@@ -177,6 +178,7 @@ export default function App() {
   const [editingAbilities, setEditingAbilities] = useState(false);
   const [editingHP, setEditingHP] = useState(false);
   const [actionTagFilter, setActionTagFilter] = useState(null);
+  const [showBaseActions, setShowBaseActions] = useState(true);
   const [hoveredAttr, setHoveredAttr] = useState(null);
   const fileInputRef = useRef();
   const toastTimer = useRef();
@@ -186,6 +188,8 @@ export default function App() {
     clearTimeout(toastTimer.current);
     toastTimer.current = setTimeout(() => setToast(''), 2500);
   }
+
+  const BASE_ACTION_IDS = ['atk','dash','disengage','dodge','help','hide','ready','opportunity'];
 
   // Collect all tags from actions + spells
   const allTags = [...new Set([
@@ -271,9 +275,9 @@ export default function App() {
     char.addEquipment({ name, qty });
   }
 
-  const filteredActions = actionFilter === 'all'
-    ? state.actions
-    : state.actions.filter(a => a.type === actionFilter);
+  const filteredActions = state.actions
+    .filter(a => showBaseActions || !BASE_ACTION_IDS.includes(a.id))
+    .filter(a => actionFilter === 'all' || a.type === actionFilter);
 
   const filteredSpells = spellFilter === 'all'
     ? state.spells
@@ -597,6 +601,22 @@ export default function App() {
                 </button>
                 <span className="toggle-label" style={{ color: state.inspiration ? '#856404' : 'var(--c-hint)' }}>
                   {state.inspiration ? 'Hai ispirazione!' : 'Nessuna ispirazione'}
+                </span>
+              </div>
+            </div>
+            <div className="card">
+              <div className="card-title">🎯 Concentrazione</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <button
+                  className={`inspiration-btn ${state.concentrating ? 'active' : ''}`}
+                  style={state.concentrating ? { borderColor: '#185FA5', background: '#E6F1FB', boxShadow: '0 0 12px rgba(24,95,165,.35)' } : {}}
+                  onClick={() => update({ concentrating: !state.concentrating })}
+                  title="Stai mantenendo un incantesimo di concentrazione?"
+                >
+                  🎯
+                </button>
+                <span className="toggle-label" style={{ color: state.concentrating ? '#185FA5' : 'var(--c-hint)' }}>
+                  {state.concentrating ? 'In concentrazione' : 'Nessuna concentrazione'}
                 </span>
               </div>
             </div>

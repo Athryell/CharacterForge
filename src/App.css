@@ -1241,3 +1241,76 @@ input[type=number] {
   background: #E6F1FB;
   box-shadow: 0 0 0 2px rgba(74,144,217,.25);
 }
+
+/* ── KEYWORD TOOLTIP ───────────────────────────────────────────── */
+.keyword-term {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: var(--c-border-mid);
+  text-underline-offset: 2px;
+  cursor: help;
+  transition: text-decoration-color .15s;
+}
+.keyword-term:hover {
+  text-decoration-color: var(--c-accent);
+}
+.keyword-tooltip {
+  background: var(--c-ink);
+  color: var(--c-bg);
+  padding: 8px 12px;
+  border-radius: var(--r);
+  font-size: 12px;
+  line-height: 1.5;
+  max-width: 250px;
+  pointer-events: none;
+  box-shadow: 0 4px 16px rgba(0,0,0,.25);
+}
+.keyword-tooltip strong {
+  display: block;
+  margin-bottom: 3px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  opacity: .7;
+}
+
+/* ── SECTION HEADER BAR ────────────────────────────────────────── */
+.section-header-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.section-header-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--c-ink);
+  flex: 1;
+}
+.add-icon-btn {
+  border: 0.5px solid var(--c-border);
+  border-radius: var(--r);
+  background: none;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--c-muted);
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.add-icon-btn:hover {
+  border-color: var(--c-accent);
+  color: var(--c-accent-text);
+  background: var(--c-accent-light);
+}
+
+/* ── CANTRIP DOT ───────────────────────────────────────────────── */
+.spell-prepared-dot.cantrip-dot {
+  opacity: 0.45;
+  cursor: default;
+}
+.spell-item.cantrip {
+  opacity: 1;
+}

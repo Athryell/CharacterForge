@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import DiceText from './DiceText';
+import { KeywordText } from './Tooltip';
 
 const EMPTY_FORM = { name: '', qty: 1, desc: '', weight: '' };
 
@@ -169,7 +169,7 @@ export default function InventoryManager({ items = [], onUpdate, onRoll }) {
                   <div className="inventory-name">{item.name}</div>
                   {item.desc && !isExpanded && (
                     <div className="inventory-desc-preview">
-                      <DiceText text={item.desc} onRoll={onRoll} label={item.name} />
+                      <KeywordText text={item.desc} onRoll={onRoll} label={item.name} />
                     </div>
                   )}
                 </div>
@@ -190,7 +190,7 @@ export default function InventoryManager({ items = [], onUpdate, onRoll }) {
               {/* Expanded: description with dice + edit form */}
               {isExpanded && !isEditing && item.desc && (
                 <div className="inventory-desc-full">
-                  <DiceText text={item.desc} onRoll={onRoll} label={item.name} />
+                  <KeywordText text={item.desc} onRoll={onRoll} label={item.name} />
                 </div>
               )}
 
