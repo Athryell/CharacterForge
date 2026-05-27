@@ -1,35 +1,43 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import {
   createDefaultState, getMod, getProfBonus, fmtMod,
   SPELLCASTING_CLASS, HIT_DICE, SLOT_TABLE, SKILLS, JSON_SCHEMA_VERSION,
 } from '../data/dnd5e';
+import { saveCharState, loadCharState } from '../chars';
 
-const STORAGE_KEY = 'characterforge_state';
+const LEGACY_KEY = 'characterforge_state';
 
-function loadFromStorage() {
+function loadFromStorage(charId) {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const saved = JSON.parse(raw);
-      return { ...createDefaultState(), ...saved };
+    if (charId) {
+      const saved = loadCharState(charId);
+      if (saved) return { ...createDefaultState(), ...saved };
+    } else {
+      const raw = localStorage.getItem(LEGACY_KEY);
+      if (raw) return { ...createDefaultState(), ...JSON.parse(raw) };
     }
-  } catch (e) { /* ignore */ }
+  } catch { /* ignore */ }
   return createDefaultState();
 }
 
-function saveToStorage(state) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch (e) { /* ignore */ }
-}
+export function useCharacter(charId) {
+  const charIdRef = useRef(charId);
+  const [state, setState] = useState(() => loadFromStorage(charId));
 
-export function useCharacter() {
-  const [state, setState] = useState(() => loadFromStorage());
+  // Reload state when charId changes
+  useEffect(() => {
+    if (charId !== charIdRef.current) {
+      charIdRef.current = charId;
+      setState(loadFromStorage(charId));
+    }
+  }, [charId]);
 
   const update = useCallback((patch) => {
     setState(prev => {
       const next = typeof patch === 'function' ? patch(prev) : { ...prev, ...patch };
-      saveToStorage(next);
+      const id = charIdRef.current;
+      if (id) saveCharState(id, next);
+      else { try { localStorage.setItem(LEGACY_KEY, JSON.stringify(next)); } catch {} }
       return next;
     });
   }, []);
@@ -172,10 +180,16 @@ export function useCharacter() {
     update(prev => ({ ...prev, equipment: prev.equipment.filter((_, i) => i !== idx) }));
   }
 
+  function save(s) {
+    const id = charIdRef.current;
+    if (id) saveCharState(id, s);
+    else { try { localStorage.setItem(LEGACY_KEY, JSON.stringify(s)); } catch {} }
+  }
+
   function importState(imported) {
     const merged = { ...createDefaultState(), ...imported, schemaVersion: JSON_SCHEMA_VERSION };
     setState(merged);
-    saveToStorage(merged);
+    save(merged);
   }
 
   function exportState() {
@@ -185,7 +199,7 @@ export function useCharacter() {
   function resetState() {
     const fresh = createDefaultState();
     setState(fresh);
-    saveToStorage(fresh);
+    save(fresh);
   }
 
   return {

@@ -2,7 +2,7 @@ import { KeywordText } from './Tooltip';
 import React, { useState } from 'react';
 import { WEAPON_PRESETS, WEAPON_PROPERTIES, calcWeaponAttack, fmtWeaponDmg } from '../data/weapons';
 
-export default function WeaponManager({ weapons = [], abilities, profBonus, onUpdate, onRoll, proficiency = '', onUpdateProficiency }) {
+export default function WeaponManager({ weapons = [], abilities, profBonus, onUpdate, onRoll, proficiency = '', onUpdateProficiency, onAddAction }) {
   const [showAdd, setShowAdd] = useState(false);
   const [customMode, setCustomMode] = useState(false);
   const [form, setForm] = useState({
@@ -81,6 +81,17 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
               </div>
             </div>
             <div className="weapon-actions">
+              {onAddAction && (
+                <button className="icon-btn" style={{ fontSize:11, padding:'2px 5px' }} title="Aggiungi alle azioni"
+                  onClick={() => onAddAction({
+                    id: `weapon_${w.id}_${Date.now()}`,
+                    name: w.name,
+                    type: 'action',
+                    descShort: `${atkStr} per colpire · ${dmgStr} ${w.dmgType}`,
+                    desc: `Attacco con ${w.name}. Tiro per colpire: ${atkStr}. Danni: ${dmgStr} ${w.dmgType}.`,
+                    dice: `1d20${attackBonus >= 0 ? '+' : ''}${attackBonus}`,
+                  })}>⚡</button>
+              )}
               <button
                 className="filter-chip"
                 style={{ fontSize: 11, padding: '2px 8px' }}

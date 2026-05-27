@@ -10,7 +10,7 @@ const SOURCE_BADGE = {
 
 const EMPTY_FORM = { name: '', desc: '' };
 
-export default function FeatureManager({ features = [], onUpdate, onRoll }) {
+export default function FeatureManager({ features = [], onUpdate, onRoll, onAddAction }) {
   const [expanded, setExpanded] = useState(null);
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -71,6 +71,17 @@ export default function FeatureManager({ features = [], onUpdate, onRoll }) {
                       </div>
                     )}
                   </div>
+                  {onAddAction && (
+                    <button className="icon-btn" style={{ fontSize:11, padding:'2px 5px' }} title="Aggiungi alle azioni"
+                      onClick={e => { e.stopPropagation(); onAddAction({
+                        id: `feature_${feature.id}_${Date.now()}`,
+                        name: feature.name,
+                        type: 'action',
+                        descShort: feature.source || feature.name,
+                        desc: feature.desc || '',
+                        dice: '',
+                      }); }}>⚡</button>
+                  )}
                   <button className="equip-remove" onClick={e => { e.stopPropagation(); removeFeature(feature.id); }}>✕</button>
                 </div>
               ))}

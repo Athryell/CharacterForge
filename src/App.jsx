@@ -1,5 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useCharacter } from './hooks/useCharacter';
+import { loadCharsIndex, saveCharsIndex, deleteChar, getActiveCharId, setActiveCharId, generateCharId, migrateLegacy, saveCharState } from './chars';
+import CharacterSelect from './components/CharacterSelect';
+import { createDefaultState } from './data/dnd5e';
 import {
   ABILITIES, ABILITY_NAMES, SKILLS, CLASSES, ALIGNMENTS,
   SPELLCASTING_CLASS, getMod, fmtMod,
@@ -116,12 +119,56 @@ function SpellSlots({ slots, onToggle }) {
   );
 }
 
-function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag }) {
+const ACTION_TYPES = [['action','Azione'],['bonus','Bonus'],['reaction','Reazione'],['free','Gratuita']];
+
+function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag, onRemove, onEdit }) {
   const [expanded, setExpanded] = useState(false);
   const [editingTags, setEditingTags] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [form, setForm] = useState(null);
   const { TagPill, TagSelector } = require('./components/Tags');
   const badgeClass = { action:'badge-action', bonus:'badge-bonus', reaction:'badge-reaction', free:'badge-free' }[action.type] || 'badge-free';
   const typeLabel = { action:'Azione', bonus:'Bonus', reaction:'Reazione', free:'Gratuita' }[action.type] || action.type;
+
+  function startEdit(e) {
+    e.stopPropagation();
+    setForm({ name: action.name, type: action.type||'action', descShort: action.descShort||'', desc: action.desc||'', dice: action.dice||'' });
+    setEditing(true);
+    setExpanded(true);
+  }
+  function saveEdit(e) {
+    e.stopPropagation();
+    if (form.name.trim()) { onEdit && onEdit(action.id, form); }
+    setEditing(false);
+  }
+
+  if (editing && form) {
+    return (
+      <div className="action-item expanded" onClick={e => e.stopPropagation()}>
+        <div className={`action-badge ${badgeClass}`}>
+          <select value={form.type} onChange={e => setForm(f => ({...f, type: e.target.value}))}
+            style={{ background:'transparent', border:'none', color:'inherit', font:'inherit', cursor:'pointer' }}>
+            {ACTION_TYPES.map(([v,l]) => <option key={v} value={v}>{l}</option>)}
+          </select>
+        </div>
+        <div className="action-content" style={{ flex:1 }}>
+          <input value={form.name} onChange={e => setForm(f => ({...f, name: e.target.value}))}
+            style={{ width:'100%', marginBottom:4, fontSize:13, fontWeight:600 }} placeholder="Nome azione" autoFocus />
+          <input value={form.descShort} onChange={e => setForm(f => ({...f, descShort: e.target.value}))}
+            style={{ width:'100%', marginBottom:4, fontSize:11, color:'var(--c-muted)' }} placeholder="Descrizione breve" />
+          <textarea value={form.desc} onChange={e => setForm(f => ({...f, desc: e.target.value}))}
+            className="notes-area" style={{ minHeight:48, marginBottom:4 }} placeholder="Descrizione completa" />
+          <input value={form.dice} onChange={e => setForm(f => ({...f, dice: e.target.value}))}
+            style={{ width:'100%', fontSize:11 }} placeholder="Dado (es. 1d20+3, vuoto se nessuno)" />
+          <div style={{ display:'flex', gap:6, marginTop:8, justifyContent:'flex-end' }}>
+            <button className="io-btn" onClick={e => { e.stopPropagation(); setEditing(false); }}>Annulla</button>
+            <button className="io-btn primary" onClick={saveEdit}>✓ Salva</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`action-item ${expanded ? 'expanded' : ''}`} onClick={() => !editingTags && setExpanded(e => !e)}>
       <div className={`action-badge ${badgeClass}`}>{typeLabel}</div>
@@ -129,6 +176,8 @@ function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag })
         <div style={{ display:'flex', alignItems:'center', gap:6 }}>
           <div className="action-name" style={{ flex:1 }}>{action.name}</div>
           {(action.tags||[]).map(t => <TagPill key={t} tag={t} allTags={allTags} small />)}
+          <button className="icon-btn" style={{ fontSize:11, padding:'1px 5px' }} onClick={startEdit} title="Modifica">✏</button>
+          {onRemove && <button className="equip-remove" onClick={e => { e.stopPropagation(); onRemove(action.id); }}>✕</button>}
         </div>
         <div className="action-desc-short">{action.descShort}</div>
         {expanded && (
@@ -160,9 +209,9 @@ function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag })
   );
 }
 
-// ── Main App ────────────────────────────────────────────────────
-export default function App() {
-  const char = useCharacter();
+// ── Character App (single character) ────────────────────────────
+function CharacterApp({ charId, onBackToSelect, onNewChar }) {
+  const char = useCharacter(charId);
   const { state, update } = char;
 
   // Layout state
@@ -200,6 +249,8 @@ export default function App() {
   const [actionTagFilter, setActionTagFilter] = useState(null);
   const [showBaseActions, setShowBaseActions] = useState(true);
   const [hoveredAttr, setHoveredAttr] = useState(null);
+  const [showAddAction, setShowAddAction] = useState(false);
+  const [addActionForm, setAddActionForm] = useState({ name:'', type:'action', descShort:'', desc:'', dice:'' });
   const fileInputRef = useRef();
   const toastTimer = useRef();
 
@@ -273,9 +324,9 @@ export default function App() {
   }
 
   function handleCreatorComplete(newState) {
-    char.importState({ ...char.state, ...newState });
     setShowCreator(false);
     showToast(`Personaggio "${newState.charName}" creato!`);
+    if (onNewChar) onNewChar(newState);
   }
   function handleImport(e) {
     const file = e.target.files[0]; if (!file) return;
@@ -293,16 +344,6 @@ export default function App() {
     a.href = url; a.download = `${state.charName||'personaggio'}.json`;
     a.click(); URL.revokeObjectURL(url);
   }
-  function handleAddAction() {
-    const name = window.prompt('Nome azione:'); if (!name) return;
-    const types = ['action','bonus','reaction','free'];
-    const idx = parseInt(window.prompt('Tipo:\n0=Azione\n1=Bonus\n2=Reazione\n3=Gratuita')||'0');
-    const type = types[idx]||'action';
-    const desc = window.prompt('Descrizione:')||'';
-    const dice = window.prompt('Dado (es. 1d8+3, vuoto se no):')||'';
-    char.addAction({ id: Date.now().toString(), name, type, descShort: desc.slice(0,50), desc, dice });
-  }
-
   const filteredActions = (state.actions||[])
     .filter(a => showBaseActions || !BASE_ACTION_IDS.includes(a.id))
     .filter(a => actionFilter === 'all' || a.type === actionFilter);
@@ -662,10 +703,51 @@ export default function App() {
             {filteredActions.filter(a => !actionTagFilter || (a.tags||[]).includes(actionTagFilter)).map(action => (
               <ActionItem key={action.id||action.name} action={action} allTags={allTags} onRoll={handleRoll}
                 onUpdateTags={(id,tags) => update({ actions: state.actions.map(a => a.id===id ? {...a,tags} : a) })}
-                onCreateTag={createTag} />
+                onCreateTag={createTag}
+                onRemove={id => update({ actions: state.actions.filter(a => a.id !== id) })}
+                onEdit={(id, patch) => update({ actions: state.actions.map(a => a.id === id ? {...a, ...patch} : a) })}
+              />
             ))}
           </div>
-          <button className="add-action-btn" onClick={handleAddAction}>+ Aggiungi azione</button>
+          {showAddAction ? (
+            <div className="weapon-add-panel" style={{ marginTop:8 }}>
+              <div className="field-row">
+                <div className="field">
+                  <label>Nome *</label>
+                  <input value={addActionForm.name} onChange={e => setAddActionForm(f => ({...f, name:e.target.value}))} placeholder="Es. Secondo vento" autoFocus />
+                </div>
+                <div className="field">
+                  <label>Tipo</label>
+                  <select value={addActionForm.type} onChange={e => setAddActionForm(f => ({...f, type:e.target.value}))}>
+                    {ACTION_TYPES.map(([v,l]) => <option key={v} value={v}>{l}</option>)}
+                  </select>
+                </div>
+                <div className="field">
+                  <label>Dado (opzionale)</label>
+                  <input value={addActionForm.dice} onChange={e => setAddActionForm(f => ({...f, dice:e.target.value}))} placeholder="1d20+3" />
+                </div>
+              </div>
+              <div className="field" style={{ marginTop:6 }}>
+                <label>Descrizione breve</label>
+                <input value={addActionForm.descShort} onChange={e => setAddActionForm(f => ({...f, descShort:e.target.value}))} placeholder="Breve riepilogo..." />
+              </div>
+              <div className="field" style={{ marginTop:6 }}>
+                <label>Descrizione completa</label>
+                <textarea className="notes-area" style={{ minHeight:48 }} value={addActionForm.desc} onChange={e => setAddActionForm(f => ({...f, desc:e.target.value}))} placeholder="Descrizione dettagliata..." />
+              </div>
+              <div style={{ display:'flex', gap:8, marginTop:8, justifyContent:'flex-end' }}>
+                <button className="io-btn" onClick={() => { setShowAddAction(false); setAddActionForm({ name:'', type:'action', descShort:'', desc:'', dice:'' }); }}>Annulla</button>
+                <button className="io-btn primary" disabled={!addActionForm.name.trim()} onClick={() => {
+                  if (!addActionForm.name.trim()) return;
+                  update({ actions: [...(state.actions||[]), { ...addActionForm, id: Date.now().toString() }] });
+                  setShowAddAction(false);
+                  setAddActionForm({ name:'', type:'action', descShort:'', desc:'', dice:'' });
+                }}>+ Aggiungi</button>
+              </div>
+            </div>
+          ) : (
+            <button className="add-action-btn" onClick={() => setShowAddAction(true)}>+ Aggiungi azione</button>
+          )}
         </div>
       );
 
@@ -674,7 +756,8 @@ export default function App() {
           <div className="card-title">⚔ Armi</div>
           <WeaponManager weapons={state.weapons||[]} abilities={state.abilities} profBonus={char.profBonus}
             onUpdate={weapons => update({ weapons })} onRoll={handleRoll}
-            proficiency={state.weaponProficiency||''} onUpdateProficiency={v => update({ weaponProficiency: v })} />
+            proficiency={state.weaponProficiency||''} onUpdateProficiency={v => update({ weaponProficiency: v })}
+            onAddAction={action => update({ actions: [...(state.actions||[]), action] })} />
         </div>
       );
 
@@ -736,7 +819,8 @@ export default function App() {
             onCreateTag={createTag}
             spellSlots={state.spellSlots||[]}
             concentratingSpell={state.concentratingSpell||null}
-            onCast={handleCastSpell} />
+            onCast={handleCastSpell}
+            onAddAction={action => update({ actions: [...(state.actions||[]), action] })} />
         </div>
       );
 
@@ -817,7 +901,8 @@ export default function App() {
       case 'classFeatures': return (
         <div className="card">
           <div className="card-title">✨ Feature di classe e tratti</div>
-          <FeatureManager features={state.features||[]} onUpdate={features => update({ features })} onRoll={handleRoll} />
+          <FeatureManager features={state.features||[]} onUpdate={features => update({ features })} onRoll={handleRoll}
+            onAddAction={action => update({ actions: [...(state.actions||[]), action] })} />
         </div>
       );
 
@@ -876,6 +961,7 @@ export default function App() {
             setTabs(DEFAULT_TABS); saveTabs(DEFAULT_TABS);
           }}>↺ Reset</button>
         )}
+        {onBackToSelect && <button className="io-btn" onClick={onBackToSelect} title="Tutti i personaggi">👥</button>}
         <button className="io-btn primary" onClick={() => setShowCreator(true)}>⚔ Nuovo</button>
         <button className="io-btn" onClick={handleExport}>⬇ Esporta</button>
         <button className="io-btn primary" onClick={() => fileInputRef.current?.click()}>⬆ Importa</button>
@@ -915,5 +1001,72 @@ export default function App() {
         />
       </div>
     </div>
+  );
+}
+
+// ── AppShell — manages active character ─────────────────────────
+export default function App() {
+  const [chars, setChars] = useState(() => loadCharsIndex());
+  const [activeCharId, setActive] = useState(() => {
+    migrateLegacy(createDefaultState);
+    return getActiveCharId();
+  });
+  const [showCreator, setShowCreator] = useState(false);
+
+  // Keep chars list in sync after any save
+  useEffect(() => {
+    function syncIndex() { setChars(loadCharsIndex()); }
+    window.addEventListener('storage', syncIndex);
+    return () => window.removeEventListener('storage', syncIndex);
+  }, []);
+
+  function handleSelect(id) {
+    setActiveCharId(id);
+    setActive(id);
+    setChars(loadCharsIndex());
+  }
+
+  function handleDelete(id) {
+    deleteChar(id);
+    const next = loadCharsIndex();
+    setChars(next);
+    if (activeCharId === id) { setActiveCharId(null); setActive(null); }
+  }
+
+  function handleCreatorComplete(newState) {
+    const id = generateCharId();
+    saveCharState(id, { ...createDefaultState(), ...newState });
+    setActiveCharId(id);
+    setActive(id);
+    setChars(loadCharsIndex());
+    setShowCreator(false);
+  }
+
+  if (!activeCharId) {
+    return (
+      <>
+        <CharacterSelect
+          chars={chars}
+          onSelect={handleSelect}
+          onCreate={() => setShowCreator(true)}
+          onDelete={handleDelete}
+        />
+        {showCreator && (
+          <CharacterCreator
+            onComplete={handleCreatorComplete}
+            onCancel={() => setShowCreator(false)}
+          />
+        )}
+      </>
+    );
+  }
+
+  return (
+    <CharacterApp
+      key={activeCharId}
+      charId={activeCharId}
+      onBackToSelect={() => { setActiveCharId(null); setActive(null); setChars(loadCharsIndex()); }}
+      onNewChar={newState => { handleCreatorComplete(newState); }}
+    />
   );
 }

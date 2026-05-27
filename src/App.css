@@ -489,6 +489,42 @@ body {
   .topbar { flex-direction: column; align-items: flex-start; }
 }
 
+/* ── CHARACTER SELECT ──────────────────────────────────────────── */
+.char-select-overlay {
+  position: fixed; inset: 0;
+  background: var(--c-bg);
+  z-index: 300;
+  display: flex; align-items: center; justify-content: center; padding: 16px;
+}
+.char-select-modal {
+  width: 100%; max-width: 460px;
+  display: flex; flex-direction: column; gap: 0;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(0,0,0,.3);
+}
+.char-select-header { padding: 24px 24px 16px; border-bottom: 1px solid var(--c-border); }
+.char-select-title  { font-size: 22px; font-weight: 700; color: var(--c-text); }
+.char-select-sub    { font-size: 13px; color: var(--c-muted); margin-top: 4px; }
+.char-select-list   { flex: 1; padding: 12px; display: flex; flex-direction: column; gap: 6px; max-height: 60vh; overflow-y: auto; }
+.char-select-empty  { color: var(--c-hint); font-size: 13px; text-align: center; padding: 24px 0; }
+.char-select-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--c-border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background .12s, border-color .12s;
+}
+.char-select-item:hover { background: var(--c-accent-light); border-color: var(--c-accent); }
+.char-select-icon   { font-size: 24px; flex-shrink: 0; width: 36px; text-align: center; }
+.char-select-name   { font-size: 14px; font-weight: 600; color: var(--c-text); }
+.char-select-meta   { font-size: 11px; color: var(--c-muted); margin-top: 2px; display: flex; gap: 4px; flex-wrap: wrap; }
+.char-select-date   { color: var(--c-hint); }
+.char-select-footer { padding: 12px 16px; border-top: 1px solid var(--c-border); }
+
 /* ── CHARACTER CREATOR ─────────────────────────────────────────── */
 .creator-overlay {
   position: fixed; inset: 0;
@@ -579,6 +615,7 @@ body {
 .creator-card-sub { font-size: 11px; color: var(--c-muted); }
 .creator-traits { margin-top: 8px; }
 .creator-trait { font-size: 11px; color: var(--c-muted); line-height: 1.5; }
+.creator-custom-input { width: 100%; margin-top: 6px; font-size: 12px; padding: 4px 6px; border: 1px solid var(--c-accent); border-radius: 4px; background: var(--c-bg); color: var(--c-text); }
 
 .creator-method-bar { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
 .creator-pb-info {

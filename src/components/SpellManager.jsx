@@ -9,7 +9,7 @@ const LEVEL_LABELS = {
 };
 const EMPTY_CUSTOM = { name: '', level: 0, school: '', concentration: false, ritual: false, desc: '' };
 
-export default function SpellManager({ spells = [], charClass, onUpdate, onRoll, allTags = [], onUpdateTags, onCreateTag, spellSlots = [], concentratingSpell = null, onCast }) {
+export default function SpellManager({ spells = [], charClass, onUpdate, onRoll, allTags = [], onUpdateTags, onCreateTag, spellSlots = [], concentratingSpell = null, onCast, onAddAction }) {
   const [view, setView] = useState('list'); // 'list' | 'srd' | 'custom'
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [castMenu, setCastMenu] = useState(null); // spell.name of open cast menu
@@ -203,6 +203,17 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
                             </div>
                           )}
                         </div>
+                      )}
+                      {onAddAction && (
+                        <button className="icon-btn" style={{ fontSize:11, padding:'2px 5px' }} title="Aggiungi alle azioni"
+                          onClick={e => { e.stopPropagation(); onAddAction({
+                            id: `spell_${spell.name}_${Date.now()}`,
+                            name: spell.name,
+                            type: 'action',
+                            descShort: `${spell.school}${spell.level === 0 ? ' · Trucchetto' : ` · Liv. ${spell.level}`}${spell.concentration ? ' · Conc.' : ''}`,
+                            desc: spell.desc || '',
+                            dice: '',
+                          }); }}>⚡</button>
                       )}
                       <button className="equip-remove" onClick={e => { e.stopPropagation(); removeSpell(spell.name); }}>✕</button>
                     </div>
