@@ -160,8 +160,6 @@ export default function App() {
   const [layout, setLayout] = useState(loadLayout);
   const [editMode, setEditMode] = useState(false);
   const [tabs, setTabs] = useState(loadTabs);
-  const tabDragIdx = React.useRef(null);
-  const tabDragOverIdx = React.useRef(null);
 
   // UI state
   const [activeTab, setActiveTab] = useState('main');
@@ -206,19 +204,6 @@ export default function App() {
     } else {
       setActiveTab(id);
     }
-  }
-
-  function handleTabDrag(i) { tabDragIdx.current = i; }
-  function handleTabDragOver(i) { tabDragOverIdx.current = i; }
-  function handleTabDrop() {
-    const from = tabDragIdx.current;
-    const to = tabDragOverIdx.current;
-    if (from === null || to === null || from === to) return;
-    const next = [...tabs];
-    const [moved] = next.splice(from, 1);
-    next.splice(to, 0, moved);
-    setTabs(next); saveTabs(next);
-    tabDragIdx.current = null; tabDragOverIdx.current = null;
   }
 
   function handleRoll(notation, name) {
@@ -707,9 +692,7 @@ export default function App() {
         activeTab={activeTab}
         onTabChange={handleTabChange}
         editMode={editMode}
-        onDragTab={handleTabDrag}
-        onDropTab={handleTabDrop}
-        onDragOverTab={handleTabDragOver}
+        onReorderTabs={next => { setTabs(next); saveTabs(next); }}
       />
 
       {editMode && (
