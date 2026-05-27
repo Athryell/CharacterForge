@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { getWidgetLabel, ALL_TABS } from '../layout';
 
 export default function WidgetShell({
-  id, children, editMode, fullWidth,
+  id, children, editMode, fullWidth, bottomFull,
   onDragStart, onDragOver, onDrop,
-  onMoveToTab, onToggleVisible, onToggleFullWidth,
+  onMoveToTab, onToggleVisible, onToggleFullWidth, onToggleBottomFull,
   isDragOver,
 }) {
   const [showMenu, setShowMenu] = useState(false);
@@ -30,6 +30,14 @@ export default function WidgetShell({
             title={fullWidth ? 'Riduci a mezza larghezza' : 'Espandi a larghezza piena'}>
             {fullWidth ? '⬛ Mezza' : '▬ Piena'}
           </button>
+
+          {/* Bottom position toggle (only for full-width widgets) */}
+          {fullWidth && (
+            <button className="widget-action-btn" onClick={() => onToggleBottomFull && onToggleBottomFull(id)}
+              title={bottomFull ? 'Sposta sopra le colonne' : 'Sposta sotto le colonne'}>
+              {bottomFull ? '⬆ Sopra' : '⬇ Sotto'}
+            </button>
+          )}
 
           {/* Move to tab */}
           <div style={{ position:'relative' }}>

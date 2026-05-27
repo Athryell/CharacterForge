@@ -9,8 +9,10 @@ const LEVEL_LABELS = {
 };
 const EMPTY_CUSTOM = { name: '', level: 0, school: '', concentration: false, ritual: false, desc: '' };
 
-export default function SpellManager({ spells = [], charClass, onUpdate, onRoll, allTags = [], onUpdateTags, onCreateTag }) {
+export default function SpellManager({ spells = [], charClass, onUpdate, onRoll, allTags = [], onUpdateTags, onCreateTag, spellSlots = [], concentratingSpell = null, onCast }) {
   const [view, setView] = useState('list'); // 'list' | 'srd' | 'custom'
+  const [showAddMenu, setShowAddMenu] = useState(false);
+  const [castMenu, setCastMenu] = useState(null); // spell.name of open cast menu
   const [filterLevel, setFilterLevel] = useState('');
   const [filterSchool, setFilterSchool] = useState('');
   const [filterClass, setFilterClass] = useState(charClass || '');
@@ -84,8 +86,19 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
                 <button className={`filter-chip ${spellFilter === 'prepared' ? 'active' : ''}`} onClick={() => setSpellFilter('prepared')}>Preparati</button>
               )}
             </div>
-            <button className="add-icon-btn" onClick={() => setView('srd')} title="Sfoglia SRD">＋ SRD</button>
-            <button className="add-icon-btn" onClick={() => setView('custom')} title="Aggiungi personalizzato">✏</button>
+            <div style={{ position: 'relative' }}>
+              <button className="add-icon-btn" onClick={() => setShowAddMenu(v => !v)} title="Aggiungi incantesimo">＋</button>
+              {showAddMenu && (
+                <div className="spell-add-menu">
+                  <button className="spell-add-menu-item" onClick={() => { setView('srd'); setShowAddMenu(false); }}>
+                    🔍 Sfoglia SRD
+                  </button>
+                  <button className="spell-add-menu-item" onClick={() => { setView('custom'); setShowAddMenu(false); }}>
+                    ✏ Personalizzato
+                  </button>
+                </div>
+              )}
+            </div>
           </>
         ) : (
           <>
@@ -107,7 +120,7 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
         <>
           {spells.length === 0 && (
             <div className="hint-text" style={{ padding: '12px 0' }}>
-              Nessun incantesimo. Clicca <strong>＋ SRD</strong> per sfogliare o <strong>✏</strong> per aggiungerne uno personalizzato.
+              Nessun incantesimo. Clicca <strong>＋</strong> per aggiungerne uno.
             </div>
           )}
           {Object.keys(byLevel).sort((a, b) => a - b).map(lvl => (
@@ -160,6 +173,37 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
                       <div className="spell-level-badge">{isCantrip ? 'Trucco' : `Liv.${spell.level}`}</div>
                       {spell.concentration && <div className="spell-conc" title="Concentrazione">C</div>}
                       {spell.ritual && <div className="spell-ritual" title="Rituale">R</div>}
+                      {onCast && (
+                        <div style={{ position: 'relative' }} onClick={e => e.stopPropagation()}>
+                          <button
+                            className={`spell-cast-btn ${castMenu === spell.name ? 'active' : ''}`}
+                            title="Lancia"
+                            onClick={() => {
+                              if (isCantrip) { onCast(spell, 0); return; }
+                              setCastMenu(castMenu === spell.name ? null : spell.name);
+                            }}
+                          >🎯</button>
+                          {castMenu === spell.name && (
+                            <div className="spell-cast-menu">
+                              {Array.from({ length: 9 - spell.level + 1 }, (_, i) => spell.level + i).map(lvl => {
+                                const slot = (spellSlots || [])[lvl - 1];
+                                const avail = slot ? slot.max - slot.used : 0;
+                                return (
+                                  <button
+                                    key={lvl}
+                                    className="spell-cast-menu-item"
+                                    disabled={avail <= 0}
+                                    onClick={() => { onCast(spell, lvl); setCastMenu(null); }}
+                                  >
+                                    <span>Slot {lvl}°</span>
+                                    <span className={`spell-cast-slot-count ${avail <= 0 ? 'empty' : ''}`}>{avail}/{slot?.max ?? 0}</span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      )}
                       <button className="equip-remove" onClick={e => { e.stopPropagation(); removeSpell(spell.name); }}>✕</button>
                     </div>
                   );

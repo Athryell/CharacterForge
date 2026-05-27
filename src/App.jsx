@@ -7,12 +7,17 @@ import {
 import CharacterCreator from './components/CharacterCreator';
 import ConditionTracker from './components/ConditionTracker';
 import WeaponManager from './components/WeaponManager';
+import ArmorManager from './components/ArmorManager';
+import { calcArmorAC } from './data/armors';
 import TabBar from './components/TabBar';
 import SpellManager from './components/SpellManager';
 import InventoryManager from './components/InventoryManager';
 import { TagFilterBar } from './components/Tags';
 import { KeywordText } from './components/Tooltip';
 import WidgetGrid from './components/WidgetGrid';
+import PinnedBar, { loadPinned, savePinned } from './components/PinnedBar';
+import FeatureManager from './components/FeatureManager';
+import { CLASS_FEATURES, SPECIES_FEATURES, BACKGROUND_FEATURES, getAutoFeatures } from './data/features';
 import { loadLayout, saveLayout, getDefaultLayout, getWidgetsForTab, WIDGET_DEFS, ALL_TABS, loadTabs, saveTabs, DEFAULT_TABS } from './layout';
 import './App.css';
 
@@ -51,7 +56,7 @@ function Toast({ message }) {
   return message ? <div className="toast show">{message}</div> : null;
 }
 
-function AbilityBox({ attr, score, onAdjust, onInput, editing, onHover }) {
+function AbilityBox({ attr, score, onAdjust, onInput, editing, onHover, onRoll }) {
   const mod = getMod(score);
   return (
     <div
@@ -60,7 +65,11 @@ function AbilityBox({ attr, score, onAdjust, onInput, editing, onHover }) {
       onMouseLeave={() => onHover && onHover(null)}
     >
       <div className="ability-label">{attr}</div>
-      <div className="ability-mod">{fmtMod(mod)}</div>
+      <div
+        className={`ability-mod ${!editing && onRoll ? 'clickable-stat' : ''}`}
+        onClick={!editing && onRoll ? () => onRoll(attr, mod) : undefined}
+        title={!editing && onRoll ? `Tira 1d20${fmtMod(mod)}` : undefined}
+      >{fmtMod(mod)}</div>
       {editing ? (
         <div className="ability-score-row">
           <button className="mod-btn" onClick={() => onAdjust(attr, -1)}>−</button>
@@ -160,6 +169,24 @@ export default function App() {
   const [layout, setLayout] = useState(loadLayout);
   const [editMode, setEditMode] = useState(false);
   const [tabs, setTabs] = useState(loadTabs);
+  const [pinned, setPinned] = useState(loadPinned);
+  const [activityLog, setActivityLog] = useState(() => {
+    try { const v = JSON.parse(localStorage.getItem('characterforge_log')); return Array.isArray(v) ? v : []; } catch { return []; }
+  });
+
+  function handleTogglePin(id) {
+    const next = pinned.includes(id) ? pinned.filter(p => p !== id) : [...pinned, id];
+    setPinned(next); savePinned(next);
+  }
+
+  function addLog(icon, text) {
+    const ts = new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+    setActivityLog(prev => {
+      const next = [{ id: Date.now(), ts, icon, text }, ...prev].slice(0, 100);
+      try { localStorage.setItem('characterforge_log', JSON.stringify(next)); } catch {}
+      return next;
+    });
+  }
 
   // UI state
   const [activeTab, setActiveTab] = useState('main');
@@ -169,6 +196,7 @@ export default function App() {
   const [showCreator, setShowCreator] = useState(false);
   const [editingAbilities, setEditingAbilities] = useState(false);
   const [editingHP, setEditingHP] = useState(false);
+  const [editingIdentity, setEditingIdentity] = useState(false);
   const [actionTagFilter, setActionTagFilter] = useState(null);
   const [showBaseActions, setShowBaseActions] = useState(true);
   const [hoveredAttr, setHoveredAttr] = useState(null);
@@ -208,10 +236,42 @@ export default function App() {
 
   function handleRoll(notation, name) {
     const result = rollDice(notation);
-    if (result !== null) showToast(`${name}: ${notation} = ${result}`);
+    if (result !== null) {
+      showToast(`${name}: ${notation} = ${result}`);
+      addLog('🎲', `${name}: ${notation} = ${result}`);
+    }
   }
-  function handleLongRest() { char.longRest(); showToast('Riposo lungo: HP e slot ripristinati!'); }
-  function handleShortRest() { showToast(char.shortRest()); }
+  function handleLongRest() {
+    char.longRest();
+    showToast('Riposo lungo: HP e slot ripristinati!');
+    addLog('🌙', 'Riposo lungo — HP e slot ripristinati');
+  }
+  function handleShortRest() {
+    const msg = char.shortRest();
+    showToast(msg);
+    addLog('☀', 'Riposo breve');
+  }
+  function handleCastSpell(spell, level) {
+    const updates = {};
+    if (spell.level > 0 && level > 0) {
+      const slot = (state.spellSlots || [])[level - 1];
+      if (!slot || slot.used >= slot.max) { showToast('Nessuno slot disponibile!'); return; }
+      updates.spellSlots = state.spellSlots.map((s, i) => i === level - 1 ? { ...s, used: s.used + 1 } : s);
+    }
+    if (spell.concentration) {
+      if (state.concentrating) {
+        const currentName = state.concentratingSpell || 'un incantesimo';
+        if (!window.confirm(`Stai già concentrandoti su "${currentName}".\nInterrompere la concentrazione?`)) return;
+      }
+      updates.concentrating = true;
+      updates.concentratingSpell = spell.name;
+    }
+    update(updates);
+    const lvlNote = spell.level > 0 && level > spell.level ? ` (slot ${level}°)` : '';
+    addLog('✨', `Lanciato: ${spell.name}${lvlNote}`);
+    showToast(`✨ ${spell.name} lanciato!`);
+  }
+
   function handleCreatorComplete(newState) {
     char.importState({ ...char.state, ...newState });
     setShowCreator(false);
@@ -280,48 +340,111 @@ export default function App() {
 
       case 'identity': return (
         <div className="card">
-          <div className="card-title">👤 Identità</div>
-          <div className="grid-2">
-            <Field label="Nome"><input value={state.charName} onChange={e => update({ charName: e.target.value })} placeholder="Es. Aldric Voss" /></Field>
-            <Field label="Classe">
-              <select value={state.charClass} onChange={e => char.onClassOrLevelChange({ charClass: e.target.value })}>
-                <option value="">— Scegli classe —</option>
-                {CLASSES.map(c => <option key={c}>{c}</option>)}
-              </select>
-            </Field>
-            <Field label="Razza / Specie">
-              <select value={state.charRace} onChange={e => update({ charRace: e.target.value })}>
-                <option value="">— Scegli specie —</option>
-                {SPECIES_LIST.map(r => <option key={r}>{r}</option>)}
-                <option value="__custom__">Personalizzata...</option>
-              </select>
-              {state.charRace === '__custom__' && (
-                <input style={{ marginTop:4 }} value={state.charRaceCustom||''} onChange={e => update({ charRaceCustom: e.target.value })} placeholder="Scrivi la specie..." />
-              )}
-            </Field>
-            <Field label="Background">
-              <select value={state.charBackground} onChange={e => update({ charBackground: e.target.value })}>
-                <option value="">— Scegli background —</option>
-                {BACKGROUNDS_LIST.map(b => <option key={b}>{b}</option>)}
-                <option value="__custom__">Personalizzato...</option>
-              </select>
-              {state.charBackground === '__custom__' && (
-                <input style={{ marginTop:4 }} value={state.charBackgroundCustom||''} onChange={e => update({ charBackgroundCustom: e.target.value })} placeholder="Scrivi il background..." />
-              )}
-            </Field>
-            <Field label="Livello">
-              <input type="number" min="1" max="20" value={state.charLevel} onChange={e => char.onClassOrLevelChange({ charLevel: parseInt(e.target.value)||1 })} />
-            </Field>
-            <Field label="Bonus competenza"><input value={`+${char.profBonus}`} readOnly /></Field>
-            <Field label="Allineamento">
-              <select value={state.charAlignment} onChange={e => update({ charAlignment: e.target.value })}>
-                {ALIGNMENTS.map(a => <option key={a}>{a}</option>)}
-              </select>
-            </Field>
-            <Field label="Esperienza (XP)">
-              <input type="number" min="0" value={state.charXP} onChange={e => update({ charXP: parseInt(e.target.value)||0 })} />
-            </Field>
+          <div className="card-title" style={{ justifyContent:'space-between' }}>
+            <span>👤 Identità</span>
+            <button className={`icon-btn ${editingIdentity ? 'active' : ''}`} onClick={() => setEditingIdentity(v => !v)}>
+              {editingIdentity ? '✓' : '✏'}
+            </button>
           </div>
+          <div className="identity-layout">
+            {state.charImage && (
+              <img src={state.charImage} alt="Personaggio" className="char-thumbnail"
+                onError={e => { e.target.style.display='none'; }} />
+            )}
+            {editingIdentity ? (
+              <div className="grid-2" style={{ flex:1 }}>
+                <Field label="Nome"><input value={state.charName} onChange={e => update({ charName: e.target.value })} placeholder="Es. Aldric Voss" /></Field>
+                <Field label="Classe">
+                  <select value={state.charClass} onChange={e => {
+                    const cls = e.target.value;
+                    char.onClassOrLevelChange({ charClass: cls });
+                    const kept = (state.features||[]).filter(f => f.sourceType !== 'class');
+                    update({ features: [...kept, ...getAutoFeatures('class', cls, CLASS_FEATURES)] });
+                  }}>
+                    <option value="">— Scegli classe —</option>
+                    {CLASSES.map(c => <option key={c}>{c}</option>)}
+                  </select>
+                </Field>
+                <Field label="Specie">
+                  <select value={state.charRace} onChange={e => {
+                    const race = e.target.value;
+                    update({ charRace: race });
+                    if (race && race !== '__custom__') {
+                      const kept = (state.features||[]).filter(f => f.sourceType !== 'species');
+                      update({ charRace: race, features: [...kept, ...getAutoFeatures('species', race, SPECIES_FEATURES)] });
+                    } else {
+                      update({ charRace: race });
+                    }
+                  }}>
+                    <option value="">— Scegli specie —</option>
+                    {SPECIES_LIST.map(r => <option key={r}>{r}</option>)}
+                    <option value="__custom__">Personalizzata...</option>
+                  </select>
+                  {state.charRace === '__custom__' && (
+                    <input style={{ marginTop:4 }} value={state.charRaceCustom||''} onChange={e => update({ charRaceCustom: e.target.value })} placeholder="Scrivi la specie..." />
+                  )}
+                </Field>
+                <Field label="Background">
+                  <select value={state.charBackground} onChange={e => {
+                    const bg = e.target.value;
+                    if (bg && bg !== '__custom__') {
+                      const kept = (state.features||[]).filter(f => f.sourceType !== 'background');
+                      update({ charBackground: bg, features: [...kept, ...getAutoFeatures('background', bg, BACKGROUND_FEATURES)] });
+                    } else {
+                      update({ charBackground: bg });
+                    }
+                  }}>
+                    <option value="">— Scegli background —</option>
+                    {BACKGROUNDS_LIST.map(b => <option key={b}>{b}</option>)}
+                    <option value="__custom__">Personalizzato...</option>
+                  </select>
+                  {state.charBackground === '__custom__' && (
+                    <input style={{ marginTop:4 }} value={state.charBackgroundCustom||''} onChange={e => update({ charBackgroundCustom: e.target.value })} placeholder="Scrivi il background..." />
+                  )}
+                </Field>
+                <Field label="Livello">
+                  <div className="hp-stepper" style={{ gap:4 }}>
+                    <button className="mod-btn" onClick={() => char.onClassOrLevelChange({ charLevel: Math.max(1, state.charLevel-1) })}>−</button>
+                    <input type="number" min="1" max="20" style={{ width:50, textAlign:'center' }} value={state.charLevel} onChange={e => char.onClassOrLevelChange({ charLevel: Math.max(1, parseInt(e.target.value)||1) })} />
+                    <button className="mod-btn" onClick={() => char.onClassOrLevelChange({ charLevel: Math.min(20, state.charLevel+1) })}>+</button>
+                  </div>
+                </Field>
+                <Field label="Bonus competenza"><input value={`+${char.profBonus}`} readOnly /></Field>
+                <Field label="Allineamento">
+                  <select value={state.charAlignment} onChange={e => update({ charAlignment: e.target.value })}>
+                    {ALIGNMENTS.map(a => <option key={a}>{a}</option>)}
+                  </select>
+                </Field>
+                <Field label="Esperienza (XP)">
+                  <input type="number" min="0" value={state.charXP} onChange={e => update({ charXP: parseInt(e.target.value)||0 })} />
+                </Field>
+              </div>
+            ) : (
+              <div className="identity-info-grid">
+                {[
+                  ['Nome', state.charName || '—'],
+                  ['Classe', state.charClass || '—'],
+                  ['Livello', state.charLevel],
+                  ['Bonus competenza', `+${char.profBonus}`],
+                  ['Specie', state.charRace === '__custom__' ? (state.charRaceCustom||'—') : (state.charRace||'—')],
+                  ['Background', state.charBackground === '__custom__' ? (state.charBackgroundCustom||'—') : (state.charBackground||'—')],
+                  ['Allineamento', state.charAlignment || '—'],
+                  ...(state.charXP ? [['Esperienza', state.charXP]] : []),
+                ].map(([label, val]) => (
+                  <div key={label} className="identity-info-item">
+                    <div className="identity-info-label">{label}</div>
+                    <div className="identity-info-val">{val}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          {editingIdentity && (
+            <Field label="🖼 Immagine personaggio (URL)">
+              <input value={state.charImage||''} onChange={e => update({ charImage: e.target.value })}
+                placeholder="https://..." style={{ marginTop:6 }} />
+            </Field>
+          )}
         </div>
       );
 
@@ -330,14 +453,15 @@ export default function App() {
           <div className="card-title" style={{ justifyContent:'space-between' }}>
             <span>🎲 Caratteristiche</span>
             <button className={`icon-btn ${editingAbilities ? 'active' : ''}`} onClick={() => setEditingAbilities(e => !e)}>
-              {editingAbilities ? '✓ Fine' : '✏ Modifica'}
+              {editingAbilities ? '✓' : '✏'}
             </button>
           </div>
           <div className="grid-6">
             {ABILITIES.map(attr => (
               <AbilityBox key={attr} attr={attr} score={state.abilities[attr]}
                 onAdjust={(a,d) => char.setAbility(a, (state.abilities[a]||10)+d)}
-                onInput={char.setAbility} editing={editingAbilities} onHover={setHoveredAttr} />
+                onInput={char.setAbility} editing={editingAbilities} onHover={setHoveredAttr}
+                onRoll={!editingAbilities ? (a, mod) => handleRoll(`1d20${mod >= 0 ? '+' : ''}${mod}`, ABILITY_NAMES[a]) : undefined} />
             ))}
           </div>
         </div>
@@ -383,11 +507,9 @@ export default function App() {
 
       case 'senses': return (
         <div className="card">
-          <div className="card-title">👁 Sensi & movimento</div>
+          <div className="card-title">👁 Sensi</div>
           <div className="field-row">
             <Field label="Percezione passiva"><input value={char.passivePerception} readOnly /></Field>
-            <Field label="Iniziativa"><input value={char.initiative} readOnly /></Field>
-            <Field label="Velocità"><input value={state.speed} onChange={e => update({ speed: e.target.value })} placeholder="9m" /></Field>
             <Field label="Dadi vita"><input value={char.hitDice} readOnly /></Field>
           </div>
         </div>
@@ -398,7 +520,7 @@ export default function App() {
           <div className="card-title" style={{ justifyContent:'space-between' }}>
             <span>❤ Punti ferita</span>
             <button className={`icon-btn ${editingHP ? 'active' : ''}`} onClick={() => setEditingHP(e => !e)}>
-              {editingHP ? '✓ Fine' : '✏ Modifica'}
+              {editingHP ? '✓' : '✏'}
             </button>
           </div>
           <div className="hp-labeled-row">
@@ -421,27 +543,17 @@ export default function App() {
                 {editingHP && <button className="mod-btn" onClick={() => update({ hpMax: state.hpMax+1 })}>+</button>}
               </div>
             </div>
-            <div className="hp-labeled-group" style={{ marginLeft:4 }}>
-              <div className="hp-label">Temp HP</div>
-              <button className={`temp-hp-icon-btn ${(state.hpTemp||0) > 0 ? 'active' : ''}`} onClick={() => setEditingHP(true)}>
-                🛡 {(state.hpTemp||0) > 0 ? state.hpTemp : '+'}
-              </button>
-            </div>
+            {(state.hpTemp||0) > 0 && (
+              <div className="hp-labeled-group" style={{ marginLeft:4 }}>
+                <div className="hp-label" style={{ color:'#185FA5' }}>Temp</div>
+                <div className="hp-big" style={{ color:'#185FA5', fontSize:20 }}>{state.hpTemp}</div>
+              </div>
+            )}
           </div>
           <HPBar current={state.hpCurrent} max={state.hpMax} />
-          {(state.hpTemp > 0 || editingHP) && (
-            <div className="hp-temp-section">
-              <div className="hp-label" style={{ marginBottom:4 }}>🛡 HP Temporanei</div>
-              <div className="hp-stepper">
-                {editingHP && <button className="mod-btn" onClick={() => update({ hpTemp: Math.max(0,(state.hpTemp||0)-1) })}>−</button>}
-                <input className="hp-big" type="number" value={state.hpTemp||0} readOnly={!editingHP}
-                  style={{ background: editingHP ? 'var(--c-bg)' : 'var(--c-surface)', color: editingHP ? 'var(--c-ink)' : '#185FA5', fontSize:20 }}
-                  onChange={e => editingHP && update({ hpTemp: Math.max(0, parseInt(e.target.value)||0) })} />
-                {editingHP && <button className="mod-btn" onClick={() => update({ hpTemp:(state.hpTemp||0)+1 })}>+</button>}
-              </div>
-              <div className="hp-bar-wrap" style={{ marginTop:4 }}>
-                <div className="hp-bar-fill" style={{ width:`${Math.min(100,((state.hpTemp||0)/Math.max(1,state.hpMax))*100)}%`, background:'#4A90D9' }} />
-              </div>
+          {(state.hpTemp||0) > 0 && (
+            <div className="hp-bar-wrap" style={{ marginTop:4 }}>
+              <div className="hp-bar-fill" style={{ width:`${Math.min(100,((state.hpTemp||0)/Math.max(1,state.hpMax))*100)}%`, background:'#4A90D9' }} />
             </div>
           )}
           <div className="hp-actions">
@@ -456,6 +568,7 @@ export default function App() {
               else char.modHP(-hpAmount);
             }}>💔 Danno</button>
             <button className="hp-action-btn success" onClick={() => char.modHP(hpAmount)}>💚 Cura</button>
+            <button className="hp-action-btn temp" onClick={() => update({ hpTemp: hpAmount })}>🛡 Temp</button>
           </div>
         </div>
       );
@@ -465,7 +578,10 @@ export default function App() {
           <div className="card-title">⚔ Statistiche combattimento</div>
           <div className="grid-3">
             <div className="stat-pill"><div className="stat-pill-label">CA</div><input className="stat-pill-input" type="number" value={state.ac} onChange={e => update({ ac:parseInt(e.target.value)||10 })} /></div>
-            <div className="stat-pill"><div className="stat-pill-label">Iniziativa</div><div className="stat-pill-val">{char.initiative}</div></div>
+            <div className="stat-pill clickable-stat"
+              onClick={() => { const m = char.abilityMod('DES'); handleRoll(`1d20${m >= 0 ? '+' : ''}${m}`, 'Iniziativa'); }}
+              title={`Tira iniziativa: 1d20${char.initiative}`}
+            ><div className="stat-pill-label">Iniziativa</div><div className="stat-pill-val">{char.initiative}</div></div>
             <div className="stat-pill"><div className="stat-pill-label">Velocità</div><input className="stat-pill-input" type="text" value={state.speed} onChange={e => update({ speed:e.target.value })} /></div>
           </div>
         </div>
@@ -484,9 +600,11 @@ export default function App() {
             <div style={{ display:'flex', alignItems:'center', gap:10 }}>
               <button className={`inspiration-btn ${state.concentrating ? 'active' : ''}`}
                 style={state.concentrating ? { borderColor:'#185FA5', background:'#E6F1FB', boxShadow:'0 0 12px rgba(24,95,165,.35)' } : {}}
-                onClick={() => update({ concentrating:!state.concentrating })}>🎯</button>
+                onClick={() => update({ concentrating:!state.concentrating, concentratingSpell: state.concentrating ? null : state.concentratingSpell })}>🎯</button>
               <span className="toggle-label" style={{ color: state.concentrating ? '#185FA5' : 'var(--c-hint)' }}>
-                {state.concentrating ? 'Concentrazione' : 'Nessuna'}
+                {state.concentrating
+                  ? (state.concentratingSpell ? `Concentrazione (${state.concentratingSpell})` : 'Concentrazione')
+                  : 'Nessuna'}
               </span>
             </div>
           </div>
@@ -555,7 +673,29 @@ export default function App() {
         <div className="card">
           <div className="card-title">⚔ Armi</div>
           <WeaponManager weapons={state.weapons||[]} abilities={state.abilities} profBonus={char.profBonus}
-            onUpdate={weapons => update({ weapons })} onRoll={handleRoll} />
+            onUpdate={weapons => update({ weapons })} onRoll={handleRoll}
+            proficiency={state.weaponProficiency||''} onUpdateProficiency={v => update({ weaponProficiency: v })} />
+        </div>
+      );
+
+      case 'armor': return (
+        <div className="card">
+          <div className="card-title">🛡 Armatura</div>
+          <ArmorManager
+            equippedArmor={state.equippedArmor||null}
+            hasShield={state.hasShield||false}
+            desMod={char.abilityMod('DES')}
+            proficiency={state.armorProficiency||''} onUpdateProficiency={v => update({ armorProficiency: v })}
+            onEquip={armor => {
+              const base = calcArmorAC(armor, char.abilityMod('DES'));
+              update({ equippedArmor: armor, ac: base + (state.hasShield ? 2 : 0) });
+            }}
+            onToggleShield={() => {
+              const shield = !state.hasShield;
+              const base = calcArmorAC(state.equippedArmor||null, char.abilityMod('DES'));
+              update({ hasShield: shield, ac: base + (shield ? 2 : 0) });
+            }}
+          />
         </div>
       );
 
@@ -593,25 +733,54 @@ export default function App() {
           <SpellManager spells={state.spells} charClass={state.charClass} onUpdate={spells => update({ spells })}
             onRoll={handleRoll} allTags={allTags}
             onUpdateTags={(name,tags) => update({ spells: state.spells.map(s => s.name===name ? {...s,tags} : s) })}
-            onCreateTag={createTag} />
+            onCreateTag={createTag}
+            spellSlots={state.spellSlots||[]}
+            concentratingSpell={state.concentratingSpell||null}
+            onCast={handleCastSpell} />
         </div>
       );
 
-      case 'currency': return (
+      case 'currency': {
+        const CURR = [['PP','MP','#7B68EE'],['GP','MO','#633806'],['SP','MA','#888780'],['CP','MR','#854F0B']];
+        const cur = state.currency || {};
+        function convertDown(i) { // 1 di CURR[i] → 10 di CURR[i+1]
+          const [fk,,] = CURR[i]; const [tk,,] = CURR[i+1];
+          if ((cur[fk]||0) < 1) return;
+          update({ currency: { ...cur, [fk]: (cur[fk]||0)-1, [tk]: (cur[tk]||0)+10 } });
+        }
+        function convertUp(i) { // 10 di CURR[i+1] → 1 di CURR[i]
+          const [fk,,] = CURR[i]; const [tk,,] = CURR[i+1];
+          if ((cur[tk]||0) < 10) return;
+          update({ currency: { ...cur, [tk]: (cur[tk]||0)-10, [fk]: (cur[fk]||0)+1 } });
+        }
+        return (
         <div className="card">
           <div className="card-title">💰 Valuta</div>
           <div className="currency-row">
-            {[['GP','MO','#633806'],['SP','MA','#888780'],['CP','MR','#854F0B'],['PP','PE','#185FA5']].map(([key,label,color]) => (
-              <div key={key} className="currency-item">
-                <div className="currency-label" style={{ color }}>{label}</div>
-                <input className="currency-input" type="number" min="0"
-                  value={state.currency[key]||0}
-                  onChange={e => update({ currency: {...state.currency, [key]:parseInt(e.target.value)||0} })} />
-              </div>
+            {CURR.map(([key,label,color], idx) => (
+              <React.Fragment key={key}>
+                <div className="currency-item">
+                  <div className="currency-label" style={{ color }}>{label}</div>
+                  <input className="currency-input" type="number" min="0"
+                    value={cur[key]||0}
+                    onChange={e => update({ currency: {...cur, [key]:parseInt(e.target.value)||0} })} />
+                </div>
+                {idx < CURR.length-1 && (
+                  <div className="currency-convert">
+                    <button className="currency-conv-btn" onClick={() => convertUp(idx)}
+                      disabled={(cur[CURR[idx+1][0]]||0) < 10}
+                      title={`10 ${CURR[idx+1][1]} → 1 ${label}`}>▲</button>
+                    <button className="currency-conv-btn" onClick={() => convertDown(idx)}
+                      disabled={(cur[key]||0) < 1}
+                      title={`1 ${label} → 10 ${CURR[idx+1][1]}`}>▼</button>
+                  </div>
+                )}
+              </React.Fragment>
             ))}
           </div>
         </div>
       );
+      }
 
       case 'inventory': return (
         <div className="card">
@@ -648,9 +817,35 @@ export default function App() {
       case 'classFeatures': return (
         <div className="card">
           <div className="card-title">✨ Feature di classe e tratti</div>
-          <textarea className="notes-area" style={{ minHeight:140 }}
-            placeholder="Feature di classe, tratti razziali, talenti..."
-            value={state.notes.classFeatures||''} onChange={e => update({ notes:{...state.notes,classFeatures:e.target.value} })} />
+          <FeatureManager features={state.features||[]} onUpdate={features => update({ features })} onRoll={handleRoll} />
+        </div>
+      );
+
+      case 'activityLog': return (
+        <div className="card">
+          <div className="card-title" style={{ justifyContent:'space-between' }}>
+            <span>📋 Log attività</span>
+            {activityLog.length > 0 && (
+              <button className="icon-btn" onClick={() => {
+                setActivityLog([]);
+                try { localStorage.removeItem('characterforge_log'); } catch {}
+              }}>🗑 Svuota</button>
+            )}
+          </div>
+          {activityLog.length === 0
+            ? <div className="hint-text">Nessuna attività registrata.</div>
+            : (
+              <div className="activity-log-list">
+                {activityLog.map(e => (
+                  <div key={e.id} className="activity-log-entry">
+                    <span className="activity-log-icon">{e.icon}</span>
+                    <span className="activity-log-text">{e.text}</span>
+                    <span className="activity-log-ts">{e.ts}</span>
+                  </div>
+                ))}
+              </div>
+            )
+          }
         </div>
       );
 
@@ -695,9 +890,17 @@ export default function App() {
         onReorderTabs={next => { setTabs(next); saveTabs(next); }}
       />
 
+      <PinnedBar
+        state={state}
+        editMode={editMode}
+        pinned={pinned}
+        onTogglePin={handleTogglePin}
+        onUpdate={update}
+      />
+
       {editMode && (
         <div className="layout-edit-banner">
-          ⠿ Trascina widget e tab · ▬/⬛ per larghezza piena/mezza · ↗ per cambiare tab · 🚫 per nascondere
+          ⠿ Trascina widget e tab · ▬/⬛ per larghezza piena/mezza · ↗ per cambiare tab · 🚫 per nascondere · 📌 per fissare info
         </div>
       )}
 

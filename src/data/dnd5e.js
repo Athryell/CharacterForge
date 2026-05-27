@@ -159,6 +159,13 @@ export function createDefaultState() {
     spells: [],
     equipment: [],
     currency: { GP: 0, SP: 0, CP: 0, PP: 0 },
+    charImage: '',
+    equippedArmor: null,
+    hasShield: false,
+    concentratingSpell: null,
+    features: [],
+    weaponProficiency: '',
+    armorProficiency: '',
     notes: {
       personality: '',
       ideals: '',

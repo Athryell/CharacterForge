@@ -13,7 +13,8 @@ export const WIDGET_DEFS = [
   { id: 'deathSaves',    label: 'Tiri salvezza morte',         defaultTab: 'combat',    defaultCol: 1, defaultFullWidth: false },
   { id: 'conditions',    label: 'Condizioni',                  defaultTab: 'combat',    defaultCol: 0, defaultFullWidth: true  },
   { id: 'actions',       label: 'Azioni',                      defaultTab: 'combat',    defaultCol: 0, defaultFullWidth: true  },
-  { id: 'weapons',       label: 'Armi',                        defaultTab: 'weapons',   defaultCol: 0, defaultFullWidth: true  },
+  { id: 'weapons',       label: 'Armi',                        defaultTab: 'inventory', defaultCol: 0, defaultFullWidth: false },
+  { id: 'armor',         label: 'Armatura',                    defaultTab: 'inventory', defaultCol: 1, defaultFullWidth: false },
   { id: 'spellStats',    label: 'Statistiche lancio',          defaultTab: 'spells',    defaultCol: 0, defaultFullWidth: false },
   { id: 'spellSlots',    label: 'Slot incantesimo',            defaultTab: 'spells',    defaultCol: 1, defaultFullWidth: false },
   { id: 'spells',        label: 'Incantesimi',                 defaultTab: 'spells',    defaultCol: 0, defaultFullWidth: true  },
@@ -22,15 +23,16 @@ export const WIDGET_DEFS = [
   { id: 'traits',        label: 'Tratti personaggio',          defaultTab: 'notes',     defaultCol: 0, defaultFullWidth: true  },
   { id: 'freeNotes',     label: 'Note libere',                 defaultTab: 'notes',     defaultCol: 0, defaultFullWidth: false },
   { id: 'classFeatures', label: 'Feature di classe',           defaultTab: 'notes',     defaultCol: 1, defaultFullWidth: false },
+  { id: 'activityLog',   label: 'Log attività',                defaultTab: 'log',       defaultCol: 0, defaultFullWidth: true  },
 ];
 
 export const DEFAULT_TABS = [
-  { id: 'main',      label: 'Personaggio', icon: '👤', visible: true },
-  { id: 'combat',    label: 'Combattimento', icon: '⚔', visible: true },
-  { id: 'weapons',   label: 'Armi',        icon: '🗡', visible: true },
-  { id: 'spells',    label: 'Magie',       icon: '✨', visible: true },
-  { id: 'inventory', label: 'Inventario',  icon: '🎒', visible: true },
-  { id: 'notes',     label: 'Note',        icon: '📝', visible: true },
+  { id: 'main',      label: 'Personaggio',  icon: '👤', visible: true },
+  { id: 'combat',    label: 'Combattimento',icon: '⚔', visible: true },
+  { id: 'spells',    label: 'Magie',        icon: '✨', visible: true },
+  { id: 'inventory', label: 'Inventario',   icon: '🎒', visible: true },
+  { id: 'notes',     label: 'Note',         icon: '📝', visible: true },
+  { id: 'log',       label: 'Log',          icon: '📋', visible: true },
 ];
 
 const WIDGET_STORAGE = 'characterforge_layout';

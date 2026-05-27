@@ -2,7 +2,7 @@ import { KeywordText } from './Tooltip';
 import React, { useState } from 'react';
 import { WEAPON_PRESETS, WEAPON_PROPERTIES, calcWeaponAttack, fmtWeaponDmg } from '../data/weapons';
 
-export default function WeaponManager({ weapons = [], abilities, profBonus, onUpdate, onRoll }) {
+export default function WeaponManager({ weapons = [], abilities, profBonus, onUpdate, onRoll, proficiency = '', onUpdateProficiency }) {
   const [showAdd, setShowAdd] = useState(false);
   const [customMode, setCustomMode] = useState(false);
   const [form, setForm] = useState({
@@ -35,6 +35,14 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
 
   return (
     <div>
+      {/* Proficiency field */}
+      <div className="proficiency-field">
+        <span className="proficiency-label">Competenza:</span>
+        <input className="proficiency-input" value={proficiency}
+          onChange={e => onUpdateProficiency && onUpdateProficiency(e.target.value)}
+          placeholder="Es. Armi semplici, spade corte, archi..." />
+      </div>
+
       {/* Weapon list */}
       {weapons.length === 0 && (
         <div className="hint-text" style={{ padding: '8px 0' }}>Nessuna arma aggiunta. Clicca "+" per aggiungerne una.</div>

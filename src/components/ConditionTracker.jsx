@@ -36,20 +36,6 @@ export default function ConditionTracker({ active = [], onChange }) {
         </div>
       )}
 
-      {active.length > 0 && (
-        <div className="condition-active-list">
-          {active.map(id => {
-            const c = CONDITIONS.find(x => x.id === id);
-            if (!c) return null;
-            return (
-              <div key={id} className="condition-active-item">
-                <span>{c.icon} {c.name}</span>
-                <button className="equip-remove" onClick={() => toggle(id)}>✕</button>
-              </div>
-            );
-          })}
-        </div>
-      )}
     </div>
   );
 }
