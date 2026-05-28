@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { KeywordText } from './Tooltip';
+import { TagPill, TagSelector } from './Tags';
 
 const SOURCE_BADGE = {
   class:      { label: 'Classe',      color: '#3B6D11', bg: '#EAF3DE' },
@@ -17,11 +18,12 @@ function detectActionType(text) {
   return 'free';
 }
 
-export default function FeatureManager({ features = [], onUpdate, onRoll, onAddAction, onRemoveAction, actionNames, editMode }) {
+export default function FeatureManager({ features = [], onUpdate, onRoll, onAddAction, onRemoveAction, actionNames, editMode, allTags = [], onUpdateTags, onCreateTag }) {
   const [expanded, setExpanded] = useState(null);
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
-  useEffect(() => { if (!editMode) setShowAdd(false); }, [editMode]);
+  const [editingTagsFor, setEditingTagsFor] = useState(null);
+  useEffect(() => { if (!editMode) { setShowAdd(false); setEditingTagsFor(null); } }, [editMode]);
 
   function removeFeature(id) {
     onUpdate(features.filter(f => f.id !== id));
@@ -69,13 +71,34 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
                 >
                   <div className="feature-source-dot" style={{ background: badge.color }} />
                   <div style={{ flex: 1 }}>
-                    <div className="feature-name">{feature.name}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
+                      <div className="feature-name">{feature.name}</div>
+                      {(feature.tags||[]).map(t => <TagPill key={t} tag={t} allTags={allTags} small />)}
+                    </div>
                     {feature.source && feature.sourceType !== 'custom' && (
                       <div className="feature-source-label">{feature.source}</div>
                     )}
-                    {expanded === feature.id && feature.desc && (
-                      <div className="feature-desc" onClick={e => e.stopPropagation()}>
-                        <KeywordText text={feature.desc} onRoll={onRoll} label={feature.name} />
+                    {expanded === feature.id && (
+                      <div onClick={e => e.stopPropagation()}>
+                        {feature.desc && (
+                          <div className="feature-desc">
+                            <KeywordText text={feature.desc} onRoll={onRoll} label={feature.name} />
+                          </div>
+                        )}
+                        <div style={{ marginTop: 6 }}>
+                          {editingTagsFor === feature.id ? (
+                            <>
+                              <TagSelector selected={feature.tags || []} allTags={allTags}
+                                onChange={tags => onUpdateTags && onUpdateTags(feature.id, tags)}
+                                onCreateTag={onCreateTag} />
+                              <button className="tag-edit-btn" style={{ marginTop: 4 }} onClick={() => setEditingTagsFor(null)}>✓ Fine</button>
+                            </>
+                          ) : (
+                            <button className="tag-edit-btn" onClick={() => setEditingTagsFor(feature.id)}>
+                              🏷 {(feature.tags||[]).length === 0 ? 'Aggiungi tag' : 'Modifica tag'}
+                            </button>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>

@@ -17,6 +17,7 @@ import SpellManager from './components/SpellManager';
 import InventoryManager from './components/InventoryManager';
 import { TagFilterBar } from './components/Tags';
 import { KeywordText } from './components/Tooltip';
+import { CharContext } from './components/CharContext';
 import WidgetGrid from './components/WidgetGrid';
 import PinnedBar, { loadPinned, savePinned } from './components/PinnedBar';
 import FeatureManager from './components/FeatureManager';
@@ -269,6 +270,9 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
   const allTags = [...new Set([
     ...(state.actions||[]).flatMap(a => a.tags||[]),
     ...(state.spells||[]).flatMap(s => s.tags||[]),
+    ...(state.weapons||[]).flatMap(w => w.tags||[]),
+    ...(state.features||[]).flatMap(f => f.tags||[]),
+    ...(state.equipment||[]).flatMap(e => e.tags||[]),
   ])];
   const actionNames = new Set((state.actions||[]).map(a => a.name));
   function createTag() {}
@@ -714,7 +718,17 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
             {filteredActions.filter(a => !actionTagFilter || (a.tags||[]).includes(actionTagFilter)).map(action => (
               <ActionItem key={action.id||action.name} action={action} allTags={allTags} onRoll={handleRoll}
                 editMode={editingActions}
-                onUpdateTags={(id,tags) => update({ actions: state.actions.map(a => a.id===id ? {...a,tags} : a) })}
+                onUpdateTags={(id,tags) => {
+                  const action = (state.actions||[]).find(a => a.id===id);
+                  const upd = { actions: state.actions.map(a => a.id===id ? {...a,tags} : a) };
+                  if (action) {
+                    upd.weapons = (state.weapons||[]).map(w => w.name===action.name ? {...w,tags} : w);
+                    upd.spells = (state.spells||[]).map(s => s.name===action.name ? {...s,tags} : s);
+                    upd.features = (state.features||[]).map(f => f.name===action.name ? {...f,tags} : f);
+                    upd.equipment = (state.equipment||[]).map(e => e.name===action.name ? {...e,tags} : e);
+                  }
+                  update(upd);
+                }}
                 onCreateTag={createTag}
                 onRemove={id => update({ actions: state.actions.filter(a => a.id !== id) })}
                 onEdit={(id, patch) => update({ actions: state.actions.map(a => a.id === id ? {...a, ...patch} : a) })}
@@ -775,6 +789,14 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
             onUpdate={weapons => update({ weapons })} onRoll={handleRoll}
             proficiency={state.weaponProficiency||''} onUpdateProficiency={v => update({ weaponProficiency: v })}
             actionNames={actionNames} editMode={editingWeapons}
+            allTags={allTags}
+            onUpdateTags={(id, tags) => {
+              const weapon = (state.weapons||[]).find(w => w.id===id);
+              const upd = { weapons: (state.weapons||[]).map(w => w.id===id ? {...w,tags} : w) };
+              if (weapon) upd.actions = (state.actions||[]).map(a => a.name===weapon.name ? {...a,tags} : a);
+              update(upd);
+            }}
+            onCreateTag={createTag}
             onAddAction={action => { if (!actionNames.has(action.name)) update({ actions: [...(state.actions||[]), action] }); }}
             onRemoveAction={name => update({ actions: (state.actions||[]).filter(a => a.name !== name) })} />
         </div>
@@ -839,7 +861,10 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
           </div>
           <SpellManager spells={state.spells} charClass={state.charClass} onUpdate={spells => update({ spells })}
             onRoll={handleRoll} allTags={allTags}
-            onUpdateTags={(name,tags) => update({ spells: state.spells.map(s => s.name===name ? {...s,tags} : s) })}
+            onUpdateTags={(name,tags) => update({
+              spells: state.spells.map(s => s.name===name ? {...s,tags} : s),
+              actions: (state.actions||[]).map(a => a.name===name ? {...a,tags} : a),
+            })}
             onCreateTag={createTag}
             spellSlots={state.spellSlots||[]}
             concentratingSpell={state.concentratingSpell||null}
@@ -900,7 +925,18 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
               {editingInventory ? '✓' : '✏'}
             </button>
           </div>
-          <InventoryManager items={state.equipment||[]} onUpdate={equipment => update({ equipment })} onRoll={handleRoll} editMode={editingInventory} />
+          <InventoryManager items={state.equipment||[]} onUpdate={equipment => update({ equipment })} onRoll={handleRoll} editMode={editingInventory}
+            allTags={allTags}
+            onUpdateTags={(id, tags) => {
+              const item = (state.equipment||[]).find(e => e.id===id);
+              const upd = { equipment: (state.equipment||[]).map(e => e.id===id ? {...e,tags} : e) };
+              if (item) upd.actions = (state.actions||[]).map(a => a.name===item.name ? {...a,tags} : a);
+              update(upd);
+            }}
+            onCreateTag={createTag}
+            actionNames={actionNames}
+            onAddAction={action => { if (!actionNames.has(action.name)) update({ actions: [...(state.actions||[]), action] }); }}
+            onRemoveAction={name => update({ actions: (state.actions||[]).filter(a => a.name !== name) })} />
         </div>
       );
 
@@ -939,6 +975,14 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
           </div>
           <FeatureManager features={state.features||[]} onUpdate={features => update({ features })} onRoll={handleRoll}
             actionNames={actionNames} editMode={editingFeatures}
+            allTags={allTags}
+            onUpdateTags={(id, tags) => {
+              const feat = (state.features||[]).find(f => f.id===id);
+              const upd = { features: (state.features||[]).map(f => f.id===id ? {...f,tags} : f) };
+              if (feat) upd.actions = (state.actions||[]).map(a => a.name===feat.name ? {...a,tags} : a);
+              update(upd);
+            }}
+            onCreateTag={createTag}
             onAddAction={action => { if (!actionNames.has(action.name)) update({ actions: [...(state.actions||[]), action] }); }}
             onRemoveAction={name => update({ actions: (state.actions||[]).filter(a => a.name !== name) })} />
         </div>
@@ -977,6 +1021,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
   }
 
   return (
+    <CharContext.Provider value={{ abilities: state.abilities, charLevel: state.charLevel }}>
     <div className="sheet">
       <Toast message={toast} />
       {showCreator && <CharacterCreator onComplete={handleCreatorComplete} onCancel={() => setShowCreator(false)} />}
@@ -1039,6 +1084,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
         />
       </div>
     </div>
+    </CharContext.Provider>
   );
 }
 

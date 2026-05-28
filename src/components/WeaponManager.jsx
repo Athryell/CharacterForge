@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { WEAPON_PRESETS, WEAPON_PROPERTIES, calcWeaponAttack, fmtWeaponDmg } from '../data/weapons';
+import { TagPill, TagSelector } from './Tags';
 
-export default function WeaponManager({ weapons = [], abilities, profBonus, onUpdate, onRoll, proficiency = '', onUpdateProficiency, onAddAction, onRemoveAction, actionNames, editMode }) {
+export default function WeaponManager({ weapons = [], abilities, profBonus, onUpdate, onRoll, proficiency = '', onUpdateProficiency, onAddAction, onRemoveAction, actionNames, editMode, allTags = [], onUpdateTags, onCreateTag }) {
   const [showAdd, setShowAdd] = useState(false);
-  useEffect(() => { if (!editMode) setShowAdd(false); }, [editMode]);
+  const [expandedId, setExpandedId] = useState(null);
+  const [editingTagsFor, setEditingTagsFor] = useState(null);
+  useEffect(() => { if (!editMode) { setShowAdd(false); setEditingTagsFor(null); } }, [editMode]);
   const [customMode, setCustomMode] = useState(false);
   const [form, setForm] = useState({
     name: '', dmg: '1d6', dmgType: 'tagliente',
@@ -52,12 +55,16 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
         const { attackBonus, dmgBonus } = calcWeaponAttack({ weapon: w, abilities, profBonus, isProficient: w.isProficient });
         const atkStr = attackBonus >= 0 ? `+${attackBonus}` : `${attackBonus}`;
         const dmgStr = fmtWeaponDmg(w.dmg, dmgBonus);
+        const isExpanded = expandedId === w.id;
 
         return (
-          <div key={w.id} className="weapon-item">
-            <div className="weapon-main">
-              <div className="weapon-name">{w.name}</div>
-              <div className="weapon-stats">
+          <div key={w.id} className={`weapon-item ${isExpanded ? 'expanded' : ''}`}>
+            <div className="weapon-main" style={{ cursor: 'pointer' }} onClick={() => setExpandedId(isExpanded ? null : w.id)}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                <div className="weapon-name">{w.name}</div>
+                {(w.tags||[]).map(t => <TagPill key={t} tag={t} allTags={allTags} small />)}
+              </div>
+              <div className="weapon-stats" onClick={e => e.stopPropagation()}>
                 <span
                   className="action-roll"
                   onClick={() => onRoll(`1d20${attackBonus >= 0 ? '+' : ''}${attackBonus}`, `Attacco ${w.name}`)}
@@ -80,6 +87,28 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
                 {!w.isProficient && <span className="weapon-prop" style={{ color: 'var(--c-warn-text)' }}>Senza competenza</span>}
               </div>
             </div>
+
+            {/* Expanded: tags editor */}
+            {isExpanded && (
+              <div className="weapon-expanded-section" onClick={e => e.stopPropagation()}>
+                {w.notes && <div style={{ fontSize: 12, color: 'var(--c-muted)', marginBottom: 4 }}>{w.notes}</div>}
+                <div style={{ marginTop: 4 }}>
+                  {editingTagsFor === w.id ? (
+                    <>
+                      <TagSelector selected={w.tags || []} allTags={allTags}
+                        onChange={tags => onUpdateTags && onUpdateTags(w.id, tags)}
+                        onCreateTag={onCreateTag} />
+                      <button className="tag-edit-btn" style={{ marginTop: 4 }} onClick={() => setEditingTagsFor(null)}>✓ Fine</button>
+                    </>
+                  ) : (
+                    <button className="tag-edit-btn" onClick={() => setEditingTagsFor(w.id)}>
+                      🏷 {(w.tags||[]).length === 0 ? 'Aggiungi tag' : 'Modifica tag'}
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
             {editMode && (
               <div className="weapon-actions">
                 {onAddAction && (() => {

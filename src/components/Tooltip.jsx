@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { useCharContext } from './CharContext';
 
 // Dizionario keyword → spiegazione
 export const KEYWORD_GLOSSARY = {
@@ -53,6 +54,35 @@ const KEYWORD_REGEX = new RegExp(
   'gi'
 );
 
+// Resolve [ATTR] and [LVL:...] notations in a text string
+export function resolveNotations(text, abilities, charLevel) {
+  if (!text) return text;
+
+  // Resolve [ATTR] notation: [FOR], [DES], [COS], [INT], [SAG], [CAR]
+  const resolved1 = text.replace(/\[(FOR|DES|COS|INT|SAG|CAR)\]/gi, (_, attr) => {
+    const score = (abilities || {})[attr.toUpperCase()] ?? 10;
+    const mod = Math.floor((score - 10) / 2);
+    return String(Math.max(1, mod));
+  });
+
+  // Resolve [LVL:base,threshold:value,...] notation
+  // Example: [LVL:1d6,5:1d8,9:1d10,15:1d12]
+  const resolved2 = resolved1.replace(/\[LVL:([^\]]+)\]/gi, (_, spec) => {
+    const parts = spec.split(',');
+    let result = parts[0].trim();
+    for (let i = 1; i < parts.length; i++) {
+      const colonIdx = parts[i].indexOf(':');
+      if (colonIdx === -1) continue;
+      const threshold = parseInt(parts[i].substring(0, colonIdx).trim());
+      const value = parts[i].substring(colonIdx + 1).trim();
+      if ((charLevel || 1) >= threshold) result = value;
+    }
+    return result;
+  });
+
+  return resolved2;
+}
+
 // Tooltip component
 function Tooltip({ text, children }) {
   const [visible, setVisible] = useState(false);
@@ -91,19 +121,19 @@ function Tooltip({ text, children }) {
 }
 
 // Renders text with keyword tooltips applied automatically
+// Supports [ATTR] and [LVL:...] notations resolved from CharContext
 export function KeywordText({ text, onRoll, label }) {
-  if (!text) return null;
+  const { abilities, charLevel } = useCharContext();
+  const resolved = resolveNotations(text, abilities, charLevel);
+  if (!resolved) return null;
 
-  // Split by keywords first, then handle dice within non-keyword parts
   const DICE_REGEX = /(\d*d\d+(?:\s*[+-]\s*\d+)?)/gi;
-
-  const parts = text.split(KEYWORD_REGEX);
+  const parts = resolved.split(KEYWORD_REGEX);
   KEYWORD_REGEX.lastIndex = 0;
 
   return (
     <span>
       {parts.map((part, i) => {
-        // Check if this part is a keyword
         const lowerPart = part.toLowerCase();
         if (KEYWORD_GLOSSARY[lowerPart]) {
           return (
@@ -113,7 +143,6 @@ export function KeywordText({ text, onRoll, label }) {
           );
         }
 
-        // Check for dice notation
         if (/^\d*d\d+/.test(part) && onRoll) {
           return (
             <button
@@ -127,7 +156,6 @@ export function KeywordText({ text, onRoll, label }) {
           );
         }
 
-        // Regular text — check for dice within it
         const diceParts = part.split(DICE_REGEX);
         DICE_REGEX.lastIndex = 0;
         if (diceParts.length === 1) return <span key={i}>{part}</span>;
