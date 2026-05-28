@@ -83,6 +83,18 @@ export function resolveNotations(text, abilities, charLevel) {
   return resolved2;
 }
 
+// Small hint bar for description textareas — shows notation syntax
+export function NotationHelpBar() {
+  return (
+    <div className="notation-help-bar">
+      <span className="notation-help-icon">💡</span>
+      <span><strong>[CAR]</strong> <strong>[FOR]</strong> <strong>[DES]</strong>… → modificatore caratteristica</span>
+      <span className="notation-help-sep">·</span>
+      <span><strong>[LVL:1d6,5:1d8,9:1d10,15:1d12]</strong> → scala col livello</span>
+    </div>
+  );
+}
+
 // Tooltip component
 function Tooltip({ text, children }) {
   const [visible, setVisible] = useState(false);
@@ -122,8 +134,11 @@ function Tooltip({ text, children }) {
 
 // Renders text with keyword tooltips applied automatically
 // Supports [ATTR] and [LVL:...] notations resolved from CharContext
+const DYNAMIC_NOTATION_RE = /\[(FOR|DES|COS|INT|SAG|CAR)\]|\[LVL:/i;
+
 export function KeywordText({ text, onRoll, label }) {
   const { abilities, charLevel } = useCharContext();
+  const hasDynamic = DYNAMIC_NOTATION_RE.test(text || '');
   const resolved = resolveNotations(text, abilities, charLevel);
   if (!resolved) return null;
 
@@ -133,6 +148,9 @@ export function KeywordText({ text, onRoll, label }) {
 
   return (
     <span>
+      {hasDynamic && (
+        <span className="notation-dynamic-badge" title={`Valore dinamico — originale: ${text}`}>≈ </span>
+      )}
       {parts.map((part, i) => {
         const lowerPart = part.toLowerCase();
         if (KEYWORD_GLOSSARY[lowerPart]) {

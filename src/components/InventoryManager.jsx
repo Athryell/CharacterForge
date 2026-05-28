@@ -1,39 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { KeywordText } from './Tooltip';
+import { KeywordText, NotationHelpBar } from './Tooltip';
 import { TagPill, TagSelector } from './Tags';
 
 const EMPTY_FORM = { name: '', qty: 1, desc: '', weight: '' };
 
 export default function InventoryManager({ items = [], onUpdate, onRoll, editMode, allTags = [], onUpdateTags, onCreateTag, onAddAction, onRemoveAction, actionNames }) {
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState(EMPTY_FORM);
+  const [addForm, setAddForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState(null);
   const [expandedId, setExpandedId] = useState(null);
   const [editingTagsFor, setEditingTagsFor] = useState(null);
-  useEffect(() => { if (!editMode) { setShowForm(false); setEditingId(null); setEditForm(null); setEditingTagsFor(null); } }, [editMode]);
 
-  function patchForm(obj) { setForm(f => ({ ...f, ...obj })); }
+  useEffect(() => {
+    if (!editMode) { setShowForm(false); setEditingId(null); setEditForm(null); setEditingTagsFor(null); }
+  }, [editMode]);
+
+  function patchAdd(obj) { setAddForm(f => ({ ...f, ...obj })); }
   function patchEdit(obj) { setEditForm(f => ({ ...f, ...obj })); }
 
   function submitAdd() {
-    if (!form.name.trim()) return;
-    const name = form.name.trim();
+    if (!addForm.name.trim()) return;
+    const name = addForm.name.trim();
     const existing = items.findIndex(i => i.name.toLowerCase() === name.toLowerCase());
     if (existing !== -1) {
       onUpdate(items.map((item, idx) =>
-        idx === existing ? { ...item, qty: (item.qty || 1) + (parseInt(form.qty) || 1) } : item
+        idx === existing ? { ...item, qty: (item.qty || 1) + (parseInt(addForm.qty) || 1) } : item
       ));
     } else {
-      onUpdate([...items, {
-        id: Date.now().toString(),
-        name,
-        qty: parseInt(form.qty) || 1,
-        desc: form.desc,
-        weight: form.weight,
-      }]);
+      onUpdate([...items, { id: Date.now().toString(), name, qty: parseInt(addForm.qty) || 1, desc: addForm.desc, weight: addForm.weight }]);
     }
-    setForm(EMPTY_FORM);
+    setAddForm(EMPTY_FORM);
     setShowForm(false);
   }
 
@@ -42,34 +39,36 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, editMod
     setEditForm({ ...item });
     setExpandedId(item.id);
   }
-
   function saveEdit() {
     onUpdate(items.map(i => i.id === editingId ? { ...i, ...editForm } : i));
-    setEditingId(null);
-    setEditForm(null);
+    setEditingId(null); setEditForm(null);
   }
-
   function cancelEdit() { setEditingId(null); setEditForm(null); }
-
   function removeItem(id) { onUpdate(items.filter(i => i.id !== id)); }
 
   function adjustQty(id, delta) {
     onUpdate(items.map(i => {
       if (i.id !== id) return i;
       const next = Math.max(0, (i.qty || 1) + delta);
-      if (next === 0) return null;
-      return { ...i, qty: next };
+      return next === 0 ? null : { ...i, qty: next };
     }).filter(Boolean));
+  }
+
+  function handleRowClick(item) {
+    if (editMode) {
+      if (editingId === item.id) cancelEdit();
+      else startEdit(item);
+    } else {
+      setExpandedId(expandedId === item.id ? null : item.id);
+    }
   }
 
   return (
     <div>
       {editMode && (
         <div className="filter-bar" style={{ marginBottom: 10 }}>
-          <button
-            className={`filter-chip ${showForm ? 'active' : ''}`}
-            onClick={() => { setShowForm(v => !v); setEditingId(null); }}
-          >
+          <button className={`filter-chip ${showForm ? 'active' : ''}`}
+            onClick={() => { setShowForm(v => !v); cancelEdit(); }}>
             {showForm ? '✕ Chiudi' : '+ Aggiungi oggetto'}
           </button>
         </div>
@@ -80,43 +79,40 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, editMod
           <div className="field-row">
             <div className="field" style={{ flex: 2 }}>
               <label>Nome *</label>
-              <input
-                value={form.name}
-                onChange={e => patchForm({ name: e.target.value })}
-                placeholder="Es. Pozione di guarigione"
-                autoFocus
-                onKeyDown={e => e.key === 'Enter' && submitAdd()}
-              />
+              <input value={addForm.name} onChange={e => patchAdd({ name: e.target.value })}
+                placeholder="Es. Pozione di guarigione" autoFocus onKeyDown={e => e.key === 'Enter' && submitAdd()} />
             </div>
             <div className="field" style={{ flex: '0 0 80px' }}>
               <label>Quantità</label>
               <div className="hp-stepper">
-                <button className="mod-btn" onClick={() => patchForm({ qty: Math.max(1, (form.qty||1) - 1) })}>−</button>
-                <input type="number" min="1" value={form.qty}
-                  onChange={e => patchForm({ qty: parseInt(e.target.value) || 1 })}
+                <button className="mod-btn" onClick={() => patchAdd({ qty: Math.max(1, (addForm.qty||1) - 1) })}>−</button>
+                <input type="number" min="1" value={addForm.qty}
+                  onChange={e => patchAdd({ qty: parseInt(e.target.value) || 1 })}
                   style={{ width: 40, textAlign: 'center', border: '0.5px solid var(--c-border)', borderRadius: 'var(--r)', padding: '4px', background: 'var(--c-bg)', color: 'var(--c-ink)' }} />
-                <button className="mod-btn" onClick={() => patchForm({ qty: (form.qty||1) + 1 })}>+</button>
+                <button className="mod-btn" onClick={() => patchAdd({ qty: (addForm.qty||1) + 1 })}>+</button>
               </div>
             </div>
             <div className="field" style={{ flex: '0 0 80px' }}>
               <label>Peso (kg)</label>
-              <input type="text" value={form.weight} onChange={e => patchForm({ weight: e.target.value })} placeholder="Es. 0.5" />
+              <input type="text" value={addForm.weight} onChange={e => patchAdd({ weight: e.target.value })} placeholder="0.5" />
             </div>
           </div>
           <div className="field" style={{ marginTop: 8 }}>
-            <label>Descrizione / Note (puoi scrivere dadi es. 2d4+2)</label>
-            <textarea className="notes-area" style={{ minHeight: 56 }} value={form.desc}
-              onChange={e => patchForm({ desc: e.target.value })} placeholder="Es. Cura 2d4+2 HP. Oggetto magico comune." />
+            <label>Descrizione / Note</label>
+            <textarea className="notes-area" style={{ minHeight: 56 }} value={addForm.desc}
+              onChange={e => patchAdd({ desc: e.target.value })} placeholder="Es. Cura 2d4+2 HP." />
+            <NotationHelpBar />
           </div>
           <div style={{ display: 'flex', gap: 8, marginTop: 8, justifyContent: 'flex-end' }}>
-            <button className="io-btn" onClick={() => { setShowForm(false); setForm(EMPTY_FORM); }}>Annulla</button>
-            <button className={`io-btn primary ${!form.name.trim() ? 'disabled' : ''}`} onClick={submitAdd} disabled={!form.name.trim()}>+ Aggiungi</button>
+            <button className="io-btn" onClick={() => { setShowForm(false); setAddForm(EMPTY_FORM); }}>Annulla</button>
+            <button className={`io-btn primary ${!addForm.name.trim() ? 'disabled' : ''}`}
+              onClick={submitAdd} disabled={!addForm.name.trim()}>+ Aggiungi</button>
           </div>
         </div>
       )}
 
       {items.length === 0 && !showForm && (
-        <div className="hint-text">Nessun oggetto. Clicca "+ Aggiungi oggetto" per iniziare.</div>
+        <div className="hint-text">Nessun oggetto. Attiva la modalità ✏ e clicca "+ Aggiungi oggetto".</div>
       )}
 
       <div className="inventory-list">
@@ -126,14 +122,14 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, editMod
           const added = actionNames?.has(item.name);
 
           return (
-            <div key={item.id} className={`inventory-item ${isExpanded ? 'expanded' : ''}`}>
-              <div className="inventory-main-row" onClick={() => !isEditing && setExpandedId(isExpanded ? null : item.id)}>
+            <div key={item.id} className={`inventory-item ${isExpanded || isEditing ? 'expanded' : ''}`}>
+              <div className="inventory-main-row" style={{ cursor: 'pointer' }} onClick={() => handleRowClick(item)}>
                 <div className="inventory-info">
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
                     <div className="inventory-name">{item.name}</div>
                     {(item.tags||[]).map(t => <TagPill key={t} tag={t} allTags={allTags} small />)}
                   </div>
-                  {item.desc && !isExpanded && (
+                  {item.desc && !isExpanded && !isEditing && (
                     <div className="inventory-desc-preview">
                       <KeywordText text={item.desc} onRoll={onRoll} label={item.name} />
                     </div>
@@ -142,7 +138,6 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, editMod
 
                 {item.weight && <span className="inventory-weight">{item.weight}kg</span>}
 
-                {/* Qty stepper on the right */}
                 <div className="inventory-qty-group" onClick={e => e.stopPropagation()}>
                   <button className="mod-btn" onClick={() => adjustQty(item.id, -1)}>−</button>
                   <span className="inventory-qty">{item.qty || 1}</span>
@@ -152,8 +147,7 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, editMod
                 {editMode && (
                   <div className="inventory-actions" onClick={e => e.stopPropagation()}>
                     {onAddAction && (
-                      <button
-                        className={`icon-btn add-to-action-btn ${added ? 'added' : ''}`}
+                      <button className={`icon-btn add-to-action-btn ${added ? 'added' : ''}`}
                         title={added ? 'Rimuovi dalle azioni' : 'Aggiungi alle azioni'}
                         onClick={() => {
                           if (added) { onRemoveAction && onRemoveAction(item.name); }
@@ -165,40 +159,16 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, editMod
                             desc: item.desc || '',
                             dice: '',
                           }); }
-                        }}
-                      >{added ? '✓' : '⚡'}</button>
+                        }}>{added ? '✓' : '⚡'}</button>
                     )}
-                    <button className="icon-btn" style={{ padding: '3px 7px', fontSize: 11 }}
-                      onClick={() => isEditing ? cancelEdit() : startEdit(item)}>
-                      {isEditing ? '✕' : '✏'}
-                    </button>
                     <button className="equip-remove" onClick={() => removeItem(item.id)}>✕</button>
                   </div>
                 )}
               </div>
 
-              {isExpanded && !isEditing && (
-                <div className="inventory-desc-full" onClick={e => e.stopPropagation()}>
-                  {item.desc && <KeywordText text={item.desc} onRoll={onRoll} label={item.name} />}
-                  <div style={{ marginTop: 6 }}>
-                    {editingTagsFor === item.id ? (
-                      <>
-                        <TagSelector selected={item.tags || []} allTags={allTags}
-                          onChange={tags => onUpdateTags && onUpdateTags(item.id, tags)}
-                          onCreateTag={onCreateTag} />
-                        <button className="tag-edit-btn" style={{ marginTop: 4 }} onClick={() => setEditingTagsFor(null)}>✓ Fine</button>
-                      </>
-                    ) : (
-                      <button className="tag-edit-btn" onClick={() => setEditingTagsFor(item.id)}>
-                        🏷 {(item.tags||[]).length === 0 ? 'Aggiungi tag' : 'Modifica tag'}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
-
+              {/* Inline edit form */}
               {isEditing && editForm && (
-                <div className="inventory-edit-form">
+                <div className="inventory-edit-form" onClick={e => e.stopPropagation()}>
                   <div className="field-row">
                     <div className="field" style={{ flex: 2 }}>
                       <label>Nome</label>
@@ -223,10 +193,44 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, editMod
                     <label>Descrizione</label>
                     <textarea className="notes-area" style={{ minHeight: 56 }}
                       value={editForm.desc || ''} onChange={e => patchEdit({ desc: e.target.value })} />
+                    <NotationHelpBar />
+                  </div>
+                  <div style={{ marginTop: 6 }}>
+                    {editingTagsFor === item.id ? (
+                      <>
+                        <TagSelector selected={item.tags || []} allTags={allTags}
+                          onChange={tags => onUpdateTags && onUpdateTags(item.id, tags)} onCreateTag={onCreateTag} />
+                        <button className="tag-edit-btn" style={{ marginTop: 4 }} onClick={() => setEditingTagsFor(null)}>✓ Fine</button>
+                      </>
+                    ) : (
+                      <button className="tag-edit-btn" onClick={() => setEditingTagsFor(item.id)}>
+                        🏷 {(item.tags||[]).length === 0 ? 'Aggiungi tag' : 'Modifica tag'}
+                      </button>
+                    )}
                   </div>
                   <div style={{ display: 'flex', gap: 8, marginTop: 8, justifyContent: 'flex-end' }}>
                     <button className="io-btn" onClick={cancelEdit}>Annulla</button>
                     <button className="io-btn primary" onClick={saveEdit}>✓ Salva</button>
+                  </div>
+                </div>
+              )}
+
+              {/* Expanded view (non-edit) */}
+              {isExpanded && !isEditing && (
+                <div className="inventory-desc-full" onClick={e => e.stopPropagation()}>
+                  {item.desc && <KeywordText text={item.desc} onRoll={onRoll} label={item.name} />}
+                  <div style={{ marginTop: 6 }}>
+                    {editingTagsFor === item.id ? (
+                      <>
+                        <TagSelector selected={item.tags || []} allTags={allTags}
+                          onChange={tags => onUpdateTags && onUpdateTags(item.id, tags)} onCreateTag={onCreateTag} />
+                        <button className="tag-edit-btn" style={{ marginTop: 4 }} onClick={() => setEditingTagsFor(null)}>✓ Fine</button>
+                      </>
+                    ) : (
+                      <button className="tag-edit-btn" onClick={() => setEditingTagsFor(item.id)}>
+                        🏷 {(item.tags||[]).length === 0 ? 'Aggiungi tag' : 'Modifica tag'}
+                      </button>
+                    )}
                   </div>
                 </div>
               )}
