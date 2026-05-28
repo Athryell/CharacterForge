@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { KeywordText } from './Tooltip';
 
 const SOURCE_BADGE = {
@@ -17,10 +17,11 @@ function detectActionType(text) {
   return 'free';
 }
 
-export default function FeatureManager({ features = [], onUpdate, onRoll, onAddAction, onRemoveAction, actionNames }) {
+export default function FeatureManager({ features = [], onUpdate, onRoll, onAddAction, onRemoveAction, actionNames, editMode }) {
   const [expanded, setExpanded] = useState(null);
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
+  useEffect(() => { if (!editMode) setShowAdd(false); }, [editMode]);
 
   function removeFeature(id) {
     onUpdate(features.filter(f => f.id !== id));
@@ -78,7 +79,7 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
                       </div>
                     )}
                   </div>
-                  {onAddAction && (() => {
+                  {editMode && onAddAction && (() => {
                     const added = actionNames?.has(feature.name);
                     return (
                       <button
@@ -87,7 +88,7 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
                         onClick={e => {
                           e.stopPropagation();
                           if (added) { onRemoveAction && onRemoveAction(feature.name); }
-                          else if (!actionNames?.has(feature.name)) { onAddAction({
+                          else { onAddAction({
                             id: `feature_${feature.id}_${Date.now()}`,
                             name: feature.name,
                             type: feature.actionType || detectActionType(feature.desc),
@@ -99,7 +100,7 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
                       >{added ? '✓' : '⚡'}</button>
                     );
                   })()}
-                  <button className="equip-remove" onClick={e => { e.stopPropagation(); removeFeature(feature.id); }}>✕</button>
+                  {editMode && <button className="equip-remove" onClick={e => { e.stopPropagation(); removeFeature(feature.id); }}>✕</button>}
                 </div>
               ))}
             </div>
@@ -107,7 +108,7 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
         );
       })}
 
-      {showAdd ? (
+      {editMode && showAdd ? (
         <div className="weapon-add-panel" style={{ marginTop: 8 }}>
           <div className="field">
             <label>Nome *</label>
@@ -126,11 +127,11 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
               onClick={submitCustom} disabled={!form.name.trim()}>+ Aggiungi</button>
           </div>
         </div>
-      ) : (
+      ) : editMode ? (
         <button className="add-action-btn" style={{ marginTop: 6 }} onClick={() => setShowAdd(true)}>
           + Aggiungi feature personalizzata
         </button>
-      )}
+      ) : null}
     </div>
   );
 }

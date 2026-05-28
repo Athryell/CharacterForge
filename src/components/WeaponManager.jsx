@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { WEAPON_PRESETS, WEAPON_PROPERTIES, calcWeaponAttack, fmtWeaponDmg } from '../data/weapons';
 
-export default function WeaponManager({ weapons = [], abilities, profBonus, onUpdate, onRoll, proficiency = '', onUpdateProficiency, onAddAction, onRemoveAction, actionNames }) {
+export default function WeaponManager({ weapons = [], abilities, profBonus, onUpdate, onRoll, proficiency = '', onUpdateProficiency, onAddAction, onRemoveAction, actionNames, editMode }) {
   const [showAdd, setShowAdd] = useState(false);
+  useEffect(() => { if (!editMode) setShowAdd(false); }, [editMode]);
   const [customMode, setCustomMode] = useState(false);
   const [form, setForm] = useState({
     name: '', dmg: '1d6', dmgType: 'tagliente',
@@ -79,43 +80,45 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
                 {!w.isProficient && <span className="weapon-prop" style={{ color: 'var(--c-warn-text)' }}>Senza competenza</span>}
               </div>
             </div>
-            <div className="weapon-actions">
-              {onAddAction && (() => {
-                const weaponDesc = `Attacco con ${w.name}. Tiro per colpire: ${atkStr}. Danni: ${dmgStr} ${w.dmgType}.${w.notes ? ' ' + w.notes : ''}`;
-                const added = actionNames?.has(w.name);
-                return (
-                  <button
-                    className={`icon-btn add-to-action-btn ${added ? 'added' : ''}`}
-                    title={added ? 'Rimuovi dalle azioni' : 'Aggiungi alle azioni'}
-                    onClick={() => {
-                      if (added) { onRemoveAction && onRemoveAction(w.name); }
-                      else if (!actionNames?.has(w.name)) { onAddAction({
-                        id: `weapon_${w.id}_${Date.now()}`,
-                        name: w.name,
-                        type: 'action',
-                        descShort: `${atkStr} per colpire · ${dmgStr} ${w.dmgType}`,
-                        desc: weaponDesc,
-                        dice: `1d20${attackBonus >= 0 ? '+' : ''}${attackBonus}`,
-                      }); }
-                    }}
-                  >{added ? '✓' : '⚡'}</button>
-                );
-              })()}
-              <button
-                className="filter-chip"
-                style={{ fontSize: 11, padding: '2px 8px' }}
-                onClick={() => onUpdate(weapons.map(x => x.id === w.id ? { ...x, isProficient: !x.isProficient } : x))}
-              >
-                {w.isProficient ? '✓ Comp.' : '✗ No comp.'}
-              </button>
-              <button className="equip-remove" onClick={() => removeWeapon(w.id)}>✕</button>
-            </div>
+            {editMode && (
+              <div className="weapon-actions">
+                {onAddAction && (() => {
+                  const weaponDesc = `Attacco con ${w.name}. Tiro per colpire: ${atkStr}. Danni: ${dmgStr} ${w.dmgType}.${w.notes ? ' ' + w.notes : ''}`;
+                  const added = actionNames?.has(w.name);
+                  return (
+                    <button
+                      className={`icon-btn add-to-action-btn ${added ? 'added' : ''}`}
+                      title={added ? 'Rimuovi dalle azioni' : 'Aggiungi alle azioni'}
+                      onClick={() => {
+                        if (added) { onRemoveAction && onRemoveAction(w.name); }
+                        else { onAddAction({
+                          id: `weapon_${w.id}_${Date.now()}`,
+                          name: w.name,
+                          type: 'action',
+                          descShort: `${atkStr} per colpire · ${dmgStr} ${w.dmgType}`,
+                          desc: weaponDesc,
+                          dice: `1d20${attackBonus >= 0 ? '+' : ''}${attackBonus}`,
+                        }); }
+                      }}
+                    >{added ? '✓' : '⚡'}</button>
+                  );
+                })()}
+                <button
+                  className="filter-chip"
+                  style={{ fontSize: 11, padding: '2px 8px' }}
+                  onClick={() => onUpdate(weapons.map(x => x.id === w.id ? { ...x, isProficient: !x.isProficient } : x))}
+                >
+                  {w.isProficient ? '✓ Comp.' : '✗ No comp.'}
+                </button>
+                <button className="equip-remove" onClick={() => removeWeapon(w.id)}>✕</button>
+              </div>
+            )}
           </div>
         );
       })}
 
       {/* Add button */}
-      {!showAdd && (
+      {editMode && !showAdd && (
         <button className="add-action-btn" onClick={() => setShowAdd(true)}>+ Aggiungi arma</button>
       )}
 

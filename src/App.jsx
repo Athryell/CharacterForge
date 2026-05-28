@@ -121,7 +121,7 @@ function SpellSlots({ slots, onToggle }) {
 
 const ACTION_TYPES = [['action','Azione'],['bonus','Bonus'],['reaction','Reazione'],['free','Gratuita']];
 
-function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag, onRemove, onEdit }) {
+function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag, onRemove, onEdit, editMode }) {
   const [expanded, setExpanded] = useState(false);
   const [editingTags, setEditingTags] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -176,8 +176,8 @@ function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag, o
         <div style={{ display:'flex', alignItems:'center', gap:6 }}>
           <div className="action-name" style={{ flex:1 }}>{action.name}</div>
           {(action.tags||[]).map(t => <TagPill key={t} tag={t} allTags={allTags} small />)}
-          <button className="icon-btn" style={{ fontSize:11, padding:'1px 5px' }} onClick={startEdit} title="Modifica">✏</button>
-          {onRemove && <button className="equip-remove" onClick={e => { e.stopPropagation(); onRemove(action.id); }}>✕</button>}
+          {editMode && <button className="icon-btn" style={{ fontSize:11, padding:'1px 5px' }} onClick={startEdit} title="Modifica">✏</button>}
+          {editMode && onRemove && <button className="equip-remove" onClick={e => { e.stopPropagation(); onRemove(action.id); }}>✕</button>}
         </div>
         <div className="action-desc-short">{action.descShort}</div>
         {expanded && (
@@ -251,6 +251,11 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
   const [hoveredAttr, setHoveredAttr] = useState(null);
   const [showAddAction, setShowAddAction] = useState(false);
   const [addActionForm, setAddActionForm] = useState({ name:'', type:'action', descShort:'', desc:'', dice:'' });
+  const [editingActions, setEditingActions] = useState(false);
+  const [editingSpells, setEditingSpells] = useState(false);
+  const [editingWeapons, setEditingWeapons] = useState(false);
+  const [editingFeatures, setEditingFeatures] = useState(false);
+  const [editingInventory, setEditingInventory] = useState(false);
   const fileInputRef = useRef();
   const toastTimer = useRef();
 
@@ -690,9 +695,14 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
         <div className="card">
           <div className="card-title" style={{ justifyContent:'space-between' }}>
             <span>⚡ Azioni</span>
-            <button className="icon-btn" style={{ fontSize:11 }} onClick={() => setShowBaseActions(v => !v)}>
-              {showBaseActions ? '🙈 Nascondi base' : '👁 Mostra base'}
-            </button>
+            <div style={{ display:'flex', gap:6 }}>
+              <button className="icon-btn" style={{ fontSize:11 }} onClick={() => setShowBaseActions(v => !v)}>
+                {showBaseActions ? '🙈 Base' : '👁 Base'}
+              </button>
+              <button className={`icon-btn ${editingActions ? 'active' : ''}`} onClick={() => { setEditingActions(v => !v); setShowAddAction(false); }}>
+                {editingActions ? '✓' : '✏'}
+              </button>
+            </div>
           </div>
           <div className="filter-bar">
             {[['all','Tutte'],['action','Azione'],['bonus','Bonus'],['reaction','Reazione'],['free','Gratuita']].map(([v,l]) => (
@@ -703,6 +713,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
           <div className="action-list">
             {filteredActions.filter(a => !actionTagFilter || (a.tags||[]).includes(actionTagFilter)).map(action => (
               <ActionItem key={action.id||action.name} action={action} allTags={allTags} onRoll={handleRoll}
+                editMode={editingActions}
                 onUpdateTags={(id,tags) => update({ actions: state.actions.map(a => a.id===id ? {...a,tags} : a) })}
                 onCreateTag={createTag}
                 onRemove={id => update({ actions: state.actions.filter(a => a.id !== id) })}
@@ -710,7 +721,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
               />
             ))}
           </div>
-          {showAddAction ? (
+          {editingActions && (showAddAction ? (
             <div className="weapon-add-panel" style={{ marginTop:8 }}>
               <div className="field-row">
                 <div className="field">
@@ -748,17 +759,22 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
             </div>
           ) : (
             <button className="add-action-btn" onClick={() => setShowAddAction(true)}>+ Aggiungi azione</button>
-          )}
+          ))}
         </div>
       );
 
       case 'weapons': return (
         <div className="card">
-          <div className="card-title">⚔ Armi</div>
+          <div className="card-title" style={{ justifyContent:'space-between' }}>
+            <span>⚔ Armi</span>
+            <button className={`icon-btn ${editingWeapons ? 'active' : ''}`} onClick={() => setEditingWeapons(v => !v)}>
+              {editingWeapons ? '✓' : '✏'}
+            </button>
+          </div>
           <WeaponManager weapons={state.weapons||[]} abilities={state.abilities} profBonus={char.profBonus}
             onUpdate={weapons => update({ weapons })} onRoll={handleRoll}
             proficiency={state.weaponProficiency||''} onUpdateProficiency={v => update({ weaponProficiency: v })}
-            actionNames={actionNames}
+            actionNames={actionNames} editMode={editingWeapons}
             onAddAction={action => { if (!actionNames.has(action.name)) update({ actions: [...(state.actions||[]), action] }); }}
             onRemoveAction={name => update({ actions: (state.actions||[]).filter(a => a.name !== name) })} />
         </div>
@@ -815,7 +831,12 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
 
       case 'spells': return (
         <div className="card">
-          <div className="card-title">📖 Incantesimi</div>
+          <div className="card-title" style={{ justifyContent:'space-between' }}>
+            <span>📖 Incantesimi</span>
+            <button className={`icon-btn ${editingSpells ? 'active' : ''}`} onClick={() => setEditingSpells(v => !v)}>
+              {editingSpells ? '✓' : '✏'}
+            </button>
+          </div>
           <SpellManager spells={state.spells} charClass={state.charClass} onUpdate={spells => update({ spells })}
             onRoll={handleRoll} allTags={allTags}
             onUpdateTags={(name,tags) => update({ spells: state.spells.map(s => s.name===name ? {...s,tags} : s) })}
@@ -823,7 +844,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
             spellSlots={state.spellSlots||[]}
             concentratingSpell={state.concentratingSpell||null}
             onCast={handleCastSpell}
-            actionNames={actionNames}
+            actionNames={actionNames} editMode={editingSpells}
             onAddAction={action => { if (!actionNames.has(action.name)) update({ actions: [...(state.actions||[]), action] }); }}
             onRemoveAction={name => update({ actions: (state.actions||[]).filter(a => a.name !== name) })} />
         </div>
@@ -873,8 +894,13 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
 
       case 'inventory': return (
         <div className="card">
-          <div className="card-title">🎒 Equipaggiamento</div>
-          <InventoryManager items={state.equipment||[]} onUpdate={equipment => update({ equipment })} onRoll={handleRoll} />
+          <div className="card-title" style={{ justifyContent:'space-between' }}>
+            <span>🎒 Equipaggiamento</span>
+            <button className={`icon-btn ${editingInventory ? 'active' : ''}`} onClick={() => setEditingInventory(v => !v)}>
+              {editingInventory ? '✓' : '✏'}
+            </button>
+          </div>
+          <InventoryManager items={state.equipment||[]} onUpdate={equipment => update({ equipment })} onRoll={handleRoll} editMode={editingInventory} />
         </div>
       );
 
@@ -905,9 +931,14 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
 
       case 'classFeatures': return (
         <div className="card">
-          <div className="card-title">✨ Feature di classe e tratti</div>
+          <div className="card-title" style={{ justifyContent:'space-between' }}>
+            <span>✨ Feature di classe e tratti</span>
+            <button className={`icon-btn ${editingFeatures ? 'active' : ''}`} onClick={() => setEditingFeatures(v => !v)}>
+              {editingFeatures ? '✓' : '✏'}
+            </button>
+          </div>
           <FeatureManager features={state.features||[]} onUpdate={features => update({ features })} onRoll={handleRoll}
-            actionNames={actionNames}
+            actionNames={actionNames} editMode={editingFeatures}
             onAddAction={action => { if (!actionNames.has(action.name)) update({ actions: [...(state.actions||[]), action] }); }}
             onRemoveAction={name => update({ actions: (state.actions||[]).filter(a => a.name !== name) })} />
         </div>

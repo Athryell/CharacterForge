@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { SRD_SPELLS, SCHOOLS, SPELL_CLASSES, filterSpells } from '../data/spells';
 import { TagPill, TagSelector, TagFilterBar } from './Tags';
 import { KeywordText } from './Tooltip';
@@ -9,14 +9,21 @@ const LEVEL_LABELS = {
 };
 const EMPTY_CUSTOM = { name: '', level: 0, school: '', concentration: false, ritual: false, desc: '' };
 
+const ACTION_BADGE = {
+  action:   { label: 'Az.',   bg: '#f0f0ee', color: '#5f5e5a' },
+  bonus:    { label: 'Bonus', bg: '#FFF3E0', color: '#854F0B' },
+  reaction: { label: 'Rea.', bg: '#E6F1FB', color: '#185FA5' },
+  free:     { label: 'Lib.', bg: '#EAF3DE', color: '#3B6D11' },
+};
+
 function detectActionType(text) {
   const t = (text || '').toLowerCase();
   if (t.includes('azione bonus')) return 'bonus';
   if (t.includes('reazione')) return 'reaction';
-  return 'free';
+  return 'action';
 }
 
-export default function SpellManager({ spells = [], charClass, onUpdate, onRoll, allTags = [], onUpdateTags, onCreateTag, spellSlots = [], concentratingSpell = null, onCast, onAddAction, onRemoveAction, actionNames }) {
+export default function SpellManager({ spells = [], charClass, onUpdate, onRoll, allTags = [], onUpdateTags, onCreateTag, spellSlots = [], concentratingSpell = null, onCast, onAddAction, onRemoveAction, actionNames, editMode }) {
   const [view, setView] = useState('list'); // 'list' | 'srd' | 'custom'
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [castMenu, setCastMenu] = useState(null); // spell.name of open cast menu
@@ -30,6 +37,11 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
   const [editingTagsFor, setEditingTagsFor] = useState(null);
   const [customForm, setCustomForm] = useState(EMPTY_CUSTOM);
 
+  useEffect(() => {
+    if (!editMode) { setView('list'); setShowAddMenu(false); }
+  }, [editMode]);
+
+  const srdByName = useMemo(() => Object.fromEntries(SRD_SPELLS.map(s => [s.name, s])), []);
   const knownNames = useMemo(() => new Set(spells.map(s => s.name)), [spells]);
 
   const availableLevels = useMemo(() =>
@@ -94,19 +106,21 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
                 <button className={`filter-chip ${spellFilter === 'prepared' ? 'active' : ''}`} onClick={() => setSpellFilter('prepared')}>Preparati</button>
               )}
             </div>
-            <div style={{ position: 'relative' }}>
-              <button className="add-icon-btn" onClick={() => setShowAddMenu(v => !v)} title="Aggiungi incantesimo">＋</button>
-              {showAddMenu && (
-                <div className="spell-add-menu">
-                  <button className="spell-add-menu-item" onClick={() => { setView('srd'); setShowAddMenu(false); }}>
-                    🔍 Sfoglia SRD
-                  </button>
-                  <button className="spell-add-menu-item" onClick={() => { setView('custom'); setShowAddMenu(false); }}>
-                    ✏ Personalizzato
-                  </button>
-                </div>
-              )}
-            </div>
+            {editMode && (
+              <div style={{ position: 'relative' }}>
+                <button className="add-icon-btn" onClick={() => setShowAddMenu(v => !v)} title="Aggiungi incantesimo">＋</button>
+                {showAddMenu && (
+                  <div className="spell-add-menu">
+                    <button className="spell-add-menu-item" onClick={() => { setView('srd'); setShowAddMenu(false); }}>
+                      🔍 Sfoglia SRD
+                    </button>
+                    <button className="spell-add-menu-item" onClick={() => { setView('custom'); setShowAddMenu(false); }}>
+                      ✏ Personalizzato
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </>
         ) : (
           <>
@@ -137,6 +151,11 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
               <div className="spell-list">
                 {byLevel[lvl].map(spell => {
                   const isCantrip = spell.level === 0;
+                  const srd = srdByName[spell.name] || {};
+                  const actionType = spell.actionType || srd.actionType || detectActionType(spell.desc);
+                  const duration = spell.duration || srd.duration || null;
+                  const range = spell.range || srd.range || null;
+                  const ab = ACTION_BADGE[actionType] || ACTION_BADGE.action;
                   return (
                     <div
                       key={spell.name}
@@ -148,17 +167,23 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
                         onClick={e => { e.stopPropagation(); if (!isCantrip) togglePrepared(spell.name); }}
                         title={isCantrip ? 'I trucchetti sono sempre disponibili' : (spell.prepared ? 'Rimuovi preparazione' : 'Segna come preparato')}
                       />
-                      <div style={{ flex: 1 }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
                           <div className="spell-name">{spell.name}</div>
                           {(spell.tags || []).map(t => <TagPill key={t} tag={t} allTags={allTags} small />)}
                         </div>
+                        {!expanded && (range || duration) && (
+                          <div style={{ fontSize:10, color:'var(--c-muted)', marginTop:1, display:'flex', gap:8 }}>
+                            {range && <span>{range}</span>}
+                            {duration && <span>{duration}</span>}
+                          </div>
+                        )}
                         {expanded === spell.name && (
                           <>
-                            {(spell.range || spell.duration) && (
+                            {(range || duration) && (
                               <div style={{ display:'flex', gap:10, marginTop:4, fontSize:11, color:'var(--c-muted)' }}>
-                                {spell.range && <span>📍 {spell.range}</span>}
-                                {spell.duration && <span>⏱ {spell.duration}</span>}
+                                {range && <span>📍 {range}</span>}
+                                {duration && <span>⏱ {duration}</span>}
                               </div>
                             )}
                             {spell.desc && (
@@ -183,6 +208,7 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
                           </>
                         )}
                       </div>
+                      <div className="spell-action-badge" style={{ background: ab.bg, color: ab.color }}>{ab.label}</div>
                       <div className="spell-school">{spell.school}</div>
                       <div className="spell-level-badge">{isCantrip ? 'Trucco' : `Liv.${spell.level}`}</div>
                       {spell.concentration && <div className="spell-conc" title="Concentrazione">C</div>}
@@ -218,7 +244,7 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
                           )}
                         </div>
                       )}
-                      {onAddAction && (() => {
+                      {editMode && onAddAction && (() => {
                         const added = actionNames?.has(spell.name);
                         return (
                           <button
@@ -227,11 +253,11 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
                             onClick={e => {
                               e.stopPropagation();
                               if (added) { onRemoveAction && onRemoveAction(spell.name); }
-                              else if (!actionNames?.has(spell.name)) { onAddAction({
+                              else { onAddAction({
                                 id: `spell_${spell.name}_${Date.now()}`,
                                 name: spell.name,
-                                type: spell.actionType || detectActionType(spell.desc),
-                                descShort: `${spell.school}${spell.level === 0 ? ' · Trucchetto' : ` · Liv. ${spell.level}`}${spell.concentration ? ' · Conc.' : ''}${spell.range ? ` · ${spell.range}` : ''}`,
+                                type: actionType,
+                                descShort: `${spell.school}${spell.level === 0 ? ' · Trucchetto' : ` · Liv. ${spell.level}`}${spell.concentration ? ' · Conc.' : ''}${range ? ` · ${range}` : ''}`,
                                 desc: spell.desc || '',
                                 dice: '',
                               }); }
@@ -239,7 +265,7 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
                           >{added ? '✓' : '⚡'}</button>
                         );
                       })()}
-                      <button className="equip-remove" onClick={e => { e.stopPropagation(); removeSpell(spell.name); }}>✕</button>
+                      {editMode && <button className="equip-remove" onClick={e => { e.stopPropagation(); removeSpell(spell.name); }}>✕</button>}
                     </div>
                   );
                 })}

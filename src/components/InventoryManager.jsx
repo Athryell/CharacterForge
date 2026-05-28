@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { KeywordText } from './Tooltip';
 
 const EMPTY_FORM = { name: '', qty: 1, desc: '', weight: '' };
 
-export default function InventoryManager({ items = [], onUpdate, onRoll }) {
+export default function InventoryManager({ items = [], onUpdate, onRoll, editMode }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState(null);
   const [expandedId, setExpandedId] = useState(null);
+  useEffect(() => { if (!editMode) { setShowForm(false); setEditingId(null); setEditForm(null); } }, [editMode]);
 
   function patchForm(obj) { setForm(f => ({ ...f, ...obj })); }
   function patchEdit(obj) { setEditForm(f => ({ ...f, ...obj })); }
@@ -71,15 +72,17 @@ export default function InventoryManager({ items = [], onUpdate, onRoll }) {
 
   return (
     <div>
-      {/* Add form toggle */}
-      <div className="filter-bar" style={{ marginBottom: 10 }}>
-        <button
-          className={`filter-chip ${showForm ? 'active' : ''}`}
-          onClick={() => { setShowForm(v => !v); setEditingId(null); }}
-        >
-          {showForm ? '✕ Chiudi' : '+ Aggiungi oggetto'}
-        </button>
-      </div>
+      {/* Add form toggle — only in editMode */}
+      {editMode && (
+        <div className="filter-bar" style={{ marginBottom: 10 }}>
+          <button
+            className={`filter-chip ${showForm ? 'active' : ''}`}
+            onClick={() => { setShowForm(v => !v); setEditingId(null); }}
+          >
+            {showForm ? '✕ Chiudi' : '+ Aggiungi oggetto'}
+          </button>
+        </div>
+      )}
 
       {/* ── ADD FORM ── */}
       {showForm && (
@@ -178,13 +181,15 @@ export default function InventoryManager({ items = [], onUpdate, onRoll }) {
                   <span className="inventory-weight">{item.weight}kg</span>
                 )}
 
-                <div className="inventory-actions" onClick={e => e.stopPropagation()}>
-                  <button className="icon-btn" style={{ padding: '3px 7px', fontSize: 11 }}
-                    onClick={() => isEditing ? cancelEdit() : startEdit(item)}>
-                    {isEditing ? '✕' : '✏'}
-                  </button>
-                  <button className="equip-remove" onClick={() => removeItem(item.id)}>✕</button>
-                </div>
+                {editMode && (
+                  <div className="inventory-actions" onClick={e => e.stopPropagation()}>
+                    <button className="icon-btn" style={{ padding: '3px 7px', fontSize: 11 }}
+                      onClick={() => isEditing ? cancelEdit() : startEdit(item)}>
+                      {isEditing ? '✕' : '✏'}
+                    </button>
+                    <button className="equip-remove" onClick={() => removeItem(item.id)}>✕</button>
+                  </div>
+                )}
               </div>
 
               {/* Expanded: description with dice + edit form */}

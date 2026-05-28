@@ -380,6 +380,10 @@ body {
 .spell-school { font-size: 10px; color: var(--c-hint); }
 .spell-level { font-size: 10px; color: var(--c-hint); }
 .spell-conc { font-size: 10px; color: #185FA5; font-weight: 500; }
+.spell-action-badge {
+  font-size: 9px; font-weight: 600; padding: 1px 5px;
+  border-radius: 3px; white-space: nowrap; flex-shrink: 0;
+}
 
 /* DEATH SAVES */
 .toggle-box { display: flex; align-items: center; gap: 8px; cursor: pointer; }
