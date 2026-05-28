@@ -10,7 +10,14 @@ const SOURCE_BADGE = {
 
 const EMPTY_FORM = { name: '', desc: '' };
 
-export default function FeatureManager({ features = [], onUpdate, onRoll, onAddAction }) {
+function detectActionType(text) {
+  const t = (text || '').toLowerCase();
+  if (t.includes('azione bonus')) return 'bonus';
+  if (t.includes('reazione')) return 'reaction';
+  return 'free';
+}
+
+export default function FeatureManager({ features = [], onUpdate, onRoll, onAddAction, actionNames }) {
   const [expanded, setExpanded] = useState(null);
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -71,17 +78,23 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
                       </div>
                     )}
                   </div>
-                  {onAddAction && (
-                    <button className="icon-btn" style={{ fontSize:11, padding:'2px 5px' }} title="Aggiungi alle azioni"
-                      onClick={e => { e.stopPropagation(); onAddAction({
-                        id: `feature_${feature.id}_${Date.now()}`,
-                        name: feature.name,
-                        type: 'action',
-                        descShort: feature.source || feature.name,
-                        desc: feature.desc || '',
-                        dice: '',
-                      }); }}>⚡</button>
-                  )}
+                  {onAddAction && (() => {
+                    const added = actionNames?.has(feature.name);
+                    return (
+                      <button
+                        className={`icon-btn add-to-action-btn ${added ? 'added' : ''}`}
+                        title={added ? 'Già nelle azioni' : 'Aggiungi alle azioni'}
+                        onClick={e => { e.stopPropagation(); onAddAction({
+                          id: `feature_${feature.id}_${Date.now()}`,
+                          name: feature.name,
+                          type: detectActionType(feature.desc),
+                          descShort: feature.source || feature.name,
+                          desc: feature.desc || '',
+                          dice: '',
+                        }); }}
+                      >{added ? '✓' : '⚡'}</button>
+                    );
+                  })()}
                   <button className="equip-remove" onClick={e => { e.stopPropagation(); removeFeature(feature.id); }}>✕</button>
                 </div>
               ))}

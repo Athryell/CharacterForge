@@ -265,6 +265,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
     ...(state.actions||[]).flatMap(a => a.tags||[]),
     ...(state.spells||[]).flatMap(s => s.tags||[]),
   ])];
+  const actionNames = new Set((state.actions||[]).map(a => a.name));
   function createTag() {}
 
   function handleTabChange(id) {
@@ -757,6 +758,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
           <WeaponManager weapons={state.weapons||[]} abilities={state.abilities} profBonus={char.profBonus}
             onUpdate={weapons => update({ weapons })} onRoll={handleRoll}
             proficiency={state.weaponProficiency||''} onUpdateProficiency={v => update({ weaponProficiency: v })}
+            actionNames={actionNames}
             onAddAction={action => update({ actions: [...(state.actions||[]), action] })} />
         </div>
       );
@@ -820,6 +822,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
             spellSlots={state.spellSlots||[]}
             concentratingSpell={state.concentratingSpell||null}
             onCast={handleCastSpell}
+            actionNames={actionNames}
             onAddAction={action => update({ actions: [...(state.actions||[]), action] })} />
         </div>
       );
@@ -902,6 +905,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
         <div className="card">
           <div className="card-title">✨ Feature di classe e tratti</div>
           <FeatureManager features={state.features||[]} onUpdate={features => update({ features })} onRoll={handleRoll}
+            actionNames={actionNames}
             onAddAction={action => update({ actions: [...(state.actions||[]), action] })} />
         </div>
       );

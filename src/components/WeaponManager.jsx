@@ -2,7 +2,14 @@ import { KeywordText } from './Tooltip';
 import React, { useState } from 'react';
 import { WEAPON_PRESETS, WEAPON_PROPERTIES, calcWeaponAttack, fmtWeaponDmg } from '../data/weapons';
 
-export default function WeaponManager({ weapons = [], abilities, profBonus, onUpdate, onRoll, proficiency = '', onUpdateProficiency, onAddAction }) {
+function detectActionType(text) {
+  const t = (text || '').toLowerCase();
+  if (t.includes('azione bonus')) return 'bonus';
+  if (t.includes('reazione')) return 'reaction';
+  return 'free';
+}
+
+export default function WeaponManager({ weapons = [], abilities, profBonus, onUpdate, onRoll, proficiency = '', onUpdateProficiency, onAddAction, actionNames }) {
   const [showAdd, setShowAdd] = useState(false);
   const [customMode, setCustomMode] = useState(false);
   const [form, setForm] = useState({
@@ -81,17 +88,24 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
               </div>
             </div>
             <div className="weapon-actions">
-              {onAddAction && (
-                <button className="icon-btn" style={{ fontSize:11, padding:'2px 5px' }} title="Aggiungi alle azioni"
-                  onClick={() => onAddAction({
-                    id: `weapon_${w.id}_${Date.now()}`,
-                    name: w.name,
-                    type: 'action',
-                    descShort: `${atkStr} per colpire · ${dmgStr} ${w.dmgType}`,
-                    desc: `Attacco con ${w.name}. Tiro per colpire: ${atkStr}. Danni: ${dmgStr} ${w.dmgType}.`,
-                    dice: `1d20${attackBonus >= 0 ? '+' : ''}${attackBonus}`,
-                  })}>⚡</button>
-              )}
+              {onAddAction && (() => {
+                const weaponDesc = `Attacco con ${w.name}. Tiro per colpire: ${atkStr}. Danni: ${dmgStr} ${w.dmgType}.${w.notes ? ' ' + w.notes : ''}`;
+                const added = actionNames?.has(w.name);
+                return (
+                  <button
+                    className={`icon-btn add-to-action-btn ${added ? 'added' : ''}`}
+                    title={added ? 'Già nelle azioni' : 'Aggiungi alle azioni'}
+                    onClick={() => onAddAction({
+                      id: `weapon_${w.id}_${Date.now()}`,
+                      name: w.name,
+                      type: detectActionType(weaponDesc),
+                      descShort: `${atkStr} per colpire · ${dmgStr} ${w.dmgType}`,
+                      desc: weaponDesc,
+                      dice: `1d20${attackBonus >= 0 ? '+' : ''}${attackBonus}`,
+                    })}
+                  >{added ? '✓' : '⚡'}</button>
+                );
+              })()}
               <button
                 className="filter-chip"
                 style={{ fontSize: 11, padding: '2px 8px' }}

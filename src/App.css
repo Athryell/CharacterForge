@@ -799,6 +799,12 @@ body {
   color: var(--c-accent-text);
   background: var(--c-accent-light);
 }
+.add-to-action-btn.added {
+  border-color: #3B6D11;
+  color: #3B6D11;
+  background: #EAF3DE;
+}
+.add-to-action-btn.added:hover { background: #d6ecbf; }
 
 /* ── ABILITY BOX EDIT MODE ─────────────────────────────────────── */
 .ability-score-static {
