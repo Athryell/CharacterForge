@@ -1,15 +1,7 @@
-import { KeywordText } from './Tooltip';
 import React, { useState } from 'react';
 import { WEAPON_PRESETS, WEAPON_PROPERTIES, calcWeaponAttack, fmtWeaponDmg } from '../data/weapons';
 
-function detectActionType(text) {
-  const t = (text || '').toLowerCase();
-  if (t.includes('azione bonus')) return 'bonus';
-  if (t.includes('reazione')) return 'reaction';
-  return 'free';
-}
-
-export default function WeaponManager({ weapons = [], abilities, profBonus, onUpdate, onRoll, proficiency = '', onUpdateProficiency, onAddAction, actionNames }) {
+export default function WeaponManager({ weapons = [], abilities, profBonus, onUpdate, onRoll, proficiency = '', onUpdateProficiency, onAddAction, onRemoveAction, actionNames }) {
   const [showAdd, setShowAdd] = useState(false);
   const [customMode, setCustomMode] = useState(false);
   const [form, setForm] = useState({
@@ -94,15 +86,18 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
                 return (
                   <button
                     className={`icon-btn add-to-action-btn ${added ? 'added' : ''}`}
-                    title={added ? 'Già nelle azioni' : 'Aggiungi alle azioni'}
-                    onClick={() => onAddAction({
-                      id: `weapon_${w.id}_${Date.now()}`,
-                      name: w.name,
-                      type: detectActionType(weaponDesc),
-                      descShort: `${atkStr} per colpire · ${dmgStr} ${w.dmgType}`,
-                      desc: weaponDesc,
-                      dice: `1d20${attackBonus >= 0 ? '+' : ''}${attackBonus}`,
-                    })}
+                    title={added ? 'Rimuovi dalle azioni' : 'Aggiungi alle azioni'}
+                    onClick={() => {
+                      if (added) { onRemoveAction && onRemoveAction(w.name); }
+                      else if (!actionNames?.has(w.name)) { onAddAction({
+                        id: `weapon_${w.id}_${Date.now()}`,
+                        name: w.name,
+                        type: 'action',
+                        descShort: `${atkStr} per colpire · ${dmgStr} ${w.dmgType}`,
+                        desc: weaponDesc,
+                        dice: `1d20${attackBonus >= 0 ? '+' : ''}${attackBonus}`,
+                      }); }
+                    }}
                   >{added ? '✓' : '⚡'}</button>
                 );
               })()}

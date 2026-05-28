@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { CLASSES, ALIGNMENTS, ABILITIES, ABILITY_NAMES, SKILLS, HIT_DICE, SPELLCASTING_CLASS } from '../data/dnd5e';
+import { CLASS_FEATURES, SPECIES_FEATURES, BACKGROUND_FEATURES, getAutoFeatures } from '../data/features';
 
 // SRD 5.5e (2024) — specie: solo tratti, nessun bonus caratteristica
 const SPECIES_SRD = [
@@ -223,8 +224,7 @@ export default function CharacterCreator({ onComplete, onCancel }) {
     saveProficiencies: [],
     skillProficiencies: [],
     charLevel: 1,
-    bgAsiPlus2: '',
-    bgAsiPlus1: '',
+    bgAsi: { FOR:0, DES:0, COS:0, INT:0, SAG:0, CAR:0 },
     customSpecies: '',
     customBackground: '',
     customClass: '',
@@ -267,10 +267,9 @@ export default function CharacterCreator({ onComplete, onCancel }) {
 
   function getFinalAbilities() {
     const base = { ...data.abilities };
-    if (data.bgAsiPlus2 && base[data.bgAsiPlus2] !== undefined)
-      base[data.bgAsiPlus2] = Math.min(20, base[data.bgAsiPlus2] + 2);
-    if (data.bgAsiPlus1 && base[data.bgAsiPlus1] !== undefined && data.bgAsiPlus1 !== data.bgAsiPlus2)
-      base[data.bgAsiPlus1] = Math.min(20, base[data.bgAsiPlus1] + 1);
+    Object.entries(data.bgAsi).forEach(([attr, bonus]) => {
+      if (bonus > 0) base[attr] = Math.min(20, (base[attr] || 10) + bonus);
+    });
     return base;
   }
 
@@ -284,6 +283,11 @@ export default function CharacterCreator({ onComplete, onCancel }) {
     const finalAbs = getFinalAbilities();
     const bgSkills = selectedBg?.skills || [];
     const allSkills = [...new Set([...bgSkills, ...data.skillProficiencies])];
+    const raceName = data.charRace === CUSTOM_SENTINEL ? '' : data.charRace;
+    const bgName = data.charBackground === CUSTOM_SENTINEL ? '' : data.charBackground;
+    const classFeats = getAutoFeatures('class', selectedCls, CLASS_FEATURES);
+    const speciesFeats = raceName ? getAutoFeatures('species', raceName, SPECIES_FEATURES) : [];
+    const bgFeats = bgName ? getAutoFeatures('background', bgName, BACKGROUND_FEATURES) : [];
     return {
       charName: data.charName,
       charClass: selectedCls,
@@ -295,6 +299,7 @@ export default function CharacterCreator({ onComplete, onCancel }) {
       saveProficiencies: CLASS_SAVE_PROFS[selectedCls] || [],
       skillProficiencies: allSkills,
       skillExpertise: [],
+      features: [...classFeats, ...speciesFeats, ...bgFeats],
       hpCurrent: calcHP(finalAbs, selectedCls),
       hpMax: calcHP(finalAbs, selectedCls),
       ac: 10 + Math.floor((finalAbs.DES - 10) / 2),
@@ -379,7 +384,7 @@ export default function CharacterCreator({ onComplete, onCancel }) {
                   const selected = data.charBackground === b.name;
                   return (
                     <div key={b.name} className={`creator-card ${selected ? 'selected' : ''}`}
-                      onClick={() => patch({ charBackground: b.name, bgAsiPlus2: '', bgAsiPlus1: '' })}>
+                      onClick={() => patch({ charBackground: b.name, bgAsi: { FOR:0, DES:0, COS:0, INT:0, SAG:0, CAR:0 } })}>
                       <div className="creator-card-name">{isCustom ? b.label : b.name}</div>
                       {!isCustom && (
                         <div className="creator-card-sub">
@@ -407,38 +412,42 @@ export default function CharacterCreator({ onComplete, onCancel }) {
               {/* ASI dal background */}
               {data.charBackground && data.charBackground !== CUSTOM_SENTINEL && (
                 <div className="creator-info-box" style={{ marginTop: 12 }}>
-                  <strong>Bonus caratteristiche da background:</strong> +2 a una e +1 a un'altra,
-                  oppure +1 a tre diverse.
+                  <strong>Bonus caratteristiche da background</strong> — distribuisci +3 totali (max +2 per caratteristica).
                   {selectedBg?.abilityScores && (
                     <span style={{ color:'var(--c-muted)', marginLeft:6 }}>
                       Consigliate: {selectedBg.abilityScores.map(a => ABILITY_NAMES[a]).join(', ')}
                     </span>
                   )}
-                  <div style={{ display:'flex', gap:12, marginTop:8, flexWrap:'wrap' }}>
-                    <div className="field" style={{ flex:1 }}>
-                      <label>+2 a</label>
-                      <select value={data.bgAsiPlus2}
-                        onChange={e => patch({ bgAsiPlus2: e.target.value, bgAsiPlus1: data.bgAsiPlus1 === e.target.value ? '' : data.bgAsiPlus1 })}>
-                        <option value=''>— Scegli —</option>
-                        {ABILITIES.map(a => (
-                          <option key={a} value={a}>
-                            {ABILITY_NAMES[a]} ({a}){selectedBg?.abilityScores?.includes(a) ? ' ★' : ''}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="field" style={{ flex:1 }}>
-                      <label>+1 a (diversa)</label>
-                      <select value={data.bgAsiPlus1} onChange={e => patch({ bgAsiPlus1: e.target.value })}>
-                        <option value=''>— Scegli —</option>
-                        {ABILITIES.filter(a => a !== data.bgAsiPlus2).map(a => (
-                          <option key={a} value={a}>
-                            {ABILITY_NAMES[a]} ({a}){selectedBg?.abilityScores?.includes(a) ? ' ★' : ''}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
+                  {(() => {
+                    const total = Object.values(data.bgAsi).reduce((s,v) => s+v, 0);
+                    return (
+                      <div style={{ marginTop:8 }}>
+                        <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'6px 12px' }}>
+                          {ABILITIES.map(a => {
+                            const val = data.bgAsi[a];
+                            const recommended = selectedBg?.abilityScores?.includes(a);
+                            return (
+                              <div key={a} style={{ display:'flex', alignItems:'center', gap:4 }}>
+                                <span style={{ fontSize:11, minWidth:32, color: recommended ? 'var(--c-accent)' : 'var(--c-muted)', fontWeight: recommended ? 600 : 400 }}>
+                                  {a}{recommended ? '★' : ''}
+                                </span>
+                                <button className="mod-btn" style={{ fontSize:11, padding:'1px 6px' }}
+                                  onClick={() => val > 0 && patch({ bgAsi: { ...data.bgAsi, [a]: val - 1 } })}>−</button>
+                                <span style={{ minWidth:22, textAlign:'center', fontSize:12, fontWeight:600, color: val > 0 ? 'var(--c-accent)' : 'var(--c-muted)' }}>
+                                  {val > 0 ? `+${val}` : '0'}
+                                </span>
+                                <button className="mod-btn" style={{ fontSize:11, padding:'1px 6px' }}
+                                  onClick={() => (val < 2 && total < 3) && patch({ bgAsi: { ...data.bgAsi, [a]: val + 1 } })}>+</button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <div style={{ marginTop:6, fontSize:11, color: total === 3 ? 'var(--c-accent)' : 'var(--c-muted)' }}>
+                          Totale: {total}/3 {total === 3 ? '✓' : ''}
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
             </div>
@@ -503,16 +512,16 @@ export default function CharacterCreator({ onComplete, onCancel }) {
                 </div>
               )}
 
-              {(data.bgAsiPlus2 || data.bgAsiPlus1) && (
+              {Object.values(data.bgAsi).some(v => v > 0) && (
                 <div className="creator-info-box" style={{ marginBottom:8 }}>
-                  Background: {data.bgAsiPlus2 ? `+2 ${ABILITY_NAMES[data.bgAsiPlus2]}` : ''}{data.bgAsiPlus1 ? `, +1 ${ABILITY_NAMES[data.bgAsiPlus1]}` : ''} (applicati nel riepilogo)
+                  Background: {Object.entries(data.bgAsi).filter(([,v]) => v > 0).map(([a,v]) => `+${v} ${ABILITY_NAMES[a]}`).join(', ')} (applicati nel riepilogo)
                 </div>
               )}
 
               <div className="creator-abilities">
                 {ABILITIES.map(attr => {
                   const base = data.abilities[attr];
-                  const bgMod = (attr === data.bgAsiPlus2 ? 2 : 0) + (attr === data.bgAsiPlus1 ? 1 : 0);
+                  const bgMod = data.bgAsi[attr] || 0;
                   const final = Math.min(20, base + bgMod);
                   const mod = Math.floor((final - 10) / 2);
                   return (
@@ -610,10 +619,10 @@ export default function CharacterCreator({ onComplete, onCancel }) {
                     <div className="creator-summary-row"><span>Talento Origin</span><strong>{selectedBg.feat}</strong></div>
                     <div className="creator-summary-row"><span>Strumento</span><strong>{selectedBg.tool}</strong></div>
                   </>}
-                  {(data.bgAsiPlus2 || data.bgAsiPlus1) && (
+                  {Object.values(data.bgAsi).some(v => v > 0) && (
                     <div className="creator-summary-row">
                       <span>Bonus background</span>
-                      <strong>{data.bgAsiPlus2 ? `+2 ${data.bgAsiPlus2}` : ''}{data.bgAsiPlus1 ? `, +1 ${data.bgAsiPlus1}` : ''}</strong>
+                      <strong>{Object.entries(data.bgAsi).filter(([,v]) => v > 0).map(([a,v]) => `+${v} ${a}`).join(', ')}</strong>
                     </div>
                   )}
                   {SPELLCASTING_CLASS[selectedCls] && (

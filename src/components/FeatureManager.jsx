@@ -17,7 +17,7 @@ function detectActionType(text) {
   return 'free';
 }
 
-export default function FeatureManager({ features = [], onUpdate, onRoll, onAddAction, actionNames }) {
+export default function FeatureManager({ features = [], onUpdate, onRoll, onAddAction, onRemoveAction, actionNames }) {
   const [expanded, setExpanded] = useState(null);
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -83,15 +83,19 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
                     return (
                       <button
                         className={`icon-btn add-to-action-btn ${added ? 'added' : ''}`}
-                        title={added ? 'Già nelle azioni' : 'Aggiungi alle azioni'}
-                        onClick={e => { e.stopPropagation(); onAddAction({
-                          id: `feature_${feature.id}_${Date.now()}`,
-                          name: feature.name,
-                          type: detectActionType(feature.desc),
-                          descShort: feature.source || feature.name,
-                          desc: feature.desc || '',
-                          dice: '',
-                        }); }}
+                        title={added ? 'Rimuovi dalle azioni' : 'Aggiungi alle azioni'}
+                        onClick={e => {
+                          e.stopPropagation();
+                          if (added) { onRemoveAction && onRemoveAction(feature.name); }
+                          else if (!actionNames?.has(feature.name)) { onAddAction({
+                            id: `feature_${feature.id}_${Date.now()}`,
+                            name: feature.name,
+                            type: feature.actionType || detectActionType(feature.desc),
+                            descShort: feature.source || feature.name,
+                            desc: feature.desc || '',
+                            dice: '',
+                          }); }
+                        }}
                       >{added ? '✓' : '⚡'}</button>
                     );
                   })()}

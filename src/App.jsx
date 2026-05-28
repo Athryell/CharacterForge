@@ -759,7 +759,8 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
             onUpdate={weapons => update({ weapons })} onRoll={handleRoll}
             proficiency={state.weaponProficiency||''} onUpdateProficiency={v => update({ weaponProficiency: v })}
             actionNames={actionNames}
-            onAddAction={action => update({ actions: [...(state.actions||[]), action] })} />
+            onAddAction={action => { if (!actionNames.has(action.name)) update({ actions: [...(state.actions||[]), action] }); }}
+            onRemoveAction={name => update({ actions: (state.actions||[]).filter(a => a.name !== name) })} />
         </div>
       );
 
@@ -823,7 +824,8 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
             concentratingSpell={state.concentratingSpell||null}
             onCast={handleCastSpell}
             actionNames={actionNames}
-            onAddAction={action => update({ actions: [...(state.actions||[]), action] })} />
+            onAddAction={action => { if (!actionNames.has(action.name)) update({ actions: [...(state.actions||[]), action] }); }}
+            onRemoveAction={name => update({ actions: (state.actions||[]).filter(a => a.name !== name) })} />
         </div>
       );
 
@@ -906,7 +908,8 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
           <div className="card-title">✨ Feature di classe e tratti</div>
           <FeatureManager features={state.features||[]} onUpdate={features => update({ features })} onRoll={handleRoll}
             actionNames={actionNames}
-            onAddAction={action => update({ actions: [...(state.actions||[]), action] })} />
+            onAddAction={action => { if (!actionNames.has(action.name)) update({ actions: [...(state.actions||[]), action] }); }}
+            onRemoveAction={name => update({ actions: (state.actions||[]).filter(a => a.name !== name) })} />
         </div>
       );
 

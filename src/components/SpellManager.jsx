@@ -16,7 +16,7 @@ function detectActionType(text) {
   return 'free';
 }
 
-export default function SpellManager({ spells = [], charClass, onUpdate, onRoll, allTags = [], onUpdateTags, onCreateTag, spellSlots = [], concentratingSpell = null, onCast, onAddAction, actionNames }) {
+export default function SpellManager({ spells = [], charClass, onUpdate, onRoll, allTags = [], onUpdateTags, onCreateTag, spellSlots = [], concentratingSpell = null, onCast, onAddAction, onRemoveAction, actionNames }) {
   const [view, setView] = useState('list'); // 'list' | 'srd' | 'custom'
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [castMenu, setCastMenu] = useState(null); // spell.name of open cast menu
@@ -48,6 +48,7 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
     onUpdate([...spells, {
       name: spell.name, level: spell.level, school: spell.school,
       concentration: spell.c, ritual: spell.r, prepared: false, desc: spell.desc,
+      actionType: spell.actionType, duration: spell.duration, range: spell.range,
     }]);
   }
 
@@ -154,6 +155,12 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
                         </div>
                         {expanded === spell.name && (
                           <>
+                            {(spell.range || spell.duration) && (
+                              <div style={{ display:'flex', gap:10, marginTop:4, fontSize:11, color:'var(--c-muted)' }}>
+                                {spell.range && <span>📍 {spell.range}</span>}
+                                {spell.duration && <span>⏱ {spell.duration}</span>}
+                              </div>
+                            )}
                             {spell.desc && (
                               <div className="spell-desc">
                                 <KeywordText text={spell.desc} onRoll={onRoll} label={spell.name} />
@@ -216,15 +223,19 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
                         return (
                           <button
                             className={`icon-btn add-to-action-btn ${added ? 'added' : ''}`}
-                            title={added ? 'Già nelle azioni' : 'Aggiungi alle azioni'}
-                            onClick={e => { e.stopPropagation(); onAddAction({
-                              id: `spell_${spell.name}_${Date.now()}`,
-                              name: spell.name,
-                              type: detectActionType(spell.desc),
-                              descShort: `${spell.school}${spell.level === 0 ? ' · Trucchetto' : ` · Liv. ${spell.level}`}${spell.concentration ? ' · Conc.' : ''}`,
-                              desc: spell.desc || '',
-                              dice: '',
-                            }); }}
+                            title={added ? 'Rimuovi dalle azioni' : 'Aggiungi alle azioni'}
+                            onClick={e => {
+                              e.stopPropagation();
+                              if (added) { onRemoveAction && onRemoveAction(spell.name); }
+                              else if (!actionNames?.has(spell.name)) { onAddAction({
+                                id: `spell_${spell.name}_${Date.now()}`,
+                                name: spell.name,
+                                type: spell.actionType || detectActionType(spell.desc),
+                                descShort: `${spell.school}${spell.level === 0 ? ' · Trucchetto' : ` · Liv. ${spell.level}`}${spell.concentration ? ' · Conc.' : ''}${spell.range ? ` · ${spell.range}` : ''}`,
+                                desc: spell.desc || '',
+                                dice: '',
+                              }); }
+                            }}
                           >{added ? '✓' : '⚡'}</button>
                         );
                       })()}
