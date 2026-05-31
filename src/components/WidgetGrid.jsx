@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import WidgetShell from './WidgetShell';
 
 // Placeholder shown in edit mode for empty drop zones
@@ -39,6 +40,7 @@ export default function WidgetGrid({
   widgets, editMode, onLayoutChange, renderWidget,
   hiddenWidgets = [], onRestoreWidget,
 }) {
+  const { t } = useTranslation();
   const [dragId,      setDragId]      = useState(null);
   const [insertKey,   setInsertKey]   = useState(null);
   // insertKey format:
@@ -138,7 +140,7 @@ export default function WidgetGrid({
       <div className="widget-full-section">
         {editMode && (
           <DropPlaceholder
-            label="⬛ Trascina qui per larghezza piena (sopra)"
+            label={t('layout.dragHereFull')}
             onDragOver={() => hover('full:0')}
             onDrop={() => commitDrop('full:0')}
           />
@@ -168,7 +170,7 @@ export default function WidgetGrid({
           <div className="widget-col">
             {editMode && col0.length === 0 && (
               <DropPlaceholder
-                label="▬ Trascina qui (colonna sinistra)"
+                label={t('layout.dragHereLeft')}
                 onDragOver={() => hover('col:0:0')}
                 onDrop={() => commitDrop('col:0:0')}
               />
@@ -193,7 +195,7 @@ export default function WidgetGrid({
           <div className="widget-col">
             {editMode && col1.length === 0 && (
               <DropPlaceholder
-                label="▬ Trascina qui (colonna destra)"
+                label={t('layout.dragHereRight')}
                 onDragOver={() => hover('col:1:0')}
                 onDrop={() => commitDrop('col:1:0')}
               />
@@ -222,7 +224,7 @@ export default function WidgetGrid({
         <div className="widget-full-section widget-bottom-full">
           {editMode && (
             <DropPlaceholder
-              label="⬛ Trascina qui per larghezza piena (sotto le colonne)"
+              label={t('layout.dragHereFull')}
               onDragOver={() => hover('full:end')}
               onDrop={() => commitDrop('full:end')}
             />
@@ -238,11 +240,11 @@ export default function WidgetGrid({
       {/* ── HIDDEN WIDGETS RESTORE ── */}
       {editMode && hiddenWidgets.length > 0 && (
         <div className="widget-hidden-panel">
-          <div className="widget-hidden-title">Widget nascosti</div>
+          <div className="widget-hidden-title">{t('layout.hiddenWidgets')}</div>
           <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
             {hiddenWidgets.map(w => (
               <button key={w.id} className="filter-chip" onClick={() => onRestoreWidget(w.id)}>
-                + {w.label}
+                {t('layout.restore', { label: t(w.label) })}
               </button>
             ))}
           </div>

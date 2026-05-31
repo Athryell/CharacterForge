@@ -24,7 +24,7 @@ export const CLASS_FEATURES = {
     { name: 'Cerchio druidico (liv 2)', desc: 'Scegli una specializzazione: Terra, Luna, ecc.' },
   ],
   Guerriero: [
-    { name: 'Competenze', desc: 'Armature: Tutte, Scudi. Armi: Semplici, da Guerra. Tiri salvezza: Forza, Costituzione. Abilità (2 tra): Acrobazia, Addestrare animali, Atletica, Historia, Intuizione, Intimidire, Percezione, Sopravvivenza.' },
+    { name: 'Competenze', desc: 'Armature: Tutte, Scudi. Armi: Semplici, da Guerra. Tiri salvezza: Forza, Costituzione. Abilità (2 tra): Acrobazia, Addestrare animali, Atletica, Storia, Intuizione, Intimidire, Percezione, Sopravvivenza.' },
     { name: 'Stile di combattimento', desc: 'Scegli uno stile: Arciere (+2 attacchi a distanza), Difesa (+1 CA), Duellante (+2 danni con arma a una mano), Grande arma (riesamina 1-2 su danni), Protezione (reazione per svantaggio ad attacchi contro alleato), Due armi (aggiungi mod. a danni 2° attacco).' },
     { name: 'Riprendere fiato', desc: 'Azione bonus: recupera 1d10 + livello PF. Usi: 1 (ripristinati con riposo breve/lungo).' },
     { name: 'Impeto (liv 2)', desc: 'Azione bonus: compi una seconda azione. Usi: 1 (ripristinati con riposo breve/lungo).' },
@@ -37,13 +37,13 @@ export const CLASS_FEATURES = {
     { name: 'Azione scaltra', desc: 'Azione bonus: Scatto, Disimpegno o Nascondersi.' },
   ],
   Mago: [
-    { name: 'Competenze', desc: 'Armi: Balestre a mano, dardi, fionde, bastoni, spade corte. Tiri salvezza: Intelligenza, Saggezza. Abilità (2 tra): Arcano, Historia, Indagare, Intuizione, Medicina, Religione.' },
+    { name: 'Competenze', desc: 'Armi: Balestre a mano, dardi, fionde, bastoni, spade corte. Tiri salvezza: Intelligenza, Saggezza. Abilità (2 tra): Arcano, Storia, Indagare, Intuizione, Medicina, Religione.' },
     { name: 'Incantesimi (Intelligenza)', desc: 'Incantatore a pieno livello con Intelligenza. Libro degli incantesimi (6 incantesimi al livello 1). Preparati = mod. INT + livello.' },
     { name: 'Recupero arcano', desc: 'Una volta al giorno (riposo breve): recupera slot di livello ≤ metà del livello mago (arrotondato su). Slot max 5°.' },
     { name: 'Tradizione arcana (liv 2)', desc: 'Scegli la scuola di magia o tradizione: Evocazione, Divinazione, Illusione, ecc.' },
   ],
   Monaco: [
-    { name: 'Competenze', desc: 'Armature: Nessuna. Armi: Semplici, spade corte. Tiri salvezza: Forza, Destrezza. Abilità (2 tra): Acrobazia, Atletica, Historia, Furtività, Intuizione, Religione.' },
+    { name: 'Competenze', desc: 'Armature: Nessuna. Armi: Semplici, spade corte. Tiri salvezza: Forza, Destrezza. Abilità (2 tra): Acrobazia, Atletica, Storia, Furtività, Intuizione, Religione.' },
     { name: 'Difesa senza armatura', desc: 'Senza armatura: CA = 10 + mod. DES + mod. SAG.' },
     { name: 'Arti marziali', desc: 'Usa DES invece di FOR per attacchi con armi da monaco. Attacchi disarmati: d4. Dopo attacco arma/disarmato come azione, puoi fare un attacco disarmato come azione bonus.' },
     { name: 'Ki (liv 2)', desc: 'Punti ki = livello (recuperati con riposo breve/lungo). Azioni ki: Attacco fulmineo, Passo del vento, Pazienza del difensore.' },
@@ -68,7 +68,7 @@ export const CLASS_FEATURES = {
     { name: 'Punti stregoneria (liv 2)', desc: 'Converti slot in punti e viceversa. Usati per metamagia.' },
   ],
   Warlock: [
-    { name: 'Competenze', desc: 'Armature: Leggere. Armi: Semplici. Tiri salvezza: Saggezza, Carisma. Abilità (2 tra): Arcano, Inganno, Historia, Intimidire, Indagare, Natura, Religione.' },
+    { name: 'Competenze', desc: 'Armature: Leggere. Armi: Semplici. Tiri salvezza: Saggezza, Carisma. Abilità (2 tra): Arcano, Inganno, Storia, Intimidire, Indagare, Natura, Religione.' },
     { name: 'Patrono ultraterreno', desc: 'Scegli il patrono: Arcidemonio, Antico, Celestiale, Genio… Concede incantesimi di patrono e capacità extra.' },
     { name: 'Incantesimi del patto (Carisma)', desc: 'Pochi slot (1 al liv. 1), ma recuperati con riposo breve/lungo. Tutti i slot al livello massimo disponibile. Conosci incantesimi fissi.' },
     { name: 'Invocazioni occulte (liv 2)', desc: 'Impari 2 invocazioni che potenziano le tue capacità arcane.' },
@@ -171,7 +171,7 @@ export const BACKGROUND_FEATURES = {
     { name: 'Rifugio dei fedeli', desc: 'Puoi ricevere cure gratuite nei templi della tua fede. Il tempio fornisce alloggio e assistenza medica a te e ai tuoi compagni fedeli.' },
   ],
   'Artigiano': [
-    { name: 'Competenze e strumenti', desc: 'Abilità: Historia, Persuasione. Strumenti: 1 set di strumenti artigiani. Lingue: 1 a scelta.' },
+    { name: 'Competenze e strumenti', desc: 'Abilità: Storia, Persuasione. Strumenti: 1 set di strumenti artigiani. Lingue: 1 a scelta.' },
     { name: 'Intermediario commerciale', desc: 'Accesso alla rete mercantile della gilda. Alloggio e risorse presso gilde affiliate.' },
   ],
   'Criminale': [
@@ -195,11 +195,11 @@ export const BACKGROUND_FEATURES = {
     { name: 'Passaggio sicuro', desc: 'Puoi ottenere passaggi gratuiti o economici su navi in cambio di lavoro come marinaio.' },
   ],
   'Nobile': [
-    { name: 'Competenze e strumenti', desc: 'Abilità: Historia, Persuasione. Strumenti: 1 set strumenti da gioco. Lingue: 1 a scelta.' },
+    { name: 'Competenze e strumenti', desc: 'Abilità: Storia, Persuasione. Strumenti: 1 set strumenti da gioco. Lingue: 1 a scelta.' },
     { name: 'Privilegio del rango', desc: 'Accesso a luoghi riservati ai nobili. La gente comune tende ad esserti deferente e a farti favori.' },
   ],
   'Saggio': [
-    { name: 'Competenze e strumenti', desc: 'Abilità: Arcano, Historia. Lingue: 2 a scelta.' },
+    { name: 'Competenze e strumenti', desc: 'Abilità: Arcano, Storia. Lingue: 2 a scelta.' },
     { name: 'Ricercatore', desc: 'Quando cerchi informazioni su un argomento, sai sempre dove trovarle (biblioteche, saggi, università), anche se richiede tempo o favori.' },
   ],
   'Soldato': [
@@ -211,7 +211,7 @@ export const BACKGROUND_FEATURES = {
     { name: 'Segreti della città', desc: 'Conosci passaggi nascosti e segreti delle città dove hai vissuto. Puoi trovare percorsi alternativi che riducono i tempi di spostamento.' },
   ],
   'Seguace di gilda': [
-    { name: 'Competenze e strumenti', desc: 'Abilità: Historia, Persuasione. Strumenti: 1 set strumenti artigiani. Lingue: 1 a scelta.' },
+    { name: 'Competenze e strumenti', desc: 'Abilità: Storia, Persuasione. Strumenti: 1 set strumenti artigiani. Lingue: 1 a scelta.' },
     { name: 'Appartenenza alla gilda', desc: 'Accesso a risorse e rete della gilda. Alloggio, assistenza legale e contatti attraverso la gilda.' },
   ],
 };

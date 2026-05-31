@@ -1,6 +1,8 @@
 import React, { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function TabBar({ tabs, activeTab, onTabChange, editMode, onReorderTabs }) {
+  const { t } = useTranslation();
   const dragIdx     = useRef(null);
   const dragOverIdx = useRef(null);
   const displayTabs = editMode ? tabs : tabs.filter(t => t.visible);
@@ -36,7 +38,7 @@ export default function TabBar({ tabs, activeTab, onTabChange, editMode, onReord
               style={{ opacity: !tab.visible ? 0.4 : 1, cursor: editMode ? 'grab' : 'pointer' }}
             >
               {editMode && <span className="drag-handle">⠿</span>}
-              {tab.icon} {tab.label}
+              {tab.icon} {t(tab.label)}
             </button>
             {editMode && (
               <button className={`tab-eye ${tab.visible ? 'on' : 'off'}`}

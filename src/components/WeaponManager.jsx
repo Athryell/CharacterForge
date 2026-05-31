@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { WEAPON_PRESETS, WEAPON_PROPERTIES, WEAPON_MASTERIES } from '../data/weapons';
 import { TagPill, TagSelector } from './Tags';
 import { NotationHelpBar, KeywordText } from './Tooltip';
@@ -9,6 +10,7 @@ const BLANK_FORM = {
 };
 
 function PropertyMasteryPicker({ properties, mastery, onChangeProperties, onChangeMastery }) {
+  const { t } = useTranslation();
   const [custom, setCustom] = useState('');
   const predefinedKeys = Object.keys(WEAPON_PROPERTIES);
   const customProps = properties.filter(p => !predefinedKeys.includes(p));
@@ -28,7 +30,7 @@ function PropertyMasteryPicker({ properties, mastery, onChangeProperties, onChan
   return (
     <div onClick={e => e.stopPropagation()}>
       <div className="prop-picker-section">
-        <div className="prop-picker-label">Proprietà</div>
+        <div className="prop-picker-label">{t('weapons.propsLabel')}</div>
         <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
           {predefinedKeys.map(key => (
             <button key={key} className={`filter-chip ${properties.includes(key) ? 'active' : ''}`}
@@ -49,14 +51,14 @@ function PropertyMasteryPicker({ properties, mastery, onChangeProperties, onChan
         )}
         <div style={{ display: 'flex', gap: 4, marginTop: 4, alignItems: 'center' }}>
           <input value={custom} onChange={e => setCustom(e.target.value)}
-            placeholder="Proprietà personalizzata..."
+            placeholder={t('weapons.customPropPlaceholder')}
             style={{ flex: 1, fontSize: 12 }}
             onKeyDown={e => e.key === 'Enter' && addCustom()} />
           <button className="io-btn" onClick={addCustom}>+</button>
         </div>
       </div>
       <div className="prop-picker-section" style={{ marginTop: 6 }}>
-        <div className="prop-picker-label">Maestria</div>
+        <div className="prop-picker-label">{t('weapons.masteryLabel')}</div>
         <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
           {Object.entries(WEAPON_MASTERIES).filter(([k]) => k !== 'none').map(([key, { label, desc }]) => (
             <button key={key} className={`filter-chip ${mastery === key ? 'active' : ''}`}
@@ -72,10 +74,10 @@ function PropertyMasteryPicker({ properties, mastery, onChangeProperties, onChan
           </div>
         )}
         <div style={{ marginTop: 4 }}>
-          <div className="prop-picker-label">Maestria personalizzata</div>
+          <div className="prop-picker-label">{t('weapons.customMasteryLabel')}</div>
           <input
             value={isCustomMastery ? mastery : ''}
-            placeholder="Es. Abbattimento, Spinta..."
+            placeholder={t('weapons.customMasteryPlaceholder')}
             style={{ fontSize: 12, width: '100%' }}
             onChange={e => onChangeMastery(e.target.value || 'none')}
           />
@@ -86,27 +88,28 @@ function PropertyMasteryPicker({ properties, mastery, onChangeProperties, onChan
 }
 
 function WeaponEditForm({ form, onChange, onSave, onCancel, onDelete, added, onToggleAction, allTags, onUpdateTags, onCreateTag, weaponId }) {
+  const { t } = useTranslation();
   function patch(obj) { onChange(f => ({ ...f, ...obj })); }
 
   return (
     <div className="weapon-edit-form" onClick={e => e.stopPropagation()}>
       <div className="field-row">
         <div className="field" style={{ flex: 2 }}>
-          <label>Nome</label>
+          <label>{t('weapons.customName')}</label>
           <input value={form.name} onChange={e => patch({ name: e.target.value })}
             placeholder="Es. Spada del nonno" autoFocus />
         </div>
         <div className="field" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-          <label>Competenza</label>
+          <label>{t('weapons.profLabel')}</label>
           <label className="toggle-box" style={{ marginTop: 6 }}>
             <input type="checkbox" checked={form.isProficient}
               onChange={e => patch({ isProficient: e.target.checked })} />
-            <span className="toggle-label">Hai competenza</span>
+            <span className="toggle-label">{t('weapons.customProf')}</span>
           </label>
         </div>
       </div>
       <div className="field" style={{ marginTop: 6 }}>
-        <label>Proprietà e Maestria</label>
+        <label>{t('weapons.propsAndMasteryLabel')}</label>
         <PropertyMasteryPicker
           properties={form.properties || []}
           mastery={form.mastery || 'none'}
@@ -114,10 +117,10 @@ function WeaponEditForm({ form, onChange, onSave, onCancel, onDelete, added, onT
           onChangeMastery={mastery => patch({ mastery })} />
       </div>
       <div className="field" style={{ marginTop: 6 }}>
-        <label>Descrizione / Note</label>
+        <label>{t('weapons.descLabel')}</label>
         <BonusTextarea className="notes-area" style={{ minHeight: 48 }}
           value={form.desc || ''} onChange={e => patch({ desc: e.target.value })}
-          placeholder="Descrizione, proprietà speciali, storia... (@ per bonus)" />
+          placeholder={t('weapons.descPlaceholder')} />
         <NotationHelpBar />
       </div>
       {allTags && weaponId && (
@@ -130,18 +133,18 @@ function WeaponEditForm({ form, onChange, onSave, onCancel, onDelete, added, onT
         <div style={{ display: 'flex', gap: 6 }}>
           {onToggleAction && (
             <button className={`icon-btn add-to-action-btn ${added ? 'added' : ''}`}
-              title={added ? 'Rimuovi dalle azioni' : 'Aggiungi alle azioni'}
+              title={added ? t('common.removeFromAction') : t('common.addToAction')}
               onClick={e => { e.stopPropagation(); onToggleAction(); }}>
               {added ? '✓' : '⚡'}
             </button>
           )}
           {onDelete && (
-            <button className="io-btn danger" onClick={e => { e.stopPropagation(); onDelete(); }}>✕ Elimina</button>
+            <button className="io-btn danger" onClick={e => { e.stopPropagation(); onDelete(); }}>{t('common.deleteBtn')}</button>
           )}
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button className="io-btn" onClick={onCancel}>Annulla</button>
-          <button className="io-btn primary" onClick={onSave} disabled={!form.name.trim()}>✓ Salva</button>
+          <button className="io-btn" onClick={onCancel}>{t('common.cancel')}</button>
+          <button className="io-btn primary" onClick={onSave} disabled={!form.name.trim()}>{t('common.save')}</button>
         </div>
       </div>
     </div>
@@ -149,6 +152,7 @@ function WeaponEditForm({ form, onChange, onSave, onCancel, onDelete, added, onT
 }
 
 export default function WeaponManager({ weapons = [], abilities, profBonus, onUpdate, onRoll, proficiency = '', onUpdateProficiency, onAddAction, onRemoveAction, actionNames, addOpen, onAddClose, allTags = [], onUpdateTags, onCreateTag }) {
+  const { t } = useTranslation();
   const [addMode, setAddMode] = useState('preset');
   const [addForm, setAddForm] = useState(BLANK_FORM);
   const [editingId, setEditingId] = useState(null);
@@ -197,17 +201,17 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
   return (
     <div>
       <div className="proficiency-field">
-        <span className="proficiency-label">Competenza:</span>
+        <span className="proficiency-label">{t('weapons.proficiencyLabel')}</span>
         <input className="proficiency-input" value={proficiency}
           onChange={e => onUpdateProficiency && onUpdateProficiency(e.target.value)}
-          placeholder="Es. Armi semplici, spade corte, archi..." />
+          placeholder={t('weapons.proficiencyPlaceholder')} />
       </div>
 
       {addOpen && (
         <div className="weapon-add-panel" style={{ marginBottom: 12 }}>
           <div className="creator-method-bar" style={{ marginBottom: 10 }}>
-            <button className={`filter-chip ${addMode === 'preset' ? 'active' : ''}`} onClick={() => setAddMode('preset')}>Preset SRD</button>
-            <button className={`filter-chip ${addMode === 'custom' ? 'active' : ''}`} onClick={() => setAddMode('custom')}>Personalizzata</button>
+            <button className={`filter-chip ${addMode === 'preset' ? 'active' : ''}`} onClick={() => setAddMode('preset')}>{t('weapons.presetSRD')}</button>
+            <button className={`filter-chip ${addMode === 'custom' ? 'active' : ''}`} onClick={() => setAddMode('custom')}>{t('weapons.custom')}</button>
           </div>
           {addMode === 'preset' ? (
             <div className="weapon-preset-list">
@@ -230,13 +234,13 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
               onCancel={onAddClose} />
           )}
           {addMode === 'preset' && (
-            <button className="io-btn" style={{ marginTop: 8 }} onClick={onAddClose}>Annulla</button>
+            <button className="io-btn" style={{ marginTop: 8 }} onClick={onAddClose}>{t('common.cancel')}</button>
           )}
         </div>
       )}
 
       {weapons.length === 0 && (
-        <div className="hint-text" style={{ padding: '8px 0' }}>Nessuna arma. Clicca "+" per aggiungerne una.</div>
+        <div className="hint-text" style={{ padding: '8px 0' }}>{t('weapons.noWeapons')}</div>
       )}
 
       {weapons.map(w => {
@@ -252,7 +256,7 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
             <div className="weapon-main" onClick={() => handleRowClick(w)} style={{ cursor: 'pointer' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                 <div className="weapon-name">{w.name}</div>
-                {(w.tags || []).map(t => <TagPill key={t} tag={t} allTags={allTags} small />)}
+                {(w.tags || []).map(tag => <TagPill key={tag} tag={tag} allTags={allTags} small />)}
                 {w.mastery && w.mastery !== 'none' && WEAPON_MASTERIES[w.mastery] && (
                   <span className="weapon-prop" style={{ fontSize: 10, color: 'var(--c-accent-text)', background: 'var(--c-accent-light)' }}
                     title={WEAPON_MASTERIES[w.mastery]?.desc}>
@@ -263,7 +267,7 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
               <div className="weapon-meta">
                 {predefinedProps.map(p => <span key={p} className="weapon-prop">{WEAPON_PROPERTIES[p]}</span>)}
                 {customProps.map(p => <span key={p} className="weapon-prop">{p}</span>)}
-                {!w.isProficient && <span className="weapon-prop" style={{ color: 'var(--c-warn-text)' }}>Senza competenza</span>}
+                {!w.isProficient && <span className="weapon-prop" style={{ color: 'var(--c-warn-text)' }}>{t('weapons.noProf')}</span>}
               </div>
             </div>
 
@@ -304,16 +308,16 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
                     <>
                       <TagSelector selected={w.tags || []} allTags={allTags}
                         onChange={tags => onUpdateTags && onUpdateTags(w.id, tags)} onCreateTag={onCreateTag} />
-                      <button className="tag-edit-btn" style={{ marginTop: 4 }} onClick={() => setEditingTagsFor(null)}>✓ Fine</button>
+                      <button className="tag-edit-btn" style={{ marginTop: 4 }} onClick={() => setEditingTagsFor(null)}>{t('common.tagDone')}</button>
                     </>
                   ) : (
                     <button className="tag-edit-btn" onClick={() => setEditingTagsFor(w.id)}>
-                      🏷 {(w.tags || []).length === 0 ? 'Aggiungi tag' : 'Modifica tag'}
+                      {(w.tags || []).length === 0 ? t('common.addTag') : t('common.editTags')}
                     </button>
                   )}
                 </div>
                 <div className="item-edit-actions">
-                  <button className="io-btn" onClick={e => { e.stopPropagation(); startEdit(w); }}>✏ Modifica</button>
+                  <button className="io-btn" onClick={e => { e.stopPropagation(); startEdit(w); }}>{t('common.edit')}</button>
                 </div>
               </div>
             )}

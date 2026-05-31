@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useCharacter } from './hooks/useCharacter';
 import { loadCharsIndex, deleteChar, getActiveCharId, setActiveCharId, generateCharId, migrateLegacy, saveCharState } from './chars';
 import CharacterSelect from './components/CharacterSelect';
@@ -103,13 +104,14 @@ function HPBar({ current, max }) {
 }
 
 function SpellSlots({ slots, onToggle }) {
+  const { t } = useTranslation();
   return (
     <div>
       {slots.map((slot, i) => {
         if (!slot.max) return null;
         return (
           <div key={i} className="spell-slot-row">
-            <div className="slot-level">{i + 1}° liv.</div>
+            <div className="slot-level">{t('spells.slotLevel', { level: i + 1 })}</div>
             <div className="slot-pips">
               {Array.from({ length: slot.max }, (_, j) => (
                 <div key={j} className={`slot-pip ${j >= slot.used ? 'available' : 'used'}`}
@@ -124,15 +126,17 @@ function SpellSlots({ slots, onToggle }) {
   );
 }
 
-const ACTION_TYPES = [['action','Azione'],['bonus','Bonus'],['reaction','Reazione'],['free','Gratuita']];
+const ACTION_TYPE_KEYS = ['action', 'bonus', 'reaction', 'free'];
 
 function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag, onRemove, onEdit, onToggleHide }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const [editingTags, setEditingTags] = useState(false);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState(null);
   const badgeClass = { action:'badge-action', bonus:'badge-bonus', reaction:'badge-reaction', free:'badge-free' }[action.type] || 'badge-free';
-  const typeLabel = { action:'Azione', bonus:'Bonus', reaction:'Reazione', free:'Gratuita' }[action.type] || action.type;
+  const typeLabels = { action: t('actions.typeAction'), bonus: t('actions.typeBonus'), reaction: t('actions.typeReaction'), free: t('actions.typeFree') };
+  const typeLabel = typeLabels[action.type] || action.type;
   const isHidden = !!action.hidden;
 
   function startEdit(e) {
@@ -152,16 +156,16 @@ function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag, o
         <div className={`action-badge ${badgeClass}`}>
           <select value={form.type} onChange={e => setForm(f => ({...f, type: e.target.value}))}
             style={{ background:'transparent', border:'none', color:'inherit', font:'inherit', cursor:'pointer' }}>
-            {ACTION_TYPES.map(([v,l]) => <option key={v} value={v}>{l}</option>)}
+            {ACTION_TYPE_KEYS.map(v => <option key={v} value={v}>{typeLabels[v]}</option>)}
           </select>
         </div>
         <div className="action-content" style={{ flex:1 }}>
           <input value={form.name} onChange={e => setForm(f => ({...f, name: e.target.value}))}
-            style={{ width:'100%', marginBottom:4, fontSize:13, fontWeight:600 }} placeholder="Nome azione" autoFocus />
+            style={{ width:'100%', marginBottom:4, fontSize:13, fontWeight:600 }} placeholder={t('actions.addFormNamePlaceholder')} autoFocus />
           <textarea value={form.desc} onChange={e => setForm(f => ({...f, desc: e.target.value}))}
-            className="notes-area" style={{ minHeight:48, marginBottom:4 }} placeholder="Descrizione completa" />
+            className="notes-area" style={{ minHeight:48, marginBottom:4 }} placeholder={t('actions.addFormDescPlaceholder')} />
           <input value={form.dice} onChange={e => setForm(f => ({...f, dice: e.target.value}))}
-            style={{ width:'100%', fontSize:11 }} placeholder="Dado (es. 1d20+3, vuoto se nessuno)" />
+            style={{ width:'100%', fontSize:11 }} placeholder={t('actions.addFormDicePlaceholder')} />
           <div style={{ display:'flex', gap:6, marginTop:8, justifyContent:'space-between', alignItems:'center' }}>
             <div style={{ display:'flex', gap:6 }}>
               {onToggleHide && (
@@ -171,12 +175,12 @@ function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag, o
                 </button>
               )}
               {onRemove && (
-                <button className="io-btn danger" onClick={e => { e.stopPropagation(); onRemove(action.id); setEditing(false); }}>✕ Elimina</button>
+                <button className="io-btn danger" onClick={e => { e.stopPropagation(); onRemove(action.id); setEditing(false); }}>{t('actions.deleteBtn')}</button>
               )}
             </div>
             <div style={{ display:'flex', gap:6 }}>
-              <button className="io-btn" onClick={e => { e.stopPropagation(); setEditing(false); }}>Annulla</button>
-              <button className="io-btn primary" onClick={saveEdit}>✓ Salva</button>
+              <button className="io-btn" onClick={e => { e.stopPropagation(); setEditing(false); }}>{t('common.cancel')}</button>
+              <button className="io-btn primary" onClick={saveEdit}>{t('common.save')}</button>
             </div>
           </div>
         </div>
@@ -199,7 +203,7 @@ function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag, o
             <KeywordText text={action.desc} onRoll={onRoll} label={action.name} />
             {action.dice && (
               <div className="action-roll" onClick={e => { e.stopPropagation(); onRoll(action.dice, action.name); }}>
-                🎲 Lancia {action.dice}
+                {t('actions.rollLabel')} {action.dice}
               </div>
             )}
             <div style={{ marginTop:8 }}>
@@ -208,16 +212,16 @@ function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag, o
                   <TagSelector selected={action.tags||[]} allTags={allTags}
                     onChange={tags => onUpdateTags && onUpdateTags(action.id, tags)}
                     onCreateTag={onCreateTag} />
-                  <button className="tag-edit-btn" style={{ marginLeft:6 }} onClick={e => { e.stopPropagation(); setEditingTags(false); }}>✓ Fine</button>
+                  <button className="tag-edit-btn" style={{ marginLeft:6 }} onClick={e => { e.stopPropagation(); setEditingTags(false); }}>{t('actions.tagDone')}</button>
                 </>
               ) : (
                 <button className="tag-edit-btn" onClick={e => { e.stopPropagation(); setEditingTags(true); }}>
-                  🏷 {(action.tags||[]).length === 0 ? 'Aggiungi tag' : 'Modifica tag'}
+                  {(action.tags||[]).length === 0 ? t('actions.addTagBtn') : t('actions.editTagBtn')}
                 </button>
               )}
             </div>
             <div className="item-edit-actions">
-              <button className="io-btn" onClick={startEdit}>✏ Modifica</button>
+              <button className="io-btn" onClick={startEdit}>{t('common.edit')}</button>
             </div>
           </div>
         )}
@@ -228,6 +232,7 @@ function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag, o
 
 // ── Character App (single character) ────────────────────────────
 function CharacterApp({ charId, onBackToSelect, onNewChar }) {
+  const { t, i18n } = useTranslation();
   const char = useCharacter(charId);
   const { state, update } = char;
 
@@ -337,19 +342,19 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
   }
   function handleLongRest() {
     char.longRest();
-    showToast('Riposo lungo: HP e slot ripristinati!');
-    addLog('🌙', 'Riposo lungo — HP e slot ripristinati');
+    showToast(t('toast.longRest'));
+    addLog('🌙', t('toast.longRest'));
   }
   function handleShortRest() {
-    const msg = char.shortRest();
-    showToast(msg);
-    addLog('☀', 'Riposo breve');
+    char.shortRest();
+    showToast(t('toast.shortRest'));
+    addLog('☀', t('toast.shortRest'));
   }
   function handleCastSpell(spell, level) {
     const updates = {};
     if (spell.level > 0 && level > 0) {
       const slot = (state.spellSlots || [])[level - 1];
-      if (!slot || slot.used >= slot.max) { showToast('Nessuno slot disponibile!'); return; }
+      if (!slot || slot.used >= slot.max) { showToast(t('toast.noSlot')); return; }
       updates.spellSlots = state.spellSlots.map((s, i) => i === level - 1 ? { ...s, used: s.used + 1 } : s);
     }
     if (spell.concentration) {
@@ -362,21 +367,21 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
     }
     update(updates);
     const lvlNote = spell.level > 0 && level > spell.level ? ` (slot ${level}°)` : '';
-    addLog('✨', `Lanciato: ${spell.name}${lvlNote}`);
-    showToast(`✨ ${spell.name} lanciato!`);
+    addLog('✨', `${spell.name}${lvlNote}`);
+    showToast(t('toast.spellCast', { name: spell.name }));
   }
 
   function handleCreatorComplete(newState) {
     setShowCreator(false);
-    showToast(`Personaggio "${newState.charName}" creato!`);
+    showToast(t('toast.creatorDone', { name: newState.charName }));
     if (onNewChar) onNewChar(newState);
   }
   function handleImport(e) {
     const file = e.target.files[0]; if (!file) return;
     const reader = new FileReader();
     reader.onload = ev => {
-      try { char.importState(JSON.parse(ev.target.result)); showToast('Personaggio importato!'); }
-      catch { showToast('Errore: file JSON non valido.'); }
+      try { char.importState(JSON.parse(ev.target.result)); showToast(t('toast.imported')); }
+      catch { showToast(t('toast.importError')); }
     };
     reader.readAsText(file); e.target.value = '';
   }
@@ -430,31 +435,31 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
       case 'identity': return (
         <div className={`card${ce}`}>
           <div className="card-title" style={{ justifyContent:'space-between' }}>
-            <span>👤 Identità</span>
+            <span>👤 {t('widgets.identity')}</span>
             <button className={`icon-btn ${editingIdentity ? 'active' : ''}`} onClick={() => setEditingIdentity(v => !v)}>
               {editingIdentity ? '✓' : '✏'}
             </button>
           </div>
           <div className="identity-layout">
             {state.charImage && (
-              <img src={state.charImage} alt="Personaggio" className="char-thumbnail"
+              <img src={state.charImage} alt={t('widgets.identity')} className="char-thumbnail"
                 onError={e => { e.target.style.display='none'; }} />
             )}
             {editingIdentity ? (
               <div className="grid-2" style={{ flex:1 }}>
-                <Field label="Nome"><input value={state.charName} onChange={e => update({ charName: e.target.value })} placeholder="Es. Aldric Voss" /></Field>
-                <Field label="Classe">
+                <Field label={t('identity.name')}><input value={state.charName} onChange={e => update({ charName: e.target.value })} placeholder="Es. Aldric Voss" /></Field>
+                <Field label={t('identity.class')}>
                   <select value={state.charClass} onChange={e => {
                     const cls = e.target.value;
                     char.onClassOrLevelChange({ charClass: cls });
                     const kept = (state.features||[]).filter(f => f.sourceType !== 'class');
                     update({ features: [...kept, ...getAutoFeatures('class', cls, CLASS_FEATURES)] });
                   }}>
-                    <option value="">— Scegli classe —</option>
+                    <option value="">{t('identity.classPlaceholder')}</option>
                     {CLASSES.map(c => <option key={c}>{c}</option>)}
                   </select>
                 </Field>
-                <Field label="Specie">
+                <Field label={t('identity.species')}>
                   <select value={state.charRace} onChange={e => {
                     const race = e.target.value;
                     update({ charRace: race });
@@ -465,15 +470,15 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
                       update({ charRace: race });
                     }
                   }}>
-                    <option value="">— Scegli specie —</option>
+                    <option value="">{t('identity.speciesPlaceholder')}</option>
                     {SPECIES_LIST.map(r => <option key={r}>{r}</option>)}
-                    <option value="__custom__">Personalizzata...</option>
+                    <option value="__custom__">{t('identity.speciesCustom')}</option>
                   </select>
                   {state.charRace === '__custom__' && (
-                    <input style={{ marginTop:4 }} value={state.charRaceCustom||''} onChange={e => update({ charRaceCustom: e.target.value })} placeholder="Scrivi la specie..." />
+                    <input style={{ marginTop:4 }} value={state.charRaceCustom||''} onChange={e => update({ charRaceCustom: e.target.value })} placeholder={t('identity.speciesCustomPlaceholder')} />
                   )}
                 </Field>
-                <Field label="Background">
+                <Field label={t('identity.background')}>
                   <select value={state.charBackground} onChange={e => {
                     const bg = e.target.value;
                     if (bg && bg !== '__custom__') {
@@ -483,42 +488,42 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
                       update({ charBackground: bg });
                     }
                   }}>
-                    <option value="">— Scegli background —</option>
+                    <option value="">{t('identity.backgroundPlaceholder')}</option>
                     {BACKGROUNDS_LIST.map(b => <option key={b}>{b}</option>)}
-                    <option value="__custom__">Personalizzato...</option>
+                    <option value="__custom__">{t('identity.backgroundCustom')}</option>
                   </select>
                   {state.charBackground === '__custom__' && (
-                    <input style={{ marginTop:4 }} value={state.charBackgroundCustom||''} onChange={e => update({ charBackgroundCustom: e.target.value })} placeholder="Scrivi il background..." />
+                    <input style={{ marginTop:4 }} value={state.charBackgroundCustom||''} onChange={e => update({ charBackgroundCustom: e.target.value })} placeholder={t('identity.backgroundCustomPlaceholder')} />
                   )}
                 </Field>
-                <Field label="Livello">
+                <Field label={t('identity.level')}>
                   <div className="hp-stepper" style={{ gap:4 }}>
                     <button className="mod-btn" onClick={() => char.onClassOrLevelChange({ charLevel: Math.max(1, state.charLevel-1) })}>−</button>
                     <input type="number" min="1" max="20" style={{ width:50, textAlign:'center' }} value={state.charLevel} onChange={e => char.onClassOrLevelChange({ charLevel: Math.max(1, parseInt(e.target.value)||1) })} />
                     <button className="mod-btn" onClick={() => char.onClassOrLevelChange({ charLevel: Math.min(20, state.charLevel+1) })}>+</button>
                   </div>
                 </Field>
-                <Field label="Bonus competenza"><input value={`+${char.profBonus}`} readOnly /></Field>
-                <Field label="Allineamento">
+                <Field label={t('identity.profBonus')}><input value={`+${char.profBonus}`} readOnly /></Field>
+                <Field label={t('identity.alignment')}>
                   <select value={state.charAlignment} onChange={e => update({ charAlignment: e.target.value })}>
                     {ALIGNMENTS.map(a => <option key={a}>{a}</option>)}
                   </select>
                 </Field>
-                <Field label="Esperienza (XP)">
+                <Field label={t('identity.xp')}>
                   <input type="number" min="0" value={state.charXP} onChange={e => update({ charXP: parseInt(e.target.value)||0 })} />
                 </Field>
               </div>
             ) : (
               <div className="identity-info-grid">
                 {[
-                  ['Nome', state.charName || '—'],
-                  ['Classe', state.charClass || '—'],
-                  ['Livello', state.charLevel],
-                  ['Bonus competenza', `+${char.profBonus}`],
-                  ['Specie', state.charRace === '__custom__' ? (state.charRaceCustom||'—') : (state.charRace||'—')],
-                  ['Background', state.charBackground === '__custom__' ? (state.charBackgroundCustom||'—') : (state.charBackground||'—')],
-                  ['Allineamento', state.charAlignment || '—'],
-                  ...(state.charXP ? [['Esperienza', state.charXP]] : []),
+                  [t('identity.name'), state.charName || '—'],
+                  [t('identity.class'), state.charClass || '—'],
+                  [t('identity.level'), state.charLevel],
+                  [t('identity.profBonus'), `+${char.profBonus}`],
+                  [t('identity.species'), state.charRace === '__custom__' ? (state.charRaceCustom||'—') : (state.charRace||'—')],
+                  [t('identity.background'), state.charBackground === '__custom__' ? (state.charBackgroundCustom||'—') : (state.charBackground||'—')],
+                  [t('identity.alignment'), state.charAlignment || '—'],
+                  ...(state.charXP ? [[t('identity.experienceShort'), state.charXP]] : []),
                 ].map(([label, val]) => (
                   <div key={label} className="identity-info-item">
                     <div className="identity-info-label">{label}</div>
@@ -529,7 +534,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
             )}
           </div>
           {editingIdentity && (
-            <Field label="🖼 Immagine personaggio (URL)">
+            <Field label={t('identity.imageUrl')}>
               <input value={state.charImage||''} onChange={e => update({ charImage: e.target.value })}
                 placeholder="https://..." style={{ marginTop:6 }} />
             </Field>
@@ -540,7 +545,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
       case 'abilities': return (
         <div className={`card${ce}`}>
           <div className="card-title" style={{ justifyContent:'space-between' }}>
-            <span>🎲 Caratteristiche</span>
+            <span>🎲 {t('widgets.abilities')}</span>
             <button className={`icon-btn ${editingAbilities ? 'active' : ''}`} onClick={() => setEditingAbilities(e => !e)}>
               {editingAbilities ? '✓' : '✏'}
             </button>
@@ -561,7 +566,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
 
       case 'saves': return (
         <div className="card">
-          <div className="card-title">🛡 Tiri salvezza</div>
+          <div className="card-title">🛡 {t('widgets.saves')}</div>
           <div className="check-list">
             {ABILITIES.map(attr => {
               const prof = state.saveProficiencies.includes(attr);
@@ -583,7 +588,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
 
       case 'skills': return (
         <div className="card">
-          <div className="card-title">🔧 Abilità</div>
+          <div className="card-title">🔧 {t('widgets.skills')}</div>
           <div className="check-list">
             {SKILLS.map(sk => {
               const prof = state.skillProficiencies.includes(sk.name);
@@ -604,10 +609,10 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
 
       case 'senses': return (
         <div className="card">
-          <div className="card-title">👁 Sensi</div>
+          <div className="card-title">👁 {t('widgets.senses')}</div>
           <div className="field-row">
-            <Field label="Percezione passiva"><input value={char.passivePerception} readOnly /></Field>
-            <Field label="Dadi vita"><input value={char.hitDice} readOnly /></Field>
+            <Field label={t('senses.passivePerception')}><input value={char.passivePerception} readOnly /></Field>
+            <Field label={t('senses.hitDice')}><input value={char.hitDice} readOnly /></Field>
           </div>
         </div>
       );
@@ -615,14 +620,14 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
       case 'hp': return (
         <div className={`card${ce}`}>
           <div className="card-title" style={{ justifyContent:'space-between' }}>
-            <span>❤ Punti ferita</span>
+            <span>❤ {t('widgets.hp')}</span>
             <button className={`icon-btn ${editingHP ? 'active' : ''}`} onClick={() => setEditingHP(e => !e)}>
               {editingHP ? '✓' : '✏'}
             </button>
           </div>
           <div className="hp-labeled-row">
             <div className="hp-labeled-group">
-              <div className="hp-label">Attuali</div>
+              <div className="hp-label">{t('hp.current')}</div>
               <div className="hp-stepper">
                 <button className="mod-btn" onClick={() => update({ hpCurrent: Math.max(0, state.hpCurrent-1) })}>−</button>
                 <input className="hp-big" type="number" value={state.hpCurrent} onChange={e => update({ hpCurrent: Math.max(0, parseInt(e.target.value)||0) })} />
@@ -632,7 +637,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
             <span className="hp-sep">/</span>
             <div className="hp-labeled-group">
               <div className="hp-label">
-                {editingHP ? 'Massimi (base)' : 'Massimi'}
+                {t('hp.max')}{editingHP ? t('hp.maxBase') : ''}
                 {equipBonuses.HP ? (
                   <span className="equip-bonus-badge" style={{ marginLeft:4 }}
                     title={(equipBonusesDetailed.HP||[]).map(s => `${s.name}: ${s.value>=0?'+':''}${s.value}`).join(', ')}>
@@ -673,19 +678,19 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
               const temp = state.hpTemp||0;
               if (temp > 0) { const r = temp-hpAmount; r >= 0 ? update({ hpTemp:r }) : update({ hpTemp:0, hpCurrent:Math.max(0,state.hpCurrent+r) }); }
               else char.modHP(-hpAmount);
-            }}>💔 Danno</button>
-            <button className="hp-action-btn success" onClick={() => char.modHP(hpAmount)}>💚 Cura</button>
-            <button className="hp-action-btn temp" onClick={() => update({ hpTemp: hpAmount })}>🛡 Temp</button>
+            }}>{t('hp.damage')}</button>
+            <button className="hp-action-btn success" onClick={() => char.modHP(hpAmount)}>{t('hp.heal')}</button>
+            <button className="hp-action-btn temp" onClick={() => update({ hpTemp: hpAmount })}>{t('hp.tempBtn')}</button>
           </div>
         </div>
       );
 
       case 'combatStats': return (
         <div className="card">
-          <div className="card-title">⚔ Statistiche combattimento</div>
+          <div className="card-title">⚔ {t('widgets.combatStats')}</div>
           <div className="grid-3">
             <div className="stat-pill">
-              <div className="stat-pill-label">CA</div>
+              <div className="stat-pill-label">{t('combat.ac')}</div>
               <input className="stat-pill-input" type="number"
                 value={state.ac + (equipBonuses.CA || 0)}
                 onChange={e => update({ ac: (parseInt(e.target.value)||10) - (equipBonuses.CA||0) })} />
@@ -699,7 +704,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
             <div className="stat-pill clickable-stat"
               onClick={() => { const im = getMod(effectiveAbilities.DES) + (equipBonuses.INI || 0); handleRoll(`1d20${im >= 0 ? '+' : ''}${im}`, 'Iniziativa'); }}
               title={`Tira iniziativa: 1d20${fmtMod(getMod(effectiveAbilities.DES) + (equipBonuses.INI || 0))}`}>
-              <div className="stat-pill-label">Iniziativa</div>
+              <div className="stat-pill-label">{t('combat.initiative')}</div>
               <div className="stat-pill-val">{fmtMod(getMod(effectiveAbilities.DES) + (equipBonuses.INI || 0))}</div>
               {equipBonuses.INI ? (
                 <span className="equip-bonus-badge"
@@ -709,7 +714,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
               ) : null}
             </div>
             <div className="stat-pill">
-              <div className="stat-pill-label">Velocità</div>
+              <div className="stat-pill-label">{t('combat.speed')}</div>
               <input className="stat-pill-input" type="text" value={state.speed} onChange={e => update({ speed:e.target.value })} />
               {equipBonuses.VEL ? (
                 <span className="equip-bonus-badge"
@@ -729,7 +734,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
             <div style={{ display:'flex', alignItems:'center', gap:10 }}>
               <button className={`inspiration-btn ${state.inspiration ? 'active' : ''}`} onClick={() => update({ inspiration:!state.inspiration })}>⭐</button>
               <span className="toggle-label" style={{ color: state.inspiration ? '#856404' : 'var(--c-hint)' }}>
-                {state.inspiration ? 'Ispirazione!' : 'No ispirazione'}
+                {state.inspiration ? t('combat.inspiration') : t('combat.noInspiration')}
               </span>
             </div>
             <div style={{ display:'flex', alignItems:'center', gap:10 }}>
@@ -738,8 +743,8 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
                 onClick={() => update({ concentrating:!state.concentrating, concentratingSpell: state.concentrating ? null : state.concentratingSpell })}>🎯</button>
               <span className="toggle-label" style={{ color: state.concentrating ? '#185FA5' : 'var(--c-hint)' }}>
                 {state.concentrating
-                  ? (state.concentratingSpell ? `Concentrazione (${state.concentratingSpell})` : 'Concentrazione')
-                  : 'No concentrazione'}
+                  ? (state.concentratingSpell ? `${t('combat.concentrating')} (${state.concentratingSpell})` : t('combat.concentrating'))
+                  : t('combat.noConcentration')}
               </span>
             </div>
           </div>
@@ -752,7 +757,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
           <div className="death-saves">
             {['success','failure'].map(type => (
               <div key={type} className="save-group">
-                <div className="save-group-label">{type === 'success' ? 'Successi' : 'Fallimenti'}</div>
+                <div className="save-group-label">{type === 'success' ? t('combat.deathSuccess') : t('combat.deathFail')}</div>
                 <div className="save-pips">
                   {[0,1,2].map(i => {
                     const arr = type === 'success' ? (state.deathSuccess||[false,false,false]) : (state.deathFail||[false,false,false]);
@@ -774,7 +779,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
 
       case 'conditions': return (
         <div className="card">
-          <div className="card-title">🔮 Condizioni</div>
+          <div className="card-title">🔮 {t('widgets.conditions')}</div>
           <ConditionTracker
             active={state.conditions||[]}
             onChange={conditions => update({ conditions })}
@@ -787,12 +792,12 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
       case 'actions': return (
         <div className="card">
           <div className="card-title" style={{ justifyContent:'space-between' }}>
-            <span>⚡ Azioni</span>
+            <span>⚡ {t('widgets.actions')}</span>
             <button className={`icon-btn ${addOpenFor === 'actions' ? 'active' : ''}`}
               onClick={() => setAddOpenFor(v => v === 'actions' ? null : 'actions')}>+</button>
           </div>
           <div className="filter-bar">
-            {[['all','Tutte'],['action','Azione'],['bonus','Bonus'],['reaction','Reazione'],['free','Gratuita']].map(([v,l]) => (
+            {[['all', t('actions.filterAll')],['action', t('actions.filterAction')],['bonus', t('actions.filterBonus')],['reaction', t('actions.filterReaction')],['free', t('actions.filterFree')]].map(([v,l]) => (
               <button key={v} className={`filter-chip ${actionFilter === v ? 'active' : ''}`} onClick={() => setActionFilter(v)}>{l}</button>
             ))}
           </div>
@@ -801,32 +806,32 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
             <div className="weapon-add-panel" style={{ marginBottom:8 }}>
               <div className="field-row">
                 <div className="field">
-                  <label>Nome *</label>
-                  <input value={addActionForm.name} onChange={e => setAddActionForm(f => ({...f, name:e.target.value}))} placeholder="Es. Secondo vento" autoFocus />
+                  <label>{t('actions.addFormName')}</label>
+                  <input value={addActionForm.name} onChange={e => setAddActionForm(f => ({...f, name:e.target.value}))} placeholder={t('actions.addFormNamePlaceholder')} autoFocus />
                 </div>
                 <div className="field">
-                  <label>Tipo</label>
+                  <label>{t('actions.addFormType')}</label>
                   <select value={addActionForm.type} onChange={e => setAddActionForm(f => ({...f, type:e.target.value}))}>
-                    {ACTION_TYPES.map(([v,l]) => <option key={v} value={v}>{l}</option>)}
+                    {ACTION_TYPE_KEYS.map(v => <option key={v} value={v}>{t(`actions.type${v.charAt(0).toUpperCase()+v.slice(1)}`)}</option>)}
                   </select>
                 </div>
                 <div className="field">
-                  <label>Dado (opzionale)</label>
-                  <input value={addActionForm.dice} onChange={e => setAddActionForm(f => ({...f, dice:e.target.value}))} placeholder="1d20+3" />
+                  <label>{t('actions.addFormDice')}</label>
+                  <input value={addActionForm.dice} onChange={e => setAddActionForm(f => ({...f, dice:e.target.value}))} placeholder={t('actions.addFormDicePlaceholder')} />
                 </div>
               </div>
               <div className="field" style={{ marginTop:6 }}>
-                <label>Descrizione / Note</label>
-                <textarea className="notes-area" style={{ minHeight:48 }} value={addActionForm.desc} onChange={e => setAddActionForm(f => ({...f, desc:e.target.value}))} placeholder="Descrizione dettagliata..." />
+                <label>{t('actions.addFormDesc')}</label>
+                <textarea className="notes-area" style={{ minHeight:48 }} value={addActionForm.desc} onChange={e => setAddActionForm(f => ({...f, desc:e.target.value}))} placeholder={t('actions.addFormDescPlaceholder')} />
               </div>
               <div style={{ display:'flex', gap:8, marginTop:8, justifyContent:'flex-end' }}>
-                <button className="io-btn" onClick={() => { setAddOpenFor(null); setAddActionForm({ name:'', type:'action', desc:'', dice:'' }); }}>Annulla</button>
+                <button className="io-btn" onClick={() => { setAddOpenFor(null); setAddActionForm({ name:'', type:'action', desc:'', dice:'' }); }}>{t('common.cancel')}</button>
                 <button className="io-btn primary" disabled={!addActionForm.name.trim()} onClick={() => {
                   if (!addActionForm.name.trim()) return;
                   update({ actions: [...(state.actions||[]), { ...addActionForm, id: Date.now().toString() }] });
                   setAddOpenFor(null);
                   setAddActionForm({ name:'', type:'action', desc:'', dice:'' });
-                }}>+ Aggiungi</button>
+                }}>{t('common.add')}</button>
               </div>
             </div>
           )}
@@ -857,7 +862,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
       case 'weapons': return (
         <div className="card">
           <div className="card-title" style={{ justifyContent:'space-between' }}>
-            <span>⚔ Armi</span>
+            <span>⚔ {t('widgets.weapons')}</span>
             <button className={`icon-btn ${addOpenFor === 'weapons' ? 'active' : ''}`}
               onClick={() => setAddOpenFor(v => v === 'weapons' ? null : 'weapons')}>+</button>
           </div>
@@ -880,7 +885,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
 
       case 'armor': return (
         <div className="card">
-          <div className="card-title">🛡 Armatura</div>
+          <div className="card-title">🛡 {t('widgets.armor')}</div>
           <ArmorManager
             equippedArmor={state.equippedArmor||null}
             hasShield={state.hasShield||false}
@@ -901,35 +906,35 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
 
       case 'spellStats': return (
         <div className="card">
-          <div className="card-title">✨ Statistiche lancio</div>
+          <div className="card-title">✨ {t('widgets.spellStats')}</div>
           {hasSpells ? (
             <div className="field-row">
-              <Field label="Stat. lancio"><input value={char.spellStat||'—'} readOnly /></Field>
-              <Field label="CD salvezza"><input value={char.spellSaveDC??'—'} readOnly /></Field>
-              <Field label="Bonus attacco"><input value={char.spellAttackBonus??'—'} readOnly /></Field>
+              <Field label={t('spells.spellcastingStat')}><input value={char.spellStat||'—'} readOnly /></Field>
+              <Field label={t('spells.saveDC')}><input value={char.spellSaveDC??'—'} readOnly /></Field>
+              <Field label={t('spells.attackBonus')}><input value={char.spellAttackBonus??'—'} readOnly /></Field>
             </div>
-          ) : <p className="hint-text">Seleziona una classe incantatore.</p>}
+          ) : <p className="hint-text">{t('spells.noSpellcaster')}</p>}
         </div>
       );
 
       case 'spellSlots': return (
         <div className="card">
           <div className="card-title" style={{ justifyContent:'space-between' }}>
-            <span>🔥 Slot incantesimo</span>
+            <span>🔥 {t('widgets.spellSlots')}</span>
             <div style={{ display:'flex', gap:6 }}>
-              <button className="rest-btn" onClick={handleShortRest}>🌙 Riposo breve</button>
-              <button className="rest-btn" onClick={handleLongRest}>🛏 Riposo lungo</button>
+              <button className="rest-btn" onClick={handleShortRest}>{t('spells.shortRest')}</button>
+              <button className="rest-btn" onClick={handleLongRest}>{t('spells.longRest')}</button>
             </div>
           </div>
           {hasSpells && state.spellSlots.length > 0
             ? <SpellSlots slots={state.spellSlots} onToggle={char.toggleSpellSlot} />
-            : <p className="hint-text">Nessuno slot disponibile.</p>}
+            : <p className="hint-text">{t('spells.noSlots')}</p>}
         </div>
       );
 
       case 'spells': return (
         <div className="card">
-          <div className="card-title">📖 Incantesimi</div>
+          <div className="card-title">📖 {t('widgets.spells')}</div>
           <SpellManager spells={state.spells} charClass={state.charClass} onUpdate={spells => update({ spells })}
             onRoll={handleRoll} allTags={allTags}
             onUpdateTags={(name,tags) => update({
@@ -947,7 +952,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
       );
 
       case 'currency': {
-        const CURR = [['PP','MP','#7B68EE'],['GP','MO','#633806'],['SP','MA','#888780'],['CP','MR','#854F0B']];
+        const CURR = [['PP',t('currency.pp'),'#7B68EE'],['GP',t('currency.gp'),'#633806'],['SP',t('currency.sp'),'#888780'],['CP',t('currency.cp'),'#854F0B']];
         const cur = state.currency || {};
         function convertDown(i) { // 1 di CURR[i] → 10 di CURR[i+1]
           const [fk,,] = CURR[i]; const [tk,,] = CURR[i+1];
@@ -961,7 +966,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
         }
         return (
         <div className="card">
-          <div className="card-title">💰 Valuta</div>
+          <div className="card-title">💰 {t('widgets.currency')}</div>
           <div className="currency-row">
             {CURR.map(([key,label,color], idx) => (
               <React.Fragment key={key}>
@@ -991,7 +996,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
       case 'inventory': return (
         <div className="card">
           <div className="card-title" style={{ justifyContent:'space-between' }}>
-            <span>🎒 Equipaggiamento</span>
+            <span>🎒 {t('widgets.inventory')}</span>
             <button className={`icon-btn ${addOpenFor === 'inventory' ? 'active' : ''}`}
               onClick={() => setAddOpenFor(v => v === 'inventory' ? null : 'inventory')}>+</button>
           </div>
@@ -1013,10 +1018,13 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
 
       case 'traits': return (
         <div className="card">
-          <div className="card-title">👤 Tratti personaggio</div>
+          <div className="card-title">👤 {t('widgets.traits')}</div>
           <div className="trait-grid">
-            {[['personality','Tratti della personalità','Come ti comporti?'],['ideals','Ideali','Cosa credi?'],
-              ['bonds','Legami','Chi o cosa ti lega al mondo?'],['flaws','Difetti','Qual è il tuo tallone d\'Achille?']
+            {[
+              ['personality', t('notes.personalityLabel'), t('notes.personalityPlaceholder')],
+              ['ideals',      t('notes.idealsLabel'),      t('notes.idealsPlaceholder')],
+              ['bonds',       t('notes.bondsLabel'),       t('notes.bondsPlaceholder')],
+              ['flaws',       t('notes.flawsLabel'),       t('notes.flawsPlaceholder')],
             ].map(([key,label,ph]) => (
               <Field key={key} label={label}>
                 <textarea className="notes-area" placeholder={ph} value={state.notes[key]||''}
@@ -1029,9 +1037,9 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
 
       case 'freeNotes': return (
         <div className="card">
-          <div className="card-title">📝 Note libere</div>
+          <div className="card-title">📝 {t('widgets.freeNotes')}</div>
           <textarea className="notes-area" style={{ minHeight:180 }}
-            placeholder="Appunti di sessione, dettagli NPC, misteri da risolvere..."
+            placeholder={t('notes.freeNotesPlaceholder')}
             value={state.notes.free||''} onChange={e => update({ notes:{...state.notes,free:e.target.value} })} />
         </div>
       );
@@ -1039,7 +1047,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
       case 'classFeatures': return (
         <div className="card">
           <div className="card-title" style={{ justifyContent:'space-between' }}>
-            <span>✨ Feature di classe e tratti</span>
+            <span>✨ {t('widgets.classFeatures')}</span>
             <button className={`icon-btn ${addOpenFor === 'features' ? 'active' : ''}`}
               onClick={() => setAddOpenFor(v => v === 'features' ? null : 'features')}>+</button>
           </div>
@@ -1061,16 +1069,16 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
       case 'activityLog': return (
         <div className="card">
           <div className="card-title" style={{ justifyContent:'space-between' }}>
-            <span>📋 Log attività</span>
+            <span>📋 {t('widgets.activityLog')}</span>
             {activityLog.length > 0 && (
               <button className="icon-btn" onClick={() => {
                 setActivityLog([]);
                 try { localStorage.removeItem('characterforge_log'); } catch {}
-              }}>🗑 Svuota</button>
+              }}>{t('activityLog.clearBtn')}</button>
             )}
           </div>
           {activityLog.length === 0
-            ? <div className="hint-text">Nessuna attività registrata.</div>
+            ? <div className="hint-text">{t('activityLog.empty')}</div>
             : (
               <div className="activity-log-list">
                 {activityLog.map(e => (
@@ -1113,36 +1121,36 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
           <div className="hamburger-backdrop" onClick={() => setShowMenu(false)} />
           <div className="hamburger-dropdown">
             <div className="hmenu-section">
-              <div className="hmenu-label">Personaggio</div>
+              <div className="hmenu-label">{t('menu.character')}</div>
               <button className="hmenu-item" onClick={() => { setShowCreator(true); setShowMenu(false); }}>
-                ⚔ Nuovo personaggio
+                {t('menu.newCharacter')}
               </button>
             </div>
             <div className="hmenu-divider" />
             <div className="hmenu-section">
-              <div className="hmenu-label">Layout</div>
+              <div className="hmenu-label">{t('menu.layout')}</div>
               <button className={`hmenu-item ${editMode ? 'active' : ''}`}
                 onClick={() => { setEditMode(v => !v); setShowMenu(false); }}>
-                {editMode ? '✓ Fine modifica layout' : '⠿ Modifica layout'}
+                {editMode ? t('menu.doneLayout') : t('menu.editLayout')}
               </button>
               <button className="hmenu-item" onClick={() => {
                 const d = getDefaultLayout(); setLayout(d); saveLayout(d);
                 setTabs(DEFAULT_TABS); saveTabs(DEFAULT_TABS);
                 setShowMenu(false);
-              }}>↺ Reset layout</button>
+              }}>{t('menu.resetLayout')}</button>
             </div>
             <div className="hmenu-divider" />
             <div className="hmenu-section">
-              <div className="hmenu-label">Tema</div>
+              <div className="hmenu-label">{t('menu.theme')}</div>
               <div className="hmenu-row">
-                {[['system','◑','Sistema'],['light','☀','Chiaro'],['dark','☾','Scuro']].map(([m, icon, label]) => (
+                {[['system', t('menu.themeSystem')],['light', t('menu.themeLight')],['dark', t('menu.themeDark')]].map(([m, label]) => (
                   <button key={m} className={`hmenu-theme-btn ${themeMode === m ? 'active' : ''}`}
-                    title={label} onClick={() => setThemeMode(m)}>{icon} {label}</button>
+                    title={label} onClick={() => setThemeMode(m)}>{label}</button>
                 ))}
               </div>
             </div>
             <div className="hmenu-section">
-              <div className="hmenu-label">Colore</div>
+              <div className="hmenu-label">{t('menu.color')}</div>
               <div className="hmenu-row">
                 {ACCENT_PRESETS.map(p => (
                   <button key={p.id} className={`accent-swatch ${accentId === p.id ? 'active' : ''}`}
@@ -1153,9 +1161,19 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
             </div>
             <div className="hmenu-divider" />
             <div className="hmenu-section">
-              <div className="hmenu-label">Dati</div>
-              <button className="hmenu-item" onClick={() => { handleExport(); setShowMenu(false); }}>⬇ Esporta personaggio</button>
-              <button className="hmenu-item" onClick={() => { fileInputRef.current?.click(); setShowMenu(false); }}>⬆ Importa personaggio</button>
+              <div className="hmenu-label">{t('menu.uiLang')}</div>
+              <div className="hmenu-row">
+                {[['it','🇮🇹 IT'],['en','🇬🇧 EN']].map(([lang, label]) => (
+                  <button key={lang} className={`hmenu-theme-btn ${i18n.language === lang ? 'active' : ''}`}
+                    onClick={() => { i18n.changeLanguage(lang); setShowMenu(false); }}>{label}</button>
+                ))}
+              </div>
+            </div>
+            <div className="hmenu-divider" />
+            <div className="hmenu-section">
+              <div className="hmenu-label">{t('menu.data')}</div>
+              <button className="hmenu-item" onClick={() => { handleExport(); setShowMenu(false); }}>{t('menu.exportChar')}</button>
+              <button className="hmenu-item" onClick={() => { fileInputRef.current?.click(); setShowMenu(false); }}>{t('menu.importChar')}</button>
             </div>
           </div>
         </>
@@ -1180,7 +1198,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
 
       {editMode && (
         <div className="layout-edit-banner">
-          ⠿ Trascina widget e tab · ▬/⬛ per larghezza piena/mezza · ↗ per cambiare tab · 🚫 per nascondere · 📌 per fissare info
+          {t('layout.editBanner')}
         </div>
       )}
 

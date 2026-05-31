@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getWidgetLabel, ALL_TABS } from '../layout';
 
 export default function WidgetShell({
@@ -7,8 +8,9 @@ export default function WidgetShell({
   onMoveToTab, onToggleVisible, onToggleFullWidth, onToggleBottomFull,
   isDragOver,
 }) {
+  const { t } = useTranslation();
   const [showMenu, setShowMenu] = useState(false);
-  const label = getWidgetLabel(id);
+  const label = t(getWidgetLabel(id));
 
   return (
     <div
@@ -25,37 +27,32 @@ export default function WidgetShell({
           <span className="widget-label">{label}</span>
           <div style={{ flex:1 }} />
 
-          {/* Full width toggle */}
-          <button className="widget-action-btn" onClick={() => onToggleFullWidth(id)}
-            title={fullWidth ? 'Riduci a mezza larghezza' : 'Espandi a larghezza piena'}>
-            {fullWidth ? '⬛ Mezza' : '▬ Piena'}
+          <button className="widget-action-btn" onClick={() => onToggleFullWidth(id)}>
+            {fullWidth ? t('layout.halfWidth') : t('layout.fullWidth')}
           </button>
 
-          {/* Bottom position toggle (only for full-width widgets) */}
           {fullWidth && (
-            <button className="widget-action-btn" onClick={() => onToggleBottomFull && onToggleBottomFull(id)}
-              title={bottomFull ? 'Sposta sopra le colonne' : 'Sposta sotto le colonne'}>
-              {bottomFull ? '⬆ Sopra' : '⬇ Sotto'}
+            <button className="widget-action-btn" onClick={() => onToggleBottomFull && onToggleBottomFull(id)}>
+              {bottomFull ? t('layout.above') : t('layout.below')}
             </button>
           )}
 
-          {/* Move to tab */}
           <div style={{ position:'relative' }}>
-            <button className="widget-action-btn" onClick={() => setShowMenu(v => !v)}>↗ Sposta</button>
+            <button className="widget-action-btn" onClick={() => setShowMenu(v => !v)}>{t('layout.moveTo')}</button>
             {showMenu && (
               <div className="widget-tab-menu">
-                <div className="widget-tab-menu-title">Sposta in:</div>
+                <div className="widget-tab-menu-title">{t('layout.moveToTitle')}</div>
                 {ALL_TABS.map(tab => (
                   <button key={tab.id} className="widget-tab-menu-item"
                     onClick={() => { onMoveToTab(id, tab.id); setShowMenu(false); }}>
-                    {tab.icon} {tab.label}
+                    {tab.icon} {t(tab.label)}
                   </button>
                 ))}
               </div>
             )}
           </div>
 
-          <button className="widget-action-btn danger" onClick={() => onToggleVisible(id)} title="Nascondi">🚫</button>
+          <button className="widget-action-btn danger" onClick={() => onToggleVisible(id)}>{t('layout.hide')}</button>
         </div>
       )}
       <div className="widget-content">{children}</div>

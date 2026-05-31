@@ -1,8 +1,9 @@
 import React, { useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useCharContext } from './CharContext';
 import { BONUS_STAT_OPTIONS } from '../data/bonuses';
 
-// Dizionario keyword → spiegazione
+// Italian keyword → Italian fallback description (also used to build the regex)
 export const KEYWORD_GLOSSARY = {
   // Condizioni
   'accecato':      'Non può vedere. Svantaggio ai tiri per colpire, vantaggio per chi lo attacca.',
@@ -46,10 +47,10 @@ export const KEYWORD_GLOSSARY = {
   'schivata':      'Fino al tuo prossimo turno, i tiri per colpire contro di te hanno svantaggio (se vedi l\'aggressore).',
 };
 
-// Regex che matcha le keyword (case insensitive, parola intera)
+// Regex that matches keywords (case insensitive, longest match first)
 const KEYWORD_REGEX = new RegExp(
   '(' + Object.keys(KEYWORD_GLOSSARY)
-    .sort((a, b) => b.length - a.length) // match più lunghi prima
+    .sort((a, b) => b.length - a.length)
     .map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
     .join('|') + ')',
   'gi'
@@ -70,16 +71,12 @@ export function parseTextBonuses(text = '') {
 export function resolveNotations(text, abilities, charLevel) {
   if (!text) return text;
 
-  // Resolve [ATTR] notation: [FOR], [DES], [COS], [INT], [SAG], [CAR]
-  // Negative lookbehind prevents matching [CAR] inside @[CAR] bonus notation
   const resolved1 = text.replace(/(?<!@)\[(FOR|DES|COS|INT|SAG|CAR)\]/gi, (_, attr) => {
     const score = (abilities || {})[attr.toUpperCase()] ?? 10;
     const mod = Math.floor((score - 10) / 2);
     return String(mod);
   });
 
-  // Resolve [LVL:base,threshold:value,...] notation
-  // Example: [LVL:1d6,5:1d8,9:1d10,15:1d12]
   const resolved2 = resolved1.replace(/\[LVL:([^\]]+)\]/gi, (_, spec) => {
     const parts = spec.split(',');
     let result = parts[0].trim();
@@ -93,20 +90,20 @@ export function resolveNotations(text, abilities, charLevel) {
     return result;
   });
 
-  // Normalize double signs that appear when modifier is negative (e.g. 1d8+-1 → 1d8-1)
   return resolved2.replace(/\+-/g, '-').replace(/--/g, '+');
 }
 
 // Small hint bar for description textareas — shows notation syntax
 export function NotationHelpBar() {
+  const { t } = useTranslation();
   return (
     <div className="notation-help-bar">
       <span className="notation-help-icon">💡</span>
-      <span><strong>[FOR]</strong> <strong>[DES]</strong>… → mod caratteristica</span>
+      <span><strong>[FOR]</strong> <strong>[DES]</strong>… {t('notation.attrHelp')}</span>
       <span className="notation-help-sep">·</span>
-      <span><strong>[LVL:1d6,5:1d8]</strong> → scala col livello</span>
+      <span><strong>[LVL:1d6,5:1d8]</strong> {t('notation.lvlHelp')}</span>
       <span className="notation-help-sep">·</span>
-      <span><strong>+1@[CA]</strong> → bonus equipaggiamento (digita @ per lista)</span>
+      <span><strong>+1@[CA]</strong> {t('notation.bonusHelp')}</span>
     </div>
   );
 }
@@ -155,6 +152,8 @@ const BONUS_NOTATION_SPLIT = /([+-]\d+@\[[A-Z-]+\])/gi;
 const BONUS_NOTATION_PARSE = /^([+-]\d+)@\[([A-Z-]+)\]$/i;
 
 export function KeywordText({ text, onRoll, label }) {
+  const { t } = useTranslation('game');
+  const { t: tUi } = useTranslation();
   const { abilities, charLevel } = useCharContext();
   const hasDynamic = DYNAMIC_NOTATION_RE.test(text || '');
   const resolved = resolveNotations(text, abilities, charLevel);
@@ -183,8 +182,9 @@ export function KeywordText({ text, onRoll, label }) {
       return parts.map((part, i) => {
         const lowerPart = part.toLowerCase();
         if (KEYWORD_GLOSSARY[lowerPart]) {
+          const tooltipText = t(`glossary.${lowerPart}`, { defaultValue: KEYWORD_GLOSSARY[lowerPart] });
           return (
-            <Tooltip key={`${keyPrefix}-${si}-${i}`} text={KEYWORD_GLOSSARY[lowerPart]}>
+            <Tooltip key={`${keyPrefix}-${si}-${i}`} text={tooltipText}>
               {part}
             </Tooltip>
           );
@@ -196,7 +196,7 @@ export function KeywordText({ text, onRoll, label }) {
               key={`${keyPrefix}-${si}-${i}`}
               className="inline-dice-btn"
               onClick={e => { e.stopPropagation(); onRoll(part, label || part); }}
-              title={`Lancia ${part}`}
+              title={`${tUi('notation.rollTitle')} ${part}`}
             >
               🎲 {part}
             </button>
@@ -234,7 +234,7 @@ export function KeywordText({ text, onRoll, label }) {
   return (
     <span>
       {hasDynamic && (
-        <span className="notation-dynamic-badge" title={`Valore dinamico — originale: ${text}`}>≈ </span>
+        <span className="notation-dynamic-badge" title={`${tUi('notation.dynamicTitle')} ${text}`}>≈ </span>
       )}
       {lines.map((line, lineIdx) => (
         <React.Fragment key={lineIdx}>

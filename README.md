@@ -78,7 +78,7 @@ Il file JSON esportato ha questa struttura. Puoi creare file custom o adattare q
     "INT": 18, "SAG": 13, "CAR": 10
   },
   "saveProficiencies": ["INT", "SAG"],
-  "skillProficiencies": ["Arcano", "Historia", "Indagare"],
+  "skillProficiencies": ["Arcano", "Storia", "Indagare"],
   "skillExpertise": ["Arcano"],
   "hpCurrent": 28,
   "hpMax": 28,

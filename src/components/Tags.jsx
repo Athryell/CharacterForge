@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 // Default tag colors cycling
 const TAG_COLORS = [
@@ -37,6 +38,7 @@ export function TagPill({ tag, allTags, onRemove, small }) {
 
 // Tag selector: shows existing tags + input for new ones
 export function TagSelector({ selected = [], allTags = [], onChange, onCreateTag }) {
+  const { t } = useTranslation();
   const [input, setInput] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
 
@@ -79,7 +81,7 @@ export function TagSelector({ selected = [], allTags = [], onChange, onCreateTag
             onFocus={() => setShowSuggestions(true)}
             onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
             onKeyDown={handleKeyDown}
-            placeholder={selected.length === 0 ? '+ Aggiungi tag...' : '+'}
+            placeholder={selected.length === 0 ? t('tags.addPlaceholder') : '+'}
           />
           {showSuggestions && (suggestions.length > 0 || input.trim()) && (
             <div className="tag-suggestions">
@@ -90,7 +92,7 @@ export function TagSelector({ selected = [], allTags = [], onChange, onCreateTag
               ))}
               {input.trim() && !allTags.includes(input.trim()) && (
                 <div className="tag-suggestion-item new" onMouseDown={() => addTag(input)}>
-                  <span style={{ fontSize: 11, color: 'var(--c-muted)' }}>Crea: </span>
+                  <span style={{ fontSize: 11, color: 'var(--c-muted)' }}>{t('tags.create')}</span>
                   <TagPill tag={input.trim()} allTags={[...allTags, input.trim()]} small />
                 </div>
               )}
@@ -104,13 +106,14 @@ export function TagSelector({ selected = [], allTags = [], onChange, onCreateTag
 
 // Filter bar using tags
 export function TagFilterBar({ allTags, activeTag, onSelect }) {
+  const { t } = useTranslation();
   if (!allTags || allTags.length === 0) return null;
   return (
     <div className="tag-filter-bar">
       <button
         className={`filter-chip ${!activeTag ? 'active' : ''}`}
         onClick={() => onSelect(null)}
-      >Tutte</button>
+      >{t('tags.filterAll')}</button>
       {allTags.map(tag => (
         <button
           key={tag}

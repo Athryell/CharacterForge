@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CLASSES, ALIGNMENTS, ABILITIES, ABILITY_NAMES, SKILLS, HIT_DICE, SPELLCASTING_CLASS } from '../data/dnd5e';
 import { CLASS_FEATURES, SPECIES_FEATURES, BACKGROUND_FEATURES, getAutoFeatures } from '../data/features';
 
@@ -123,7 +124,7 @@ const BACKGROUNDS_SRD = [
     desc: 'Sei cresciuto in una famiglia di alto rango, circondato da ricchezza, potere e intrighi di corte. Il tuo nome apre molte porte.',
     abilityScores: ['FOR', 'INT', 'CAR'],
     feat: 'Esperto',
-    skills: ['Historia', 'Persuasione'],
+    skills: ['Storia', 'Persuasione'],
     tool: 'Set da gioco (a scelta)',
     equipA: 'Set da gioco, abiti eleganti, anello con sigillo, pergamena di pedigree, 25 MO',
     equipB: '50 MO',
@@ -133,7 +134,7 @@ const BACKGROUNDS_SRD = [
     desc: 'Hai trascorso gli anni formativi viaggiando tra manieri e monasteri, studiando libri e pergamene e imparando la storia del multiverso.',
     abilityScores: ['COS', 'INT', 'SAG'],
     feat: 'Iniziato alla Magia (Mago)',
-    skills: ['Arcano', 'Historia'],
+    skills: ['Arcano', 'Storia'],
     tool: 'Strumenti calligrafici',
     equipA: 'Bastone ferrato, strumenti calligrafici, libro (storia), pergamena (8 fogli), veste, 8 MO',
     equipB: '50 MO',
@@ -195,19 +196,19 @@ const CLASS_SKILL_COUNT = {
 const CLASS_SKILL_OPTIONS = {
   Barbaro: ['Addestrare animali','Atletica','Intimidire','Natura','Percezione','Sopravvivenza'],
   Bardo: SKILLS.map(s=>s.name),
-  Chierico: ['Historia','Indagare','Medicina','Persuasione','Religione'],
+  Chierico: ['Storia','Indagare','Medicina','Persuasione','Religione'],
   Druido: ['Arcano','Addestrare animali','Indagare','Medicina','Natura','Percezione','Religione','Sopravvivenza'],
-  Guerriero: ['Acrobazia','Addestrare animali','Atletica','Historia','Indagare','Intimidire','Percezione','Sopravvivenza'],
+  Guerriero: ['Acrobazia','Addestrare animali','Atletica','Storia','Indagare','Intimidire','Percezione','Sopravvivenza'],
   Ladro: ['Acrobazia','Atletica','Inganno','Indagare','Intimidire','Percezione','Persuasione','Furtività','Prestidigitazione'],
-  Mago: ['Arcano','Historia','Indagare','Medicina','Religione'],
-  Monaco: ['Acrobazia','Atletica','Historia','Indagare','Religione','Furtività'],
+  Mago: ['Arcano','Storia','Indagare','Medicina','Religione'],
+  Monaco: ['Acrobazia','Atletica','Storia','Indagare','Religione','Furtività'],
   Paladino: ['Atletica','Indagare','Intimidire','Medicina','Persuasione','Religione'],
   Ranger: ['Addestrare animali','Atletica','Indagare','Natura','Percezione','Furtività','Sopravvivenza'],
   Stregone: ['Arcano','Inganno','Indagare','Intimidire','Natura','Persuasione','Religione'],
-  Warlock: ['Arcano','Inganno','Historia','Indagare','Intimidire','Natura','Religione'],
+  Warlock: ['Arcano','Inganno','Storia','Indagare','Intimidire','Natura','Religione'],
 };
 
-const STEPS = ['Identità', 'Classe', 'Statistiche', 'Competenze', 'Riepilogo'];
+// STEPS is computed inside the component to support i18n
 
 const POINT_BUY_COSTS = { 8:0,9:1,10:2,11:3,12:4,13:5,14:7,15:9 };
 const POINT_BUY_TOTAL = 27;
@@ -215,6 +216,14 @@ const POINT_BUY_TOTAL = 27;
 const CUSTOM_SENTINEL = '__custom__';
 
 export default function CharacterCreator({ onComplete, onCancel }) {
+  const { t } = useTranslation();
+  const STEPS = [
+    t('creator.steps.identity'),
+    t('creator.steps.class'),
+    t('creator.steps.stats'),
+    t('creator.steps.proficiencies'),
+    t('creator.steps.summary'),
+  ];
   const [step, setStep] = useState(0);
   const [data, setData] = useState({
     charName: '', charRace: '', charBackground: '', charAlignment: 'Legale Buono',
@@ -338,7 +347,7 @@ export default function CharacterCreator({ onComplete, onCancel }) {
     <div className="creator-overlay">
       <div className="creator-modal">
         <div className="creator-header">
-          <div className="creator-title">⚔ Crea personaggio</div>
+          <div className="creator-title">{t('creator.title')}</div>
           <button className="creator-close" onClick={onCancel}>✕</button>
         </div>
 
@@ -357,18 +366,18 @@ export default function CharacterCreator({ onComplete, onCancel }) {
           {step === 0 && (
             <div className="creator-section">
               <div className="field" style={{ marginBottom: 12 }}>
-                <label>Nome personaggio</label>
+                <label>{t('creator.nameLabel')}</label>
                 <input value={data.charName} onChange={e => patch({ charName: e.target.value })} placeholder="Es. Aldric Voss" autoFocus />
               </div>
               <div className="field" style={{ marginBottom: 16 }}>
-                <label>Allineamento</label>
+                <label>{t('identity.alignment')}</label>
                 <select value={data.charAlignment} onChange={e => patch({ charAlignment: e.target.value })}>
                   {ALIGNMENTS.map(a => <option key={a}>{a}</option>)}
                 </select>
               </div>
 
               {/* SPECIE */}
-              <div className="creator-subtitle">Specie</div>
+              <div className="creator-subtitle">{t('creator.speciesTitle')}</div>
               <div className="creator-grid">
                 {speciesList.map(r => {
                   const isCustom = r.name === CUSTOM_SENTINEL;
@@ -392,7 +401,7 @@ export default function CharacterCreator({ onComplete, onCancel }) {
               </div>
 
               {/* BACKGROUND */}
-              <div className="creator-subtitle" style={{ marginTop: 16 }}>Background</div>
+              <div className="creator-subtitle" style={{ marginTop: 16 }}>{t('creator.backgroundTitle')}</div>
               <div className="creator-grid">
                 {bgList.map(b => {
                   const isCustom = b.name === CUSTOM_SENTINEL;
@@ -427,10 +436,10 @@ export default function CharacterCreator({ onComplete, onCancel }) {
               {/* ASI dal background */}
               {data.charBackground && data.charBackground !== CUSTOM_SENTINEL && (
                 <div className="creator-info-box" style={{ marginTop: 12 }}>
-                  <strong>Bonus caratteristiche da background</strong> — distribuisci +3 totali (max +2 per caratteristica).
+                  <strong>{t('creator.bgAsiLabel')}</strong>
                   {selectedBg?.abilityScores && (
                     <span style={{ color:'var(--c-muted)', marginLeft:6 }}>
-                      Consigliate: {selectedBg.abilityScores.map(a => ABILITY_NAMES[a]).join(', ')}
+                      {t('creator.bgAsiRecommended')} {selectedBg.abilityScores.map(a => ABILITY_NAMES[a]).join(', ')}
                     </span>
                   )}
                   {(() => {
@@ -458,7 +467,7 @@ export default function CharacterCreator({ onComplete, onCancel }) {
                           })}
                         </div>
                         <div style={{ marginTop:6, fontSize:11, color: total === 3 ? 'var(--c-accent)' : 'var(--c-muted)' }}>
-                          Totale: {total}/3 {total === 3 ? '✓' : ''}
+                          {t('creator.bgAsiTotal', { total })} {total === 3 ? '✓' : ''}
                         </div>
                       </div>
                     );
@@ -471,7 +480,7 @@ export default function CharacterCreator({ onComplete, onCancel }) {
           {/* ── STEP 1 — Classe ── */}
           {step === 1 && (
             <div className="creator-section">
-              <div className="creator-subtitle">Scegli la tua classe</div>
+              <div className="creator-subtitle">{t('creator.classTitle')}</div>
               <div className="creator-grid">
                 {classList.map(cls => {
                   const isCustom = cls === CUSTOM_SENTINEL;
@@ -506,7 +515,7 @@ export default function CharacterCreator({ onComplete, onCancel }) {
           {step === 2 && (
             <div className="creator-section">
               <div className="creator-method-bar">
-                {[['pointbuy','Point Buy'],['standard','Array standard'],['roll','Lancia i dadi']].map(([v,l]) => (
+                {[['pointbuy', t('creator.pointBuy')],['standard', t('creator.standardArray')],['roll', t('creator.rollStats')]].map(([v,l]) => (
                   <button key={v} className={`filter-chip ${data.abilitiesMethod === v ? 'active' : ''}`}
                     onClick={() => {
                       patch({ abilitiesMethod: v });
@@ -516,14 +525,14 @@ export default function CharacterCreator({ onComplete, onCancel }) {
                     }}>{l}</button>
                 ))}
                 {data.abilitiesMethod === 'roll' && (
-                  <button className="filter-chip" onClick={rollStats}>🎲 Rilancia</button>
+                  <button className="filter-chip" onClick={rollStats}>{t('creator.reroll')}</button>
                 )}
               </div>
 
               {data.abilitiesMethod === 'pointbuy' && (
                 <div className="creator-pb-info">
-                  Punti rimasti: <strong>{pointsLeft}</strong> / {POINT_BUY_TOTAL}
-                  {pointsLeft < 0 && <span style={{ color:'#A32D2D' }}> — troppi punti spesi!</span>}
+                  {t('creator.pointsLeft', { left: pointsLeft, total: POINT_BUY_TOTAL })}
+                  {pointsLeft < 0 && <span style={{ color:'#A32D2D' }}>{t('creator.tooManyPoints')}</span>}
                 </div>
               )}
 
@@ -577,8 +586,8 @@ export default function CharacterCreator({ onComplete, onCancel }) {
                 </div>
               )}
               <div className="creator-subtitle">
-                Scegli {CLASS_SKILL_COUNT[selectedCls] || 2} abilità di classe
-                ({data.skillProficiencies.length}/{CLASS_SKILL_COUNT[selectedCls] || 2} selezionate)
+                {t('creator.profTitle', { count: CLASS_SKILL_COUNT[selectedCls] || 2 })}
+                {' '}{t('creator.profSelected', { selected: data.skillProficiencies.length, max: CLASS_SKILL_COUNT[selectedCls] || 2 })}
               </div>
               <div className="check-list">
                 {(CLASS_SKILL_OPTIONS[selectedCls] || SKILLS.map(s => s.name)).map(sk => {
@@ -627,21 +636,21 @@ export default function CharacterCreator({ onComplete, onCancel }) {
                       );
                     })}
                   </div>
-                  <div className="creator-summary-row"><span>HP massimi</span><strong>{hp} ({HIT_DICE[selectedCls] || 'd8'}+{conMod} COS)</strong></div>
-                  <div className="creator-summary-row"><span>Tiri salvezza</span><strong>{(CLASS_SAVE_PROFS[selectedCls] || []).join(', ') || '—'}</strong></div>
-                  <div className="creator-summary-row"><span>Competenze</span><strong>{[...(selectedBg?.skills || []), ...data.skillProficiencies].join(', ') || '—'}</strong></div>
+                  <div className="creator-summary-row"><span>{t('creator.summaryMaxHP')}</span><strong>{hp} ({HIT_DICE[selectedCls] || 'd8'}+{conMod} COS)</strong></div>
+                  <div className="creator-summary-row"><span>{t('creator.summarySavingThrows')}</span><strong>{(CLASS_SAVE_PROFS[selectedCls] || []).join(', ') || '—'}</strong></div>
+                  <div className="creator-summary-row"><span>{t('creator.summaryProficiencies')}</span><strong>{[...(selectedBg?.skills || []), ...data.skillProficiencies].join(', ') || '—'}</strong></div>
                   {selectedBg && <>
-                    <div className="creator-summary-row"><span>Talento Origin</span><strong>{selectedBg.feat}</strong></div>
-                    <div className="creator-summary-row"><span>Strumento</span><strong>{selectedBg.tool}</strong></div>
+                    <div className="creator-summary-row"><span>{t('creator.summaryOriginFeat')}</span><strong>{selectedBg.feat}</strong></div>
+                    <div className="creator-summary-row"><span>{t('creator.summaryTool')}</span><strong>{selectedBg.tool}</strong></div>
                   </>}
                   {Object.values(data.bgAsi).some(v => v > 0) && (
                     <div className="creator-summary-row">
-                      <span>Bonus background</span>
+                      <span>{t('creator.summaryBgBonus')}</span>
                       <strong>{Object.entries(data.bgAsi).filter(([,v]) => v > 0).map(([a,v]) => `+${v} ${a}`).join(', ')}</strong>
                     </div>
                   )}
                   {SPELLCASTING_CLASS[selectedCls] && (
-                    <div className="creator-summary-row"><span>Incantatore</span><strong>Sì ({SPELLCASTING_CLASS[selectedCls]})</strong></div>
+                    <div className="creator-summary-row"><span>{t('creator.summarySpellcaster')}</span><strong>Sì ({SPELLCASTING_CLASS[selectedCls]})</strong></div>
                   )}
                 </div>
               </div>
@@ -651,14 +660,14 @@ export default function CharacterCreator({ onComplete, onCancel }) {
 
         <div className="creator-footer">
           <button className="io-btn" onClick={step === 0 ? onCancel : () => setStep(s => s - 1)}>
-            {step === 0 ? 'Annulla' : '← Indietro'}
+            {step === 0 ? t('creator.cancel') : t('creator.back')}
           </button>
           <div style={{ flex:1 }} />
           {step < STEPS.length - 1 ? (
             <button className={`io-btn primary ${!canNextStep ? 'disabled' : ''}`}
-              onClick={() => canNextStep && setStep(s => s + 1)}>Avanti →</button>
+              onClick={() => canNextStep && setStep(s => s + 1)}>{t('creator.next')}</button>
           ) : (
-            <button className="io-btn primary" onClick={() => onComplete(buildFinalState())}>✓ Crea personaggio</button>
+            <button className="io-btn primary" onClick={() => onComplete(buildFinalState())}>{t('creator.create')}</button>
           )}
         </div>
       </div>

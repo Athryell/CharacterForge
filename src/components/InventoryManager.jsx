@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { KeywordText, NotationHelpBar } from './Tooltip';
 import BonusTextarea from './BonusTextarea';
 import { TagPill, TagSelector } from './Tags';
@@ -6,6 +7,7 @@ import { TagPill, TagSelector } from './Tags';
 const EMPTY_FORM = { name: '', qty: 1, desc: '', weight: '' };
 
 export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen, onAddClose, allTags = [], onUpdateTags, onCreateTag, onAddAction, onRemoveAction, actionNames }) {
+  const { t } = useTranslation();
   const [addForm, setAddForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState(null);
@@ -62,12 +64,12 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
         <div className="weapon-add-panel" style={{ marginBottom: 12 }}>
           <div className="field-row">
             <div className="field" style={{ flex: 2 }}>
-              <label>Nome *</label>
+              <label>{t('inventory.nameLabel')}</label>
               <input value={addForm.name} onChange={e => patchAdd({ name: e.target.value })}
-                placeholder="Es. Pozione di guarigione" autoFocus onKeyDown={e => e.key === 'Enter' && submitAdd()} />
+                placeholder={t('inventory.namePlaceholder')} autoFocus onKeyDown={e => e.key === 'Enter' && submitAdd()} />
             </div>
             <div className="field" style={{ flex: '0 0 80px' }}>
-              <label>Quantità</label>
+              <label>{t('inventory.qty')}</label>
               <div className="hp-stepper">
                 <button className="mod-btn" onClick={() => patchAdd({ qty: Math.max(1, (addForm.qty||1) - 1) })}>−</button>
                 <input type="number" min="1" value={addForm.qty}
@@ -77,26 +79,26 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
               </div>
             </div>
             <div className="field" style={{ flex: '0 0 80px' }}>
-              <label>Peso (kg)</label>
+              <label>{t('inventory.weight')}</label>
               <input type="text" value={addForm.weight} onChange={e => patchAdd({ weight: e.target.value })} placeholder="0.5" />
             </div>
           </div>
           <div className="field" style={{ marginTop: 8 }}>
-            <label>Descrizione / Note</label>
+            <label>{t('inventory.descLabel')}</label>
             <BonusTextarea className="notes-area" style={{ minHeight: 56 }} value={addForm.desc}
-              onChange={e => patchAdd({ desc: e.target.value })} placeholder="Es. Cura 2d4+2 HP. (@ per bonus)" />
+              onChange={e => patchAdd({ desc: e.target.value })} placeholder={t('inventory.descAddPlaceholder')} />
             <NotationHelpBar />
           </div>
           <div style={{ display: 'flex', gap: 8, marginTop: 8, justifyContent: 'flex-end' }}>
-            <button className="io-btn" onClick={() => { onAddClose && onAddClose(); setAddForm(EMPTY_FORM); }}>Annulla</button>
+            <button className="io-btn" onClick={() => { onAddClose && onAddClose(); setAddForm(EMPTY_FORM); }}>{t('common.cancel')}</button>
             <button className={`io-btn primary ${!addForm.name.trim() ? 'disabled' : ''}`}
-              onClick={submitAdd} disabled={!addForm.name.trim()}>+ Aggiungi</button>
+              onClick={submitAdd} disabled={!addForm.name.trim()}>{t('inventory.add')}</button>
           </div>
         </div>
       )}
 
       {items.length === 0 && !addOpen && (
-        <div className="hint-text">Nessun oggetto. Attiva la modalità ✏ e clicca "+ Aggiungi oggetto".</div>
+        <div className="hint-text">{t('inventory.empty2')}</div>
       )}
 
       <div className="inventory-list">
@@ -111,7 +113,7 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
                 <div className="inventory-info">
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
                     <div className="inventory-name">{item.name}</div>
-                    {(item.tags||[]).map(t => <TagPill key={t} tag={t} allTags={allTags} small />)}
+                    {(item.tags||[]).map(tag => <TagPill key={tag} tag={tag} allTags={allTags} small />)}
                   </div>
                   {item.desc && !isExpanded && !isEditing && (
                     <div className="inventory-desc-preview">
@@ -129,16 +131,15 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
                 </div>
               </div>
 
-              {/* Inline edit form */}
               {isEditing && editForm && (
                 <div className="inventory-edit-form" onClick={e => e.stopPropagation()}>
                   <div className="field-row">
                     <div className="field" style={{ flex: 2 }}>
-                      <label>Nome</label>
+                      <label>{t('inventory.nameEditLabel')}</label>
                       <input value={editForm.name} onChange={e => patchEdit({ name: e.target.value })} />
                     </div>
                     <div className="field" style={{ flex: '0 0 80px' }}>
-                      <label>Quantità</label>
+                      <label>{t('inventory.qty')}</label>
                       <div className="hp-stepper">
                         <button className="mod-btn" onClick={() => patchEdit({ qty: Math.max(1, (editForm.qty||1) - 1) })}>−</button>
                         <input type="number" min="1" value={editForm.qty}
@@ -148,12 +149,12 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
                       </div>
                     </div>
                     <div className="field" style={{ flex: '0 0 80px' }}>
-                      <label>Peso (kg)</label>
+                      <label>{t('inventory.weight')}</label>
                       <input value={editForm.weight || ''} onChange={e => patchEdit({ weight: e.target.value })} placeholder="0.5" />
                     </div>
                   </div>
                   <div className="field" style={{ marginTop: 6 }}>
-                    <label>Descrizione</label>
+                    <label>{t('inventory.descEditLabel')}</label>
                     <BonusTextarea className="notes-area" style={{ minHeight: 56 }}
                       value={editForm.desc || ''} onChange={e => patchEdit({ desc: e.target.value })} />
                     <NotationHelpBar />
@@ -163,11 +164,11 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
                       <>
                         <TagSelector selected={item.tags || []} allTags={allTags}
                           onChange={tags => onUpdateTags && onUpdateTags(item.id, tags)} onCreateTag={onCreateTag} />
-                        <button className="tag-edit-btn" style={{ marginTop: 4 }} onClick={() => setEditingTagsFor(null)}>✓ Fine</button>
+                        <button className="tag-edit-btn" style={{ marginTop: 4 }} onClick={() => setEditingTagsFor(null)}>{t('common.tagDone')}</button>
                       </>
                     ) : (
                       <button className="tag-edit-btn" onClick={() => setEditingTagsFor(item.id)}>
-                        🏷 {(item.tags||[]).length === 0 ? 'Aggiungi tag' : 'Modifica tag'}
+                        {(item.tags||[]).length === 0 ? t('common.addTag') : t('common.editTags')}
                       </button>
                     )}
                   </div>
@@ -175,23 +176,22 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
                     <div style={{ display: 'flex', gap: 6 }}>
                       {onAddAction && (
                         <button className={`icon-btn add-to-action-btn ${added ? 'added' : ''}`}
-                          title={added ? 'Rimuovi dalle azioni' : 'Aggiungi alle azioni'}
+                          title={added ? t('common.removeFromAction') : t('common.addToAction')}
                           onClick={() => {
                             if (added) { onRemoveAction && onRemoveAction(item.name); }
                             else { onAddAction({ id: `item_${item.id}_${Date.now()}`, name: item.name, type: 'action', desc: item.desc || '', dice: '' }); }
                           }}>{added ? '✓' : '⚡'}</button>
                       )}
-                      <button className="io-btn danger" onClick={() => removeItem(item.id)}>✕ Elimina</button>
+                      <button className="io-btn danger" onClick={() => removeItem(item.id)}>{t('common.deleteBtn')}</button>
                     </div>
                     <div style={{ display: 'flex', gap: 8 }}>
-                      <button className="io-btn" onClick={cancelEdit}>Annulla</button>
-                      <button className="io-btn primary" onClick={saveEdit}>✓ Salva</button>
+                      <button className="io-btn" onClick={cancelEdit}>{t('common.cancel')}</button>
+                      <button className="io-btn primary" onClick={saveEdit}>{t('common.save')}</button>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Expanded view (non-edit) */}
               {isExpanded && !isEditing && (
                 <div className="inventory-desc-full" onClick={e => e.stopPropagation()}>
                   {item.desc && <KeywordText text={item.desc} onRoll={onRoll} label={item.name} />}
@@ -207,16 +207,16 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
                       <>
                         <TagSelector selected={item.tags || []} allTags={allTags}
                           onChange={tags => onUpdateTags && onUpdateTags(item.id, tags)} onCreateTag={onCreateTag} />
-                        <button className="tag-edit-btn" style={{ marginTop: 4 }} onClick={() => setEditingTagsFor(null)}>✓ Fine</button>
+                        <button className="tag-edit-btn" style={{ marginTop: 4 }} onClick={() => setEditingTagsFor(null)}>{t('common.tagDone')}</button>
                       </>
                     ) : (
                       <button className="tag-edit-btn" onClick={() => setEditingTagsFor(item.id)}>
-                        🏷 {(item.tags||[]).length === 0 ? 'Aggiungi tag' : 'Modifica tag'}
+                        {(item.tags||[]).length === 0 ? t('common.addTag') : t('common.editTags')}
                       </button>
                     )}
                   </div>
                   <div className="item-edit-actions">
-                    <button className="io-btn" onClick={() => startEdit(item)}>✏ Modifica</button>
+                    <button className="io-btn" onClick={() => startEdit(item)}>{t('common.edit')}</button>
                   </div>
                 </div>
               )}
