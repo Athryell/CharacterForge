@@ -107,9 +107,6 @@ export default function WidgetGrid({
     arr.filter(w => !w.fullWidth && w.col === col).sort((a,b) => a.order - b.order).forEach(w => { w.order = i++; });
   }
 
-  // Determine if dragging a full-width widget (used for auto-full-width logic)
-  const draggingFullWidth = dragId ? widgets.find(w => w.id === dragId)?.fullWidth : false;
-
   // ── shell props factory ───────────────────────────────────────
   function shellProps(w) {
     return {

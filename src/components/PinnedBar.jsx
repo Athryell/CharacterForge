@@ -6,6 +6,7 @@ const PINNABLE = [
   { id: 'inspiration', label: 'Ispirazione' },
   { id: 'concentration', label: 'Concentrazione' },
   { id: 'conditions',  label: 'Condizioni' },
+  { id: 'exhaustion',  label: 'Affaticamento' },
   { id: 'deathSaves',  label: 'TS Morte' },
 ];
 
@@ -55,7 +56,7 @@ export default function PinnedBar({ state, editMode, pinned, onTogglePin, onUpda
 
 function PinContent({ id, state, onUpdate, active, editMode }) {
   if (!active) {
-    const labels = { hp:'HP', inspiration:'Ispirazione', concentration:'Concentrazione', conditions:'Condizioni', deathSaves:'TS Morte' };
+    const labels = { hp:'HP', inspiration:'Ispirazione', concentration:'Concentrazione', conditions:'Condizioni', exhaustion:'Affaticamento', deathSaves:'TS Morte' };
     return <span className="pin-content-muted">{labels[id]}</span>;
   }
 
@@ -95,15 +96,30 @@ function PinContent({ id, state, onUpdate, active, editMode }) {
       );
     case 'conditions': {
       const active = state.conditions || [];
+      const exhLvl = state.exhaustionLevel || 0;
+      const hasAny = active.length > 0 || exhLvl > 0;
       return (
         <span className="pin-content">
-          🔮{active.length === 0
+          🔮{!hasAny
             ? <span className="pin-hint"> Nessuna</span>
-            : active.map(id => {
-                const cond = CONDITIONS.find(c => c.id === id);
-                return <span key={id} className="pin-cond">{cond ? cond.name : id}</span>;
-              })
+            : <>
+                {active.map(cid => {
+                  const cond = CONDITIONS.find(c => c.id === cid);
+                  return <span key={cid} className="pin-cond">{cond ? cond.name : cid}</span>;
+                })}
+                {exhLvl > 0 && <span className="pin-cond">😓 Aff.{exhLvl}</span>}
+              </>
           }
+        </span>
+      );
+    }
+    case 'exhaustion': {
+      const lvl = state.exhaustionLevel || 0;
+      if (lvl === 0) return <span className="pin-content"><span className="pin-hint">😓 Nessun aff.</span></span>;
+      return (
+        <span className="pin-content pin-on"
+          title={`Affaticamento liv. ${lvl}: −${lvl * 5} ft velocità`}>
+          😓 Aff. {lvl} · −{lvl * 5}ft
         </span>
       );
     }

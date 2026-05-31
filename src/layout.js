@@ -12,14 +12,14 @@ export const WIDGET_DEFS = [
   { id: 'inspiration',   label: 'Ispirazione & Concentrazione',defaultTab: 'combat',    defaultCol: 1, defaultFullWidth: false },
   { id: 'deathSaves',    label: 'Tiri salvezza morte',         defaultTab: 'combat',    defaultCol: 1, defaultFullWidth: false },
   { id: 'conditions',    label: 'Condizioni',                  defaultTab: 'combat',    defaultCol: 0, defaultFullWidth: true  },
-  { id: 'actions',       label: 'Azioni',                      defaultTab: 'combat',    defaultCol: 0, defaultFullWidth: true  },
+  { id: 'actions',       label: 'Azioni',                      defaultTab: 'combat',    defaultCol: 0, defaultFullWidth: true,  defaultBottomFull: true },
+  { id: 'armor',         label: 'Armatura',                    defaultTab: 'inventory', defaultCol: 0, defaultFullWidth: false },
   { id: 'weapons',       label: 'Armi',                        defaultTab: 'inventory', defaultCol: 0, defaultFullWidth: false },
-  { id: 'armor',         label: 'Armatura',                    defaultTab: 'inventory', defaultCol: 1, defaultFullWidth: false },
   { id: 'spellStats',    label: 'Statistiche lancio',          defaultTab: 'spells',    defaultCol: 0, defaultFullWidth: false },
   { id: 'spellSlots',    label: 'Slot incantesimo',            defaultTab: 'spells',    defaultCol: 1, defaultFullWidth: false },
-  { id: 'spells',        label: 'Incantesimi',                 defaultTab: 'spells',    defaultCol: 0, defaultFullWidth: true  },
-  { id: 'currency',      label: 'Valuta',                      defaultTab: 'inventory', defaultCol: 0, defaultFullWidth: false },
-  { id: 'inventory',     label: 'Equipaggiamento',             defaultTab: 'inventory', defaultCol: 0, defaultFullWidth: true  },
+  { id: 'spells',        label: 'Incantesimi',                 defaultTab: 'spells',    defaultCol: 0, defaultFullWidth: true,  defaultBottomFull: true },
+  { id: 'inventory',     label: 'Equipaggiamento',             defaultTab: 'inventory', defaultCol: 1, defaultFullWidth: false },
+  { id: 'currency',      label: 'Valuta',                      defaultTab: 'inventory', defaultCol: 1, defaultFullWidth: false },
   { id: 'traits',        label: 'Tratti personaggio',          defaultTab: 'notes',     defaultCol: 0, defaultFullWidth: true  },
   { id: 'freeNotes',     label: 'Note libere',                 defaultTab: 'notes',     defaultCol: 0, defaultFullWidth: false },
   { id: 'classFeatures', label: 'Feature di classe',           defaultTab: 'notes',     defaultCol: 1, defaultFullWidth: false },
@@ -56,6 +56,7 @@ export function getDefaultLayout() {
   return WIDGET_DEFS.map((w, i) => ({
     id: w.id, tab: w.defaultTab, col: w.defaultCol,
     order: i, visible: true, fullWidth: w.defaultFullWidth ?? false,
+    bottomFull: w.defaultBottomFull ?? false,
   }));
 }
 

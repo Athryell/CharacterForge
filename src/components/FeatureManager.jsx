@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { KeywordText, NotationHelpBar } from './Tooltip';
 import { TagPill, TagSelector } from './Tags';
 
@@ -18,17 +18,12 @@ function detectActionType(text) {
   return 'free';
 }
 
-export default function FeatureManager({ features = [], onUpdate, onRoll, onAddAction, onRemoveAction, actionNames, editMode, allTags = [], onUpdateTags, onCreateTag }) {
+export default function FeatureManager({ features = [], onUpdate, onRoll, onAddAction, onRemoveAction, actionNames, addOpen, onAddClose, allTags = [], onUpdateTags, onCreateTag }) {
   const [expanded, setExpanded] = useState(null);
-  const [showAdd, setShowAdd] = useState(false);
   const [addForm, setAddForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState(null);
   const [editingTagsFor, setEditingTagsFor] = useState(null);
-
-  useEffect(() => {
-    if (!editMode) { setShowAdd(false); setEditingId(null); setEditForm(null); setEditingTagsFor(null); }
-  }, [editMode]);
 
   function startEdit(f) {
     setEditingId(f.id);
@@ -42,12 +37,9 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
   function cancelEdit() { setEditingId(null); setEditForm(null); }
 
   function handleItemClick(feature) {
-    if (editMode) {
-      if (editingId === feature.id) cancelEdit();
-      else startEdit(feature);
-    } else {
-      setExpanded(expanded === feature.id ? null : feature.id);
-    }
+    if (editingId === feature.id) return;
+    if (editingId) cancelEdit();
+    setExpanded(expanded === feature.id ? null : feature.id);
   }
 
   function removeFeature(id) { onUpdate(features.filter(f => f.id !== id)); }
@@ -62,7 +54,7 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
       sourceType: 'custom',
     }]);
     setAddForm(EMPTY_FORM);
-    setShowAdd(false);
+    onAddClose && onAddClose();
   }
 
   const grouped = { class: [], species: [], background: [], custom: [] };
@@ -73,16 +65,7 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
 
   return (
     <div>
-      {editMode && (
-        <div className="filter-bar" style={{ marginBottom: 10 }}>
-          <button className={`filter-chip ${showAdd ? 'active' : ''}`}
-            onClick={() => { setShowAdd(v => !v); cancelEdit(); }}>
-            {showAdd ? '✕ Chiudi' : '+ Aggiungi feature'}
-          </button>
-        </div>
-      )}
-
-      {showAdd && (
+      {addOpen && (
         <div className="weapon-add-panel" style={{ marginBottom: 12 }}>
           <div className="field">
             <label>Nome *</label>
@@ -97,14 +80,14 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
             <NotationHelpBar />
           </div>
           <div style={{ display: 'flex', gap: 8, marginTop: 8, justifyContent: 'flex-end' }}>
-            <button className="io-btn" onClick={() => { setShowAdd(false); setAddForm(EMPTY_FORM); }}>Annulla</button>
+            <button className="io-btn" onClick={() => { onAddClose && onAddClose(); setAddForm(EMPTY_FORM); }}>Annulla</button>
             <button className={`io-btn primary ${!addForm.name.trim() ? 'disabled' : ''}`}
               onClick={submitCustom} disabled={!addForm.name.trim()}>+ Aggiungi</button>
           </div>
         </div>
       )}
 
-      {features.length === 0 && !showAdd && (
+      {features.length === 0 && !addOpen && (
         <div className="hint-text" style={{ padding: '8px 0' }}>
           Nessuna feature. Le feature vengono aggiunte automaticamente quando selezioni classe, specie e background.
         </div>
@@ -164,9 +147,23 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
                               </button>
                             )}
                           </div>
-                          <div style={{ display: 'flex', gap: 8, marginTop: 8, justifyContent: 'flex-end' }}>
-                            <button className="io-btn" onClick={e => { e.stopPropagation(); cancelEdit(); }}>Annulla</button>
-                            <button className="io-btn primary" onClick={e => { e.stopPropagation(); saveEdit(); }}>✓ Salva</button>
+                          <div style={{ display: 'flex', gap: 8, marginTop: 8, justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', gap: 6 }}>
+                              {onAddAction && (
+                                <button className={`icon-btn add-to-action-btn ${added ? 'added' : ''}`}
+                                  title={added ? 'Rimuovi dalle azioni' : 'Aggiungi alle azioni'}
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    if (added) { onRemoveAction && onRemoveAction(feature.name); }
+                                    else { onAddAction({ id: `feature_${feature.id}_${Date.now()}`, name: feature.name, type: feature.actionType || detectActionType(feature.desc), desc: feature.desc || '', dice: '' }); }
+                                  }}>{added ? '✓' : '⚡'}</button>
+                              )}
+                              <button className="io-btn danger" onClick={e => { e.stopPropagation(); removeFeature(feature.id); }}>✕ Elimina</button>
+                            </div>
+                            <div style={{ display: 'flex', gap: 8 }}>
+                              <button className="io-btn" onClick={e => { e.stopPropagation(); cancelEdit(); }}>Annulla</button>
+                              <button className="io-btn primary" onClick={e => { e.stopPropagation(); saveEdit(); }}>✓ Salva</button>
+                            </div>
                           </div>
                         </div>
                       )}
@@ -192,30 +189,12 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
                               </button>
                             )}
                           </div>
+                          <div className="item-edit-actions">
+                            <button className="io-btn" onClick={e => { e.stopPropagation(); startEdit(feature); }}>✏ Modifica</button>
+                          </div>
                         </div>
                       )}
                     </div>
-
-                    {editMode && onAddAction && (
-                      <button
-                        className={`icon-btn add-to-action-btn ${added ? 'added' : ''}`}
-                        title={added ? 'Rimuovi dalle azioni' : 'Aggiungi alle azioni'}
-                        onClick={e => {
-                          e.stopPropagation();
-                          if (added) { onRemoveAction && onRemoveAction(feature.name); }
-                          else { onAddAction({
-                            id: `feature_${feature.id}_${Date.now()}`,
-                            name: feature.name,
-                            type: feature.actionType || detectActionType(feature.desc),
-                            descShort: feature.source || feature.name,
-                            desc: feature.desc || '',
-                            dice: '',
-                          }); }
-                        }}>{added ? '✓' : '⚡'}</button>
-                    )}
-                    {editMode && (
-                      <button className="equip-remove" onClick={e => { e.stopPropagation(); removeFeature(feature.id); }}>✕</button>
-                    )}
                   </div>
                 );
               })}

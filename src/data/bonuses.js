@@ -1,0 +1,18 @@
+export const BONUS_STAT_OPTIONS = [
+  { value: 'CA',     label: 'Classe Armatura (CA)' },
+  { value: 'INI',    label: 'Iniziativa' },
+  { value: 'VEL',    label: 'Velocità' },
+  { value: 'HP',     label: 'HP massimi' },
+  { value: 'FOR',    label: 'Forza (FOR)' },
+  { value: 'DES',    label: 'Destrezza (DES)' },
+  { value: 'COS',    label: 'Costituzione (COS)' },
+  { value: 'INT',    label: 'Intelligenza (INT)' },
+  { value: 'SAG',    label: 'Saggezza (SAG)' },
+  { value: 'CAR',    label: 'Carisma (CAR)' },
+  { value: 'TS-FOR', label: 'TS Forza' },
+  { value: 'TS-DES', label: 'TS Destrezza' },
+  { value: 'TS-COS', label: 'TS Costituzione' },
+  { value: 'TS-INT', label: 'TS Intelligenza' },
+  { value: 'TS-SAG', label: 'TS Saggezza' },
+  { value: 'TS-CAR', label: 'TS Carisma' },
+];

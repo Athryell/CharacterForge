@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useCharContext } from './CharContext';
+import { BONUS_STAT_OPTIONS } from '../data/bonuses';
 
 // Dizionario keyword → spiegazione
 export const KEYWORD_GLOSSARY = {
@@ -54,15 +55,27 @@ const KEYWORD_REGEX = new RegExp(
   'gi'
 );
 
+// Extracts +N@[STAT] bonus notations from text (e.g. "+2@[CA]" → [{stat:'CA', value:2}])
+export function parseTextBonuses(text = '') {
+  const re = /([+-]\d+)@\[([A-Z-]+)\]/g;
+  const results = [];
+  let m;
+  while ((m = re.exec(text)) !== null) {
+    results.push({ stat: m[2].toUpperCase(), value: Number(m[1]) });
+  }
+  return results;
+}
+
 // Resolve [ATTR] and [LVL:...] notations in a text string
 export function resolveNotations(text, abilities, charLevel) {
   if (!text) return text;
 
   // Resolve [ATTR] notation: [FOR], [DES], [COS], [INT], [SAG], [CAR]
-  const resolved1 = text.replace(/\[(FOR|DES|COS|INT|SAG|CAR)\]/gi, (_, attr) => {
+  // Negative lookbehind prevents matching [CAR] inside @[CAR] bonus notation
+  const resolved1 = text.replace(/(?<!@)\[(FOR|DES|COS|INT|SAG|CAR)\]/gi, (_, attr) => {
     const score = (abilities || {})[attr.toUpperCase()] ?? 10;
     const mod = Math.floor((score - 10) / 2);
-    return String(Math.max(1, mod));
+    return String(mod);
   });
 
   // Resolve [LVL:base,threshold:value,...] notation
@@ -80,7 +93,8 @@ export function resolveNotations(text, abilities, charLevel) {
     return result;
   });
 
-  return resolved2;
+  // Normalize double signs that appear when modifier is negative (e.g. 1d8+-1 → 1d8-1)
+  return resolved2.replace(/\+-/g, '-').replace(/--/g, '+');
 }
 
 // Small hint bar for description textareas — shows notation syntax
@@ -88,9 +102,11 @@ export function NotationHelpBar() {
   return (
     <div className="notation-help-bar">
       <span className="notation-help-icon">💡</span>
-      <span><strong>[CAR]</strong> <strong>[FOR]</strong> <strong>[DES]</strong>… → modificatore caratteristica</span>
+      <span><strong>[FOR]</strong> <strong>[DES]</strong>… → mod caratteristica</span>
       <span className="notation-help-sep">·</span>
-      <span><strong>[LVL:1d6,5:1d8,9:1d10,15:1d12]</strong> → scala col livello</span>
+      <span><strong>[LVL:1d6,5:1d8]</strong> → scala col livello</span>
+      <span className="notation-help-sep">·</span>
+      <span><strong>+1@[CA]</strong> → bonus equipaggiamento (digita @ per lista)</span>
     </div>
   );
 }
@@ -133,8 +149,10 @@ function Tooltip({ text, children }) {
 }
 
 // Renders text with keyword tooltips applied automatically
-// Supports [ATTR] and [LVL:...] notations resolved from CharContext
-const DYNAMIC_NOTATION_RE = /\[(FOR|DES|COS|INT|SAG|CAR)\]|\[LVL:/i;
+// Supports [ATTR], [LVL:...], and +N@[STAT] notations resolved from CharContext
+const DYNAMIC_NOTATION_RE = /\[(FOR|DES|COS|INT|SAG|CAR)\]|\[LVL:|[+-]\d+@\[[A-Z-]+\]/i;
+const BONUS_NOTATION_SPLIT = /([+-]\d+@\[[A-Z-]+\])/gi;
+const BONUS_NOTATION_PARSE = /^([+-]\d+)@\[([A-Z-]+)\]$/i;
 
 export function KeywordText({ text, onRoll, label }) {
   const { abilities, charLevel } = useCharContext();
@@ -143,19 +161,30 @@ export function KeywordText({ text, onRoll, label }) {
   if (!resolved) return null;
 
   const DICE_REGEX = /(\d*d\d+(?:\s*[+-]\s*\d+)?)/gi;
-  const parts = resolved.split(KEYWORD_REGEX);
-  KEYWORD_REGEX.lastIndex = 0;
 
-  return (
-    <span>
-      {hasDynamic && (
-        <span className="notation-dynamic-badge" title={`Valore dinamico — originale: ${text}`}>≈ </span>
-      )}
-      {parts.map((part, i) => {
+  function renderSegments(lineText, keyPrefix) {
+    const bonusSegments = lineText.split(BONUS_NOTATION_SPLIT);
+    BONUS_NOTATION_SPLIT.lastIndex = 0;
+    return bonusSegments.map((seg, si) => {
+      const bonusMatch = seg.match(BONUS_NOTATION_PARSE);
+      if (bonusMatch) {
+        const value = Number(bonusMatch[1]);
+        const stat = bonusMatch[2].toUpperCase();
+        const statLabel = BONUS_STAT_OPTIONS.find(o => o.value === stat)?.label || stat;
+        return (
+          <span key={`${keyPrefix}-b${si}`} className="bonus-inline-badge">
+            {statLabel} {value >= 0 ? '+' : ''}{value}
+          </span>
+        );
+      }
+
+      const parts = seg.split(KEYWORD_REGEX);
+      KEYWORD_REGEX.lastIndex = 0;
+      return parts.map((part, i) => {
         const lowerPart = part.toLowerCase();
         if (KEYWORD_GLOSSARY[lowerPart]) {
           return (
-            <Tooltip key={i} text={KEYWORD_GLOSSARY[lowerPart]}>
+            <Tooltip key={`${keyPrefix}-${si}-${i}`} text={KEYWORD_GLOSSARY[lowerPart]}>
               {part}
             </Tooltip>
           );
@@ -164,7 +193,7 @@ export function KeywordText({ text, onRoll, label }) {
         if (/^\d*d\d+/.test(part) && onRoll) {
           return (
             <button
-              key={i}
+              key={`${keyPrefix}-${si}-${i}`}
               className="inline-dice-btn"
               onClick={e => { e.stopPropagation(); onRoll(part, label || part); }}
               title={`Lancia ${part}`}
@@ -176,10 +205,10 @@ export function KeywordText({ text, onRoll, label }) {
 
         const diceParts = part.split(DICE_REGEX);
         DICE_REGEX.lastIndex = 0;
-        if (diceParts.length === 1) return <span key={i}>{part}</span>;
+        if (diceParts.length === 1) return <span key={`${keyPrefix}-${si}-${i}`}>{part}</span>;
 
         return (
-          <span key={i}>
+          <span key={`${keyPrefix}-${si}-${i}`}>
             {diceParts.map((dp, j) => {
               if (/^\d*d\d+/.test(dp) && onRoll) {
                 return (
@@ -196,7 +225,23 @@ export function KeywordText({ text, onRoll, label }) {
             })}
           </span>
         );
-      })}
+      });
+    });
+  }
+
+  const lines = resolved.split('\n');
+
+  return (
+    <span>
+      {hasDynamic && (
+        <span className="notation-dynamic-badge" title={`Valore dinamico — originale: ${text}`}>≈ </span>
+      )}
+      {lines.map((line, lineIdx) => (
+        <React.Fragment key={lineIdx}>
+          {lineIdx > 0 && <br />}
+          {renderSegments(line, lineIdx)}
+        </React.Fragment>
+      ))}
     </span>
   );
 }

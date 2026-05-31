@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { SRD_SPELLS, SCHOOLS, SPELL_CLASSES, filterSpells } from '../data/spells';
 import { TagPill, TagSelector, TagFilterBar } from './Tags';
 import { KeywordText, NotationHelpBar } from './Tooltip';
@@ -26,7 +26,7 @@ function detectActionType(text) {
   return 'action';
 }
 
-function SpellEditForm({ spell, srd, onSave, onCancel, allTags, onUpdateTags, onCreateTag }) {
+function SpellEditForm({ spell, srd, onSave, onCancel, onDelete, added, onToggleAction, allTags, onUpdateTags, onCreateTag }) {
   const [form, setForm] = useState({
     name: spell.name,
     level: spell.level,
@@ -101,15 +101,29 @@ function SpellEditForm({ spell, srd, onSave, onCancel, allTags, onUpdateTags, on
             onChange={tags => onUpdateTags(spell.name, tags)} onCreateTag={onCreateTag} />
         </div>
       )}
-      <div style={{ display: 'flex', gap: 8, marginTop: 10, justifyContent: 'flex-end' }}>
-        <button className="io-btn" onClick={onCancel}>Annulla</button>
-        <button className="io-btn primary" onClick={() => onSave(spell.name, form)} disabled={!form.name.trim()}>✓ Salva</button>
+      <div style={{ display: 'flex', gap: 8, marginTop: 10, justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 6 }}>
+          {onToggleAction && (
+            <button className={`icon-btn add-to-action-btn ${added ? 'added' : ''}`}
+              title={added ? 'Rimuovi dalle azioni' : 'Aggiungi alle azioni'}
+              onClick={e => { e.stopPropagation(); onToggleAction(); }}>
+              {added ? '✓' : '⚡'}
+            </button>
+          )}
+          {onDelete && (
+            <button className="io-btn danger" onClick={e => { e.stopPropagation(); onDelete(); }}>✕ Elimina</button>
+          )}
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="io-btn" onClick={onCancel}>Annulla</button>
+          <button className="io-btn primary" onClick={() => onSave(spell.name, form)} disabled={!form.name.trim()}>✓ Salva</button>
+        </div>
       </div>
     </div>
   );
 }
 
-export default function SpellManager({ spells = [], charClass, onUpdate, onRoll, allTags = [], onUpdateTags, onCreateTag, spellSlots = [], concentratingSpell = null, onCast, onAddAction, onRemoveAction, actionNames, editMode }) {
+export default function SpellManager({ spells = [], charClass, onUpdate, onRoll, allTags = [], onUpdateTags, onCreateTag, spellSlots = [], concentratingSpell = null, onCast, onAddAction, onRemoveAction, actionNames }) {
   const [view, setView] = useState('list');
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [castMenu, setCastMenu] = useState(null);
@@ -124,9 +138,6 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
   const [customForm, setCustomForm] = useState(EMPTY_CUSTOM);
   const [editingSpellName, setEditingSpellName] = useState(null);
 
-  useEffect(() => {
-    if (!editMode) { setView('list'); setShowAddMenu(false); setEditingSpellName(null); }
-  }, [editMode]);
 
   const srdByName = useMemo(() => Object.fromEntries(SRD_SPELLS.map(s => [s.name, s])), []);
   const knownNames = useMemo(() => new Set(spells.map(s => s.name)), [spells]);
@@ -169,12 +180,8 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
   }
 
   function handleSpellClick(spellName) {
-    if (editMode) {
-      setEditingSpellName(prev => prev === spellName ? null : spellName);
-      setExpanded(null);
-    } else {
-      setExpanded(prev => prev === spellName ? null : spellName);
-    }
+    if (editingSpellName === spellName) return;
+    setExpanded(prev => prev === spellName ? null : spellName);
   }
 
   const filteredKnown = useMemo(() => {
@@ -206,17 +213,15 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
                 <button className={`filter-chip ${spellFilter === 'prepared' ? 'active' : ''}`} onClick={() => setSpellFilter('prepared')}>Preparati</button>
               )}
             </div>
-            {editMode && (
-              <div style={{ position: 'relative' }}>
-                <button className="add-icon-btn" onClick={() => setShowAddMenu(v => !v)} title="Aggiungi incantesimo">＋</button>
-                {showAddMenu && (
-                  <div className="spell-add-menu">
-                    <button className="spell-add-menu-item" onClick={() => { setView('srd'); setShowAddMenu(false); }}>🔍 Sfoglia SRD</button>
-                    <button className="spell-add-menu-item" onClick={() => { setView('custom'); setShowAddMenu(false); }}>✏ Personalizzato</button>
-                  </div>
-                )}
-              </div>
-            )}
+            <div style={{ position: 'relative' }}>
+              <button className="add-icon-btn" onClick={() => setShowAddMenu(v => !v)} title="Aggiungi incantesimo">＋</button>
+              {showAddMenu && (
+                <div className="spell-add-menu">
+                  <button className="spell-add-menu-item" onClick={() => { setView('srd'); setShowAddMenu(false); }}>🔍 Sfoglia SRD</button>
+                  <button className="spell-add-menu-item" onClick={() => { setView('custom'); setShowAddMenu(false); }}>✏ Personalizzato</button>
+                </div>
+              )}
+            </div>
           </>
         ) : (
           <>
@@ -237,7 +242,7 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
         <>
           {spells.length === 0 && (
             <div className="hint-text" style={{ padding: '12px 0' }}>
-              Nessun incantesimo. {editMode ? 'Clicca ＋ per aggiungerne uno.' : 'Attiva ✏ per aggiungerne.'}
+              Nessun incantesimo. Clicca ＋ per aggiungerne uno.
             </div>
           )}
           {Object.keys(byLevel).sort((a, b) => a - b).map(lvl => (
@@ -283,6 +288,12 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
                             spell={spell} srd={srd}
                             onSave={saveSpellEdit}
                             onCancel={() => setEditingSpellName(null)}
+                            onDelete={() => { removeSpell(spell.name); setEditingSpellName(null); }}
+                            added={added}
+                            onToggleAction={onAddAction ? () => {
+                              if (added) { onRemoveAction && onRemoveAction(spell.name); }
+                              else { onAddAction({ id: `spell_${spell.name}_${Date.now()}`, name: spell.name, type: actionType, desc: spell.desc || '', dice: '' }); }
+                            } : null}
                             allTags={allTags}
                             onUpdateTags={onUpdateTags}
                             onCreateTag={onCreateTag}
@@ -317,6 +328,9 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
                                 </button>
                               )}
                             </div>
+                            <div className="item-edit-actions" onClick={e => e.stopPropagation()}>
+                              <button className="io-btn" onClick={() => { setEditingSpellName(spell.name); setExpanded(null); }}>✏ Modifica</button>
+                            </div>
                           </>
                         )}
                       </div>
@@ -350,26 +364,6 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
                             </div>
                           )}
                         </div>
-                      )}
-
-                      {editMode && onAddAction && (
-                        <button className={`icon-btn add-to-action-btn ${added ? 'added' : ''}`}
-                          title={added ? 'Rimuovi dalle azioni' : 'Aggiungi alle azioni'}
-                          onClick={e => {
-                            e.stopPropagation();
-                            if (added) { onRemoveAction && onRemoveAction(spell.name); }
-                            else { onAddAction({
-                              id: `spell_${spell.name}_${Date.now()}`,
-                              name: spell.name,
-                              type: actionType,
-                              descShort: `${spell.school}${spell.level === 0 ? ' · Trucchetto' : ` · Liv. ${spell.level}`}${spell.concentration ? ' · Conc.' : ''}${range ? ` · ${range}` : ''}`,
-                              desc: spell.desc || '',
-                              dice: '',
-                            }); }
-                          }}>{added ? '✓' : '⚡'}</button>
-                      )}
-                      {editMode && (
-                        <button className="equip-remove" onClick={e => { e.stopPropagation(); removeSpell(spell.name); }}>✕</button>
                       )}
                     </div>
                   );

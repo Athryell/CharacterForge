@@ -13,7 +13,6 @@ export const SKILLS = [
   { name: 'Arcano', attr: 'INT' },
   { name: 'Atletica', attr: 'FOR' },
   { name: 'Furtività', attr: 'DES' },
-  { name: 'Historia', attr: 'INT' },
   { name: 'Inganno', attr: 'CAR' },
   { name: 'Indagare', attr: 'INT' },
   { name: 'Intimidire', attr: 'CAR' },
@@ -55,52 +54,11 @@ export const SLOT_TABLE = {
 
 export const DEFAULT_ACTIONS = [
   {
-    id: 'atk', name: 'Attacco', type: 'action',
-    descShort: 'Effettua un attacco con un\'arma',
-    desc: 'Effettua un attacco con un\'arma che impugni. Tiro per colpire: 1d20 + modificatore + competenza.',
-    dice: '1d20',
-  },
-  {
-    id: 'dash', name: 'Scatto', type: 'action',
-    descShort: 'Velocità doppia per il turno',
-    desc: 'Ottieni movimento extra pari alla tua velocità per il turno corrente.',
+    id: 'azione_base',
+    name: 'Azione',
+    type: 'action',
+    desc: "Con la tua azione puoi: **Attaccare** – un attacco in mischia o a distanza. **Scattare** – raddoppia la velocità. **Disimpegnarti** – ti sposti senza provocare attacchi d'opportunità. **Schivare** – svantaggio agli attacchi contro di te, vantaggio ai TS Destrezza. **Aiutare** – concede vantaggio a un alleato. **Nascondersi** – prova di Furtività (DES). **Prepararti** – prepara una reazione. **Usare un oggetto** – interagisci con un oggetto del tuo inventario.",
     dice: '',
-  },
-  {
-    id: 'disengage', name: 'Disimpegno', type: 'action',
-    descShort: 'Non provoca attacchi d\'opportunità',
-    desc: 'Il tuo movimento non provoca attacchi d\'opportunità per il resto del turno.',
-    dice: '',
-  },
-  {
-    id: 'dodge', name: 'Schivata', type: 'action',
-    descShort: 'I nemici hanno svantaggio per colpirti',
-    desc: 'Fino al tuo prossimo turno, ogni tiro per colpire contro di te ha svantaggio se riesci a vedere il tuo aggressore.',
-    dice: '',
-  },
-  {
-    id: 'help', name: 'Aiuto', type: 'action',
-    descShort: 'Dai vantaggio a un alleato',
-    desc: 'Fornisci vantaggio alla prossima prova di caratteristica o tiro per colpire di un alleato entro 1,5 m.',
-    dice: '',
-  },
-  {
-    id: 'hide', name: 'Nascondersi', type: 'action',
-    descShort: 'Prova di Furtività (DES)',
-    desc: 'Effettua una prova di Furtività (DES). Se superi la Percezione passiva dei nemici, diventi nascosto.',
-    dice: '1d20',
-  },
-  {
-    id: 'ready', name: 'Prepararsi', type: 'action',
-    descShort: 'Prepara un\'azione da usare come reazione',
-    desc: 'Scegli un\'azione da compiere e un trigger. Quando il trigger si verifica, puoi usare la tua reazione.',
-    dice: '',
-  },
-  {
-    id: 'opportunity', name: 'Attacco d\'opportunità', type: 'reaction',
-    descShort: 'Quando un nemico esce dalla tua portata',
-    desc: 'Quando una creatura visibile abbandona la tua portata senza disimpegnarsi, puoi usare la tua reazione per effettuare un attacco.',
-    dice: '1d20',
   },
 ];
 

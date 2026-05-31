@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useCharacter } from './hooks/useCharacter';
-import { loadCharsIndex, saveCharsIndex, deleteChar, getActiveCharId, setActiveCharId, generateCharId, migrateLegacy, saveCharState } from './chars';
+import { loadCharsIndex, deleteChar, getActiveCharId, setActiveCharId, generateCharId, migrateLegacy, saveCharState } from './chars';
 import CharacterSelect from './components/CharacterSelect';
 import { createDefaultState } from './data/dnd5e';
 import {
@@ -15,14 +15,15 @@ import { calcArmorAC } from './data/armors';
 import TabBar from './components/TabBar';
 import SpellManager from './components/SpellManager';
 import InventoryManager from './components/InventoryManager';
-import { TagFilterBar } from './components/Tags';
-import { KeywordText } from './components/Tooltip';
+import { TagFilterBar, TagPill, TagSelector } from './components/Tags';
+import { KeywordText, parseTextBonuses, resolveNotations } from './components/Tooltip';
 import { CharContext } from './components/CharContext';
 import WidgetGrid from './components/WidgetGrid';
 import PinnedBar, { loadPinned, savePinned } from './components/PinnedBar';
 import FeatureManager from './components/FeatureManager';
 import { CLASS_FEATURES, SPECIES_FEATURES, BACKGROUND_FEATURES, getAutoFeatures } from './data/features';
-import { loadLayout, saveLayout, getDefaultLayout, getWidgetsForTab, WIDGET_DEFS, ALL_TABS, loadTabs, saveTabs, DEFAULT_TABS } from './layout';
+import { loadLayout, saveLayout, getDefaultLayout, getWidgetsForTab, WIDGET_DEFS, loadTabs, saveTabs, DEFAULT_TABS } from './layout';
+import { useTheme, ACCENT_PRESETS } from './hooks/useTheme';
 import './App.css';
 
 const SPECIES_LIST = [
@@ -38,7 +39,8 @@ const BACKGROUNDS_LIST = [
 
 // ── Utilities ───────────────────────────────────────────────────
 function rollDice(notation) {
-  const m = notation.match(/(\d+)d(\d+)([+-]\d+)?/);
+  const clean = notation.replace(/\s/g, '').replace(/\+-/g, '-').replace(/--/g, '+');
+  const m = clean.match(/(\d+)d(\d+)([+-]\d+)?/);
   if (!m) return null;
   let total = 0;
   for (let i = 0; i < parseInt(m[1]); i++)
@@ -60,8 +62,9 @@ function Toast({ message }) {
   return message ? <div className="toast show">{message}</div> : null;
 }
 
-function AbilityBox({ attr, score, onAdjust, onInput, editing, onHover, onRoll }) {
-  const mod = getMod(score);
+function AbilityBox({ attr, score, effectiveScore, onAdjust, onInput, editing, onHover, onRoll, bonus, bonusSources = [] }) {
+  const mod = getMod(effectiveScore ?? score);
+  const srcTitle = bonusSources.map(s => `${s.name} (${s.value >= 0 ? '+' : ''}${s.value})`).join(', ');
   return (
     <div
       className={`ability-box ${editing ? 'editing' : ''}`}
@@ -82,8 +85,9 @@ function AbilityBox({ attr, score, onAdjust, onInput, editing, onHover, onRoll }
           <button className="mod-btn" onClick={() => onAdjust(attr, 1)}>+</button>
         </div>
       ) : (
-        <div className="ability-score-static">{score}</div>
+        <div className="ability-score-static">{effectiveScore ?? score}</div>
       )}
+      {bonus ? <span className="equip-bonus-badge" title={srcTitle || undefined}>🎒</span> : null}
     </div>
   );
 }
@@ -122,20 +126,19 @@ function SpellSlots({ slots, onToggle }) {
 
 const ACTION_TYPES = [['action','Azione'],['bonus','Bonus'],['reaction','Reazione'],['free','Gratuita']];
 
-function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag, onRemove, onEdit, editMode }) {
+function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag, onRemove, onEdit, onToggleHide }) {
   const [expanded, setExpanded] = useState(false);
   const [editingTags, setEditingTags] = useState(false);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState(null);
-  const { TagPill, TagSelector } = require('./components/Tags');
   const badgeClass = { action:'badge-action', bonus:'badge-bonus', reaction:'badge-reaction', free:'badge-free' }[action.type] || 'badge-free';
   const typeLabel = { action:'Azione', bonus:'Bonus', reaction:'Reazione', free:'Gratuita' }[action.type] || action.type;
+  const isHidden = !!action.hidden;
 
   function startEdit(e) {
     e.stopPropagation();
-    setForm({ name: action.name, type: action.type||'action', descShort: action.descShort||'', desc: action.desc||'', dice: action.dice||'' });
+    setForm({ name: action.name, type: action.type||'action', desc: action.desc||'', dice: action.dice||'' });
     setEditing(true);
-    setExpanded(true);
   }
   function saveEdit(e) {
     e.stopPropagation();
@@ -145,7 +148,7 @@ function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag, o
 
   if (editing && form) {
     return (
-      <div className="action-item expanded" onClick={e => e.stopPropagation()}>
+      <div className={`action-item expanded${isHidden ? ' action-hidden' : ''}`} onClick={e => e.stopPropagation()}>
         <div className={`action-badge ${badgeClass}`}>
           <select value={form.type} onChange={e => setForm(f => ({...f, type: e.target.value}))}
             style={{ background:'transparent', border:'none', color:'inherit', font:'inherit', cursor:'pointer' }}>
@@ -155,15 +158,26 @@ function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag, o
         <div className="action-content" style={{ flex:1 }}>
           <input value={form.name} onChange={e => setForm(f => ({...f, name: e.target.value}))}
             style={{ width:'100%', marginBottom:4, fontSize:13, fontWeight:600 }} placeholder="Nome azione" autoFocus />
-          <input value={form.descShort} onChange={e => setForm(f => ({...f, descShort: e.target.value}))}
-            style={{ width:'100%', marginBottom:4, fontSize:11, color:'var(--c-muted)' }} placeholder="Descrizione breve" />
           <textarea value={form.desc} onChange={e => setForm(f => ({...f, desc: e.target.value}))}
             className="notes-area" style={{ minHeight:48, marginBottom:4 }} placeholder="Descrizione completa" />
           <input value={form.dice} onChange={e => setForm(f => ({...f, dice: e.target.value}))}
             style={{ width:'100%', fontSize:11 }} placeholder="Dado (es. 1d20+3, vuoto se nessuno)" />
-          <div style={{ display:'flex', gap:6, marginTop:8, justifyContent:'flex-end' }}>
-            <button className="io-btn" onClick={e => { e.stopPropagation(); setEditing(false); }}>Annulla</button>
-            <button className="io-btn primary" onClick={saveEdit}>✓ Salva</button>
+          <div style={{ display:'flex', gap:6, marginTop:8, justifyContent:'space-between', alignItems:'center' }}>
+            <div style={{ display:'flex', gap:6 }}>
+              {onToggleHide && (
+                <button className="icon-btn" title={isHidden ? 'Mostra' : 'Nascondi'}
+                  onClick={e => { e.stopPropagation(); onToggleHide(action.id); }}>
+                  {isHidden ? '👁' : '🙈'}
+                </button>
+              )}
+              {onRemove && (
+                <button className="io-btn danger" onClick={e => { e.stopPropagation(); onRemove(action.id); setEditing(false); }}>✕ Elimina</button>
+              )}
+            </div>
+            <div style={{ display:'flex', gap:6 }}>
+              <button className="io-btn" onClick={e => { e.stopPropagation(); setEditing(false); }}>Annulla</button>
+              <button className="io-btn primary" onClick={saveEdit}>✓ Salva</button>
+            </div>
           </div>
         </div>
       </div>
@@ -171,16 +185,15 @@ function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag, o
   }
 
   return (
-    <div className={`action-item ${expanded ? 'expanded' : ''}`} onClick={() => !editingTags && setExpanded(e => !e)}>
+    <div className={`action-item ${expanded ? 'expanded' : ''}${isHidden ? ' action-hidden' : ''}`}
+      onClick={() => { if (editingTags) return; setExpanded(e => !e); }}>
       <div className={`action-badge ${badgeClass}`}>{typeLabel}</div>
       <div className="action-content">
         <div style={{ display:'flex', alignItems:'center', gap:6 }}>
           <div className="action-name" style={{ flex:1 }}>{action.name}</div>
           {(action.tags||[]).map(t => <TagPill key={t} tag={t} allTags={allTags} small />)}
-          {editMode && <button className="icon-btn" style={{ fontSize:11, padding:'1px 5px' }} onClick={startEdit} title="Modifica">✏</button>}
-          {editMode && onRemove && <button className="equip-remove" onClick={e => { e.stopPropagation(); onRemove(action.id); }}>✕</button>}
+          {isHidden && <span style={{ fontSize:12, opacity:0.5 }} title="Nascosta">🙈</span>}
         </div>
-        <div className="action-desc-short">{action.descShort}</div>
         {expanded && (
           <div className="action-desc-full" onClick={e => e.stopPropagation()}>
             <KeywordText text={action.desc} onRoll={onRoll} label={action.name} />
@@ -202,6 +215,9 @@ function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag, o
                   🏷 {(action.tags||[]).length === 0 ? 'Aggiungi tag' : 'Modifica tag'}
                 </button>
               )}
+            </div>
+            <div className="item-edit-actions">
+              <button className="io-btn" onClick={startEdit}>✏ Modifica</button>
             </div>
           </div>
         )}
@@ -248,15 +264,11 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
   const [editingHP, setEditingHP] = useState(false);
   const [editingIdentity, setEditingIdentity] = useState(false);
   const [actionTagFilter, setActionTagFilter] = useState(null);
-  const [showBaseActions, setShowBaseActions] = useState(true);
+  const [showMenu, setShowMenu] = useState(false);
   const [hoveredAttr, setHoveredAttr] = useState(null);
-  const [showAddAction, setShowAddAction] = useState(false);
-  const [addActionForm, setAddActionForm] = useState({ name:'', type:'action', descShort:'', desc:'', dice:'' });
-  const [editingActions, setEditingActions] = useState(false);
-  const [editingSpells, setEditingSpells] = useState(false);
-  const [editingWeapons, setEditingWeapons] = useState(false);
-  const [editingFeatures, setEditingFeatures] = useState(false);
-  const [editingInventory, setEditingInventory] = useState(false);
+  const [addActionForm, setAddActionForm] = useState({ name:'', type:'action', desc:'', dice:'' });
+  const [addOpenFor, setAddOpenFor] = useState(null);
+  const { mode: themeMode, accentId, setThemeMode, setAccent } = useTheme();
   const fileInputRef = useRef();
   const toastTimer = useRef();
 
@@ -266,7 +278,6 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
     toastTimer.current = setTimeout(() => setToast(''), 2500);
   }
 
-  const BASE_ACTION_IDS = ['atk','dash','disengage','dodge','help','hide','ready','opportunity'];
   const allTags = [...new Set([
     ...(state.actions||[]).flatMap(a => a.tags||[]),
     ...(state.spells||[]).flatMap(s => s.tags||[]),
@@ -275,6 +286,26 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
     ...(state.equipment||[]).flatMap(e => e.tags||[]),
   ])];
   const actionNames = new Set((state.actions||[]).map(a => a.name));
+  const { equipBonuses, equipBonusesDetailed } = useMemo(() => {
+    const totals = {};
+    const detailed = {};
+    const add = (stat, value, name) => {
+      totals[stat] = (totals[stat] || 0) + Number(value);
+      detailed[stat] = detailed[stat] || [];
+      detailed[stat].push({ name, value: Number(value) });
+    };
+    [...(state.weapons||[]), ...(state.equipment||[])].forEach(item => {
+      (item.bonuses||[]).forEach(({ stat, value }) => add(stat, value, item.name));
+      parseTextBonuses(item.desc).forEach(({ stat, value }) => add(stat, value, item.name));
+    });
+    return { equipBonuses: totals, equipBonusesDetailed: detailed };
+  }, [state.weapons, state.equipment]);
+
+  const effectiveAbilities = useMemo(() => {
+    const result = {};
+    ABILITIES.forEach(attr => { result[attr] = (state.abilities[attr] || 10) + (equipBonuses[attr] || 0); });
+    return result;
+  }, [state.abilities, equipBonuses]);
   function createTag() {}
 
   function handleTabChange(id) {
@@ -296,10 +327,12 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
   }
 
   function handleRoll(notation, name) {
-    const result = rollDice(notation);
+    const resolved = resolveNotations(notation, effectiveAbilities, state.charLevel);
+    const result = rollDice(resolved);
     if (result !== null) {
-      showToast(`${name}: ${notation} = ${result}`);
-      addLog('🎲', `${name}: ${notation} = ${result}`);
+      const display = resolved !== notation ? `${notation} → ${resolved}` : notation;
+      showToast(`${name}: ${display} = ${result}`);
+      addLog('🎲', `${name}: ${display} = ${result}`);
     }
   }
   function handleLongRest() {
@@ -355,7 +388,6 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
     a.click(); URL.revokeObjectURL(url);
   }
   const filteredActions = (state.actions||[])
-    .filter(a => showBaseActions || !BASE_ACTION_IDS.includes(a.id))
     .filter(a => actionFilter === 'all' || a.type === actionFilter);
   const hasSpells = !!SPELLCASTING_CLASS[state.charClass];
 
@@ -386,11 +418,17 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
     .map(w => ({ ...w, label: WIDGET_DEFS.find(d => d.id === w.id)?.label || w.id }));
 
   // ── Widget renderer ────────────────────────────────────────────
+  const contentEditMap = {
+    identity: editingIdentity,
+    abilities: editingAbilities,
+    hp: editingHP,
+  };
   function renderWidget(id) {
+    const ce = contentEditMap[id] ? ' content-editing' : '';
     switch (id) {
 
       case 'identity': return (
-        <div className="card">
+        <div className={`card${ce}`}>
           <div className="card-title" style={{ justifyContent:'space-between' }}>
             <span>👤 Identità</span>
             <button className={`icon-btn ${editingIdentity ? 'active' : ''}`} onClick={() => setEditingIdentity(v => !v)}>
@@ -500,7 +538,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
       );
 
       case 'abilities': return (
-        <div className="card">
+        <div className={`card${ce}`}>
           <div className="card-title" style={{ justifyContent:'space-between' }}>
             <span>🎲 Caratteristiche</span>
             <button className={`icon-btn ${editingAbilities ? 'active' : ''}`} onClick={() => setEditingAbilities(e => !e)}>
@@ -510,9 +548,12 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
           <div className="grid-6">
             {ABILITIES.map(attr => (
               <AbilityBox key={attr} attr={attr} score={state.abilities[attr]}
+                effectiveScore={effectiveAbilities[attr]}
                 onAdjust={(a,d) => char.setAbility(a, (state.abilities[a]||10)+d)}
                 onInput={char.setAbility} editing={editingAbilities} onHover={setHoveredAttr}
-                onRoll={!editingAbilities ? (a, mod) => handleRoll(`1d20${mod >= 0 ? '+' : ''}${mod}`, ABILITY_NAMES[a]) : undefined} />
+                onRoll={!editingAbilities ? (a, mod) => handleRoll(`1d20${mod >= 0 ? '+' : ''}${mod}`, ABILITY_NAMES[a]) : undefined}
+                bonus={equipBonuses[attr] || 0}
+                bonusSources={equipBonusesDetailed[attr] || []} />
             ))}
           </div>
         </div>
@@ -524,11 +565,15 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
           <div className="check-list">
             {ABILITIES.map(attr => {
               const prof = state.saveProficiencies.includes(attr);
+              const effMod = getMod(effectiveAbilities[attr]) + (prof ? char.profBonus : 0) + (equipBonuses[`TS-${attr}`] || 0);
+              const tsBonus = equipBonuses[`TS-${attr}`] || 0;
               return (
                 <div key={attr} className={`check-item ${hoveredAttr === attr ? 'attr-highlight' : ''}`} onClick={() => char.toggleSaveProficiency(attr)}>
                   <div className={`check-dot ${prof ? 'proficient' : ''}`} />
-                  <span className="check-val">{fmtMod(char.calcSaveMod(attr))}</span>
+                  <span className="check-val">{fmtMod(effMod)}</span>
                   <span className="check-name">{ABILITY_NAMES[attr]}</span>
+                  {tsBonus ? <span className="equip-bonus-badge" style={{ marginLeft:'auto' }}
+                    title={(equipBonusesDetailed[`TS-${attr}`]||[]).map(s=>`${s.name}: ${s.value>=0?'+':''}${s.value}`).join(', ')}>🎒</span> : null}
                 </div>
               );
             })}
@@ -543,10 +588,11 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
             {SKILLS.map(sk => {
               const prof = state.skillProficiencies.includes(sk.name);
               const exp = state.skillExpertise.includes(sk.name);
+              const effSkMod = getMod(effectiveAbilities[sk.attr]) + (exp ? char.profBonus*2 : prof ? char.profBonus : 0);
               return (
                 <div key={sk.name} className={`check-item ${hoveredAttr === sk.attr ? 'attr-highlight' : ''}`} onClick={() => char.toggleSkillProficiency(sk.name)}>
                   <div className={`check-dot ${exp ? 'expertise' : prof ? 'proficient' : ''}`} />
-                  <span className="check-val">{fmtMod(char.calcSkillMod(sk))}</span>
+                  <span className="check-val">{fmtMod(effSkMod)}</span>
                   <span className="check-name">{sk.name}</span>
                   <span className="check-attr">{sk.attr}</span>
                 </div>
@@ -567,7 +613,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
       );
 
       case 'hp': return (
-        <div className="card">
+        <div className={`card${ce}`}>
           <div className="card-title" style={{ justifyContent:'space-between' }}>
             <span>❤ Punti ferita</span>
             <button className={`icon-btn ${editingHP ? 'active' : ''}`} onClick={() => setEditingHP(e => !e)}>
@@ -585,10 +631,20 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
             </div>
             <span className="hp-sep">/</span>
             <div className="hp-labeled-group">
-              <div className="hp-label">Massimi</div>
+              <div className="hp-label">
+                {editingHP ? 'Massimi (base)' : 'Massimi'}
+                {equipBonuses.HP ? (
+                  <span className="equip-bonus-badge" style={{ marginLeft:4 }}
+                    title={(equipBonusesDetailed.HP||[]).map(s => `${s.name}: ${s.value>=0?'+':''}${s.value}`).join(', ')}>
+                    🎒
+                  </span>
+                ) : null}
+              </div>
               <div className="hp-stepper">
                 {editingHP && <button className="mod-btn" onClick={() => update({ hpMax: Math.max(1, state.hpMax-1) })}>−</button>}
-                <input className="hp-big" type="number" value={state.hpMax} readOnly={!editingHP}
+                <input className="hp-big" type="number"
+                  value={editingHP ? state.hpMax : state.hpMax + (equipBonuses.HP || 0)}
+                  readOnly={!editingHP}
                   style={{ background: editingHP ? 'var(--c-bg)' : 'var(--c-surface)', color: editingHP ? 'var(--c-ink)' : 'var(--c-muted)' }}
                   onChange={e => editingHP && update({ hpMax: Math.max(1, parseInt(e.target.value)||1) })} />
                 {editingHP && <button className="mod-btn" onClick={() => update({ hpMax: state.hpMax+1 })}>+</button>}
@@ -601,7 +657,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
               </div>
             )}
           </div>
-          <HPBar current={state.hpCurrent} max={state.hpMax} />
+          <HPBar current={state.hpCurrent} max={state.hpMax + (equipBonuses.HP || 0)} />
           {(state.hpTemp||0) > 0 && (
             <div className="hp-bar-wrap" style={{ marginTop:4 }}>
               <div className="hp-bar-fill" style={{ width:`${Math.min(100,((state.hpTemp||0)/Math.max(1,state.hpMax))*100)}%`, background:'#4A90D9' }} />
@@ -628,12 +684,40 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
         <div className="card">
           <div className="card-title">⚔ Statistiche combattimento</div>
           <div className="grid-3">
-            <div className="stat-pill"><div className="stat-pill-label">CA</div><input className="stat-pill-input" type="number" value={state.ac} onChange={e => update({ ac:parseInt(e.target.value)||10 })} /></div>
+            <div className="stat-pill">
+              <div className="stat-pill-label">CA</div>
+              <input className="stat-pill-input" type="number"
+                value={state.ac + (equipBonuses.CA || 0)}
+                onChange={e => update({ ac: (parseInt(e.target.value)||10) - (equipBonuses.CA||0) })} />
+              {equipBonuses.CA ? (
+                <span className="equip-bonus-badge"
+                  title={(equipBonusesDetailed.CA||[]).map(s=>`${s.name}: ${s.value>=0?'+':''}${s.value}`).join(', ')}>
+                  🎒
+                </span>
+              ) : null}
+            </div>
             <div className="stat-pill clickable-stat"
-              onClick={() => { const m = char.abilityMod('DES'); handleRoll(`1d20${m >= 0 ? '+' : ''}${m}`, 'Iniziativa'); }}
-              title={`Tira iniziativa: 1d20${char.initiative}`}
-            ><div className="stat-pill-label">Iniziativa</div><div className="stat-pill-val">{char.initiative}</div></div>
-            <div className="stat-pill"><div className="stat-pill-label">Velocità</div><input className="stat-pill-input" type="text" value={state.speed} onChange={e => update({ speed:e.target.value })} /></div>
+              onClick={() => { const im = getMod(effectiveAbilities.DES) + (equipBonuses.INI || 0); handleRoll(`1d20${im >= 0 ? '+' : ''}${im}`, 'Iniziativa'); }}
+              title={`Tira iniziativa: 1d20${fmtMod(getMod(effectiveAbilities.DES) + (equipBonuses.INI || 0))}`}>
+              <div className="stat-pill-label">Iniziativa</div>
+              <div className="stat-pill-val">{fmtMod(getMod(effectiveAbilities.DES) + (equipBonuses.INI || 0))}</div>
+              {equipBonuses.INI ? (
+                <span className="equip-bonus-badge"
+                  title={(equipBonusesDetailed.INI||[]).map(s=>`${s.name}: ${s.value>=0?'+':''}${s.value}`).join(', ')}>
+                  🎒
+                </span>
+              ) : null}
+            </div>
+            <div className="stat-pill">
+              <div className="stat-pill-label">Velocità</div>
+              <input className="stat-pill-input" type="text" value={state.speed} onChange={e => update({ speed:e.target.value })} />
+              {equipBonuses.VEL ? (
+                <span className="equip-bonus-badge"
+                  title={(equipBonusesDetailed.VEL||[]).map(s=>`${s.name}: ${s.value>=0?'+':''}${s.value}`).join(', ')}>
+                  🎒
+                </span>
+              ) : null}
+            </div>
           </div>
         </div>
       );
@@ -645,7 +729,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
             <div style={{ display:'flex', alignItems:'center', gap:10 }}>
               <button className={`inspiration-btn ${state.inspiration ? 'active' : ''}`} onClick={() => update({ inspiration:!state.inspiration })}>⭐</button>
               <span className="toggle-label" style={{ color: state.inspiration ? '#856404' : 'var(--c-hint)' }}>
-                {state.inspiration ? 'Ispirazione!' : 'Nessuna'}
+                {state.inspiration ? 'Ispirazione!' : 'No ispirazione'}
               </span>
             </div>
             <div style={{ display:'flex', alignItems:'center', gap:10 }}>
@@ -655,7 +739,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
               <span className="toggle-label" style={{ color: state.concentrating ? '#185FA5' : 'var(--c-hint)' }}>
                 {state.concentrating
                   ? (state.concentratingSpell ? `Concentrazione (${state.concentratingSpell})` : 'Concentrazione')
-                  : 'Nessuna'}
+                  : 'No concentrazione'}
               </span>
             </div>
           </div>
@@ -691,7 +775,12 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
       case 'conditions': return (
         <div className="card">
           <div className="card-title">🔮 Condizioni</div>
-          <ConditionTracker active={state.conditions||[]} onChange={conditions => update({ conditions })} />
+          <ConditionTracker
+            active={state.conditions||[]}
+            onChange={conditions => update({ conditions })}
+            exhaustionLevel={state.exhaustionLevel||0}
+            onExhaustionChange={level => update({ exhaustionLevel: level })}
+          />
         </div>
       );
 
@@ -699,14 +788,8 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
         <div className="card">
           <div className="card-title" style={{ justifyContent:'space-between' }}>
             <span>⚡ Azioni</span>
-            <div style={{ display:'flex', gap:6 }}>
-              <button className="icon-btn" style={{ fontSize:11 }} onClick={() => setShowBaseActions(v => !v)}>
-                {showBaseActions ? '🙈 Base' : '👁 Base'}
-              </button>
-              <button className={`icon-btn ${editingActions ? 'active' : ''}`} onClick={() => { setEditingActions(v => !v); setShowAddAction(false); }}>
-                {editingActions ? '✓' : '✏'}
-              </button>
-            </div>
+            <button className={`icon-btn ${addOpenFor === 'actions' ? 'active' : ''}`}
+              onClick={() => setAddOpenFor(v => v === 'actions' ? null : 'actions')}>+</button>
           </div>
           <div className="filter-bar">
             {[['all','Tutte'],['action','Azione'],['bonus','Bonus'],['reaction','Reazione'],['free','Gratuita']].map(([v,l]) => (
@@ -714,29 +797,8 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
             ))}
           </div>
           {allTags.length > 0 && <TagFilterBar allTags={allTags} activeTag={actionTagFilter} onSelect={setActionTagFilter} />}
-          <div className="action-list">
-            {filteredActions.filter(a => !actionTagFilter || (a.tags||[]).includes(actionTagFilter)).map(action => (
-              <ActionItem key={action.id||action.name} action={action} allTags={allTags} onRoll={handleRoll}
-                editMode={editingActions}
-                onUpdateTags={(id,tags) => {
-                  const action = (state.actions||[]).find(a => a.id===id);
-                  const upd = { actions: state.actions.map(a => a.id===id ? {...a,tags} : a) };
-                  if (action) {
-                    upd.weapons = (state.weapons||[]).map(w => w.name===action.name ? {...w,tags} : w);
-                    upd.spells = (state.spells||[]).map(s => s.name===action.name ? {...s,tags} : s);
-                    upd.features = (state.features||[]).map(f => f.name===action.name ? {...f,tags} : f);
-                    upd.equipment = (state.equipment||[]).map(e => e.name===action.name ? {...e,tags} : e);
-                  }
-                  update(upd);
-                }}
-                onCreateTag={createTag}
-                onRemove={id => update({ actions: state.actions.filter(a => a.id !== id) })}
-                onEdit={(id, patch) => update({ actions: state.actions.map(a => a.id === id ? {...a, ...patch} : a) })}
-              />
-            ))}
-          </div>
-          {editingActions && (showAddAction ? (
-            <div className="weapon-add-panel" style={{ marginTop:8 }}>
+          {addOpenFor === 'actions' && (
+            <div className="weapon-add-panel" style={{ marginBottom:8 }}>
               <div className="field-row">
                 <div className="field">
                   <label>Nome *</label>
@@ -754,26 +816,41 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
                 </div>
               </div>
               <div className="field" style={{ marginTop:6 }}>
-                <label>Descrizione breve</label>
-                <input value={addActionForm.descShort} onChange={e => setAddActionForm(f => ({...f, descShort:e.target.value}))} placeholder="Breve riepilogo..." />
-              </div>
-              <div className="field" style={{ marginTop:6 }}>
-                <label>Descrizione completa</label>
+                <label>Descrizione / Note</label>
                 <textarea className="notes-area" style={{ minHeight:48 }} value={addActionForm.desc} onChange={e => setAddActionForm(f => ({...f, desc:e.target.value}))} placeholder="Descrizione dettagliata..." />
               </div>
               <div style={{ display:'flex', gap:8, marginTop:8, justifyContent:'flex-end' }}>
-                <button className="io-btn" onClick={() => { setShowAddAction(false); setAddActionForm({ name:'', type:'action', descShort:'', desc:'', dice:'' }); }}>Annulla</button>
+                <button className="io-btn" onClick={() => { setAddOpenFor(null); setAddActionForm({ name:'', type:'action', desc:'', dice:'' }); }}>Annulla</button>
                 <button className="io-btn primary" disabled={!addActionForm.name.trim()} onClick={() => {
                   if (!addActionForm.name.trim()) return;
                   update({ actions: [...(state.actions||[]), { ...addActionForm, id: Date.now().toString() }] });
-                  setShowAddAction(false);
-                  setAddActionForm({ name:'', type:'action', descShort:'', desc:'', dice:'' });
+                  setAddOpenFor(null);
+                  setAddActionForm({ name:'', type:'action', desc:'', dice:'' });
                 }}>+ Aggiungi</button>
               </div>
             </div>
-          ) : (
-            <button className="add-action-btn" onClick={() => setShowAddAction(true)}>+ Aggiungi azione</button>
-          ))}
+          )}
+          <div className="action-list">
+            {filteredActions.filter(a => !actionTagFilter || (a.tags||[]).includes(actionTagFilter)).map(action => (
+              <ActionItem key={action.id||action.name} action={action} allTags={allTags} onRoll={handleRoll}
+                onUpdateTags={(id,tags) => {
+                  const action = (state.actions||[]).find(a => a.id===id);
+                  const upd = { actions: state.actions.map(a => a.id===id ? {...a,tags} : a) };
+                  if (action) {
+                    upd.weapons = (state.weapons||[]).map(w => w.name===action.name ? {...w,tags} : w);
+                    upd.spells = (state.spells||[]).map(s => s.name===action.name ? {...s,tags} : s);
+                    upd.features = (state.features||[]).map(f => f.name===action.name ? {...f,tags} : f);
+                    upd.equipment = (state.equipment||[]).map(e => e.name===action.name ? {...e,tags} : e);
+                  }
+                  update(upd);
+                }}
+                onCreateTag={createTag}
+                onRemove={id => update({ actions: state.actions.filter(a => a.id !== id) })}
+                onEdit={(id, patch) => update({ actions: state.actions.map(a => a.id === id ? {...a, ...patch} : a) })}
+                onToggleHide={id => update({ actions: state.actions.map(a => a.id === id ? {...a, hidden: !a.hidden} : a) })}
+              />
+            ))}
+          </div>
         </div>
       );
 
@@ -781,14 +858,13 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
         <div className="card">
           <div className="card-title" style={{ justifyContent:'space-between' }}>
             <span>⚔ Armi</span>
-            <button className={`icon-btn ${editingWeapons ? 'active' : ''}`} onClick={() => setEditingWeapons(v => !v)}>
-              {editingWeapons ? '✓' : '✏'}
-            </button>
+            <button className={`icon-btn ${addOpenFor === 'weapons' ? 'active' : ''}`}
+              onClick={() => setAddOpenFor(v => v === 'weapons' ? null : 'weapons')}>+</button>
           </div>
           <WeaponManager weapons={state.weapons||[]} abilities={state.abilities} profBonus={char.profBonus}
             onUpdate={weapons => update({ weapons })} onRoll={handleRoll}
             proficiency={state.weaponProficiency||''} onUpdateProficiency={v => update({ weaponProficiency: v })}
-            actionNames={actionNames} editMode={editingWeapons}
+            actionNames={actionNames} addOpen={addOpenFor === 'weapons'} onAddClose={() => setAddOpenFor(null)}
             allTags={allTags}
             onUpdateTags={(id, tags) => {
               const weapon = (state.weapons||[]).find(w => w.id===id);
@@ -853,12 +929,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
 
       case 'spells': return (
         <div className="card">
-          <div className="card-title" style={{ justifyContent:'space-between' }}>
-            <span>📖 Incantesimi</span>
-            <button className={`icon-btn ${editingSpells ? 'active' : ''}`} onClick={() => setEditingSpells(v => !v)}>
-              {editingSpells ? '✓' : '✏'}
-            </button>
-          </div>
+          <div className="card-title">📖 Incantesimi</div>
           <SpellManager spells={state.spells} charClass={state.charClass} onUpdate={spells => update({ spells })}
             onRoll={handleRoll} allTags={allTags}
             onUpdateTags={(name,tags) => update({
@@ -869,7 +940,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
             spellSlots={state.spellSlots||[]}
             concentratingSpell={state.concentratingSpell||null}
             onCast={handleCastSpell}
-            actionNames={actionNames} editMode={editingSpells}
+            actionNames={actionNames}
             onAddAction={action => { if (!actionNames.has(action.name)) update({ actions: [...(state.actions||[]), action] }); }}
             onRemoveAction={name => update({ actions: (state.actions||[]).filter(a => a.name !== name) })} />
         </div>
@@ -921,11 +992,11 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
         <div className="card">
           <div className="card-title" style={{ justifyContent:'space-between' }}>
             <span>🎒 Equipaggiamento</span>
-            <button className={`icon-btn ${editingInventory ? 'active' : ''}`} onClick={() => setEditingInventory(v => !v)}>
-              {editingInventory ? '✓' : '✏'}
-            </button>
+            <button className={`icon-btn ${addOpenFor === 'inventory' ? 'active' : ''}`}
+              onClick={() => setAddOpenFor(v => v === 'inventory' ? null : 'inventory')}>+</button>
           </div>
-          <InventoryManager items={state.equipment||[]} onUpdate={equipment => update({ equipment })} onRoll={handleRoll} editMode={editingInventory}
+          <InventoryManager items={state.equipment||[]} onUpdate={equipment => update({ equipment })} onRoll={handleRoll}
+            addOpen={addOpenFor === 'inventory'} onAddClose={() => setAddOpenFor(null)}
             allTags={allTags}
             onUpdateTags={(id, tags) => {
               const item = (state.equipment||[]).find(e => e.id===id);
@@ -969,12 +1040,11 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
         <div className="card">
           <div className="card-title" style={{ justifyContent:'space-between' }}>
             <span>✨ Feature di classe e tratti</span>
-            <button className={`icon-btn ${editingFeatures ? 'active' : ''}`} onClick={() => setEditingFeatures(v => !v)}>
-              {editingFeatures ? '✓' : '✏'}
-            </button>
+            <button className={`icon-btn ${addOpenFor === 'features' ? 'active' : ''}`}
+              onClick={() => setAddOpenFor(v => v === 'features' ? null : 'features')}>+</button>
           </div>
           <FeatureManager features={state.features||[]} onUpdate={features => update({ features })} onRoll={handleRoll}
-            actionNames={actionNames} editMode={editingFeatures}
+            actionNames={actionNames} addOpen={addOpenFor === 'features'} onAddClose={() => setAddOpenFor(null)}
             allTags={allTags}
             onUpdateTags={(id, tags) => {
               const feat = (state.features||[]).find(f => f.id===id);
@@ -1021,35 +1091,76 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
   }
 
   return (
-    <CharContext.Provider value={{ abilities: state.abilities, charLevel: state.charLevel }}>
+    <CharContext.Provider value={{ abilities: effectiveAbilities, charLevel: state.charLevel }}>
     <div className="sheet">
       <Toast message={toast} />
       {showCreator && <CharacterCreator onComplete={handleCreatorComplete} onCancel={() => setShowCreator(false)} />}
 
-      {/* Template bar */}
-      <div className="template-bar">
-        <span className="template-label">Sistema:</span>
-        {['dnd5e','custom'].map(t => (
-          <button key={t} className={`template-chip ${state.template===t ? 'active' : ''}`} onClick={() => update({ template:t })}>
-            {t === 'dnd5e' ? 'D&D 5e / 2024' : 'Personalizzato'}
-          </button>
-        ))}
+      {/* Top bar */}
+      <div className="top-bar">
+        <span className="top-bar-brand">D&amp;D 5e 2024</span>
         <div style={{ flex:1 }} />
-        <button className={`icon-btn ${editMode ? 'active' : ''}`} onClick={() => setEditMode(v => !v)} title="Modalità layout">
-          {editMode ? '✓ Fine layout' : '⠿ Layout'}
-        </button>
-        {editMode && (
-          <button className="icon-btn" onClick={() => {
-            const d = getDefaultLayout(); setLayout(d); saveLayout(d);
-            setTabs(DEFAULT_TABS); saveTabs(DEFAULT_TABS);
-          }}>↺ Reset</button>
+        {onBackToSelect && (
+          <button className="icon-btn" onClick={onBackToSelect} title="Tutti i personaggi">👥</button>
         )}
-        {onBackToSelect && <button className="io-btn" onClick={onBackToSelect} title="Tutti i personaggi">👥</button>}
-        <button className="io-btn primary" onClick={() => setShowCreator(true)}>⚔ Nuovo</button>
-        <button className="io-btn" onClick={handleExport}>⬇ Esporta</button>
-        <button className="io-btn primary" onClick={() => fileInputRef.current?.click()}>⬆ Importa</button>
-        <input ref={fileInputRef} type="file" accept=".json" style={{ display:'none' }} onChange={handleImport} />
+        <button className="hamburger-btn" onClick={() => setShowMenu(v => !v)} title="Menu" aria-label="Menu">
+          ☰
+        </button>
       </div>
+
+      {showMenu && (
+        <>
+          <div className="hamburger-backdrop" onClick={() => setShowMenu(false)} />
+          <div className="hamburger-dropdown">
+            <div className="hmenu-section">
+              <div className="hmenu-label">Personaggio</div>
+              <button className="hmenu-item" onClick={() => { setShowCreator(true); setShowMenu(false); }}>
+                ⚔ Nuovo personaggio
+              </button>
+            </div>
+            <div className="hmenu-divider" />
+            <div className="hmenu-section">
+              <div className="hmenu-label">Layout</div>
+              <button className={`hmenu-item ${editMode ? 'active' : ''}`}
+                onClick={() => { setEditMode(v => !v); setShowMenu(false); }}>
+                {editMode ? '✓ Fine modifica layout' : '⠿ Modifica layout'}
+              </button>
+              <button className="hmenu-item" onClick={() => {
+                const d = getDefaultLayout(); setLayout(d); saveLayout(d);
+                setTabs(DEFAULT_TABS); saveTabs(DEFAULT_TABS);
+                setShowMenu(false);
+              }}>↺ Reset layout</button>
+            </div>
+            <div className="hmenu-divider" />
+            <div className="hmenu-section">
+              <div className="hmenu-label">Tema</div>
+              <div className="hmenu-row">
+                {[['system','◑','Sistema'],['light','☀','Chiaro'],['dark','☾','Scuro']].map(([m, icon, label]) => (
+                  <button key={m} className={`hmenu-theme-btn ${themeMode === m ? 'active' : ''}`}
+                    title={label} onClick={() => setThemeMode(m)}>{icon} {label}</button>
+                ))}
+              </div>
+            </div>
+            <div className="hmenu-section">
+              <div className="hmenu-label">Colore</div>
+              <div className="hmenu-row">
+                {ACCENT_PRESETS.map(p => (
+                  <button key={p.id} className={`accent-swatch ${accentId === p.id ? 'active' : ''}`}
+                    title={p.label} onClick={() => setAccent(p.id)}
+                    style={{ '--swatch-color': p.light.accent }} />
+                ))}
+              </div>
+            </div>
+            <div className="hmenu-divider" />
+            <div className="hmenu-section">
+              <div className="hmenu-label">Dati</div>
+              <button className="hmenu-item" onClick={() => { handleExport(); setShowMenu(false); }}>⬇ Esporta personaggio</button>
+              <button className="hmenu-item" onClick={() => { fileInputRef.current?.click(); setShowMenu(false); }}>⬆ Importa personaggio</button>
+            </div>
+          </div>
+        </>
+      )}
+      <input ref={fileInputRef} type="file" accept=".json" style={{ display:'none' }} onChange={handleImport} />
 
       <TabBar
         tabs={tabs}

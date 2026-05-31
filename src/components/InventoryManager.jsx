@@ -1,20 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { KeywordText, NotationHelpBar } from './Tooltip';
+import BonusTextarea from './BonusTextarea';
 import { TagPill, TagSelector } from './Tags';
 
 const EMPTY_FORM = { name: '', qty: 1, desc: '', weight: '' };
 
-export default function InventoryManager({ items = [], onUpdate, onRoll, editMode, allTags = [], onUpdateTags, onCreateTag, onAddAction, onRemoveAction, actionNames }) {
-  const [showForm, setShowForm] = useState(false);
+export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen, onAddClose, allTags = [], onUpdateTags, onCreateTag, onAddAction, onRemoveAction, actionNames }) {
   const [addForm, setAddForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState(null);
   const [expandedId, setExpandedId] = useState(null);
   const [editingTagsFor, setEditingTagsFor] = useState(null);
-
-  useEffect(() => {
-    if (!editMode) { setShowForm(false); setEditingId(null); setEditForm(null); setEditingTagsFor(null); }
-  }, [editMode]);
 
   function patchAdd(obj) { setAddForm(f => ({ ...f, ...obj })); }
   function patchEdit(obj) { setEditForm(f => ({ ...f, ...obj })); }
@@ -31,7 +27,7 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, editMod
       onUpdate([...items, { id: Date.now().toString(), name, qty: parseInt(addForm.qty) || 1, desc: addForm.desc, weight: addForm.weight }]);
     }
     setAddForm(EMPTY_FORM);
-    setShowForm(false);
+    onAddClose && onAddClose();
   }
 
   function startEdit(item) {
@@ -55,26 +51,14 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, editMod
   }
 
   function handleRowClick(item) {
-    if (editMode) {
-      if (editingId === item.id) cancelEdit();
-      else startEdit(item);
-    } else {
-      setExpandedId(expandedId === item.id ? null : item.id);
-    }
+    if (editingId === item.id) return;
+    if (editingId) cancelEdit();
+    setExpandedId(expandedId === item.id ? null : item.id);
   }
 
   return (
     <div>
-      {editMode && (
-        <div className="filter-bar" style={{ marginBottom: 10 }}>
-          <button className={`filter-chip ${showForm ? 'active' : ''}`}
-            onClick={() => { setShowForm(v => !v); cancelEdit(); }}>
-            {showForm ? '✕ Chiudi' : '+ Aggiungi oggetto'}
-          </button>
-        </div>
-      )}
-
-      {showForm && (
+      {addOpen && (
         <div className="weapon-add-panel" style={{ marginBottom: 12 }}>
           <div className="field-row">
             <div className="field" style={{ flex: 2 }}>
@@ -99,19 +83,19 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, editMod
           </div>
           <div className="field" style={{ marginTop: 8 }}>
             <label>Descrizione / Note</label>
-            <textarea className="notes-area" style={{ minHeight: 56 }} value={addForm.desc}
-              onChange={e => patchAdd({ desc: e.target.value })} placeholder="Es. Cura 2d4+2 HP." />
+            <BonusTextarea className="notes-area" style={{ minHeight: 56 }} value={addForm.desc}
+              onChange={e => patchAdd({ desc: e.target.value })} placeholder="Es. Cura 2d4+2 HP. (@ per bonus)" />
             <NotationHelpBar />
           </div>
           <div style={{ display: 'flex', gap: 8, marginTop: 8, justifyContent: 'flex-end' }}>
-            <button className="io-btn" onClick={() => { setShowForm(false); setAddForm(EMPTY_FORM); }}>Annulla</button>
+            <button className="io-btn" onClick={() => { onAddClose && onAddClose(); setAddForm(EMPTY_FORM); }}>Annulla</button>
             <button className={`io-btn primary ${!addForm.name.trim() ? 'disabled' : ''}`}
               onClick={submitAdd} disabled={!addForm.name.trim()}>+ Aggiungi</button>
           </div>
         </div>
       )}
 
-      {items.length === 0 && !showForm && (
+      {items.length === 0 && !addOpen && (
         <div className="hint-text">Nessun oggetto. Attiva la modalità ✏ e clicca "+ Aggiungi oggetto".</div>
       )}
 
@@ -143,27 +127,6 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, editMod
                   <span className="inventory-qty">{item.qty || 1}</span>
                   <button className="mod-btn" onClick={() => adjustQty(item.id, 1)}>+</button>
                 </div>
-
-                {editMode && (
-                  <div className="inventory-actions" onClick={e => e.stopPropagation()}>
-                    {onAddAction && (
-                      <button className={`icon-btn add-to-action-btn ${added ? 'added' : ''}`}
-                        title={added ? 'Rimuovi dalle azioni' : 'Aggiungi alle azioni'}
-                        onClick={() => {
-                          if (added) { onRemoveAction && onRemoveAction(item.name); }
-                          else { onAddAction({
-                            id: `item_${item.id}_${Date.now()}`,
-                            name: item.name,
-                            type: 'action',
-                            descShort: item.desc ? item.desc.substring(0, 60) : item.name,
-                            desc: item.desc || '',
-                            dice: '',
-                          }); }
-                        }}>{added ? '✓' : '⚡'}</button>
-                    )}
-                    <button className="equip-remove" onClick={() => removeItem(item.id)}>✕</button>
-                  </div>
-                )}
               </div>
 
               {/* Inline edit form */}
@@ -191,7 +154,7 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, editMod
                   </div>
                   <div className="field" style={{ marginTop: 6 }}>
                     <label>Descrizione</label>
-                    <textarea className="notes-area" style={{ minHeight: 56 }}
+                    <BonusTextarea className="notes-area" style={{ minHeight: 56 }}
                       value={editForm.desc || ''} onChange={e => patchEdit({ desc: e.target.value })} />
                     <NotationHelpBar />
                   </div>
@@ -208,9 +171,22 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, editMod
                       </button>
                     )}
                   </div>
-                  <div style={{ display: 'flex', gap: 8, marginTop: 8, justifyContent: 'flex-end' }}>
-                    <button className="io-btn" onClick={cancelEdit}>Annulla</button>
-                    <button className="io-btn primary" onClick={saveEdit}>✓ Salva</button>
+                  <div style={{ display: 'flex', gap: 8, marginTop: 8, justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      {onAddAction && (
+                        <button className={`icon-btn add-to-action-btn ${added ? 'added' : ''}`}
+                          title={added ? 'Rimuovi dalle azioni' : 'Aggiungi alle azioni'}
+                          onClick={() => {
+                            if (added) { onRemoveAction && onRemoveAction(item.name); }
+                            else { onAddAction({ id: `item_${item.id}_${Date.now()}`, name: item.name, type: 'action', desc: item.desc || '', dice: '' }); }
+                          }}>{added ? '✓' : '⚡'}</button>
+                      )}
+                      <button className="io-btn danger" onClick={() => removeItem(item.id)}>✕ Elimina</button>
+                    </div>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button className="io-btn" onClick={cancelEdit}>Annulla</button>
+                      <button className="io-btn primary" onClick={saveEdit}>✓ Salva</button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -219,6 +195,13 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, editMod
               {isExpanded && !isEditing && (
                 <div className="inventory-desc-full" onClick={e => e.stopPropagation()}>
                   {item.desc && <KeywordText text={item.desc} onRoll={onRoll} label={item.name} />}
+                  {(item.bonuses || []).length > 0 && (
+                    <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 4 }}>
+                      {item.bonuses.map((b, i) => (
+                        <span key={i} className="bonus-chip">{b.stat} {b.value >= 0 ? '+' : ''}{b.value}</span>
+                      ))}
+                    </div>
+                  )}
                   <div style={{ marginTop: 6 }}>
                     {editingTagsFor === item.id ? (
                       <>
@@ -231,6 +214,9 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, editMod
                         🏷 {(item.tags||[]).length === 0 ? 'Aggiungi tag' : 'Modifica tag'}
                       </button>
                     )}
+                  </div>
+                  <div className="item-edit-actions">
+                    <button className="io-btn" onClick={() => startEdit(item)}>✏ Modifica</button>
                   </div>
                 </div>
               )}

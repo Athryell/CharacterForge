@@ -261,8 +261,23 @@ export default function CharacterCreator({ onComplete, onCancel }) {
     patch({ abilities: rolled });
   }
 
+  const CLASS_STANDARD_ARRAYS = {
+    'Barbaro':   { FOR:15, DES:14, COS:13, INT:12, SAG:10, CAR:8  },
+    'Guerriero': { FOR:15, DES:14, COS:13, INT:12, SAG:10, CAR:8  },
+    'Monaco':    { FOR:12, DES:15, COS:13, INT:8,  SAG:14, CAR:10 },
+    'Paladino':  { FOR:15, DES:8,  COS:14, INT:10, SAG:12, CAR:14 },
+    'Ranger':    { FOR:12, DES:15, COS:14, INT:8,  SAG:13, CAR:10 },
+    'Ladro':     { FOR:8,  DES:15, COS:14, INT:10, SAG:13, CAR:12 },
+    'Bardo':     { FOR:8,  DES:14, COS:13, INT:10, SAG:12, CAR:15 },
+    'Chierico':  { FOR:10, DES:14, COS:13, INT:8,  SAG:15, CAR:12 },
+    'Druido':    { FOR:8,  DES:14, COS:13, INT:10, SAG:15, CAR:12 },
+    'Stregone':  { FOR:8,  DES:13, COS:14, INT:10, SAG:12, CAR:15 },
+    'Warlock':   { FOR:8,  DES:14, COS:13, INT:10, SAG:12, CAR:15 },
+    'Mago':      { FOR:8,  DES:13, COS:14, INT:15, SAG:12, CAR:10 },
+  };
   function setStandard() {
-    patch({ abilities: { FOR:15, DES:14, COS:13, INT:12, SAG:10, CAR:8 } });
+    const arr = CLASS_STANDARD_ARRAYS[data.charClass] || { FOR:15, DES:14, COS:13, INT:12, SAG:10, CAR:8 };
+    patch({ abilities: arr });
   }
 
   function getFinalAbilities() {
