@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { WEAPON_PRESETS, WEAPON_PROPERTIES, WEAPON_MASTERIES } from '../data/weapons';
+import { WEAPON_PROPERTIES, WEAPON_MASTERIES } from '../data/weapons';
+import dataManager from '../data/dataManager';
 import { TagPill, TagSelector } from './Tags';
 import { NotationHelpBar, KeywordText } from './Tooltip';
 import BonusTextarea from './BonusTextarea';
@@ -215,7 +216,7 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
           </div>
           {addMode === 'preset' ? (
             <div className="weapon-preset-list">
-              {WEAPON_PRESETS.map(p => (
+              {dataManager.getWeapons().map(p => (
                 <div key={p.name} className="weapon-preset-item" onClick={() => addPreset(p)}>
                   <div className="weapon-name">{p.name}</div>
                   <div className="weapon-meta">

@@ -2143,3 +2143,40 @@ input[type=number] {
 }
 .exhaustion-btn:hover:not(:disabled) { background: var(--c-accent-light); color: var(--c-accent-text); }
 .exhaustion-btn:disabled { opacity: 0.3; cursor: default; }
+
+/* ── SourceManager ───────────────────────────────────────────── */
+.source-manager { display: flex; flex-direction: column; gap: 12px; }
+
+.source-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.source-confirm-panel {
+  background: var(--c-surface); border: 1px solid var(--c-accent);
+  border-radius: var(--r); padding: 12px 14px;
+}
+.source-confirm-title { font-size: 12px; color: var(--c-muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; }
+.source-confirm-info { font-size: 14px; font-weight: 600; color: var(--c-ink); }
+.source-confirm-desc { font-size: 12px; color: var(--c-muted); margin-top: 4px; }
+.source-confirm-counts { font-size: 12px; color: var(--c-accent-text); background: var(--c-accent-light); border-radius: 6px; padding: 3px 8px; margin-top: 6px; display: inline-block; }
+
+.source-status {
+  border-radius: var(--r); padding: 8px 12px; font-size: 13px;
+}
+.source-status.ok { background: #d4edda; color: #155724; }
+.source-status.err { background: #f8d7da; color: #721c24; }
+
+.source-list { display: flex; flex-direction: column; gap: 8px; }
+.source-item {
+  background: var(--c-surface); border: 1px solid var(--c-border);
+  border-radius: var(--r); padding: 10px 12px;
+}
+.source-item-header { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.source-badge {
+  font-size: 10px; font-weight: 700; border-radius: 4px; padding: 2px 6px;
+  text-transform: uppercase; letter-spacing: .05em;
+}
+.source-badge.srd { background: #d4edda; color: #155724; }
+.source-badge.homebrew { background: #cce5ff; color: #004085; }
+.source-name { font-size: 14px; font-weight: 600; color: var(--c-ink); }
+.source-author { font-size: 12px; color: var(--c-muted); }
+.source-counts { font-size: 11px; color: var(--c-muted); margin-top: 4px; }
+.source-desc { font-size: 12px; color: var(--c-muted); margin-top: 4px; font-style: italic; }

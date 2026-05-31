@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CLASSES, ALIGNMENTS, ABILITIES, ABILITY_NAMES, SKILLS, HIT_DICE, SPELLCASTING_CLASS } from '../data/dnd5e';
+import { ALIGNMENTS, ABILITIES, ABILITY_NAMES, SKILLS, HIT_DICE, SPELLCASTING_CLASS } from '../data/dnd5e';
 import { CLASS_FEATURES, SPECIES_FEATURES, BACKGROUND_FEATURES, getAutoFeatures } from '../data/features';
+import { CLASS_SAVE_PROFS, CLASS_SKILL_COUNT, CLASS_SKILL_OPTIONS } from '../data/srd/classes';
+import dataManager from '../data/dataManager';
 
 // SRD 5.5e (2024) — specie: solo tratti, nessun bonus caratteristica
 const SPECIES_SRD = [
@@ -181,32 +183,7 @@ const BACKGROUNDS_SRD = [
   },
 ];
 
-const CLASS_SAVE_PROFS = {
-  Barbaro: ['FOR','COS'], Bardo: ['DES','CAR'], Chierico: ['SAG','CAR'],
-  Druido: ['INT','SAG'], Guerriero: ['FOR','COS'], Ladro: ['DES','INT'],
-  Mago: ['INT','SAG'], Monaco: ['FOR','DES'], Paladino: ['SAG','CAR'],
-  Ranger: ['FOR','DES'], Stregone: ['COS','CAR'], Warlock: ['SAG','CAR'],
-};
-
-const CLASS_SKILL_COUNT = {
-  Barbaro:2, Bardo:3, Chierico:2, Druido:2, Guerriero:2, Ladro:4,
-  Mago:2, Monaco:2, Paladino:2, Ranger:3, Stregone:2, Warlock:2,
-};
-
-const CLASS_SKILL_OPTIONS = {
-  Barbaro: ['Addestrare animali','Atletica','Intimidire','Natura','Percezione','Sopravvivenza'],
-  Bardo: SKILLS.map(s=>s.name),
-  Chierico: ['Storia','Indagare','Medicina','Persuasione','Religione'],
-  Druido: ['Arcano','Addestrare animali','Indagare','Medicina','Natura','Percezione','Religione','Sopravvivenza'],
-  Guerriero: ['Acrobazia','Addestrare animali','Atletica','Storia','Indagare','Intimidire','Percezione','Sopravvivenza'],
-  Ladro: ['Acrobazia','Atletica','Inganno','Indagare','Intimidire','Percezione','Persuasione','Furtività','Prestidigitazione'],
-  Mago: ['Arcano','Storia','Indagare','Medicina','Religione'],
-  Monaco: ['Acrobazia','Atletica','Storia','Indagare','Religione','Furtività'],
-  Paladino: ['Atletica','Indagare','Intimidire','Medicina','Persuasione','Religione'],
-  Ranger: ['Addestrare animali','Atletica','Indagare','Natura','Percezione','Furtività','Sopravvivenza'],
-  Stregone: ['Arcano','Inganno','Indagare','Intimidire','Natura','Persuasione','Religione'],
-  Warlock: ['Arcano','Inganno','Storia','Indagare','Intimidire','Natura','Religione'],
-};
+// CLASS_SAVE_PROFS, CLASS_SKILL_COUNT, CLASS_SKILL_OPTIONS → importati da src/data/srd/classes.js
 
 // STEPS is computed inside the component to support i18n
 
@@ -241,11 +218,12 @@ export default function CharacterCreator({ onComplete, onCancel }) {
 
   function patch(obj) { setData(prev => ({ ...prev, ...obj })); }
 
+  const allBackgrounds = dataManager.getBackgrounds();
   const speciesList = [...SPECIES_SRD, { name: CUSTOM_SENTINEL, label: 'Personalizzata...' }];
-  const bgList      = [...BACKGROUNDS_SRD, { name: CUSTOM_SENTINEL, label: 'Personalizzato...' }];
-  const classList   = [...CLASSES, CUSTOM_SENTINEL];
+  const bgList      = [...allBackgrounds, { name: CUSTOM_SENTINEL, label: 'Personalizzato...' }];
+  const classList   = [...dataManager.getClasses(), CUSTOM_SENTINEL];
 
-  const selectedBg  = data.charBackground === CUSTOM_SENTINEL ? null : BACKGROUNDS_SRD.find(b => b.name === data.charBackground);
+  const selectedBg  = data.charBackground === CUSTOM_SENTINEL ? null : allBackgrounds.find(b => b.name === data.charBackground);
   const selectedCls = data.charClass === CUSTOM_SENTINEL ? data.customClass : data.charClass;
 
   const pointsSpent = Object.values(data.abilities).reduce((sum, v) => sum + (POINT_BUY_COSTS[v] ?? 0), 0);

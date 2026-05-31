@@ -14,7 +14,8 @@
     "spells": "Magie",
     "inventory": "Inventario",
     "notes": "Note",
-    "log": "Log"
+    "log": "Log",
+    "sources": "Sorgenti"
   },
   "widgets": {
     "identity": "Identità",
@@ -38,7 +39,8 @@
     "freeNotes": "Note libere",
     "classFeatures": "Feature di classe",
     "activityLog": "Log attività",
-    "armor": "Armatura"
+    "armor": "Armatura",
+    "sources": "Sorgenti dati"
   },
   "identity": {
     "name": "Nome",

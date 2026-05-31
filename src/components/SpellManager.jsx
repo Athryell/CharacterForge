@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SRD_SPELLS, SCHOOLS, SPELL_CLASSES, filterSpells } from '../data/spells';
+import { SCHOOLS, SPELL_CLASSES, filterSpells } from '../data/spells';
+import dataManager from '../data/dataManager';
 import { TagPill, TagSelector, TagFilterBar } from './Tags';
 import { KeywordText, NotationHelpBar } from './Tooltip';
 
@@ -129,7 +130,7 @@ function SpellEditForm({ spell, srd, onSave, onCancel, onDelete, added, onToggle
   );
 }
 
-export default function SpellManager({ spells = [], charClass, onUpdate, onRoll, allTags = [], onUpdateTags, onCreateTag, spellSlots = [], concentratingSpell = null, onCast, onAddAction, onRemoveAction, actionNames }) {
+export default function SpellManager({ spells = [], charClass, onUpdate, onRoll, allTags = [], onUpdateTags, onCreateTag, spellSlots = [], concentratingSpell = null, onCast, onAddAction, onRemoveAction, actionNames, homebrewKey = 0 }) {
   const { t } = useTranslation();
   const [view, setView] = useState('list');
   const [showAddMenu, setShowAddMenu] = useState(false);
@@ -152,18 +153,19 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
     ['free', t('actions.typeFree')],
   ];
 
-  const srdByName = useMemo(() => Object.fromEntries(SRD_SPELLS.map(s => [s.name, s])), []);
+  const srdByName = useMemo(() => Object.fromEntries(dataManager.getSpells().map(s => [s.name, s])), [homebrewKey]);
   const knownNames = useMemo(() => new Set(spells.map(s => s.name)), [spells]);
 
   const availableLevels = useMemo(() =>
     [...new Set(spells.map(s => s.level))].sort((a, b) => a - b), [spells]);
 
   const browsedSpells = useMemo(() => filterSpells({
+    spells: dataManager.getSpells(),
     level: filterLevel !== '' ? parseInt(filterLevel) : undefined,
     school: filterSchool || undefined,
     cls: filterClass || undefined,
     search: filterSearch || undefined,
-  }), [filterLevel, filterSchool, filterClass, filterSearch]);
+  }), [filterLevel, filterSchool, filterClass, filterSearch, homebrewKey]);
 
   function addSRDSpell(spell) {
     if (knownNames.has(spell.name)) return;

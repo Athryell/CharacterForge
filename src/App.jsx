@@ -5,9 +5,11 @@ import { loadCharsIndex, deleteChar, getActiveCharId, setActiveCharId, generateC
 import CharacterSelect from './components/CharacterSelect';
 import { createDefaultState } from './data/dnd5e';
 import {
-  ABILITIES, ABILITY_NAMES, SKILLS, CLASSES, ALIGNMENTS,
+  ABILITIES, ABILITY_NAMES, SKILLS, ALIGNMENTS,
   SPELLCASTING_CLASS, getMod, fmtMod,
 } from './data/dnd5e';
+import dataManager from './data/dataManager';
+import SourceManager from './components/SourceManager';
 import CharacterCreator from './components/CharacterCreator';
 import ConditionTracker from './components/ConditionTracker';
 import WeaponManager from './components/WeaponManager';
@@ -27,16 +29,6 @@ import { loadLayout, saveLayout, getDefaultLayout, getWidgetsForTab, WIDGET_DEFS
 import { useTheme, ACCENT_PRESETS } from './hooks/useTheme';
 import './App.css';
 
-const SPECIES_LIST = [
-  'Umano', 'Elfo (Alto)', 'Elfo (Silvano)', 'Nano (Collina)', 'Nano (Montagna)',
-  'Halfling (Pieditozzo)', 'Halfling (Selvatico)', 'Mezzelfo', 'Tiefling', 'Draconico',
-  'Gnomo (Roccia)', 'Gnomo (Foresta)', "Mezz'orco", 'Aasimar',
-];
-const BACKGROUNDS_LIST = [
-  'Accolito', 'Artigiano', 'Criminale', 'Eremita', 'Eroe Popolare',
-  'Intrattenitore', 'Marinaio', 'Nobile', 'Saggio', 'Soldato',
-  'Orfano di strada', 'Seguace di gilda',
-];
 
 // ── Utilities ───────────────────────────────────────────────────
 function rollDice(notation) {
@@ -273,6 +265,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
   const [hoveredAttr, setHoveredAttr] = useState(null);
   const [addActionForm, setAddActionForm] = useState({ name:'', type:'action', desc:'', dice:'' });
   const [addOpenFor, setAddOpenFor] = useState(null);
+  const [homebrewVersion, setHomebrewVersion] = useState(0);
   const { mode: themeMode, accentId, setThemeMode, setAccent } = useTheme();
   const fileInputRef = useRef();
   const toastTimer = useRef();
@@ -456,7 +449,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
                     update({ features: [...kept, ...getAutoFeatures('class', cls, CLASS_FEATURES)] });
                   }}>
                     <option value="">{t('identity.classPlaceholder')}</option>
-                    {CLASSES.map(c => <option key={c}>{c}</option>)}
+                    {dataManager.getClasses().map(c => <option key={c}>{c}</option>)}
                   </select>
                 </Field>
                 <Field label={t('identity.species')}>
@@ -471,7 +464,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
                     }
                   }}>
                     <option value="">{t('identity.speciesPlaceholder')}</option>
-                    {SPECIES_LIST.map(r => <option key={r}>{r}</option>)}
+                    {dataManager.getSpecies().map(r => <option key={r}>{r}</option>)}
                     <option value="__custom__">{t('identity.speciesCustom')}</option>
                   </select>
                   {state.charRace === '__custom__' && (
@@ -489,7 +482,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
                     }
                   }}>
                     <option value="">{t('identity.backgroundPlaceholder')}</option>
-                    {BACKGROUNDS_LIST.map(b => <option key={b}>{b}</option>)}
+                    {dataManager.getBackgrounds().map(b => <option key={b.name}>{b.name}</option>)}
                     <option value="__custom__">{t('identity.backgroundCustom')}</option>
                   </select>
                   {state.charBackground === '__custom__' && (
@@ -947,7 +940,15 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
             onCast={handleCastSpell}
             actionNames={actionNames}
             onAddAction={action => { if (!actionNames.has(action.name)) update({ actions: [...(state.actions||[]), action] }); }}
-            onRemoveAction={name => update({ actions: (state.actions||[]).filter(a => a.name !== name) })} />
+            onRemoveAction={name => update({ actions: (state.actions||[]).filter(a => a.name !== name) })}
+            homebrewKey={homebrewVersion} />
+        </div>
+      );
+
+      case 'sourcesWidget': return (
+        <div className="card">
+          <div className="card-title">📦 Sorgenti dati</div>
+          <SourceManager onHomebrewChange={() => setHomebrewVersion(v => v + 1)} />
         </div>
       );
 

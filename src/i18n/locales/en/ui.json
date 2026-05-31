@@ -14,7 +14,8 @@
     "spells": "Spells",
     "inventory": "Inventory",
     "notes": "Notes",
-    "log": "Log"
+    "log": "Log",
+    "sources": "Sources"
   },
   "widgets": {
     "identity": "Identity",
@@ -38,7 +39,8 @@
     "freeNotes": "Free Notes",
     "classFeatures": "Class Features",
     "activityLog": "Activity Log",
-    "armor": "Armor"
+    "armor": "Armor",
+    "sources": "Data Sources"
   },
   "identity": {
     "name": "Name",
