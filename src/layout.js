@@ -24,7 +24,6 @@ export const WIDGET_DEFS = [
   { id: 'freeNotes',     label: 'widgets.freeNotes',     defaultTab: 'notes',     defaultCol: 0, defaultFullWidth: false },
   { id: 'classFeatures', label: 'widgets.classFeatures', defaultTab: 'notes',     defaultCol: 1, defaultFullWidth: false },
   { id: 'activityLog',   label: 'widgets.activityLog',   defaultTab: 'log',       defaultCol: 0, defaultFullWidth: true  },
-  { id: 'sourcesWidget', label: 'widgets.sources',        defaultTab: 'sources',   defaultCol: 0, defaultFullWidth: true  },
 ];
 
 export const DEFAULT_TABS = [
@@ -34,7 +33,6 @@ export const DEFAULT_TABS = [
   { id: 'inventory', label: 'tabs.inventory', icon: '🎒',  visible: true },
   { id: 'notes',     label: 'tabs.notes',     icon: '📝',  visible: true },
   { id: 'log',       label: 'tabs.log',       icon: '📋',  visible: true },
-  { id: 'sources',   label: 'tabs.sources',   icon: '📦',  visible: true },
 ];
 
 const WIDGET_STORAGE = 'characterforge_layout';

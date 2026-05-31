@@ -285,6 +285,7 @@
     "data": "Data",
     "exportChar": "⬇ Export character",
     "importChar": "⬆ Import character",
+    "sources": "Data Sources",
     "uiLang": "Language"
   },
   "toast": {

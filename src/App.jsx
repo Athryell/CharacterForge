@@ -266,6 +266,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
   const [addActionForm, setAddActionForm] = useState({ name:'', type:'action', desc:'', dice:'' });
   const [addOpenFor, setAddOpenFor] = useState(null);
   const [homebrewVersion, setHomebrewVersion] = useState(0);
+  const [showSources, setShowSources] = useState(false);
   const { mode: themeMode, accentId, setThemeMode, setAccent } = useTheme();
   const fileInputRef = useRef();
   const toastTimer = useRef();
@@ -945,13 +946,6 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
         </div>
       );
 
-      case 'sourcesWidget': return (
-        <div className="card">
-          <div className="card-title">📦 Sorgenti dati</div>
-          <SourceManager onHomebrewChange={() => setHomebrewVersion(v => v + 1)} />
-        </div>
-      );
-
       case 'currency': {
         const CURR = [['PP',t('currency.pp'),'#7B68EE'],['GP',t('currency.gp'),'#633806'],['SP',t('currency.sp'),'#888780'],['CP',t('currency.cp'),'#854F0B']];
         const cur = state.currency || {};
@@ -1105,6 +1099,20 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
       <Toast message={toast} />
       {showCreator && <CharacterCreator onComplete={handleCreatorComplete} onCancel={() => setShowCreator(false)} />}
 
+      {showSources && (
+        <div className="creator-overlay" onClick={() => setShowSources(false)}>
+          <div className="sources-modal" onClick={e => e.stopPropagation()}>
+            <div className="sources-modal-header">
+              <span>📦 {t('menu.sources')}</span>
+              <button className="io-btn" onClick={() => setShowSources(false)}>✕</button>
+            </div>
+            <div className="sources-modal-body">
+              <SourceManager onHomebrewChange={() => setHomebrewVersion(v => v + 1)} />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Top bar */}
       <div className="top-bar">
         <span className="top-bar-brand">D&amp;D 5e 2024</span>
@@ -1175,6 +1183,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
               <div className="hmenu-label">{t('menu.data')}</div>
               <button className="hmenu-item" onClick={() => { handleExport(); setShowMenu(false); }}>{t('menu.exportChar')}</button>
               <button className="hmenu-item" onClick={() => { fileInputRef.current?.click(); setShowMenu(false); }}>{t('menu.importChar')}</button>
+              <button className="hmenu-item" onClick={() => { setShowSources(true); setShowMenu(false); }}>📦 {t('menu.sources')}</button>
             </div>
           </div>
         </>
