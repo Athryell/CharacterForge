@@ -103,3 +103,11 @@ Variabili in `:root` (src/App.css):
 - `--font-display` (Cinzel), `--font-body` (Crimson Pro)
 
 Nuove variabili sempre in `:root`. Nessun file CSS aggiuntivo.
+
+## Ultimo aggiornamento
+
+- ✅ i18n implementato (i18next, EN come sorgente, IT/FR/DE/ES)
+- ✅ Sistema dati SRD separato in src/data/srd/
+- ✅ dataManager.js per fusione SRD + homebrew
+- ✅ Crowdin configurato e sincronizzato
+- ✅ Separazione PHB da SRDF
