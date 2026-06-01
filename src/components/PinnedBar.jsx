@@ -1,13 +1,13 @@
 import React from 'react';
-import { CONDITIONS } from '../data/conditions';
+import { useTranslation } from 'react-i18next';
 
 const PINNABLE = [
-  { id: 'hp',          label: 'HP' },
-  { id: 'inspiration', label: 'Ispirazione' },
-  { id: 'concentration', label: 'Concentrazione' },
-  { id: 'conditions',  label: 'Condizioni' },
-  { id: 'exhaustion',  label: 'Affaticamento' },
-  { id: 'deathSaves',  label: 'TS Morte' },
+  { id: 'hp',            labelKey: 'pinned.hp' },
+  { id: 'inspiration',   labelKey: 'pinned.inspiration' },
+  { id: 'concentration', labelKey: 'pinned.concentration' },
+  { id: 'conditions',    labelKey: 'pinned.conditions' },
+  { id: 'exhaustion',    labelKey: 'pinned.exhaustion' },
+  { id: 'deathSaves',    labelKey: 'pinned.deathSaves' },
 ];
 
 const STORAGE_KEY = 'characterforge_pinned';
@@ -25,6 +25,7 @@ export function savePinned(pinned) {
 }
 
 export default function PinnedBar({ state, editMode, pinned, onTogglePin, onUpdate }) {
+  const { t } = useTranslation();
   if (!editMode && pinned.length === 0) return null;
 
   const items = editMode ? PINNABLE : PINNABLE.filter(p => pinned.includes(p.id));
@@ -39,14 +40,14 @@ export default function PinnedBar({ state, editMode, pinned, onTogglePin, onUpda
             key={item.id}
             className={`pin-item ${isPinned ? '' : 'pin-inactive'} ${editMode ? 'pin-item-edit' : ''}`}
             onClick={editMode ? () => onTogglePin(item.id) : undefined}
-            title={editMode ? (isPinned ? 'Rimuovi pin' : 'Fissa in cima') : undefined}
+            title={editMode ? (isPinned ? t('pinned.removePin', 'Remove pin') : t('pinned.addPin', 'Pin to top')) : undefined}
           >
             {editMode && (
               <span className={`pin-toggle-icon ${isPinned ? 'on' : 'off'}`}>
                 {isPinned ? '📌' : '📎'}
               </span>
             )}
-            <PinContent id={item.id} state={state} onUpdate={onUpdate} active={isPinned || !editMode} editMode={editMode} />
+            <PinContent id={item.id} labelKey={item.labelKey} state={state} onUpdate={onUpdate} active={isPinned || !editMode} editMode={editMode} />
           </div>
         );
       })}
@@ -54,10 +55,11 @@ export default function PinnedBar({ state, editMode, pinned, onTogglePin, onUpda
   );
 }
 
-function PinContent({ id, state, onUpdate, active, editMode }) {
+function PinContent({ id, labelKey, state, onUpdate, active, editMode }) {
+  const { t } = useTranslation();
+
   if (!active) {
-    const labels = { hp:'HP', inspiration:'Ispirazione', concentration:'Concentrazione', conditions:'Condizioni', exhaustion:'Affaticamento', deathSaves:'TS Morte' };
-    return <span className="pin-content-muted">{labels[id]}</span>;
+    return <span className="pin-content-muted">{t(labelKey, id)}</span>;
   }
 
   switch (id) {
@@ -74,24 +76,24 @@ function PinContent({ id, state, onUpdate, active, editMode }) {
     }
     case 'inspiration':
       return editMode ? (
-        <span className={`pin-content ${state.inspiration ? 'pin-on' : ''}`}>⭐ Ispirazione</span>
+        <span className={`pin-content ${state.inspiration ? 'pin-on' : ''}`}>⭐ {t('pinned.inspiration', 'Inspiration')}</span>
       ) : (
         <button
           className={`pin-content pin-action ${state.inspiration ? 'pin-on' : ''}`}
           onClick={() => onUpdate({ inspiration: !state.inspiration })}
         >
-          ⭐ {state.inspiration ? 'Ispirazione' : 'No ispirazione'}
+          ⭐ {state.inspiration ? t('pinned.inspirationOn', 'Inspired') : t('pinned.inspirationOff', 'No inspiration')}
         </button>
       );
     case 'concentration':
       return editMode ? (
-        <span className={`pin-content ${state.concentrating ? 'pin-on pin-blue' : ''}`}>🎯 Concentrazione</span>
+        <span className={`pin-content ${state.concentrating ? 'pin-on pin-blue' : ''}`}>🎯 {t('pinned.concentration', 'Concentration')}</span>
       ) : (
         <button
           className={`pin-content pin-action ${state.concentrating ? 'pin-on pin-blue' : ''}`}
           onClick={() => onUpdate({ concentrating: !state.concentrating })}
         >
-          🎯 {state.concentrating ? 'Concentrazione' : 'No conc.'}
+          🎯 {state.concentrating ? t('pinned.concentrationOn', 'Concentrating') : t('pinned.concentrationOff', 'No conc.')}
         </button>
       );
     case 'conditions': {
@@ -101,13 +103,12 @@ function PinContent({ id, state, onUpdate, active, editMode }) {
       return (
         <span className="pin-content">
           🔮{!hasAny
-            ? <span className="pin-hint"> Nessuna</span>
+            ? <span className="pin-hint"> {t('pinned.none', 'None')}</span>
             : <>
-                {active.map(cid => {
-                  const cond = CONDITIONS.find(c => c.id === cid);
-                  return <span key={cid} className="pin-cond">{cond ? cond.name : cid}</span>;
-                })}
-                {exhLvl > 0 && <span className="pin-cond">😓 Aff.{exhLvl}</span>}
+                {active.map(cid => (
+                  <span key={cid} className="pin-cond">{t(`data.conditions.${cid}.name`, cid)}</span>
+                ))}
+                {exhLvl > 0 && <span className="pin-cond">😓 {t('pinned.exhaustionShort', 'Exh.')}{exhLvl}</span>}
               </>
           }
         </span>
@@ -115,11 +116,11 @@ function PinContent({ id, state, onUpdate, active, editMode }) {
     }
     case 'exhaustion': {
       const lvl = state.exhaustionLevel || 0;
-      if (lvl === 0) return <span className="pin-content"><span className="pin-hint">😓 Nessun aff.</span></span>;
+      if (lvl === 0) return <span className="pin-content"><span className="pin-hint">😓 {t('pinned.noExhaustion', 'No exhaustion')}</span></span>;
       return (
         <span className="pin-content pin-on"
-          title={`Affaticamento liv. ${lvl}: −${lvl * 5} ft velocità`}>
-          😓 Aff. {lvl} · −{lvl * 5}ft
+          title={`${t('pinned.exhaustionLevel', 'Exhaustion level')} ${lvl}: −${lvl * 5} ft`}>
+          😓 {t('pinned.exhaustionShort', 'Exh.')} {lvl} · −{lvl * 5}ft
         </span>
       );
     }

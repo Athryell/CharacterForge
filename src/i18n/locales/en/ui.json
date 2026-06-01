@@ -25,7 +25,7 @@
     "senses": "Senses",
     "hp": "Hit Points",
     "combatStats": "Combat Stats",
-    "inspiration": "Inspiration & Concentration",
+    "inspiration": "Inspiration",
     "deathSaves": "Death Saving Throws",
     "conditions": "Conditions",
     "actions": "Actions",
@@ -161,7 +161,8 @@
     "customFormTitle": "✏ Custom spell",
     "castSlot": "Slot Lv. {{level}}",
     "noSpells2": "No spells. Click ＋ to add one.",
-    "descEditLabel": "Description"
+    "descEditLabel": "Description",
+    "alwaysPrepared": "Always prepared"
   },
   "inventory": {
     "addBtn": "+ Add item",
@@ -179,7 +180,9 @@
     "nameEditLabel": "Name",
     "descEditLabel": "Description",
     "descAddPlaceholder": "E.g. Heals 2d4+2 HP. (@ for bonuses)",
-    "empty2": "No items. Enable ✏ mode and click \"+ Add item\"."
+    "empty2": "No items. Enable ✏ mode and click \"+ Add item\".",
+    "carried": "Carried weight",
+    "coinWeight": "(incl. {{n}} {{unit}} from coins)"
   },
   "currency": {
     "gp": "GP",
@@ -211,8 +214,8 @@
     "moveTo": "↗ Move",
     "moveToTitle": "Move to:",
     "hide": "🚫",
-    "fullWidth": "▬ Full",
-    "halfWidth": "⬛ Half",
+    "fullWidth": "▬ Expand",
+    "halfWidth": "⬛ Shrink",
     "dragHere": "Drag here",
     "dragHereFull": "⬛ Drag here for full width",
     "dragHereLeft": "▬ Drag here (left column)",
@@ -223,16 +226,17 @@
     "below": "⬇ Below"
   },
   "tags": {
-    "addPlaceholder": "+ Add tag...",
-    "create": "Create: ",
-    "filterAll": "All"
+    "add": "Add tag",
+    "edit": "Edit tags",
+    "addPlaceholder": "Add tag..."
   },
   "notation": {
     "dynamicTitle": "Dynamic value — original:",
     "rollTitle": "Roll",
     "attrHelp": "→ ability modifier",
     "lvlHelp": "→ scales with level",
-    "bonusHelp": "→ equipment bonus (type @ for list)"
+    "bonusHelp": "→ equipment bonus (type @ for list)",
+    "counterHelp": "→ clickable counter (e.g. charges)"
   },
   "weapons": {
     "noWeapons": "No weapons added. Click \"+\" to add one.",
@@ -261,7 +265,8 @@
     "descLabel": "Description / Notes",
     "descPlaceholder": "Description, special properties, history... (@ for bonuses)",
     "proficiencyLabel": "Proficiency:",
-    "proficiencyPlaceholder": "E.g. Simple weapons, short swords, bows..."
+    "proficiencyPlaceholder": "E.g. Simple weapons, short swords, bows...",
+    "equipBonusLabel": "Equipment bonuses"
   },
   "conditions": {
     "title": "Conditions"
@@ -286,7 +291,17 @@
     "exportChar": "⬇ Export character",
     "importChar": "⬆ Import character",
     "sources": "Data Sources",
-    "uiLang": "Language"
+    "uiLang": "Language",
+    "units": "Units",
+    "weightUnit": "Weight",
+    "speedUnit": "Speed"
+  },
+  "units": {
+    "sq": "sq."
+  },
+  "dice": {
+    "natural20": "Natural 20!",
+    "natural1": "Natural 1!"
   },
   "toast": {
     "longRest": "Long rest: HP and spell slots restored!",
@@ -347,7 +362,8 @@
     "summaryOriginFeat": "Origin Feat",
     "summaryTool": "Tool",
     "summaryBgBonus": "Background bonus",
-    "summarySpellcaster": "Spellcaster"
+    "summarySpellcaster": "Spellcaster",
+    "spellcaster": "Spellcaster"
   },
   "common": {
     "edit": "✏ Edit",
@@ -363,6 +379,284 @@
     "editTags": "🏷 Edit tags",
     "tagDone": "✓ Done",
     "addToAction": "Add to actions",
-    "removeFromAction": "Remove from actions"
+    "removeFromAction": "Remove from actions",
+    "inAction": "In actions",
+    "delete": "Delete",
+    "done": "Done"
+  },
+  "data": {
+    "abilities": {
+      "STR": "Strength",
+      "DEX": "Dexterity",
+      "CON": "Constitution",
+      "INT": "Intelligence",
+      "WIS": "Wisdom",
+      "CHA": "Charisma"
+    },
+    "abilityAbbr": {
+      "STR": "STR",
+      "DEX": "DEX",
+      "CON": "CON",
+      "INT": "INT",
+      "WIS": "WIS",
+      "CHA": "CHA"
+    },
+    "skills": {
+      "acrobatics": "Acrobatics",
+      "animal-handling": "Animal Handling",
+      "arcana": "Arcana",
+      "athletics": "Athletics",
+      "deception": "Deception",
+      "history": "History",
+      "insight": "Insight",
+      "intimidation": "Intimidation",
+      "investigation": "Investigation",
+      "medicine": "Medicine",
+      "nature": "Nature",
+      "perception": "Perception",
+      "performance": "Performance",
+      "persuasion": "Persuasion",
+      "religion": "Religion",
+      "sleight-of-hand": "Sleight of Hand",
+      "stealth": "Stealth",
+      "survival": "Survival"
+    },
+    "classes": {
+      "Barbarian": "Barbarian",
+      "Bard": "Bard",
+      "Cleric": "Cleric",
+      "Druid": "Druid",
+      "Fighter": "Fighter",
+      "Monk": "Monk",
+      "Paladin": "Paladin",
+      "Ranger": "Ranger",
+      "Rogue": "Rogue",
+      "Sorcerer": "Sorcerer",
+      "Warlock": "Warlock",
+      "Wizard": "Wizard"
+    },
+    "alignments": {
+      "Lawful Good": "Lawful Good",
+      "Neutral Good": "Neutral Good",
+      "Chaotic Good": "Chaotic Good",
+      "Lawful Neutral": "Lawful Neutral",
+      "True Neutral": "True Neutral",
+      "Chaotic Neutral": "Chaotic Neutral",
+      "Lawful Evil": "Lawful Evil",
+      "Neutral Evil": "Neutral Evil",
+      "Chaotic Evil": "Chaotic Evil"
+    },
+    "conditions": {
+      "blinded": {
+        "name": "Blinded",
+        "desc": "Cannot see. Automatically fails checks requiring sight. Attack rolls against it have advantage; its attack rolls have disadvantage."
+      },
+      "charmed": {
+        "name": "Charmed",
+        "desc": "Cannot attack the charmer or target them with harmful effects. The charmer has advantage on social interaction checks."
+      },
+      "deafened": {
+        "name": "Deafened",
+        "desc": "Cannot hear. Automatically fails checks requiring hearing."
+      },
+      "frightened": {
+        "name": "Frightened",
+        "desc": "Disadvantage on ability checks and attack rolls while the source of fear is in sight. Cannot willingly move closer to the source."
+      },
+      "grappled": {
+        "name": "Grappled",
+        "desc": "Speed reduced to 0. Ends if the grappler is incapacitated or the creature is moved beyond the grappler's reach."
+      },
+      "incapacitated": {
+        "name": "Incapacitated",
+        "desc": "Cannot take actions, bonus actions, or reactions."
+      },
+      "invisible": {
+        "name": "Invisible",
+        "desc": "Cannot be seen without magic. Attack rolls against it have disadvantage; its attacks have advantage."
+      },
+      "paralyzed": {
+        "name": "Paralyzed",
+        "desc": "Incapacitated, cannot move or speak. Fails STR and DEX saves. Melee hits within 5ft are automatic criticals."
+      },
+      "petrified": {
+        "name": "Petrified",
+        "desc": "Turned to stone. Incapacitated, resistance to all damage, immune to poison and disease, does not age."
+      },
+      "poisoned": {
+        "name": "Poisoned",
+        "desc": "Disadvantage on attack rolls and ability checks."
+      },
+      "prone": {
+        "name": "Prone",
+        "desc": "Can only crawl. Disadvantage on attack rolls. Melee hits have advantage; ranged hits have disadvantage."
+      },
+      "restrained": {
+        "name": "Restrained",
+        "desc": "Speed 0. Disadvantage on attack rolls and DEX saves. Attack rolls against it have advantage."
+      },
+      "stunned": {
+        "name": "Stunned",
+        "desc": "Incapacitated, cannot move, speaks only falteringly. Fails STR and DEX saves. Attack rolls against it have advantage."
+      },
+      "unconscious": {
+        "name": "Unconscious",
+        "desc": "Incapacitated, cannot move or speak. Drops held items. Fails STR and DEX saves. Melee hits within 5ft are automatic criticals."
+      },
+      "concentration": {
+        "name": "Concentrating",
+        "desc": "Maintaining a concentration spell. Taking damage requires a CON save (DC 10 or half damage). Failure ends the spell."
+      },
+      "exhaustion": {
+        "name": "Exhaustion",
+        "desc": "Each level subtracts 2 from d20 rolls and reduces speed by 5 ft. Lv. 5: speed 0. Lv. 6: instant death."
+      }
+    },
+    "species": {
+      "human": "Human",
+      "high-elf": "High Elf",
+      "wood-elf": "Wood Elf",
+      "hill-dwarf": "Hill Dwarf",
+      "mountain-dwarf": "Mountain Dwarf",
+      "lightfoot-halfling": "Lightfoot Halfling",
+      "stout-halfling": "Stout Halfling",
+      "half-elf": "Half-Elf",
+      "tiefling": "Tiefling",
+      "dragonborn": "Dragonborn",
+      "rock-gnome": "Rock Gnome",
+      "forest-gnome": "Forest Gnome",
+      "half-orc": "Half-Orc",
+      "aasimar": "Aasimar",
+      "elf": "Elf",
+      "dwarf": "Dwarf",
+      "halfling": "Halfling",
+      "gnome": "Gnome",
+      "orc": "Orc",
+      "goliath": "Goliath"
+    },
+    "backgrounds": {
+      "acolyte": "Acolyte",
+      "artisan": "Artisan",
+      "charlatan": "Charlatan",
+      "criminal": "Criminal",
+      "entertainer": "Entertainer",
+      "farmer": "Farmer",
+      "guard": "Guard",
+      "guide": "Guide",
+      "hermit": "Hermit",
+      "merchant": "Merchant",
+      "noble": "Noble",
+      "sage": "Sage",
+      "sailor": "Sailor",
+      "scribe": "Scribe",
+      "soldier": "Soldier",
+      "wayfarer": "Wayfarer"
+    },
+    "weaponProps": {
+      "finesse": "Finesse",
+      "thrown": "Thrown",
+      "ranged": "Ranged",
+      "twoHanded": "Two-Handed",
+      "versatile": "Versatile",
+      "light": "Light",
+      "heavy": "Heavy",
+      "reach": "Reach",
+      "loading": "Loading",
+      "ammunition": "Ammunition"
+    },
+    "masteries": {
+      "none": "—",
+      "cleave": "Cleave",
+      "graze": "Graze",
+      "nick": "Nick",
+      "push": "Push",
+      "sap": "Sap",
+      "slow": "Slow",
+      "topple": "Topple",
+      "vex": "Vex"
+    },
+    "schools": {
+      "enchantment": "Enchantment",
+      "divination": "Divination",
+      "evocation": "Evocation",
+      "illusion": "Illusion",
+      "conjuration": "Conjuration",
+      "necromancy": "Necromancy",
+      "transmutation": "Transmutation",
+      "abjuration": "Abjuration"
+    },
+    "dmgTypes": {
+      "bludgeoning": "Bludgeoning",
+      "piercing": "Piercing",
+      "slashing": "Slashing",
+      "fire": "Fire",
+      "cold": "Cold",
+      "lightning": "Lightning",
+      "thunder": "Thunder",
+      "acid": "Acid",
+      "poison": "Poison",
+      "necrotic": "Necrotic",
+      "radiant": "Radiant",
+      "psychic": "Psychic",
+      "force": "Force"
+    },
+    "stats": {
+      "AC": "Armor Class (AC)",
+      "INIT": "Initiative",
+      "SPD": "Speed",
+      "HP": "Max HP",
+      "STR": "Strength (STR)",
+      "DEX": "Dexterity (DEX)",
+      "CON": "Constitution (CON)",
+      "INT": "Intelligence (INT)",
+      "WIS": "Wisdom (WIS)",
+      "CHA": "Charisma (CHA)",
+      "TS-STR": "ST Strength",
+      "TS-DEX": "ST Dexterity",
+      "TS-CON": "ST Constitution",
+      "TS-INT": "ST Intelligence",
+      "TS-WIS": "ST Wisdom",
+      "TS-CHA": "ST Charisma"
+    }
+  },
+  "pinned": {
+    "hp": "HP",
+    "inspiration": "Inspiration",
+    "concentration": "Concentration",
+    "conditions": "Conditions",
+    "exhaustion": "Exhaustion",
+    "deathSaves": "Death Saves",
+    "removePin": "Remove pin",
+    "addPin": "Pin to top",
+    "inspirationOn": "Inspired",
+    "inspirationOff": "No inspiration",
+    "concentrationOn": "Concentrating",
+    "concentrationOff": "No conc.",
+    "none": "None",
+    "exhaustionShort": "Exh.",
+    "noExhaustion": "No exhaustion",
+    "exhaustionLevel": "Exhaustion level"
+  },
+  "charSelect": {
+    "subtitle": "Choose a character or create a new one",
+    "empty": "No saved characters. Create a new one!",
+    "unnamed": "Unnamed",
+    "level": "Level",
+    "confirmDelete": "Delete \"{{name}}\"? This cannot be undone.",
+    "deleteTitle": "Delete character",
+    "createNew": "Create new character"
+  },
+  "features": {
+    "sourceClass": "Class",
+    "sourceSpecies": "Species",
+    "sourceBackground": "Background",
+    "sourceCustom": "Custom",
+    "formName": "Name",
+    "formDesc": "Description",
+    "namePlaceholder": "Ex. Second Wind, Sneak Attack...",
+    "descPlaceholder": "Feature description...",
+    "empty": "No features. Features are added automatically when you select a class, species, and background.",
+    "addToActions": "Add to actions",
+    "removeFromActions": "Remove from actions"
   }
 }

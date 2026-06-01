@@ -1,0 +1,80 @@
+{
+  "dragonborn": {
+    "name": "Draconico", "size": "Media",
+    "traits": [
+      { "name": "Antenato draconico",      "desc": "Scegli un tipo di drago (Nero/Acido, Blu/Fulmine, Ottone/Fuoco, Bronzo/Fulmine, Rame/Acido, Oro/Fuoco, Verde/Veleno, Rosso/Fuoco, Argento/Freddo, Bianco/Freddo). Determina il tipo di danno del Soffio draconico e la Resistenza ai danni." },
+      { "name": "Soffio draconico",        "desc": "Sostituisci un attacco con un cono da 4,5 m o una linea da 9 m. Ogni creatura effettua un TS DES (CD 8 + mod. COS + bonus competenza) o subisce 1d10 danni (tipo del tuo antenato). Scala: 2d10 al livello 5, 3d10 al livello 11, 4d10 al livello 17. Usi = bonus competenza per riposo lungo." },
+      { "name": "Resistenza ai danni",     "desc": "Resistenza al tipo di danno del tuo Antenato draconico." },
+      { "name": "Visione nel buio",        "desc": "Visione nel buio 18 m." },
+      { "name": "Volo draconico (Livello 5)", "desc": "Azione bonus: fai spuntare ali spettrali, ottieni Velocità di volo pari alla tua Velocità per 10 minuti. Una volta per riposo lungo." }
+    ]
+  },
+  "dwarf": {
+    "name": "Nano", "size": "Media",
+    "traits": [
+      { "name": "Visione nel buio",  "desc": "Visione nel buio 36 m." },
+      { "name": "Resilienza nanica", "desc": "Resistenza ai danni da veleno. Vantaggio ai tiri salvezza per evitare o porre fine alla condizione Avvelenato." },
+      { "name": "Tenacia nanica",    "desc": "Il massimo dei PF aumenta di 1, e aumenta di 1 di nuovo ogni volta che guadagni un livello." },
+      { "name": "Senso della pietra","desc": "Azione bonus: ottieni Tremore-senso 18 m per 10 minuti (devi essere su pietra o a contatto con essa). Usi = bonus competenza per riposo lungo." }
+    ]
+  },
+  "elf": {
+    "name": "Elfo", "size": "Media",
+    "traits": [
+      { "name": "Visione nel buio",  "desc": "Visione nel buio 18 m." },
+      { "name": "Lignaggio elfico",  "desc": "Scegli Drow, Alto elfo o Elfo silvano. Drow: visione nel buio 36 m, Luci danzanti; liv. 3 Fuoco fatuo; liv. 5 Oscurità. Alto elfo: Prestidigitazione; liv. 3 Individuare magia; liv. 5 Passo nebbioso. Elfo silvano: Velocità 10,5 m, Arte druidica; liv. 3 Passo lungo; liv. 5 Passare senza tracce." },
+      { "name": "Lignaggio fatato",  "desc": "Vantaggio ai tiri salvezza per evitare o porre fine alla condizione Incantato." },
+      { "name": "Sensi acuti",       "desc": "Competenza in Intuizione, Percezione o Sopravvivenza (a scelta)." },
+      { "name": "Trance",            "desc": "Non hai bisogno di dormire. Puoi completare un riposo lungo in 4 ore di meditazione in trance." }
+    ]
+  },
+  "gnome": {
+    "name": "Gnomo", "size": "Piccola",
+    "traits": [
+      { "name": "Visione nel buio",  "desc": "Visione nel buio 18 m." },
+      { "name": "Astuzia gnomica",   "desc": "Vantaggio ai tiri salvezza di Intelligenza, Saggezza e Carisma." },
+      { "name": "Lignaggio gnomico", "desc": "Scegli Gnomo silvano o Gnomo delle rocce. Silvano: trucchetto Illusione minore + Parlare con gli animali (numero di volte pari al bonus competenza per riposo lungo). Rocce: trucchetti Riparazione e Prestidigitazione + Inventore (crea piccoli congegni meccanici, 3 alla volta, si disfano dopo 8 ore)." }
+    ]
+  },
+  "goliath": {
+    "name": "Goliath", "size": "Media",
+    "traits": [
+      { "name": "Antenato gigante",        "desc": "Scegli un dono (usi pari al bonus competenza per riposo lungo): Balzo della nuvola (teletrasporto 9 m), Bruciatura del fuoco (+1d10 fuoco al colpo), Gelo del ghiaccio (+1d6 freddo, velocità bersaglio -3 m), Crollo della collina (atterrare prono), Resistenza della pietra (reazione: riduzione danni 1d12+COS), Tuono della tempesta (reazione: 1d8 danni da tuono all'attaccante)." },
+      { "name": "Forma grande (Livello 5)", "desc": "Azione bonus: diventa Grande per 10 minuti (vantaggio alle prove di FOR, +3 m di velocità). Una volta per riposo lungo." },
+      { "name": "Corporatura possente",    "desc": "Vantaggio alle prove di caratteristica per porre fine alla condizione Afferrato. Conta come una taglia più grande ai fini della capacità di trasporto." }
+    ]
+  },
+  "halfling": {
+    "name": "Halfling", "size": "Piccola",
+    "traits": [
+      { "name": "Coraggioso",          "desc": "Vantaggio ai tiri salvezza per evitare o porre fine alla condizione Spaventato." },
+      { "name": "Agilità halfling",    "desc": "Puoi muoverti attraverso lo spazio di qualsiasi creatura di taglia superiore a te." },
+      { "name": "Fortuna",             "desc": "Quando ottieni 1 su un d20, devi rilanciare il dado e usare il nuovo risultato." },
+      { "name": "Invisibilità naturale","desc": "Puoi compiere l'azione Nascondersi anche quando sei oscurato solo da una creatura almeno di una taglia più grande di te." }
+    ]
+  },
+  "human": {
+    "name": "Umano", "size": "Media o Piccola",
+    "traits": [
+      { "name": "Pieno di risorse", "desc": "Ottieni Ispirazione eroica ogni volta che completi un riposo lungo." },
+      { "name": "Abile",            "desc": "Ottieni competenza in un'abilità a scelta." },
+      { "name": "Versatile",        "desc": "Ottieni un talento d'origine a scelta." }
+    ]
+  },
+  "orc": {
+    "name": "Orco", "size": "Media",
+    "traits": [
+      { "name": "Scarica di adrenalina", "desc": "Azione bonus: compi l'azione Scatto e ottieni Punti ferita temporanei pari al tuo bonus competenza. Usi = bonus competenza, recuperati con riposo breve o lungo." },
+      { "name": "Visione nel buio",      "desc": "Visione nel buio 36 m." },
+      { "name": "Resistenza instancabile","desc": "Quando vieni ridotto a 0 PF ma non muori sul colpo, scendi invece a 1 PF. Una volta per riposo lungo." }
+    ]
+  },
+  "tiefling": {
+    "name": "Tiefling", "size": "Media o Piccola",
+    "traits": [
+      { "name": "Visione nel buio",      "desc": "Visione nel buio 18 m." },
+      { "name": "Eredità infernale",     "desc": "Scegli Abissale, Cthonico o Infernale. Abissale: resistenza Veleno, Spruzzo di veleno; liv. 3 Raggio di malattia; liv. 5 Bloccare persone. Cthonico: resistenza Necrotico, Tocco gelido; liv. 3 Falsa vita; liv. 5 Raggio di spossatezza. Infernale: resistenza Fuoco, Dardo di fuoco; liv. 3 Rimprovero infernale; liv. 5 Oscurità." },
+      { "name": "Presenza ultraterrena", "desc": "Conosci il trucchetto Taumaturgia." }
+    ]
+  }
+}

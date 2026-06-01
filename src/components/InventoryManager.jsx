@@ -6,7 +6,7 @@ import { TagPill, TagSelector } from './Tags';
 
 const EMPTY_FORM = { name: '', qty: 1, desc: '', weight: '' };
 
-export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen, onAddClose, allTags = [], onUpdateTags, onCreateTag, onAddAction, onRemoveAction, actionNames }) {
+export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen, onAddClose, allTags = [], onUpdateTags, onCreateTag, onAddAction, onRemoveAction, actionNames, currentWeightKg = 0, maxWeightKg, coinWeightKg = 0, weightUnit = 'kg', toDisplayWeight }) {
   const { t } = useTranslation();
   const [addForm, setAddForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState(null);
@@ -58,8 +58,28 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
     setExpandedId(expandedId === item.id ? null : item.id);
   }
 
+  const displayW = n => Math.round((toDisplayWeight ? toDisplayWeight(n) : n) * 10) / 10;
+
   return (
     <div>
+      {maxWeightKg !== undefined && (
+        <div className="weight-summary">
+          <div className="weight-summary-text">
+            <span>{t('inventory.carried')}: <strong>{displayW(currentWeightKg)} {weightUnit}</strong> / {displayW(maxWeightKg)} {weightUnit}</span>
+            {coinWeightKg > 0 && (
+              <span style={{ fontSize: 10, color: 'var(--c-muted)' }}>
+                ({t('inventory.coinWeight', { n: displayW(coinWeightKg), unit: weightUnit })})
+              </span>
+            )}
+          </div>
+          <div className="weight-bar">
+            <div className="weight-bar-fill" style={{
+              width: `${Math.min(100, (currentWeightKg / maxWeightKg) * 100)}%`,
+              background: currentWeightKg > maxWeightKg ? 'var(--c-warn)' : 'var(--c-accent)',
+            }} />
+          </div>
+        </div>
+      )}
       {addOpen && (
         <div className="weapon-add-panel" style={{ marginBottom: 12 }}>
           <div className="field-row">
@@ -113,16 +133,19 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
                 <div className="inventory-info">
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
                     <div className="inventory-name">{item.name}</div>
+                    {added && <span className="action-added-badge" title={t('common.inAction', 'In azioni')}>⚡</span>}
                     {(item.tags||[]).map(tag => <TagPill key={tag} tag={tag} allTags={allTags} small />)}
                   </div>
                   {item.desc && !isExpanded && !isEditing && (
                     <div className="inventory-desc-preview">
-                      <KeywordText text={item.desc} onRoll={onRoll} label={item.name} />
+                      <KeywordText text={item.desc} onRoll={onRoll} label={item.name}
+                        counters={item.counters}
+                        onCounterChange={(idx, vals) => onUpdate(items.map(i => i.id === item.id ? { ...i, counters: { ...(i.counters || {}), [idx]: vals } } : i))} />
                     </div>
                   )}
                 </div>
 
-                {item.weight && <span className="inventory-weight">{item.weight}kg</span>}
+                {item.weight && <span className="inventory-weight">{displayW(parseFloat(item.weight) || 0)} {weightUnit}</span>}
 
                 <div className="inventory-qty-group" onClick={e => e.stopPropagation()}>
                   <button className="mod-btn" onClick={() => adjustQty(item.id, -1)}>−</button>
@@ -194,7 +217,9 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
 
               {isExpanded && !isEditing && (
                 <div className="inventory-desc-full" onClick={e => e.stopPropagation()}>
-                  {item.desc && <KeywordText text={item.desc} onRoll={onRoll} label={item.name} />}
+                  {item.desc && <KeywordText text={item.desc} onRoll={onRoll} label={item.name}
+                    counters={item.counters}
+                    onCounterChange={(idx, vals) => onUpdate(items.map(i => i.id === item.id ? { ...i, counters: { ...(i.counters || {}), [idx]: vals } } : i))} />}
                   {(item.bonuses || []).length > 0 && (
                     <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 4 }}>
                       {item.bonuses.map((b, i) => (
@@ -202,19 +227,6 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
                       ))}
                     </div>
                   )}
-                  <div style={{ marginTop: 6 }}>
-                    {editingTagsFor === item.id ? (
-                      <>
-                        <TagSelector selected={item.tags || []} allTags={allTags}
-                          onChange={tags => onUpdateTags && onUpdateTags(item.id, tags)} onCreateTag={onCreateTag} />
-                        <button className="tag-edit-btn" style={{ marginTop: 4 }} onClick={() => setEditingTagsFor(null)}>{t('common.tagDone')}</button>
-                      </>
-                    ) : (
-                      <button className="tag-edit-btn" onClick={() => setEditingTagsFor(item.id)}>
-                        {(item.tags||[]).length === 0 ? t('common.addTag') : t('common.editTags')}
-                      </button>
-                    )}
-                  </div>
                   <div className="item-edit-actions">
                     <button className="io-btn" onClick={() => startEdit(item)}>{t('common.edit')}</button>
                   </div>

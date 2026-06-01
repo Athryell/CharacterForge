@@ -1,42 +1,40 @@
 // CharacterForge — D&D 5e SRD 5.2 Data (CC BY 4.0 — Wizards of the Coast)
 // https://dnd.wizards.com/resources/systems-reference-document
+// All internal keys use English — display names come from i18n.
 
-export const ABILITIES = ['FOR', 'DES', 'COS', 'INT', 'SAG', 'CAR'];
-export const ABILITY_NAMES = {
-  FOR: 'Forza', DES: 'Destrezza', COS: 'Costituzione',
-  INT: 'Intelligenza', SAG: 'Saggezza', CAR: 'Carisma'
-};
+export const ABILITIES = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'];
 
 export const SKILLS = [
-  { name: 'Acrobazia', attr: 'DES' },
-  { name: 'Addestrare animali', attr: 'SAG' },
-  { name: 'Arcano', attr: 'INT' },
-  { name: 'Atletica', attr: 'FOR' },
-  { name: 'Furtività', attr: 'DES' },
-  { name: 'Inganno', attr: 'CAR' },
-  { name: 'Indagare', attr: 'INT' },
-  { name: 'Intimidire', attr: 'CAR' },
-  { name: 'Intrattenere', attr: 'CAR' },
-  { name: 'Medicina', attr: 'SAG' },
-  { name: 'Natura', attr: 'INT' },
-  { name: 'Percezione', attr: 'SAG' },
-  { name: 'Persuasione', attr: 'CAR' },
-  { name: 'Prestidigitazione', attr: 'DES' },
-  { name: 'Religione', attr: 'INT' },
-  { name: 'Sopravvivenza', attr: 'SAG' },
-  { name: 'Storia', attr: 'INT' },
+  { id: 'acrobatics',    attr: 'DEX' },
+  { id: 'animal-handling', attr: 'WIS' },
+  { id: 'arcana',        attr: 'INT' },
+  { id: 'athletics',     attr: 'STR' },
+  { id: 'deception',     attr: 'CHA' },
+  { id: 'history',       attr: 'INT' },
+  { id: 'insight',       attr: 'WIS' },
+  { id: 'intimidation',  attr: 'CHA' },
+  { id: 'investigation', attr: 'INT' },
+  { id: 'medicine',      attr: 'WIS' },
+  { id: 'nature',        attr: 'INT' },
+  { id: 'perception',    attr: 'WIS' },
+  { id: 'performance',   attr: 'CHA' },
+  { id: 'persuasion',    attr: 'CHA' },
+  { id: 'religion',      attr: 'INT' },
+  { id: 'sleight-of-hand', attr: 'DEX' },
+  { id: 'stealth',       attr: 'DEX' },
+  { id: 'survival',      attr: 'WIS' },
 ];
 
 export const SPELLCASTING_CLASS = {
-  Mago: 'INT', Chierico: 'SAG', Druido: 'SAG',
-  Bardo: 'CAR', Stregone: 'CAR', Warlock: 'CAR',
-  Paladino: 'CAR', Ranger: 'SAG',
+  Wizard: 'INT', Cleric: 'WIS', Druid: 'WIS',
+  Bard: 'CHA', Sorcerer: 'CHA', Warlock: 'CHA',
+  Paladin: 'CHA', Ranger: 'WIS',
 };
 
 export const HIT_DICE = {
-  Barbaro: 'd12', Guerriero: 'd10', Paladino: 'd10', Ranger: 'd10',
-  Bardo: 'd8', Chierico: 'd8', Druido: 'd8', Monaco: 'd8', Ladro: 'd8', Warlock: 'd8',
-  Stregone: 'd6', Mago: 'd6',
+  Barbarian: 'd12', Fighter: 'd10', Paladin: 'd10', Ranger: 'd10',
+  Bard: 'd8', Cleric: 'd8', Druid: 'd8', Monk: 'd8', Rogue: 'd8', Warlock: 'd8',
+  Sorcerer: 'd6', Wizard: 'd6',
 };
 
 export const SLOT_TABLE = {
@@ -52,30 +50,29 @@ export const SLOT_TABLE = {
   19: [4,3,3,3,3,2,1,1,1], 20: [4,3,3,3,3,2,2,1,1],
 };
 
+// Default action added to every new character — content is in English (base language).
 export const DEFAULT_ACTIONS = [
   {
-    id: 'azione_base',
-    name: 'Azione',
+    id: 'default_action',
+    name: 'Action',
     type: 'action',
-    desc: "Con la tua azione puoi: **Attaccare** – un attacco in mischia o a distanza. **Scattare** – raddoppia la velocità. **Disimpegnarti** – ti sposti senza provocare attacchi d'opportunità. **Schivare** – svantaggio agli attacchi contro di te, vantaggio ai TS Destrezza. **Aiutare** – concede vantaggio a un alleato. **Nascondersi** – prova di Furtività (DES). **Prepararti** – prepara una reazione. **Usare un oggetto** – interagisci con un oggetto del tuo inventario.",
+    desc: "On your turn you can: **Attack** – make a melee or ranged attack. **Dash** – gain extra movement equal to your speed. **Disengage** – your movement doesn't provoke opportunity attacks. **Dodge** – attacks against you have disadvantage; you have advantage on DEX saves. **Help** – grant an ally advantage on their next check or attack. **Hide** – make a Stealth (DEX) check. **Ready** – prepare a reaction to a trigger. **Use an Object** – interact with an item in your inventory.",
     dice: '',
   },
 ];
 
 export const CLASSES = [
-  'Barbaro', 'Bardo', 'Chierico', 'Druido', 'Guerriero',
-  'Ladro', 'Mago', 'Monaco', 'Paladino', 'Ranger', 'Stregone', 'Warlock',
+  'Barbarian', 'Bard', 'Cleric', 'Druid', 'Fighter',
+  'Monk', 'Paladin', 'Ranger', 'Rogue', 'Sorcerer', 'Warlock', 'Wizard',
 ];
 
 export const ALIGNMENTS = [
-  'Legale Buono', 'Neutrale Buono', 'Caotico Buono',
-  'Legale Neutrale', 'Vero Neutrale', 'Caotico Neutrale',
-  'Legale Malvagio', 'Neutrale Malvagio', 'Caotico Malvagio',
+  'Lawful Good', 'Neutral Good', 'Chaotic Good',
+  'Lawful Neutral', 'True Neutral', 'Chaotic Neutral',
+  'Lawful Evil', 'Neutral Evil', 'Chaotic Evil',
 ];
 
-// JSON Import Schema — compatibile con Character Craft 5.5e (parziale)
-// Le chiavi sono documentate per consentire import di file custom
-export const JSON_SCHEMA_VERSION = '1.0.0';
+export const JSON_SCHEMA_VERSION = '2.0.0';
 
 export function getMod(score) {
   return Math.floor((score - 10) / 2);
@@ -92,6 +89,7 @@ export function fmtMod(n) {
 export function createDefaultState() {
   return {
     schemaVersion: JSON_SCHEMA_VERSION,
+    _schema_v2: true,
     template: 'dnd5e',
     charName: '',
     charClass: '',
@@ -99,8 +97,8 @@ export function createDefaultState() {
     charBackground: '',
     charLevel: 1,
     charXP: 0,
-    charAlignment: 'Legale Buono',
-    abilities: { FOR: 10, DES: 10, COS: 10, INT: 10, SAG: 10, CAR: 10 },
+    charAlignment: 'Lawful Good',
+    abilities: { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 },
     saveProficiencies: [],
     skillProficiencies: [],
     skillExpertise: [],
@@ -108,7 +106,7 @@ export function createDefaultState() {
     hpMax: 10,
     hpTemp: 0,
     ac: 10,
-    speed: '9m',
+    speed: '30ft',
     inspiration: false,
     deathSuccess: [false, false, false],
     deathFail: [false, false, false],

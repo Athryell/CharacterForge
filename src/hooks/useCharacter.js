@@ -4,6 +4,7 @@ import {
   SPELLCASTING_CLASS, HIT_DICE, SLOT_TABLE, SKILLS, JSON_SCHEMA_VERSION,
 } from '../data/dnd5e';
 import { saveCharState, loadCharState } from '../chars';
+import { migrateCharState } from '../data/migration';
 
 const LEGACY_KEY = 'characterforge_state';
 
@@ -11,10 +12,10 @@ function loadFromStorage(charId) {
   try {
     if (charId) {
       const saved = loadCharState(charId);
-      if (saved) return { ...createDefaultState(), ...saved };
+      if (saved) return { ...createDefaultState(), ...migrateCharState(saved) };
     } else {
       const raw = localStorage.getItem(LEGACY_KEY);
-      if (raw) return { ...createDefaultState(), ...JSON.parse(raw) };
+      if (raw) return { ...createDefaultState(), ...migrateCharState(JSON.parse(raw)) };
     }
   } catch { /* ignore */ }
   return createDefaultState();
@@ -58,13 +59,13 @@ export function useCharacter(charId) {
 
   function calcSkillMod(skill) {
     const base = abilityMod(skill.attr);
-    if (state.skillExpertise.includes(skill.name)) return base + profBonus * 2;
-    if (state.skillProficiencies.includes(skill.name)) return base + profBonus;
+    if (state.skillExpertise.includes(skill.id)) return base + profBonus * 2;
+    if (state.skillProficiencies.includes(skill.id)) return base + profBonus;
     return base;
   }
 
-  const passivePerception = 10 + calcSkillMod(SKILLS.find(s => s.name === 'Percezione'));
-  const initiative = fmtMod(abilityMod('DES'));
+  const passivePerception = 10 + calcSkillMod(SKILLS.find(s => s.id === 'perception'));
+  const initiative = fmtMod(abilityMod('DEX'));
   const hitDice = `${level}× ${HIT_DICE[state.charClass] || 'd8'}`;
 
   // Spellcasting

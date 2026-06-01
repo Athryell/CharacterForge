@@ -1,62 +1,63 @@
-// Armi SRD 5.2 (CC BY 4.0 — Wizards of the Coast)
+// Weapons SRD 5.2 (CC BY 4.0 — Wizards of the Coast)
+// Property and mastery labels are i18n keys — display via t('data.weaponProps.<key>') etc.
 
 export const WEAPON_PROPERTIES = {
-  finesse: 'Finezza',
-  thrown: 'Lancio',
-  ranged: 'A distanza',
-  twoHanded: 'A due mani',
-  versatile: 'Versatile',
-  light: 'Leggera',
-  heavy: 'Pesante',
-  reach: 'Allungo',
-  loading: 'Caricamento',
-  ammunition: 'Munizioni',
+  finesse:    'finesse',
+  thrown:     'thrown',
+  ranged:     'ranged',
+  twoHanded:  'twoHanded',
+  versatile:  'versatile',
+  light:      'light',
+  heavy:      'heavy',
+  reach:      'reach',
+  loading:    'loading',
+  ammunition: 'ammunition',
 };
 
 export const WEAPON_MASTERIES = {
-  none:   { label: '—',             desc: '' },
-  cleave: { label: 'Falciata',      desc: 'Colpendo, attacca un\'altra creatura adiacente entro la portata usando la stessa azione.' },
-  graze:  { label: 'Sfioramento',   desc: 'Mancando un attacco, infliggi danni pari al tuo modificatore FOR o DES (minimo 0).' },
-  nick:   { label: 'Colpo rapido',  desc: 'Con questa arma leggera puoi effettuare l\'attacco extra del combattimento a due armi come azione libera, senza spendere un\'azione bonus.' },
-  push:   { label: 'Spinta',        desc: 'Colpendo, puoi spingere il bersaglio di 3m (se Grande o più piccolo), purché abbia due piedi per terra.' },
-  sap:    { label: 'Stordimento',   desc: 'Colpendo, il bersaglio ha svantaggio al suo prossimo tiro per colpire fino all\'inizio del tuo prossimo turno.' },
-  slow:   { label: 'Rallentamento', desc: 'Colpendo, la velocità del bersaglio si riduce di 3m fino all\'inizio del tuo prossimo turno.' },
-  topple: { label: 'Abbattimento',  desc: 'Colpendo, il bersaglio deve superare un TS FOR (CD = 8 + bonus competenza + mod.) o cade a terra prono.' },
-  vex:    { label: 'Provocazione',  desc: 'Colpendo, ottieni vantaggio al prossimo tiro per colpire contro lo stesso bersaglio prima della fine del tuo prossimo turno.' },
+  none:   { label: 'none',   desc: '' },
+  cleave: { label: 'cleave', desc: 'On a hit, attack one adjacent creature within reach using the same action.' },
+  graze:  { label: 'graze',  desc: 'On a miss, deal damage equal to your STR or DEX modifier (minimum 0).' },
+  nick:   { label: 'nick',   desc: 'With this Light weapon you can make the extra two-weapon-fighting attack as a free action, without spending a bonus action.' },
+  push:   { label: 'push',   desc: 'On a hit, push the target 10 ft (if Large or smaller) provided it has two feet on the ground.' },
+  sap:    { label: 'sap',    desc: 'On a hit, the target has disadvantage on its next attack roll until the start of your next turn.' },
+  slow:   { label: 'slow',   desc: 'On a hit, the target\'s speed is reduced by 10 ft until the start of your next turn.' },
+  topple: { label: 'topple', desc: 'On a hit, the target must succeed on a STR save (DC = 8 + prof bonus + mod) or fall prone.' },
+  vex:    { label: 'vex',    desc: 'On a hit, you gain advantage on your next attack roll against the same target before the end of your next turn.' },
 };
 
 export const ABILITY_OPTIONS = [
-  { value: 'auto', label: 'Automatico (FOR/DES)' },
-  { value: 'FOR',  label: 'Forza (FOR)' },
-  { value: 'DES',  label: 'Destrezza (DES)' },
-  { value: 'COS',  label: 'Costituzione (COS)' },
-  { value: 'INT',  label: 'Intelligenza (INT)' },
-  { value: 'SAG',  label: 'Saggezza (SAG)' },
-  { value: 'CAR',  label: 'Carisma (CAR)' },
+  { value: 'auto', label: 'Auto (STR/DEX)' },
+  { value: 'STR',  label: 'Strength (STR)' },
+  { value: 'DEX',  label: 'Dexterity (DEX)' },
+  { value: 'CON',  label: 'Constitution (CON)' },
+  { value: 'INT',  label: 'Intelligence (INT)' },
+  { value: 'WIS',  label: 'Wisdom (WIS)' },
+  { value: 'CHA',  label: 'Charisma (CHA)' },
 ];
 
 export const WEAPON_PRESETS = [
-  // Mischia semplici
-  { name: 'Clava',          dmg: '1d4',  dmgType: 'contundente', properties: ['light'], prof: true, mastery: 'slow' },
-  { name: 'Pugnale',        dmg: '1d4',  dmgType: 'perforante',  properties: ['finesse','light','thrown'], range: '6/18', prof: true, mastery: 'nick' },
-  { name: 'Randello',       dmg: '1d6',  dmgType: 'contundente', properties: [], prof: true, mastery: 'topple' },
-  { name: 'Ascia da mano',  dmg: '1d6',  dmgType: 'tagliente',   properties: ['light','thrown'], range: '6/18', prof: true, mastery: 'vex' },
-  { name: 'Lancia',         dmg: '1d6',  dmgType: 'perforante',  properties: ['thrown','versatile'], versatileDmg: '1d8', range: '6/18', prof: true, mastery: 'sap' },
-  { name: 'Mazza',          dmg: '1d6',  dmgType: 'contundente', properties: [], prof: true, mastery: 'sap' },
-  { name: 'Bastone',        dmg: '1d6',  dmgType: 'contundente', properties: ['versatile'], versatileDmg: '1d8', prof: true, mastery: 'topple' },
-  // Mischia marziali
-  { name: 'Spada corta',    dmg: '1d6',  dmgType: 'perforante',  properties: ['finesse','light'], prof: false, mastery: 'vex' },
-  { name: 'Spada lunga',    dmg: '1d8',  dmgType: 'tagliente',   properties: ['versatile'], versatileDmg: '1d10', prof: false, mastery: 'sap' },
-  { name: 'Spadone',        dmg: '2d6',  dmgType: 'tagliente',   properties: ['heavy','twoHanded'], prof: false, mastery: 'graze' },
-  { name: 'Ascia da guerra',dmg: '1d8',  dmgType: 'tagliente',   properties: ['versatile'], versatileDmg: '1d10', prof: false, mastery: 'topple' },
-  { name: 'Alabarda',       dmg: '1d10', dmgType: 'tagliente',   properties: ['heavy','reach','twoHanded'], prof: false, mastery: 'cleave' },
-  { name: 'Rapier',         dmg: '1d8',  dmgType: 'perforante',  properties: ['finesse'], prof: false, mastery: 'vex' },
-  // Distanza semplici
-  { name: 'Arco corto',     dmg: '1d6',  dmgType: 'perforante',  properties: ['ammunition','ranged','twoHanded'], range: '24/96', prof: true, mastery: 'vex' },
-  { name: 'Balestra leggera',dmg:'1d8',  dmgType: 'perforante',  properties: ['ammunition','ranged','loading'], range: '24/96', prof: true, mastery: 'slow' },
-  // Distanza marziali
-  { name: 'Arco lungo',     dmg: '1d8',  dmgType: 'perforante',  properties: ['ammunition','ranged','heavy','twoHanded'], range: '45/180', prof: false, mastery: 'slow' },
-  { name: 'Balestra pesante',dmg:'1d10', dmgType: 'perforante',  properties: ['ammunition','ranged','heavy','loading'], range: '30/120', prof: false, mastery: 'push' },
+  // Simple Melee
+  { name: 'Club',             dmg: '1d4',  dmgType: 'bludgeoning', properties: ['light'], prof: true, mastery: 'slow' },
+  { name: 'Dagger',           dmg: '1d4',  dmgType: 'piercing',    properties: ['finesse','light','thrown'], range: '20/60', prof: true, mastery: 'nick' },
+  { name: 'Greatclub',        dmg: '1d8',  dmgType: 'bludgeoning', properties: [], prof: true, mastery: 'topple' },
+  { name: 'Handaxe',          dmg: '1d6',  dmgType: 'slashing',    properties: ['light','thrown'], range: '20/60', prof: true, mastery: 'vex' },
+  { name: 'Spear',            dmg: '1d6',  dmgType: 'piercing',    properties: ['thrown','versatile'], versatileDmg: '1d8', range: '20/60', prof: true, mastery: 'sap' },
+  { name: 'Mace',             dmg: '1d6',  dmgType: 'bludgeoning', properties: [], prof: true, mastery: 'sap' },
+  { name: 'Quarterstaff',     dmg: '1d6',  dmgType: 'bludgeoning', properties: ['versatile'], versatileDmg: '1d8', prof: true, mastery: 'topple' },
+  // Martial Melee
+  { name: 'Shortsword',       dmg: '1d6',  dmgType: 'piercing',    properties: ['finesse','light'], prof: false, mastery: 'vex' },
+  { name: 'Longsword',        dmg: '1d8',  dmgType: 'slashing',    properties: ['versatile'], versatileDmg: '1d10', prof: false, mastery: 'sap' },
+  { name: 'Greatsword',       dmg: '2d6',  dmgType: 'slashing',    properties: ['heavy','twoHanded'], prof: false, mastery: 'graze' },
+  { name: 'Battleaxe',        dmg: '1d8',  dmgType: 'slashing',    properties: ['versatile'], versatileDmg: '1d10', prof: false, mastery: 'topple' },
+  { name: 'Halberd',          dmg: '1d10', dmgType: 'slashing',    properties: ['heavy','reach','twoHanded'], prof: false, mastery: 'cleave' },
+  { name: 'Rapier',           dmg: '1d8',  dmgType: 'piercing',    properties: ['finesse'], prof: false, mastery: 'vex' },
+  // Simple Ranged
+  { name: 'Shortbow',         dmg: '1d6',  dmgType: 'piercing',    properties: ['ammunition','ranged','twoHanded'], range: '80/320', prof: true, mastery: 'vex' },
+  { name: 'Light Crossbow',   dmg: '1d8',  dmgType: 'piercing',    properties: ['ammunition','ranged','loading'], range: '80/320', prof: true, mastery: 'slow' },
+  // Martial Ranged
+  { name: 'Longbow',          dmg: '1d8',  dmgType: 'piercing',    properties: ['ammunition','ranged','heavy','twoHanded'], range: '150/600', prof: false, mastery: 'slow' },
+  { name: 'Heavy Crossbow',   dmg: '1d10', dmgType: 'piercing',    properties: ['ammunition','ranged','heavy','loading'], range: '100/400', prof: false, mastery: 'push' },
 ];
 
 export function calcWeaponAttack({ weapon, abilities, profBonus, isProficient }) {
@@ -66,13 +67,13 @@ export function calcWeaponAttack({ weapon, abilities, profBonus, isProficient })
   if (override && override !== 'auto') {
     statMod = Math.floor(((abilities[override] ?? 10) - 10) / 2);
   } else if (weapon.properties?.includes('finesse')) {
-    const forMod = Math.floor(((abilities.FOR ?? 10) - 10) / 2);
-    const desMod = Math.floor(((abilities.DES ?? 10) - 10) / 2);
-    statMod = Math.max(forMod, desMod);
+    const strMod = Math.floor(((abilities.STR ?? 10) - 10) / 2);
+    const dexMod = Math.floor(((abilities.DEX ?? 10) - 10) / 2);
+    statMod = Math.max(strMod, dexMod);
   } else if (weapon.properties?.includes('ranged')) {
-    statMod = Math.floor(((abilities.DES ?? 10) - 10) / 2);
+    statMod = Math.floor(((abilities.DEX ?? 10) - 10) / 2);
   } else {
-    statMod = Math.floor(((abilities.FOR ?? 10) - 10) / 2);
+    statMod = Math.floor(((abilities.STR ?? 10) - 10) / 2);
   }
 
   const prof = isProficient ? profBonus : 0;

@@ -7,7 +7,7 @@ import { NotationHelpBar, KeywordText } from './Tooltip';
 import BonusTextarea from './BonusTextarea';
 
 const BLANK_FORM = {
-  name: '', isProficient: true, desc: '', properties: [], mastery: 'none',
+  name: '', isProficient: true, desc: '', properties: [], mastery: 'none', weight: '',
 };
 
 function PropertyMasteryPicker({ properties, mastery, onChangeProperties, onChangeMastery }) {
@@ -36,7 +36,7 @@ function PropertyMasteryPicker({ properties, mastery, onChangeProperties, onChan
           {predefinedKeys.map(key => (
             <button key={key} className={`filter-chip ${properties.includes(key) ? 'active' : ''}`}
               style={{ fontSize: 11 }} onClick={() => toggleProp(key)}>
-              {WEAPON_PROPERTIES[key]}
+              {t('data.weaponProps.' + key, WEAPON_PROPERTIES[key])}
             </button>
           ))}
         </div>
@@ -65,7 +65,7 @@ function PropertyMasteryPicker({ properties, mastery, onChangeProperties, onChan
             <button key={key} className={`filter-chip ${mastery === key ? 'active' : ''}`}
               style={{ fontSize: 11 }} title={desc}
               onClick={() => onChangeMastery(mastery === key ? 'none' : key)}>
-              {label}
+              {t('data.masteries.' + key, label)}
             </button>
           ))}
         </div>
@@ -99,6 +99,10 @@ function WeaponEditForm({ form, onChange, onSave, onCancel, onDelete, added, onT
           <label>{t('weapons.customName')}</label>
           <input value={form.name} onChange={e => patch({ name: e.target.value })}
             placeholder="Es. Spada del nonno" autoFocus />
+        </div>
+        <div className="field" style={{ flex: '0 0 70px' }}>
+          <label>{t('inventory.weight', 'Peso')}</label>
+          <input type="text" value={form.weight || ''} onChange={e => patch({ weight: e.target.value })} placeholder="0" />
         </div>
         <div className="field" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
           <label>{t('weapons.profLabel')}</label>
@@ -152,7 +156,7 @@ function WeaponEditForm({ form, onChange, onSave, onCancel, onDelete, added, onT
   );
 }
 
-export default function WeaponManager({ weapons = [], abilities, profBonus, onUpdate, onRoll, proficiency = '', onUpdateProficiency, onAddAction, onRemoveAction, actionNames, addOpen, onAddClose, allTags = [], onUpdateTags, onCreateTag }) {
+export default function WeaponManager({ weapons = [], abilities, profBonus, onUpdate, onRoll, proficiency = '', onUpdateProficiency, onAddAction, onRemoveAction, actionNames, addOpen, onAddClose, allTags = [], onUpdateTags, onCreateTag, weightUnit = 'kg' }) {
   const { t } = useTranslation();
   const [addMode, setAddMode] = useState('preset');
   const [addForm, setAddForm] = useState(BLANK_FORM);
@@ -221,10 +225,10 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
                   <div className="weapon-name">{p.name}</div>
                   <div className="weapon-meta">
                     {(p.properties || []).map(prop => (
-                      <span key={prop} className="weapon-prop">{WEAPON_PROPERTIES[prop] || prop}</span>
+                      <span key={prop} className="weapon-prop">{t("data.weaponProps." + prop, WEAPON_PROPERTIES[prop] || prop)}</span>
                     ))}
                     {p.mastery && p.mastery !== 'none' && (
-                      <span className="weapon-prop">{WEAPON_MASTERIES[p.mastery]?.label}</span>
+                      <span className="weapon-prop">{t("data.masteries." + p.mastery, WEAPON_MASTERIES[p.mastery]?.label || p.mastery)}</span>
                     )}
                   </div>
                 </div>
@@ -257,17 +261,19 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
             <div className="weapon-main" onClick={() => handleRowClick(w)} style={{ cursor: 'pointer' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                 <div className="weapon-name">{w.name}</div>
+                {added && <span className="action-added-badge" title={t('common.inAction', 'In azioni')}>⚡</span>}
                 {(w.tags || []).map(tag => <TagPill key={tag} tag={tag} allTags={allTags} small />)}
-                {w.mastery && w.mastery !== 'none' && WEAPON_MASTERIES[w.mastery] && (
+                {w.mastery && w.mastery !== 'none' && (
                   <span className="weapon-prop" style={{ fontSize: 10, color: 'var(--c-accent-text)', background: 'var(--c-accent-light)' }}
                     title={WEAPON_MASTERIES[w.mastery]?.desc}>
-                    {WEAPON_MASTERIES[w.mastery]?.label}
+                    {WEAPON_MASTERIES[w.mastery] ? t("data.masteries." + w.mastery, WEAPON_MASTERIES[w.mastery].label) : w.mastery}
                   </span>
                 )}
               </div>
               <div className="weapon-meta">
-                {predefinedProps.map(p => <span key={p} className="weapon-prop">{WEAPON_PROPERTIES[p]}</span>)}
+                {predefinedProps.map(p => <span key={p} className="weapon-prop">{t("data.weaponProps." + p, WEAPON_PROPERTIES[p])}</span>)}
                 {customProps.map(p => <span key={p} className="weapon-prop">{p}</span>)}
+                {w.weight && <span className="weapon-prop" style={{ fontSize: 10 }}>{w.weight} {weightUnit || 'kg'}</span>}
                 {!w.isProficient && <span className="weapon-prop" style={{ color: 'var(--c-warn-text)' }}>{t('weapons.noProf')}</span>}
               </div>
             </div>
@@ -291,10 +297,15 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
 
             {isExpanded && !isEditing && (
               <div className="weapon-expanded-section" onClick={e => e.stopPropagation()}>
-                {w.desc && <div style={{ fontSize: 12, color: 'var(--c-muted)', marginBottom: 4 }}><KeywordText text={w.desc} /></div>}
-                {w.mastery && w.mastery !== 'none' && WEAPON_MASTERIES[w.mastery] && (
+                {w.desc && <div style={{ fontSize: 12, color: 'var(--c-muted)', marginBottom: 4 }}>
+                  <KeywordText text={w.desc}
+                    counters={w.counters}
+                    onCounterChange={(idx, vals) => onUpdate(weapons.map(w2 => w2.id === w.id ? { ...w2, counters: { ...(w2.counters || {}), [idx]: vals } } : w2))} />
+                </div>}
+                {w.mastery && w.mastery !== 'none' && (
                   <div style={{ fontSize: 11, color: 'var(--c-muted)', marginBottom: 4 }}>
-                    <strong>{WEAPON_MASTERIES[w.mastery]?.label}:</strong> {WEAPON_MASTERIES[w.mastery]?.desc}
+                    <strong>{WEAPON_MASTERIES[w.mastery] ? t("data.masteries." + w.mastery, WEAPON_MASTERIES[w.mastery].label) : w.mastery}:</strong>
+                    {WEAPON_MASTERIES[w.mastery] && ` ${WEAPON_MASTERIES[w.mastery].desc}`}
                   </div>
                 )}
                 {(w.bonuses || []).length > 0 && (
@@ -304,19 +315,6 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
                     ))}
                   </div>
                 )}
-                <div style={{ marginTop: 4 }}>
-                  {editingTagsFor === w.id ? (
-                    <>
-                      <TagSelector selected={w.tags || []} allTags={allTags}
-                        onChange={tags => onUpdateTags && onUpdateTags(w.id, tags)} onCreateTag={onCreateTag} />
-                      <button className="tag-edit-btn" style={{ marginTop: 4 }} onClick={() => setEditingTagsFor(null)}>{t('common.tagDone')}</button>
-                    </>
-                  ) : (
-                    <button className="tag-edit-btn" onClick={() => setEditingTagsFor(w.id)}>
-                      {(w.tags || []).length === 0 ? t('common.addTag') : t('common.editTags')}
-                    </button>
-                  )}
-                </div>
                 <div className="item-edit-actions">
                   <button className="io-btn" onClick={e => { e.stopPropagation(); startEdit(w); }}>{t('common.edit')}</button>
                 </div>

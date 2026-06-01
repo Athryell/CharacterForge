@@ -25,7 +25,7 @@
     "senses": "Sensi",
     "hp": "Punti ferita",
     "combatStats": "Statistiche combattimento",
-    "inspiration": "Ispirazione & Concentrazione",
+    "inspiration": "Ispirazione",
     "deathSaves": "Tiri salvezza morte",
     "conditions": "Condizioni",
     "actions": "Azioni",
@@ -161,7 +161,8 @@
     "customFormTitle": "✏ Incantesimo personalizzato",
     "castSlot": "Slot {{level}}°",
     "noSpells2": "Nessun incantesimo. Clicca ＋ per aggiungerne uno.",
-    "descEditLabel": "Descrizione"
+    "descEditLabel": "Descrizione",
+    "alwaysPrepared": "Sempre preparata"
   },
   "inventory": {
     "addBtn": "+ Aggiungi oggetto",
@@ -179,7 +180,9 @@
     "nameEditLabel": "Nome",
     "descEditLabel": "Descrizione",
     "descAddPlaceholder": "Es. Cura 2d4+2 HP. (@ per bonus)",
-    "empty2": "Nessun oggetto. Attiva la modalità ✏ e clicca \"+ Aggiungi oggetto\"."
+    "empty2": "Nessun oggetto. Attiva la modalità ✏ e clicca \"+ Aggiungi oggetto\".",
+    "carried": "Peso trasportato",
+    "coinWeight": "(di cui {{n}} {{unit}} da monete)"
   },
   "currency": {
     "gp": "MO",
@@ -211,8 +214,8 @@
     "moveTo": "↗ Sposta",
     "moveToTitle": "Sposta in:",
     "hide": "🚫",
-    "fullWidth": "▬ Piena",
-    "halfWidth": "⬛ Mezza",
+    "fullWidth": "▬ Espandi",
+    "halfWidth": "⬛ Riduci",
     "dragHere": "Trascina qui",
     "dragHereFull": "⬛ Trascina qui per larghezza piena",
     "dragHereLeft": "▬ Trascina qui (colonna sinistra)",
@@ -223,16 +226,17 @@
     "below": "⬇ Sotto"
   },
   "tags": {
-    "addPlaceholder": "+ Aggiungi tag...",
-    "create": "Crea: ",
-    "filterAll": "Tutte"
+    "add": "Aggiungi tag",
+    "edit": "Modifica tag",
+    "addPlaceholder": "Aggiungi tag..."
   },
   "notation": {
     "dynamicTitle": "Valore dinamico — originale:",
     "rollTitle": "Lancia",
     "attrHelp": "→ mod caratteristica",
     "lvlHelp": "→ scala col livello",
-    "bonusHelp": "→ bonus equipaggiamento (digita @ per lista)"
+    "bonusHelp": "→ bonus equipaggiamento (digita @ per lista)",
+    "counterHelp": "→ counter cliccabile (es. cariche)"
   },
   "weapons": {
     "noWeapons": "Nessuna arma aggiunta. Clicca \"+\" per aggiungerne una.",
@@ -261,7 +265,8 @@
     "descLabel": "Descrizione / Note",
     "descPlaceholder": "Descrizione, proprietà speciali, storia... (@ per bonus)",
     "proficiencyLabel": "Competenza:",
-    "proficiencyPlaceholder": "Es. Armi semplici, spade corte, archi..."
+    "proficiencyPlaceholder": "Es. Armi semplici, spade corte, archi...",
+    "equipBonusLabel": "Bonus equipaggiamento"
   },
   "conditions": {
     "title": "Condizioni"
@@ -286,7 +291,17 @@
     "exportChar": "⬇ Esporta personaggio",
     "importChar": "⬆ Importa personaggio",
     "sources": "Sorgenti dati",
-    "uiLang": "Lingua"
+    "uiLang": "Lingua",
+    "units": "Unità di misura",
+    "weightUnit": "Peso",
+    "speedUnit": "Velocità"
+  },
+  "units": {
+    "sq": "cas."
+  },
+  "dice": {
+    "natural20": "Natural 20!",
+    "natural1": "Natural 1!"
   },
   "toast": {
     "longRest": "Riposo lungo: HP e slot ripristinati!",
@@ -347,7 +362,8 @@
     "summaryOriginFeat": "Talento Origin",
     "summaryTool": "Strumento",
     "summaryBgBonus": "Bonus background",
-    "summarySpellcaster": "Incantatore"
+    "summarySpellcaster": "Incantatore",
+    "spellcaster": "Incantatore"
   },
   "common": {
     "edit": "✏ Modifica",
@@ -363,6 +379,284 @@
     "editTags": "🏷 Modifica tag",
     "tagDone": "✓ Fine",
     "addToAction": "Aggiungi alle azioni",
-    "removeFromAction": "Rimuovi dalle azioni"
+    "removeFromAction": "Rimuovi dalle azioni",
+    "inAction": "In azioni",
+    "delete": "Elimina",
+    "done": "Fine"
+  },
+  "data": {
+    "abilities": {
+      "STR": "Forza",
+      "DEX": "Destrezza",
+      "CON": "Costituzione",
+      "INT": "Intelligenza",
+      "WIS": "Saggezza",
+      "CHA": "Carisma"
+    },
+    "abilityAbbr": {
+      "STR": "FOR",
+      "DEX": "DES",
+      "CON": "COS",
+      "INT": "INT",
+      "WIS": "SAG",
+      "CHA": "CAR"
+    },
+    "skills": {
+      "acrobatics": "Acrobazia",
+      "animal-handling": "Addestrare animali",
+      "arcana": "Arcano",
+      "athletics": "Atletica",
+      "deception": "Inganno",
+      "history": "Storia",
+      "insight": "Intuizione",
+      "intimidation": "Intimidire",
+      "investigation": "Indagare",
+      "medicine": "Medicina",
+      "nature": "Natura",
+      "perception": "Percezione",
+      "performance": "Intrattenere",
+      "persuasion": "Persuasione",
+      "religion": "Religione",
+      "sleight-of-hand": "Prestidigitazione",
+      "stealth": "Furtività",
+      "survival": "Sopravvivenza"
+    },
+    "classes": {
+      "Barbarian": "Barbaro",
+      "Bard": "Bardo",
+      "Cleric": "Chierico",
+      "Druid": "Druido",
+      "Fighter": "Guerriero",
+      "Monk": "Monaco",
+      "Paladin": "Paladino",
+      "Ranger": "Ranger",
+      "Rogue": "Ladro",
+      "Sorcerer": "Stregone",
+      "Warlock": "Warlock",
+      "Wizard": "Mago"
+    },
+    "alignments": {
+      "Lawful Good": "Legale Buono",
+      "Neutral Good": "Neutrale Buono",
+      "Chaotic Good": "Caotico Buono",
+      "Lawful Neutral": "Legale Neutrale",
+      "True Neutral": "Vero Neutrale",
+      "Chaotic Neutral": "Caotico Neutrale",
+      "Lawful Evil": "Legale Malvagio",
+      "Neutral Evil": "Neutrale Malvagio",
+      "Chaotic Evil": "Caotico Malvagio"
+    },
+    "conditions": {
+      "blinded": {
+        "name": "Accecato",
+        "desc": "Non puoi vedere. Fallisce automaticamente le prove che richiedono la vista. I tiri per colpire contro di te hanno vantaggio; i tuoi tiri per colpire hanno svantaggio."
+      },
+      "charmed": {
+        "name": "Affascinato",
+        "desc": "Non puoi attaccare chi ti ha affascinato né bersagliarlo con effetti dannosi. Chi ti ha affascinato ha vantaggio alle prove di interazione sociale."
+      },
+      "deafened": {
+        "name": "Assordato",
+        "desc": "Non puoi sentire. Fallisce automaticamente le prove che richiedono l'udito."
+      },
+      "frightened": {
+        "name": "Spaventato",
+        "desc": "Svantaggio alle prove di caratteristica e ai tiri per colpire finché la fonte della paura è in vista. Non puoi avvicinarti volontariamente alla fonte."
+      },
+      "grappled": {
+        "name": "Afferrato",
+        "desc": "Velocità ridotta a 0. Termina se chi afferra è incapacitato o la creatura viene spostata oltre la sua portata."
+      },
+      "incapacitated": {
+        "name": "Incapacitato",
+        "desc": "Non puoi compiere azioni, azioni bonus o reazioni."
+      },
+      "invisible": {
+        "name": "Invisibile",
+        "desc": "Non puoi essere visto senza magia. I tiri per colpire contro di te hanno svantaggio; i tuoi attacchi hanno vantaggio."
+      },
+      "paralyzed": {
+        "name": "Paralizzato",
+        "desc": "Incapacitato, non puoi muoverti né parlare. Fallisce i TS FOR e DES. I colpi in mischia entro 1,5 m sono critici automatici."
+      },
+      "petrified": {
+        "name": "Pietrificato",
+        "desc": "Trasformato in pietra. Incapacitato, resistenza a tutti i danni, immune a veleno e malattie, non invecchia."
+      },
+      "poisoned": {
+        "name": "Avvelenato",
+        "desc": "Svantaggio ai tiri per colpire e alle prove di caratteristica."
+      },
+      "prone": {
+        "name": "A Terra",
+        "desc": "Puoi solo strisciare. Svantaggio ai tiri per colpire. I colpi in mischia hanno vantaggio; i colpi a distanza hanno svantaggio."
+      },
+      "restrained": {
+        "name": "Trattenuto",
+        "desc": "Velocità 0. Svantaggio ai tiri per colpire e ai TS DES. I tiri per colpire contro di te hanno vantaggio."
+      },
+      "stunned": {
+        "name": "Stordito",
+        "desc": "Incapacitato, non puoi muoverti, parli solo balbettando. Fallisce i TS FOR e DES. I tiri per colpire contro di te hanno vantaggio."
+      },
+      "unconscious": {
+        "name": "Privo di Sensi",
+        "desc": "Incapacitato, non puoi muoverti né parlare. Lascia cadere gli oggetti. Fallisce i TS FOR e DES. I colpi in mischia entro 1,5 m sono critici automatici."
+      },
+      "concentration": {
+        "name": "Concentrazione",
+        "desc": "Stai mantenendo un incantesimo di concentrazione. Subire danni richiede un TS COS (CD 10 o metà dei danni). Fallire interrompe l'incantesimo."
+      },
+      "exhaustion": {
+        "name": "Affaticamento",
+        "desc": "Ogni livello sottrae 2 ai tiri d20 e riduce la velocità di 1,5 m. Lv. 5: velocità 0. Lv. 6: morte istantanea."
+      }
+    },
+    "species": {
+      "human": "Umano",
+      "high-elf": "Elfo (Alto)",
+      "wood-elf": "Elfo (Silvano)",
+      "hill-dwarf": "Nano (Collina)",
+      "mountain-dwarf": "Nano (Montagna)",
+      "lightfoot-halfling": "Halfling (Pieditozzo)",
+      "stout-halfling": "Halfling (Selvatico)",
+      "half-elf": "Mezzelfo",
+      "tiefling": "Tiefling",
+      "dragonborn": "Draconico",
+      "rock-gnome": "Gnomo (Roccia)",
+      "forest-gnome": "Gnomo (Foresta)",
+      "half-orc": "Mezz'orco",
+      "aasimar": "Aasimar",
+      "elf": "Elfo",
+      "dwarf": "Nano",
+      "halfling": "Halfling",
+      "gnome": "Gnomo",
+      "orc": "Orco",
+      "goliath": "Goliath"
+    },
+    "backgrounds": {
+      "acolyte": "Accolito",
+      "artisan": "Artigiano",
+      "charlatan": "Impostore",
+      "criminal": "Criminale",
+      "entertainer": "Intrattenitore",
+      "farmer": "Contadino",
+      "guard": "Guardia",
+      "guide": "Guida",
+      "hermit": "Eremita",
+      "merchant": "Mercante",
+      "noble": "Nobile",
+      "sage": "Saggio",
+      "sailor": "Marinaio",
+      "scribe": "Scrivano",
+      "soldier": "Soldato",
+      "wayfarer": "Viandante"
+    },
+    "weaponProps": {
+      "finesse": "Finezza",
+      "thrown": "Lancio",
+      "ranged": "A distanza",
+      "twoHanded": "A due mani",
+      "versatile": "Versatile",
+      "light": "Leggera",
+      "heavy": "Pesante",
+      "reach": "Allungo",
+      "loading": "Caricamento",
+      "ammunition": "Munizioni"
+    },
+    "masteries": {
+      "none": "—",
+      "cleave": "Falciata",
+      "graze": "Sfioramento",
+      "nick": "Colpo rapido",
+      "push": "Spinta",
+      "sap": "Stordimento",
+      "slow": "Rallentamento",
+      "topple": "Abbattimento",
+      "vex": "Provocazione"
+    },
+    "schools": {
+      "enchantment": "Ammaliamento",
+      "divination": "Divinazione",
+      "evocation": "Evocazione",
+      "illusion": "Illusione",
+      "conjuration": "Invocazione",
+      "necromancy": "Necromanzia",
+      "transmutation": "Trasmutazione",
+      "abjuration": "Abiurazione"
+    },
+    "dmgTypes": {
+      "bludgeoning": "Contundente",
+      "piercing": "Perforante",
+      "slashing": "Tagliente",
+      "fire": "Fuoco",
+      "cold": "Freddo",
+      "lightning": "Fulmine",
+      "thunder": "Tuono",
+      "acid": "Acido",
+      "poison": "Veleno",
+      "necrotic": "Necrotico",
+      "radiant": "Radiante",
+      "psychic": "Psichico",
+      "force": "Forza"
+    },
+    "stats": {
+      "AC": "Classe Armatura (CA)",
+      "INIT": "Iniziativa",
+      "SPD": "Velocità",
+      "HP": "PF Massimi",
+      "STR": "Forza (FOR)",
+      "DEX": "Destrezza (DES)",
+      "CON": "Costituzione (COS)",
+      "INT": "Intelligenza (INT)",
+      "WIS": "Saggezza (SAG)",
+      "CHA": "Carisma (CAR)",
+      "TS-STR": "TS Forza",
+      "TS-DEX": "TS Destrezza",
+      "TS-CON": "TS Costituzione",
+      "TS-INT": "TS Intelligenza",
+      "TS-WIS": "TS Saggezza",
+      "TS-CHA": "TS Carisma"
+    }
+  },
+  "pinned": {
+    "hp": "HP",
+    "inspiration": "Ispirazione",
+    "concentration": "Concentrazione",
+    "conditions": "Condizioni",
+    "exhaustion": "Affaticamento",
+    "deathSaves": "TS Morte",
+    "removePin": "Rimuovi pin",
+    "addPin": "Fissa in cima",
+    "inspirationOn": "Ispirato",
+    "inspirationOff": "No ispirazione",
+    "concentrationOn": "In concentrazione",
+    "concentrationOff": "No conc.",
+    "none": "Nessuna",
+    "exhaustionShort": "Aff.",
+    "noExhaustion": "Nessun aff.",
+    "exhaustionLevel": "Affaticamento liv."
+  },
+  "charSelect": {
+    "subtitle": "Scegli un personaggio o creane uno nuovo",
+    "empty": "Nessun personaggio salvato. Creane uno nuovo!",
+    "unnamed": "Senza nome",
+    "level": "Livello",
+    "confirmDelete": "Eliminare \"{{name}}\"? L'azione è irreversibile.",
+    "deleteTitle": "Elimina personaggio",
+    "createNew": "Crea nuovo personaggio"
+  },
+  "features": {
+    "sourceClass": "Classe",
+    "sourceSpecies": "Specie",
+    "sourceBackground": "Background",
+    "sourceCustom": "Personalizzato",
+    "formName": "Nome",
+    "formDesc": "Descrizione",
+    "namePlaceholder": "Es. Secondo vento, Attacco furtivo...",
+    "descPlaceholder": "Descrizione della feature...",
+    "empty": "Nessuna feature. Le feature vengono aggiunte automaticamente quando selezioni classe, specie e background.",
+    "addToActions": "Aggiungi alle azioni",
+    "removeFromActions": "Rimuovi dalle azioni"
   }
 }

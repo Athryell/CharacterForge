@@ -1,0 +1,80 @@
+{
+  "dragonborn": {
+    "name": "Dragonborn", "size": "Medium",
+    "traits": [
+      { "name": "Draconic Ancestry",    "desc": "Choose a dragon type (Black/Acid, Blue/Lightning, Brass/Fire, Bronze/Lightning, Copper/Acid, Gold/Fire, Green/Poison, Red/Fire, Silver/Cold, White/Cold). Affects Breath Weapon and Damage Resistance." },
+      { "name": "Breath Weapon",        "desc": "Replace one attack with a 15-ft Cone or 30-ft Line. Each creature makes a Dex save (DC 8 + Con mod + Prof Bonus) or takes 1d10 damage (your dragon type). Scales: 2d10 at lvl 5, 3d10 at lvl 11, 4d10 at lvl 17. Uses = Prof Bonus per Long Rest." },
+      { "name": "Damage Resistance",    "desc": "Resistance to the damage type of your Draconic Ancestry." },
+      { "name": "Darkvision",           "desc": "Darkvision 60 ft." },
+      { "name": "Draconic Flight (Level 5)", "desc": "Bonus Action: sprout spectral wings, gain Fly Speed equal to your Speed for 10 minutes. Once per Long Rest." }
+    ]
+  },
+  "dwarf": {
+    "name": "Dwarf", "size": "Medium",
+    "traits": [
+      { "name": "Darkvision",        "desc": "Darkvision 120 ft." },
+      { "name": "Dwarven Resilience","desc": "Resistance to Poison damage. Advantage on saves to avoid or end the Poisoned condition." },
+      { "name": "Dwarven Toughness", "desc": "HP maximum increases by 1, and increases by 1 again each time you gain a level." },
+      { "name": "Stonecunning",      "desc": "Bonus Action: gain Tremorsense 60 ft for 10 minutes (must be on or touching stone). Uses = Prof Bonus per Long Rest." }
+    ]
+  },
+  "elf": {
+    "name": "Elf", "size": "Medium",
+    "traits": [
+      { "name": "Darkvision",     "desc": "Darkvision 60 ft." },
+      { "name": "Elven Lineage",  "desc": "Choose Drow, High Elf, or Wood Elf. Drow: Darkvision 120 ft, Dancing Lights; lvl3 Faerie Fire; lvl5 Darkness. High Elf: Prestidigitation; lvl3 Detect Magic; lvl5 Misty Step. Wood Elf: Speed 35 ft, Druidcraft; lvl3 Longstrider; lvl5 Pass without Trace." },
+      { "name": "Fey Ancestry",   "desc": "Advantage on saves to avoid or end the Charmed condition." },
+      { "name": "Keen Senses",    "desc": "Proficiency in Insight, Perception, or Survival (choose one)." },
+      { "name": "Trance",         "desc": "You don't need sleep. You can finish a Long Rest in 4 hours of trancelike meditation." }
+    ]
+  },
+  "gnome": {
+    "name": "Gnome", "size": "Small",
+    "traits": [
+      { "name": "Darkvision",      "desc": "Darkvision 60 ft." },
+      { "name": "Gnomish Cunning", "desc": "Advantage on Intelligence, Wisdom, and Charisma saving throws." },
+      { "name": "Gnomish Lineage", "desc": "Choose Forest Gnome or Rock Gnome. Forest: Minor Illusion cantrip + Speak with Animals (Prof Bonus times per Long Rest). Rock: Mending + Prestidigitation cantrips + Tinker (create Tiny clockwork devices, 3 at a time, fall apart after 8 hours)." }
+    ]
+  },
+  "goliath": {
+    "name": "Goliath", "size": "Medium",
+    "traits": [
+      { "name": "Giant Ancestry",       "desc": "Choose one boon (Prof Bonus uses per Long Rest): Cloud's Jaunt (teleport 30 ft), Fire's Burn (+1d10 Fire on hit), Frost's Chill (+1d6 Cold, target speed -10 ft), Hill's Tumble (knock prone), Stone's Endurance (Reaction: 1d12+CON damage reduction), Storm's Thunder (Reaction: 1d8 Thunder damage to attacker)." },
+      { "name": "Large Form (Level 5)", "desc": "Bonus Action: become Large for 10 minutes (Advantage on STR checks, +10 ft Speed). Once per Long Rest." },
+      { "name": "Powerful Build",       "desc": "Advantage on ability checks to end the Grappled condition. Count as one size larger for carrying capacity." }
+    ]
+  },
+  "halfling": {
+    "name": "Halfling", "size": "Small",
+    "traits": [
+      { "name": "Brave",               "desc": "Advantage on saves to avoid or end the Frightened condition." },
+      { "name": "Halfling Nimbleness", "desc": "You can move through the space of any creature larger than you." },
+      { "name": "Luck",                "desc": "When you roll a 1 on a d20, you must reroll the die and use the new roll." },
+      { "name": "Naturally Stealthy",  "desc": "You can take the Hide action even when obscured only by a creature at least one size larger than you." }
+    ]
+  },
+  "human": {
+    "name": "Human", "size": "Medium or Small",
+    "traits": [
+      { "name": "Resourceful", "desc": "You gain Heroic Inspiration whenever you finish a Long Rest." },
+      { "name": "Skillful",    "desc": "You gain proficiency in one skill of your choice." },
+      { "name": "Versatile",   "desc": "You gain an Origin feat of your choice." }
+    ]
+  },
+  "orc": {
+    "name": "Orc", "size": "Medium",
+    "traits": [
+      { "name": "Adrenaline Rush",      "desc": "Bonus Action: take the Dash action and gain Temporary Hit Points equal to your Proficiency Bonus. Uses = Prof Bonus, regained on Short or Long Rest." },
+      { "name": "Darkvision",           "desc": "Darkvision 120 ft." },
+      { "name": "Relentless Endurance", "desc": "When reduced to 0 HP but not killed outright, drop to 1 HP instead. Once per Long Rest." }
+    ]
+  },
+  "tiefling": {
+    "name": "Tiefling", "size": "Medium or Small",
+    "traits": [
+      { "name": "Darkvision",            "desc": "Darkvision 60 ft." },
+      { "name": "Fiendish Legacy",       "desc": "Choose Abyssal, Chthonic, or Infernal. Abyssal: Poison Resistance, Poison Spray; lvl3 Ray of Sickness; lvl5 Hold Person. Chthonic: Necrotic Resistance, Chill Touch; lvl3 False Life; lvl5 Ray of Enfeeblement. Infernal: Fire Resistance, Fire Bolt; lvl3 Hellish Rebuke; lvl5 Darkness." },
+      { "name": "Otherworldly Presence", "desc": "You know the Thaumaturgy cantrip." }
+    ]
+  }
+}

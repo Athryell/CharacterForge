@@ -1,0 +1,28 @@
+{
+  "blinded":       { "name": "Accecato",       "desc": "Non può vedere. Fallisce automaticamente le prove che richiedono la vista. I tiri per colpire contro di esso hanno vantaggio; i suoi tiri per colpire hanno svantaggio." },
+  "charmed":       { "name": "Incantato",      "desc": "Non può attaccare chi lo ha incantato né prenderlo di mira con effetti dannosi. Chi lo incanta ha vantaggio alle prove di interazione sociale." },
+  "deafened":      { "name": "Assordato",      "desc": "Non può sentire. Fallisce automaticamente le prove che richiedono l'udito." },
+  "frightened":    { "name": "Spaventato",     "desc": "Svantaggio alle prove di caratteristica e ai tiri per colpire mentre la fonte della paura è visibile. Non può avvicinarsi volontariamente alla fonte." },
+  "grappled":      { "name": "Afferrato",      "desc": "Velocità ridotta a 0. Termina se chi lo ha afferrato è incapacitato o la creatura viene spostata oltre la sua portata." },
+  "incapacitated": { "name": "Incapacitato",   "desc": "Non può compiere azioni, azioni bonus o reazioni." },
+  "invisible":     { "name": "Invisibile",     "desc": "Non può essere visto senza magia. I tiri per colpire contro di esso hanno svantaggio; i suoi attacchi hanno vantaggio." },
+  "paralyzed":     { "name": "Paralizzato",    "desc": "Incapacitato, non può muoversi né parlare. Fallisce i TS di FOR e DES. I colpi in mischia entro 1,5 m sono automaticamente critici." },
+  "petrified":     { "name": "Pietrificato",   "desc": "Trasformato in pietra. Incapacitato, resistenza a tutti i danni, immune a veleno e malattie, non invecchia." },
+  "poisoned":      { "name": "Avvelenato",     "desc": "Svantaggio ai tiri per colpire e alle prove di caratteristica." },
+  "prone":         { "name": "Prono",          "desc": "Può solo strisciare. Svantaggio ai tiri per colpire. I colpi in mischia hanno vantaggio; quelli a distanza hanno svantaggio." },
+  "restrained":    { "name": "Immobilizzato",  "desc": "Velocità 0. Svantaggio ai tiri per colpire e ai TS di DES. I tiri per colpire contro di esso hanno vantaggio." },
+  "stunned":       { "name": "Stordito",       "desc": "Incapacitato, non può muoversi, parla solo balbettando. Fallisce i TS di FOR e DES. I tiri per colpire contro di esso hanno vantaggio." },
+  "unconscious":   { "name": "Privo di sensi", "desc": "Incapacitato, non può muoversi né parlare. Lascia cadere gli oggetti tenuti. Fallisce i TS di FOR e DES. I colpi in mischia entro 1,5 m sono automaticamente critici." },
+  "exhaustion":    {
+    "name": "Esaurimento",
+    "desc": "Ogni livello sottrae 2 ai tiri di d20 e riduce la velocità di 1,5 m. Liv. 5: velocità 0. Liv. 6: morte istantanea. Si riduce di 1 ad ogni riposo lungo.",
+    "levels": [
+      "Liv. 1: −2 a tutti i tiri d20 · Velocità −1,5 m",
+      "Liv. 2: −4 a tutti i tiri d20 · Velocità −3 m",
+      "Liv. 3: −6 a tutti i tiri d20 · Velocità −4,5 m",
+      "Liv. 4: −8 a tutti i tiri d20 · Velocità −6 m",
+      "Liv. 5: −10 a tutti i tiri d20 · Velocità 0",
+      "Liv. 6: Morte"
+    ]
+  }
+}

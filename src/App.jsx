@@ -5,7 +5,7 @@ import { loadCharsIndex, deleteChar, getActiveCharId, setActiveCharId, generateC
 import CharacterSelect from './components/CharacterSelect';
 import { createDefaultState } from './data/dnd5e';
 import {
-  ABILITIES, ABILITY_NAMES, SKILLS, ALIGNMENTS,
+  ABILITIES, SKILLS, ALIGNMENTS,
   SPELLCASTING_CLASS, getMod, fmtMod,
 } from './data/dnd5e';
 import dataManager from './data/dataManager';
@@ -27,19 +27,28 @@ import FeatureManager from './components/FeatureManager';
 import { CLASS_FEATURES, SPECIES_FEATURES, BACKGROUND_FEATURES, getAutoFeatures } from './data/features';
 import { loadLayout, saveLayout, getDefaultLayout, getWidgetsForTab, WIDGET_DEFS, loadTabs, saveTabs, DEFAULT_TABS } from './layout';
 import { useTheme, ACCENT_PRESETS } from './hooks/useTheme';
+import { useUnits, parseSpeedFt } from './hooks/useUnits';
 import './App.css';
 
 
 // ── Utilities ───────────────────────────────────────────────────
 function rollDice(notation) {
   const clean = notation.replace(/\s/g, '').replace(/\+-/g, '-').replace(/--/g, '+');
-  const m = clean.match(/(\d+)d(\d+)([+-]\d+)?/);
-  if (!m) return null;
+  const diceMatch = clean.match(/(\d+)d(\d+)/i);
+  if (!diceMatch) return null;
   let total = 0;
-  for (let i = 0; i < parseInt(m[1]); i++)
-    total += Math.floor(Math.random() * parseInt(m[2])) + 1;
-  if (m[3]) total += parseInt(m[3]);
-  return total;
+  const count = parseInt(diceMatch[1]);
+  const sides = parseInt(diceMatch[2]);
+  let firstRoll = null;
+  for (let i = 0; i < count; i++) {
+    const roll = Math.floor(Math.random() * sides) + 1;
+    if (i === 0) firstRoll = roll;
+    total += roll;
+  }
+  const afterDice = clean.slice(diceMatch.index + diceMatch[0].length);
+  for (const m of afterDice.matchAll(/([+-]\d+)/g))
+    total += parseInt(m[1]);
+  return { total, natural: count === 1 ? firstRoll : null, sides };
 }
 
 function Field({ label, children }) {
@@ -267,7 +276,9 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
   const [addOpenFor, setAddOpenFor] = useState(null);
   const [homebrewVersion, setHomebrewVersion] = useState(0);
   const [showSources, setShowSources] = useState(false);
+  const [speedInputVal, setSpeedInputVal] = useState(null);
   const { mode: themeMode, accentId, setThemeMode, setAccent } = useTheme();
+  const { weightUnit, speedUnit, setPref: setUnitPref, toDisplayWeight, toDisplaySpeed, fromDisplaySpeed } = useUnits();
   const fileInputRef = useRef();
   const toastTimer = useRef();
 
@@ -305,6 +316,19 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
     ABILITIES.forEach(attr => { result[attr] = (state.abilities[attr] || 10) + (equipBonuses[attr] || 0); });
     return result;
   }, [state.abilities, equipBonuses]);
+
+  const { currentWeightKg, maxWeightKg, coinWeightKg } = useMemo(() => {
+    const strScore = state.abilities?.STR || 10;
+    const inventoryW = (state.equipment || []).reduce((s, i) => s + (parseFloat(i.weight) || 0) * (i.qty || 1), 0);
+    const weaponW = (state.weapons || []).reduce((s, w) => s + (parseFloat(w.weight) || 0), 0);
+    const armorW = (state.armors || []).reduce((s, a) => s + (parseFloat(a.weight) || 0), 0);
+    const totalCoins = Object.values(state.currency || {}).reduce((s, v) => s + (parseInt(v) || 0), 0);
+    const coinW_raw = Math.floor(totalCoins / 50);
+    const coinW = weightUnit === 'lbs' ? coinW_raw * 2 : coinW_raw;
+    const maxW = weightUnit === 'lbs' ? strScore * 15 : strScore * 7;
+    return { currentWeightKg: inventoryW + weaponW + armorW + coinW, maxWeightKg: maxW, coinWeightKg: coinW };
+  }, [state.equipment, state.weapons, state.armors, state.currency, state.abilities, weightUnit]);
+
   function createTag() {}
 
   function handleTabChange(id) {
@@ -326,12 +350,15 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
   }
 
   function handleRoll(notation, name) {
-    const resolved = resolveNotations(notation, effectiveAbilities, state.charLevel);
+    const resolved = resolveNotations(notation, effectiveAbilities, state.charLevel, char.profBonus);
     const result = rollDice(resolved);
     if (result !== null) {
       const display = resolved !== notation ? `${notation} → ${resolved}` : notation;
-      showToast(`${name}: ${display} = ${result}`);
-      addLog('🎲', `${name}: ${display} = ${result}`);
+      let suffix = '';
+      if (result.natural === 20 && result.sides === 20) suffix = ` — ⭐ ${t('dice.natural20')}`;
+      else if (result.natural === 1 && result.sides === 20) suffix = ` — 💀 ${t('dice.natural1')}`;
+      showToast(`${name}: ${display} = ${result.total}${suffix}`);
+      addLog('🎲', `${name}: ${display} = ${result.total}${suffix}`);
     }
   }
   function handleLongRest() {
@@ -450,7 +477,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
                     update({ features: [...kept, ...getAutoFeatures('class', cls, CLASS_FEATURES)] });
                   }}>
                     <option value="">{t('identity.classPlaceholder')}</option>
-                    {dataManager.getClasses().map(c => <option key={c}>{c}</option>)}
+                    {dataManager.getClasses().map(c => <option key={c} value={c}>{t(`data.classes.${c}`, c)}</option>)}
                   </select>
                 </Field>
                 <Field label={t('identity.species')}>
@@ -465,7 +492,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
                     }
                   }}>
                     <option value="">{t('identity.speciesPlaceholder')}</option>
-                    {dataManager.getSpecies().map(r => <option key={r}>{r}</option>)}
+                    {dataManager.getSpecies().map(r => <option key={r.id} value={r.id}>{t(`data.species.${r.id}`, r.name)}</option>)}
                     <option value="__custom__">{t('identity.speciesCustom')}</option>
                   </select>
                   {state.charRace === '__custom__' && (
@@ -483,7 +510,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
                     }
                   }}>
                     <option value="">{t('identity.backgroundPlaceholder')}</option>
-                    {dataManager.getBackgrounds().map(b => <option key={b.name}>{b.name}</option>)}
+                    {dataManager.getBackgrounds().map(b => <option key={b.id || b.name} value={b.id || b.name}>{t(`data.backgrounds.${b.id || b.name}`, b.name)}</option>)}
                     <option value="__custom__">{t('identity.backgroundCustom')}</option>
                   </select>
                   {state.charBackground === '__custom__' && (
@@ -500,7 +527,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
                 <Field label={t('identity.profBonus')}><input value={`+${char.profBonus}`} readOnly /></Field>
                 <Field label={t('identity.alignment')}>
                   <select value={state.charAlignment} onChange={e => update({ charAlignment: e.target.value })}>
-                    {ALIGNMENTS.map(a => <option key={a}>{a}</option>)}
+                    {ALIGNMENTS.map(a => <option key={a} value={a}>{t(`data.alignments.${a}`, a)}</option>)}
                   </select>
                 </Field>
                 <Field label={t('identity.xp')}>
@@ -511,12 +538,12 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
               <div className="identity-info-grid">
                 {[
                   [t('identity.name'), state.charName || '—'],
-                  [t('identity.class'), state.charClass || '—'],
+                  [t('identity.class'), state.charClass ? t(`data.classes.${state.charClass}`, state.charClass) : '—'],
                   [t('identity.level'), state.charLevel],
                   [t('identity.profBonus'), `+${char.profBonus}`],
-                  [t('identity.species'), state.charRace === '__custom__' ? (state.charRaceCustom||'—') : (state.charRace||'—')],
-                  [t('identity.background'), state.charBackground === '__custom__' ? (state.charBackgroundCustom||'—') : (state.charBackground||'—')],
-                  [t('identity.alignment'), state.charAlignment || '—'],
+                  [t('identity.species'), state.charRace === '__custom__' ? (state.charRaceCustom||'—') : (state.charRace ? t(`data.species.${state.charRace}`, state.charRace) : '—')],
+                  [t('identity.background'), state.charBackground === '__custom__' ? (state.charBackgroundCustom||'—') : (state.charBackground ? t(`data.backgrounds.${state.charBackground}`, state.charBackground) : '—')],
+                  [t('identity.alignment'), state.charAlignment ? t(`data.alignments.${state.charAlignment}`, state.charAlignment) : '—'],
                   ...(state.charXP ? [[t('identity.experienceShort'), state.charXP]] : []),
                 ].map(([label, val]) => (
                   <div key={label} className="identity-info-item">
@@ -550,7 +577,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
                 effectiveScore={effectiveAbilities[attr]}
                 onAdjust={(a,d) => char.setAbility(a, (state.abilities[a]||10)+d)}
                 onInput={char.setAbility} editing={editingAbilities} onHover={setHoveredAttr}
-                onRoll={!editingAbilities ? (a, mod) => handleRoll(`1d20${mod >= 0 ? '+' : ''}${mod}`, ABILITY_NAMES[a]) : undefined}
+                onRoll={!editingAbilities ? (a, mod) => handleRoll(`1d20${mod >= 0 ? '+' : ''}${mod}`, t(`data.abilities.${a}`)) : undefined}
                 bonus={equipBonuses[attr] || 0}
                 bonusSources={equipBonusesDetailed[attr] || []} />
             ))}
@@ -567,10 +594,12 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
               const effMod = getMod(effectiveAbilities[attr]) + (prof ? char.profBonus : 0) + (equipBonuses[`TS-${attr}`] || 0);
               const tsBonus = equipBonuses[`TS-${attr}`] || 0;
               return (
-                <div key={attr} className={`check-item ${hoveredAttr === attr ? 'attr-highlight' : ''}`} onClick={() => char.toggleSaveProficiency(attr)}>
-                  <div className={`check-dot ${prof ? 'proficient' : ''}`} />
+                <div key={attr} className={`check-item ${hoveredAttr === attr ? 'attr-highlight' : ''}`}
+                  onClick={() => handleRoll(`1d20${effMod >= 0 ? '+' : ''}${effMod}`, t(`data.abilities.${attr}`))}>
+                  <div className={`check-dot ${prof ? 'proficient' : ''}`}
+                    onClick={e => { e.stopPropagation(); char.toggleSaveProficiency(attr); }} />
                   <span className="check-val">{fmtMod(effMod)}</span>
-                  <span className="check-name">{ABILITY_NAMES[attr]}</span>
+                  <span className="check-name">{t(`data.abilities.${attr}`)}</span>
                   {tsBonus ? <span className="equip-bonus-badge" style={{ marginLeft:'auto' }}
                     title={(equipBonusesDetailed[`TS-${attr}`]||[]).map(s=>`${s.name}: ${s.value>=0?'+':''}${s.value}`).join(', ')}>🎒</span> : null}
                 </div>
@@ -585,15 +614,17 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
           <div className="card-title">🔧 {t('widgets.skills')}</div>
           <div className="check-list">
             {SKILLS.map(sk => {
-              const prof = state.skillProficiencies.includes(sk.name);
-              const exp = state.skillExpertise.includes(sk.name);
+              const prof = state.skillProficiencies.includes(sk.id);
+              const exp = state.skillExpertise.includes(sk.id);
               const effSkMod = getMod(effectiveAbilities[sk.attr]) + (exp ? char.profBonus*2 : prof ? char.profBonus : 0);
               return (
-                <div key={sk.name} className={`check-item ${hoveredAttr === sk.attr ? 'attr-highlight' : ''}`} onClick={() => char.toggleSkillProficiency(sk.name)}>
-                  <div className={`check-dot ${exp ? 'expertise' : prof ? 'proficient' : ''}`} />
+                <div key={sk.id} className={`check-item ${hoveredAttr === sk.attr ? 'attr-highlight' : ''}`}
+                  onClick={() => handleRoll(`1d20${effSkMod >= 0 ? '+' : ''}${effSkMod}`, t(`data.skills.${sk.id}`))}>
+                  <div className={`check-dot ${exp ? 'expertise' : prof ? 'proficient' : ''}`}
+                    onClick={e => { e.stopPropagation(); char.toggleSkillProficiency(sk.id); }} />
                   <span className="check-val">{fmtMod(effSkMod)}</span>
-                  <span className="check-name">{sk.name}</span>
-                  <span className="check-attr">{sk.attr}</span>
+                  <span className="check-name">{t(`data.skills.${sk.id}`)}</span>
+                  <span className="check-attr">{t(`data.abilityAbbr.${sk.attr}`)}</span>
                 </div>
               );
             })}
@@ -686,33 +717,43 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
             <div className="stat-pill">
               <div className="stat-pill-label">{t('combat.ac')}</div>
               <input className="stat-pill-input" type="number"
-                value={state.ac + (equipBonuses.CA || 0)}
-                onChange={e => update({ ac: (parseInt(e.target.value)||10) - (equipBonuses.CA||0) })} />
-              {equipBonuses.CA ? (
+                value={state.ac + (equipBonuses.AC || 0)}
+                onChange={e => update({ ac: (parseInt(e.target.value)||10) - (equipBonuses.AC||0) })} />
+              {equipBonuses.AC ? (
                 <span className="equip-bonus-badge"
-                  title={(equipBonusesDetailed.CA||[]).map(s=>`${s.name}: ${s.value>=0?'+':''}${s.value}`).join(', ')}>
+                  title={(equipBonusesDetailed.AC||[]).map(s=>`${s.name}: ${s.value>=0?'+':''}${s.value}`).join(', ')}>
                   🎒
                 </span>
               ) : null}
             </div>
             <div className="stat-pill clickable-stat"
-              onClick={() => { const im = getMod(effectiveAbilities.DES) + (equipBonuses.INI || 0); handleRoll(`1d20${im >= 0 ? '+' : ''}${im}`, 'Iniziativa'); }}
-              title={`Tira iniziativa: 1d20${fmtMod(getMod(effectiveAbilities.DES) + (equipBonuses.INI || 0))}`}>
+              onClick={() => { const im = getMod(effectiveAbilities.DEX) + (equipBonuses.INIT || 0); handleRoll(`1d20${im >= 0 ? '+' : ''}${im}`, 'Iniziativa'); }}
+              title={`Tira iniziativa: 1d20${fmtMod(getMod(effectiveAbilities.DEX) + (equipBonuses.INIT || 0))}`}>
               <div className="stat-pill-label">{t('combat.initiative')}</div>
-              <div className="stat-pill-val">{fmtMod(getMod(effectiveAbilities.DES) + (equipBonuses.INI || 0))}</div>
-              {equipBonuses.INI ? (
+              <div className="stat-pill-val">{fmtMod(getMod(effectiveAbilities.DEX) + (equipBonuses.INIT || 0))}</div>
+              {equipBonuses.INIT ? (
                 <span className="equip-bonus-badge"
-                  title={(equipBonusesDetailed.INI||[]).map(s=>`${s.name}: ${s.value>=0?'+':''}${s.value}`).join(', ')}>
+                  title={(equipBonusesDetailed.INIT||[]).map(s=>`${s.name}: ${s.value>=0?'+':''}${s.value}`).join(', ')}>
                   🎒
                 </span>
               ) : null}
             </div>
             <div className="stat-pill">
               <div className="stat-pill-label">{t('combat.speed')}</div>
-              <input className="stat-pill-input" type="text" value={state.speed} onChange={e => update({ speed:e.target.value })} />
-              {equipBonuses.VEL ? (
+              <div style={{ display:'flex', alignItems:'center', gap:2 }}>
+                <input className="stat-pill-input" type="text" inputMode="decimal"
+                  value={speedInputVal !== null ? speedInputVal : String(toDisplaySpeed(parseSpeedFt(state.speed)))}
+                  onFocus={() => setSpeedInputVal(String(toDisplaySpeed(parseSpeedFt(state.speed))))}
+                  onChange={e => setSpeedInputVal(e.target.value)}
+                  onBlur={() => { update({ speed: String(fromDisplaySpeed(speedInputVal ?? '0')) }); setSpeedInputVal(null); }}
+                  onKeyDown={e => { if (e.key === 'Enter') { update({ speed: String(fromDisplaySpeed(speedInputVal ?? '0')) }); setSpeedInputVal(null); e.target.blur(); } }} />
+                <span style={{ fontSize:10, color:'var(--c-muted)', whiteSpace:'nowrap' }}>
+                  {speedUnit === 'sq' ? '□' : speedUnit}
+                </span>
+              </div>
+              {equipBonuses.SPD ? (
                 <span className="equip-bonus-badge"
-                  title={(equipBonusesDetailed.VEL||[]).map(s=>`${s.name}: ${s.value>=0?'+':''}${s.value}`).join(', ')}>
+                  title={(equipBonusesDetailed.SPD||[]).map(s=>`${s.name}: ${s.value>=0?'+':''}${s.value}`).join(', ')}>
                   🎒
                 </span>
               ) : null}
@@ -723,24 +764,12 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
 
       case 'inspiration': return (
         <div className="card">
-          <div className="card-title" style={{ marginBottom:12 }}>⭐ / 🎯 Stato</div>
-          <div style={{ display:'flex', gap:16, flexWrap:'wrap' }}>
-            <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-              <button className={`inspiration-btn ${state.inspiration ? 'active' : ''}`} onClick={() => update({ inspiration:!state.inspiration })}>⭐</button>
-              <span className="toggle-label" style={{ color: state.inspiration ? '#856404' : 'var(--c-hint)' }}>
-                {state.inspiration ? t('combat.inspiration') : t('combat.noInspiration')}
-              </span>
-            </div>
-            <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-              <button className={`inspiration-btn ${state.concentrating ? 'active' : ''}`}
-                style={state.concentrating ? { borderColor:'#185FA5', background:'#E6F1FB', boxShadow:'0 0 12px rgba(24,95,165,.35)' } : {}}
-                onClick={() => update({ concentrating:!state.concentrating, concentratingSpell: state.concentrating ? null : state.concentratingSpell })}>🎯</button>
-              <span className="toggle-label" style={{ color: state.concentrating ? '#185FA5' : 'var(--c-hint)' }}>
-                {state.concentrating
-                  ? (state.concentratingSpell ? `${t('combat.concentrating')} (${state.concentratingSpell})` : t('combat.concentrating'))
-                  : t('combat.noConcentration')}
-              </span>
-            </div>
+          <div className="card-title" style={{ marginBottom:12 }}>⭐ {t('widgets.inspiration')}</div>
+          <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+            <button className={`inspiration-btn ${state.inspiration ? 'active' : ''}`} onClick={() => update({ inspiration:!state.inspiration })}>⭐</button>
+            <span className="toggle-label" style={{ color: state.inspiration ? '#856404' : 'var(--c-hint)' }}>
+              {state.inspiration ? t('combat.inspiration') : t('combat.noInspiration')}
+            </span>
           </div>
         </div>
       );
@@ -864,7 +893,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
             onUpdate={weapons => update({ weapons })} onRoll={handleRoll}
             proficiency={state.weaponProficiency||''} onUpdateProficiency={v => update({ weaponProficiency: v })}
             actionNames={actionNames} addOpen={addOpenFor === 'weapons'} onAddClose={() => setAddOpenFor(null)}
-            allTags={allTags}
+            allTags={allTags} weightUnit={weightUnit}
             onUpdateTags={(id, tags) => {
               const weapon = (state.weapons||[]).find(w => w.id===id);
               const upd = { weapons: (state.weapons||[]).map(w => w.id===id ? {...w,tags} : w) };
@@ -877,26 +906,49 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
         </div>
       );
 
-      case 'armor': return (
-        <div className="card">
-          <div className="card-title">🛡 {t('widgets.armor')}</div>
-          <ArmorManager
-            equippedArmor={state.equippedArmor||null}
-            hasShield={state.hasShield||false}
-            desMod={char.abilityMod('DES')}
-            proficiency={state.armorProficiency||''} onUpdateProficiency={v => update({ armorProficiency: v })}
-            onEquip={armor => {
-              const base = calcArmorAC(armor, char.abilityMod('DES'));
-              update({ equippedArmor: armor, ac: base + (state.hasShield ? 2 : 0) });
-            }}
-            onToggleShield={() => {
-              const shield = !state.hasShield;
-              const base = calcArmorAC(state.equippedArmor||null, char.abilityMod('DES'));
-              update({ hasShield: shield, ac: base + (shield ? 2 : 0) });
-            }}
-          />
-        </div>
-      );
+      case 'armor': {
+        // Backward compat: migrate old equippedArmor/hasShield to armors list
+        let armorList = state.armors || [];
+        if (armorList.length === 0 && (state.equippedArmor || state.hasShield)) {
+          armorList = [];
+          if (state.equippedArmor) armorList.push({
+            id: state.equippedArmor.id || 'migrated_armor',
+            name: state.equippedArmor.name, type: 'armor',
+            armorType: state.equippedArmor.type || 'medium',
+            acValue: calcArmorAC(state.equippedArmor, char.abilityMod('DES')),
+            isProficient: true, equipped: true, desc: '', weight: '', tags: [],
+          });
+          if (state.hasShield) armorList.push({
+            id: 'migrated_shield', name: 'Scudo', type: 'shield',
+            acValue: 2, isProficient: true, equipped: true, desc: '', weight: '', tags: [],
+          });
+        }
+        function onArmorUpdate(next) {
+          const ea = next.find(a => a.type === 'armor' && a.equipped);
+          const shieldBonus = next.filter(a => a.type === 'shield' && a.equipped).reduce((s, sh) => s + (sh.acValue || 2), 0);
+          const armorAC = ea ? ea.acValue : (10 + char.abilityMod('DES'));
+          update({ armors: next, ac: armorAC + shieldBonus });
+        }
+        return (
+          <div className="card">
+            <div className="card-title" style={{ justifyContent:'space-between' }}>
+              <span>🛡 {t('widgets.armor')}</span>
+              <button className={`icon-btn ${addOpenFor === 'armor' ? 'active' : ''}`}
+                onClick={() => setAddOpenFor(v => v === 'armor' ? null : 'armor')}>+</button>
+            </div>
+            <ArmorManager
+              armors={armorList}
+              desMod={char.abilityMod('DES')}
+              onUpdate={onArmorUpdate}
+              proficiency={state.armorProficiency||''} onUpdateProficiency={v => update({ armorProficiency: v })}
+              allTags={allTags} weightUnit={weightUnit}
+              onUpdateTags={(id, tags) => update({ armors: armorList.map(a => a.id===id ? {...a,tags} : a) })}
+              onCreateTag={createTag}
+              addOpen={addOpenFor === 'armor'} onAddClose={() => setAddOpenFor(null)}
+            />
+          </div>
+        );
+      }
 
       case 'spellStats': return (
         <div className="card">
@@ -908,6 +960,16 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
               <Field label={t('spells.attackBonus')}><input value={char.spellAttackBonus??'—'} readOnly /></Field>
             </div>
           ) : <p className="hint-text">{t('spells.noSpellcaster')}</p>}
+          <div style={{ display:'flex', alignItems:'center', gap:10, marginTop:10, paddingTop:8, borderTop:'0.5px solid var(--c-border)' }}>
+            <button className={`inspiration-btn ${state.concentrating ? 'active' : ''}`}
+              style={state.concentrating ? { borderColor:'#185FA5', background:'#E6F1FB', boxShadow:'0 0 12px rgba(24,95,165,.35)' } : {}}
+              onClick={() => update({ concentrating:!state.concentrating, concentratingSpell: state.concentrating ? null : state.concentratingSpell })}>🎯</button>
+            <span className="toggle-label" style={{ color: state.concentrating ? '#185FA5' : 'var(--c-hint)' }}>
+              {state.concentrating
+                ? (state.concentratingSpell ? `${t('combat.concentrating')} (${state.concentratingSpell})` : t('combat.concentrating'))
+                : t('combat.noConcentration')}
+            </span>
+          </div>
         </div>
       );
 
@@ -1007,7 +1069,12 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
             onCreateTag={createTag}
             actionNames={actionNames}
             onAddAction={action => { if (!actionNames.has(action.name)) update({ actions: [...(state.actions||[]), action] }); }}
-            onRemoveAction={name => update({ actions: (state.actions||[]).filter(a => a.name !== name) })} />
+            onRemoveAction={name => update({ actions: (state.actions||[]).filter(a => a.name !== name) })}
+            currentWeightKg={currentWeightKg}
+            maxWeightKg={maxWeightKg}
+            coinWeightKg={coinWeightKg}
+            weightUnit={weightUnit}
+            toDisplayWeight={toDisplayWeight} />
         </div>
       );
 
@@ -1094,7 +1161,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
   }
 
   return (
-    <CharContext.Provider value={{ abilities: effectiveAbilities, charLevel: state.charLevel }}>
+    <CharContext.Provider value={{ abilities: effectiveAbilities, charLevel: state.charLevel, profBonus: char.profBonus }}>
     <div className="sheet">
       <Toast message={toast} />
       {showCreator && <CharacterCreator onComplete={handleCreatorComplete} onCancel={() => setShowCreator(false)} />}
@@ -1115,10 +1182,22 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
 
       {/* Top bar */}
       <div className="top-bar">
-        <span className="top-bar-brand">D&amp;D 5e 2024</span>
+        <span className="top-bar-brand">D&amp;D 5.5e 2024</span>
         <div style={{ flex:1 }} />
         {onBackToSelect && (
           <button className="icon-btn" onClick={onBackToSelect} title="Tutti i personaggi">👥</button>
+        )}
+        {editMode && (
+          <>
+            <button className="io-btn" style={{ fontSize: 12, padding: '4px 10px' }}
+              onClick={() => { const d = getDefaultLayout(); setLayout(d); saveLayout(d); setTabs(DEFAULT_TABS); saveTabs(DEFAULT_TABS); }}>
+              {t('nav.reset')}
+            </button>
+            <button className="io-btn primary" style={{ fontSize: 12, padding: '4px 10px' }}
+              onClick={() => setEditMode(false)}>
+              {t('nav.layoutDone')}
+            </button>
+          </>
         )}
         <button className="hamburger-btn" onClick={() => setShowMenu(v => !v)} title="Menu" aria-label="Menu">
           ☰
@@ -1175,6 +1254,24 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
                 {[['it','🇮🇹 IT'],['en','🇬🇧 EN']].map(([lang, label]) => (
                   <button key={lang} className={`hmenu-theme-btn ${i18n.language === lang ? 'active' : ''}`}
                     onClick={() => { i18n.changeLanguage(lang); setShowMenu(false); }}>{label}</button>
+                ))}
+              </div>
+            </div>
+            <div className="hmenu-divider" />
+            <div className="hmenu-section">
+              <div className="hmenu-label">{t('menu.units')}</div>
+              <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 4 }}>
+                <span style={{ fontSize: 11, color: 'var(--c-muted)', minWidth: 52 }}>{t('menu.weightUnit')}</span>
+                {[['kg','kg'],['lbs','lbs']].map(([val, label]) => (
+                  <button key={val} className={`hmenu-theme-btn ${weightUnit === val ? 'active' : ''}`}
+                    onClick={() => setUnitPref('weightUnit', val)}>{label}</button>
+                ))}
+              </div>
+              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                <span style={{ fontSize: 11, color: 'var(--c-muted)', minWidth: 52 }}>{t('menu.speedUnit')}</span>
+                {[['ft','ft'],['m','m'],['sq','□']].map(([val, label]) => (
+                  <button key={val} className={`hmenu-theme-btn ${speedUnit === val ? 'active' : ''}`}
+                    onClick={() => setUnitPref('speedUnit', val)}>{label}</button>
                 ))}
               </div>
             </div>

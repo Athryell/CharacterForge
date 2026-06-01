@@ -40,6 +40,7 @@ function SpellEditForm({ spell, srd, onSave, onCancel, onDelete, added, onToggle
     school: spell.school || '',
     concentration: spell.concentration || false,
     ritual: spell.ritual || false,
+    alwaysPrepared: spell.alwaysPrepared || false,
     actionType: spell.actionType || srd.actionType || detectActionType(spell.desc),
     duration: spell.duration || srd.duration || '',
     range: spell.range || srd.range || '',
@@ -64,7 +65,7 @@ function SpellEditForm({ spell, srd, onSave, onCancel, onDelete, added, onToggle
           <label>{t('spells.customSchool')}</label>
           <select value={form.school} onChange={e => patch({ school: e.target.value })}>
             <option value="">—</option>
-            {SCHOOLS.map(s => <option key={s}>{s}</option>)}
+            {SCHOOLS.map(s => <option key={s} value={s}>{t(`data.schools.${s}`, s)}</option>)}
           </select>
         </div>
       </div>
@@ -84,7 +85,7 @@ function SpellEditForm({ spell, srd, onSave, onCancel, onDelete, added, onToggle
           <input value={form.range} onChange={e => patch({ range: e.target.value })} placeholder="Es. 18m, Sé stessi" />
         </div>
       </div>
-      <div style={{ display: 'flex', gap: 16, marginTop: 8, alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: 16, marginTop: 8, alignItems: 'center', flexWrap: 'wrap' }}>
         <label className="toggle-box">
           <input type="checkbox" checked={form.concentration} onChange={e => patch({ concentration: e.target.checked })} />
           <span className="toggle-label">{t('spells.concentration')}</span>
@@ -92,6 +93,10 @@ function SpellEditForm({ spell, srd, onSave, onCancel, onDelete, added, onToggle
         <label className="toggle-box">
           <input type="checkbox" checked={form.ritual} onChange={e => patch({ ritual: e.target.checked })} />
           <span className="toggle-label">{t('spells.ritual')}</span>
+        </label>
+        <label className="toggle-box">
+          <input type="checkbox" checked={form.alwaysPrepared} onChange={e => patch({ alwaysPrepared: e.target.checked })} />
+          <span className="toggle-label">{t('spells.alwaysPrepared', 'Sempre preparata')}</span>
         </label>
       </div>
       <div className="field" style={{ marginTop: 8 }}>
@@ -202,7 +207,7 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
   const filteredKnown = useMemo(() => {
     let result = spells;
     if (spellFilter === '0') result = result.filter(s => s.level === 0);
-    else if (spellFilter === 'prepared') result = result.filter(s => s.prepared);
+    else if (spellFilter === 'prepared') result = result.filter(s => s.prepared || s.alwaysPrepared);
     else if (spellFilter !== 'all') { const lvl = parseInt(spellFilter); result = result.filter(s => s.level === lvl); }
     if (spellTagFilter) result = result.filter(s => (s.tags || []).includes(spellTagFilter));
     return result;
@@ -224,7 +229,7 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
                   {lvl === 0 ? t('spells.filterCantrips') : LEVEL_LABELS[lvl]}
                 </button>
               ))}
-              {spells.some(s => s.prepared) && (
+              {spells.some(s => s.prepared || s.alwaysPrepared) && (
                 <button className={`filter-chip ${spellFilter === 'prepared' ? 'active' : ''}`} onClick={() => setSpellFilter('prepared')}>{t('spells.filterPrepared')}</button>
               )}
             </div>
@@ -274,19 +279,22 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
                   const isEditing = editingSpellName === spell.name;
                   const isExpanded = expanded === spell.name;
                   const added = actionNames?.has(spell.name);
+                  const isEffectivePrepared = spell.prepared || spell.alwaysPrepared || isCantrip;
 
                   return (
                     <div key={spell.name}
-                      className={`spell-item ${spell.prepared || isCantrip ? 'prepared' : ''} ${isExpanded || isEditing ? 'expanded' : ''} ${isCantrip ? 'cantrip' : ''}`}
+                      className={`spell-item ${isEffectivePrepared ? 'prepared' : ''} ${isExpanded || isEditing ? 'expanded' : ''} ${isCantrip ? 'cantrip' : ''}`}
                       onClick={() => handleSpellClick(spell.name)}
                     >
                       <div
-                        className={`spell-prepared-dot ${(spell.prepared || isCantrip) ? 'on' : ''} ${isCantrip ? 'cantrip-dot' : ''}`}
-                        onClick={e => { e.stopPropagation(); if (!isCantrip) togglePrepared(spell.name); }}
+                        className={`spell-prepared-dot ${isEffectivePrepared ? 'on' : ''} ${isCantrip ? 'cantrip-dot' : ''} ${spell.alwaysPrepared ? 'always-prepared-dot' : ''}`}
+                        title={spell.alwaysPrepared ? t('spells.alwaysPrepared', 'Sempre preparata') : undefined}
+                        onClick={e => { e.stopPropagation(); if (!isCantrip && !spell.alwaysPrepared) togglePrepared(spell.name); }}
                       />
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
                           <div className="spell-name">{spell.name}</div>
+                          {added && <span className="action-added-badge" title={t('common.inAction', 'In azioni')}>⚡</span>}
                           {(spell.tags || []).map(tag => <TagPill key={tag} tag={tag} allTags={allTags} small />)}
                         </div>
                         {!isExpanded && !isEditing && (range || duration) && (
@@ -323,23 +331,11 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
                             )}
                             {spell.desc && (
                               <div className="spell-desc">
-                                <KeywordText text={spell.desc} onRoll={onRoll} label={spell.name} />
+                                <KeywordText text={spell.desc} onRoll={onRoll} label={spell.name}
+                                  counters={spell.counters}
+                                  onCounterChange={(idx, vals) => onUpdate(spells.map(s2 => s2.name === spell.name ? { ...s2, counters: { ...(s2.counters || {}), [idx]: vals } } : s2))} />
                               </div>
                             )}
-                            <div style={{ marginTop: 6 }} onClick={e => e.stopPropagation()}>
-                              {editingTagsFor === spell.name ? (
-                                <>
-                                  <TagSelector selected={spell.tags || []} allTags={allTags}
-                                    onChange={tags => onUpdateTags && onUpdateTags(spell.name, tags)}
-                                    onCreateTag={onCreateTag} />
-                                  <button className="tag-edit-btn" style={{ marginTop: 4 }} onClick={() => setEditingTagsFor(null)}>{t('spells.tagDone')}</button>
-                                </>
-                              ) : (
-                                <button className="tag-edit-btn" onClick={() => setEditingTagsFor(spell.name)}>
-                                  {(spell.tags || []).length === 0 ? t('spells.addTagBtn') : t('spells.editTagBtn')}
-                                </button>
-                              )}
-                            </div>
                             <div className="item-edit-actions" onClick={e => e.stopPropagation()}>
                               <button className="io-btn" onClick={() => { setEditingSpellName(spell.name); setExpanded(null); }}>{t('common.edit')}</button>
                             </div>
@@ -348,7 +344,7 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
                       </div>
 
                       <div className="spell-action-badge" style={{ background: ab.bg, color: ab.color }}>{ab.label}</div>
-                      <div className="spell-school">{spell.school}</div>
+                      {spell.school && <div className="spell-school">{t(`data.schools.${spell.school}`, spell.school)}</div>}
                       <div className="spell-level-badge">{isCantrip ? t('spells.filterCantrips') : t('spells.levelLabel', { level: spell.level })}</div>
                       {spell.concentration && <div className="spell-conc" title={t('spells.concentration')}>C</div>}
                       {spell.ritual && <div className="spell-ritual" title={t('spells.ritual')}>R</div>}
@@ -399,11 +395,11 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
               </select>
               <select className="spell-filter-select" value={filterSchool} onChange={e => setFilterSchool(e.target.value)}>
                 <option value="">{t('spells.filterAllSchools')}</option>
-                {SCHOOLS.map(s => <option key={s}>{s}</option>)}
+                {SCHOOLS.map(s => <option key={s} value={s}>{t(`data.schools.${s}`, s)}</option>)}
               </select>
               <select className="spell-filter-select" value={filterClass} onChange={e => setFilterClass(e.target.value)}>
                 <option value="">{t('spells.filterAllClasses')}</option>
-                {SPELL_CLASSES.map(c => <option key={c}>{c}</option>)}
+                {SPELL_CLASSES.map(c => <option key={c} value={c}>{t(`data.classes.${c}`, c)}</option>)}
               </select>
             </div>
             <div className="hint-text" style={{ marginTop: 4 }}>
@@ -424,11 +420,11 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
                     <div className="spell-browser-name">{spell.name}</div>
                     <div className="spell-browser-tags">
                       <span className="spell-level-badge">{spell.level === 0 ? t('spells.filterCantrips') : t('spells.levelLabel', { level: spell.level })}</span>
-                      <span className="spell-school-badge">{spell.school}</span>
+                      {spell.school && <span className="spell-school-badge">{t(`data.schools.${spell.school}`, spell.school)}</span>}
                       {spell.c && <span className="spell-conc" title={t('spells.concentration')}>C</span>}
                       {spell.r && <span className="spell-ritual" title={t('spells.ritual')}>R</span>}
                     </div>
-                    <div className="spell-browser-classes">{spell.classes.join(', ')}</div>
+                    {spell.classes?.length > 0 && <div className="spell-browser-classes">{spell.classes.map(cl => t(`data.classes.${cl}`, cl)).join(', ')}</div>}
                     {isExp && <div className="spell-browser-desc"><KeywordText text={spell.desc} onRoll={onRoll} label={spell.name} /></div>}
                   </div>
                   <button className={`spell-add-btn ${already ? 'known' : ''}`}
@@ -460,7 +456,7 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
               <label>{t('spells.customSchool')}</label>
               <select value={customForm.school} onChange={e => setCustomForm(f => ({ ...f, school: e.target.value }))}>
                 <option value="">—</option>
-                {SCHOOLS.map(s => <option key={s}>{s}</option>)}
+                {SCHOOLS.map(s => <option key={s} value={s}>{t(`data.schools.${s}`, s)}</option>)}
               </select>
             </div>
           </div>

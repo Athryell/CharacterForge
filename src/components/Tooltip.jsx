@@ -1,60 +1,15 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCharContext } from './CharContext';
 import { BONUS_STAT_OPTIONS } from '../data/bonuses';
 
-// Italian keyword → Italian fallback description (also used to build the regex)
-export const KEYWORD_GLOSSARY = {
-  // Condizioni
-  'accecato':      'Non può vedere. Svantaggio ai tiri per colpire, vantaggio per chi lo attacca.',
-  'affascinato':   'Non può attaccare la fonte dell\'incantesimo. La fonte ha vantaggio nelle prove sociali.',
-  'assordato':     'Non può sentire. Fallisce prove che richiedono l\'udito.',
-  'spaventato':    'Svantaggio a prove e tiri per colpire mentre vede la fonte della paura.',
-  'afferrato':     'Velocità ridotta a 0. Termina se il grappler è incapacitato.',
-  'incapacitato':  'Non può compiere azioni né reazioni.',
-  'invisibile':    'Non può essere visto senza magia. Vantaggio ai tiri per colpire, svantaggio per chi lo attacca.',
-  'paralizzato':   'Incapacitato. Fallisce TS FOR e DES. I colpi in mischia entro 1,5m sono critici.',
-  'pietrificato':  'Trasformato in pietra. Incapacitato, resistenza a tutti i danni.',
-  'avvelenato':    'Svantaggio ai tiri per colpire e alle prove di caratteristica.',
-  'a terra':       'Può muoversi solo strisciando. Svantaggio ai tiri per colpire. Colpi in mischia: vantaggio, distanza: svantaggio.',
-  'trattenuto':    'Velocità 0. Svantaggio ai tiri per colpire e TS DES. Chi attacca ha vantaggio.',
-  'stordito':      'Incapacitato, non può muoversi. Fallisce TS FOR e DES. Chi attacca ha vantaggio.',
-  'privo di sensi':'Incapacitato. Fallisce TS FOR e DES. I colpi in mischia entro 1,5m sono critici.',
-  'nascosto':      'Le creature non sanno dove sei. Tiri attacco contro di te falliscono automaticamente se non ti individuano.',
-  // Meccaniche
-  'vantaggio':     'Lancia 2d20 e usa il risultato più alto.',
-  'svantaggio':    'Lancia 2d20 e usa il risultato più basso.',
-  'concentrazione':'Se subisci danni devi superare un TS COS (CD 10 o metà del danno). Fallendo perdi l\'incantesimo.',
-  'rituale':       'Puoi lanciare questo incantesimo come rituale (10 minuti in più, senza spendere uno slot).',
-  'critico':       'Con un 20 naturale o un attacco critico, lanci i dadi del danno due volte.',
-  'copertura':     'Copertura metà: +2 CA e TS DES. Copertura 3/4: +5 CA e TS DES. Copertura totale: non può essere bersaglio.',
-  'reazione':      'Azione speciale usabile una volta per round, anche al di fuori del tuo turno.',
-  'azione bonus':  'Azione aggiuntiva ottenuta da feature di classe o incantesimi specifici. Una per turno.',
-  // Proprietà armi
-  'finezza':       'Puoi usare FOR o DES (il più alto) per attacco e danno.',
-  'leggera':       'Puoi usare questa arma nel combattimento a due armi.',
-  'pesante':       'Le creature di taglia Piccola hanno svantaggio ai tiri per colpire.',
-  'versatile':     'Puoi impugnarla con due mani per usare il dado danni indicato tra parentesi.',
-  'allungo':       'Aggiunge 1,5m alla tua portata in mischia.',
-  'lancio':        'Puoi lanciare questa arma a distanza.',
-  'munizioni':     'Richiede munizioni (frecce, dardi, pallini). Recuperi metà delle munizioni dopo il combattimento.',
-  'caricamento':   'Puoi effettuare un solo attacco con questa arma per azione/azione bonus/reazione, indipendentemente dagli attacchi extra.',
-  'a due mani':    'Richiede due mani per l\'uso.',
-  // Altro
-  'attacco di opportunità': 'Reazione: quando una creatura visibile esce dalla tua portata senza disimpegnarsi.',
-  'disimpegno':    'Il tuo movimento non provoca attacchi di opportunità per il resto del turno.',
-  'scatto':        'Ottieni movimento extra pari alla tua velocità per il turno corrente.',
-  'schivata':      'Fino al tuo prossimo turno, i tiri per colpire contro di te hanno svantaggio (se vedi l\'aggressore).',
-};
-
-// Regex that matches keywords (case insensitive, longest match first)
-const KEYWORD_REGEX = new RegExp(
-  '(' + Object.keys(KEYWORD_GLOSSARY)
-    .sort((a, b) => b.length - a.length)
-    .map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
-    .join('|') + ')',
-  'gi'
-);
+// Hook: returns the keyword glossary for the active language.
+// Keys and values are both in the active language (EN: "blinded"→EN desc, IT: "accecato"→IT desc).
+export function useKeywordGlossary() {
+  const { t } = useTranslation('game');
+  const glossary = t('glossary', { returnObjects: true });
+  return (glossary && typeof glossary === 'object') ? glossary : {};
+}
 
 // Extracts +N@[STAT] bonus notations from text (e.g. "+2@[CA]" → [{stat:'CA', value:2}])
 export function parseTextBonuses(text = '') {
@@ -67,12 +22,18 @@ export function parseTextBonuses(text = '') {
   return results;
 }
 
-// Resolve [ATTR] and [LVL:...] notations in a text string
-export function resolveNotations(text, abilities, charLevel) {
+// IT→EN ability abbreviation map for backward-compat notation resolution
+const IT_TO_EN_ABBR = { FOR:'STR', DES:'DEX', COS:'CON', SAG:'WIS', CAR:'CHA', INT:'INT' };
+
+// Resolve [ATTR], [PRO], and [LVL:...] notations in a text string
+// Supports both IT ([FOR],[DES],...) and EN ([STR],[DEX],...) ability notations
+export function resolveNotations(text, abilities, charLevel, profBonus) {
   if (!text) return text;
 
-  const resolved1 = text.replace(/(?<!@)\[(FOR|DES|COS|INT|SAG|CAR)\]/gi, (_, attr) => {
-    const score = (abilities || {})[attr.toUpperCase()] ?? 10;
+  const resolved1 = text.replace(/(?<!@)\[(STR|DEX|CON|INT|WIS|CHA|FOR|DES|COS|SAG|CAR|PRO)\]/gi, (_, attr) => {
+    if (attr.toUpperCase() === 'PRO') return String(profBonus ?? 2);
+    const key = IT_TO_EN_ABBR[attr.toUpperCase()] || attr.toUpperCase();
+    const score = (abilities || {})[key] ?? 10;
     const mod = Math.floor((score - 10) / 2);
     return String(mod);
   });
@@ -99,11 +60,13 @@ export function NotationHelpBar() {
   return (
     <div className="notation-help-bar">
       <span className="notation-help-icon">💡</span>
-      <span><strong>[FOR]</strong> <strong>[DES]</strong>… {t('notation.attrHelp')}</span>
+      <span><strong>[STR]</strong> <strong>[DEX]</strong>… <strong>[PRO]</strong> {t('notation.attrHelp')}</span>
       <span className="notation-help-sep">·</span>
       <span><strong>[LVL:1d6,5:1d8]</strong> {t('notation.lvlHelp')}</span>
       <span className="notation-help-sep">·</span>
       <span><strong>+1@[CA]</strong> {t('notation.bonusHelp')}</span>
+      <span className="notation-help-sep">·</span>
+      <span><strong>[3]</strong> {t('notation.counterHelp')}</span>
     </div>
   );
 }
@@ -147,84 +110,129 @@ function Tooltip({ text, children }) {
 
 // Renders text with keyword tooltips applied automatically
 // Supports [ATTR], [LVL:...], and +N@[STAT] notations resolved from CharContext
-const DYNAMIC_NOTATION_RE = /\[(FOR|DES|COS|INT|SAG|CAR)\]|\[LVL:|[+-]\d+@\[[A-Z-]+\]/i;
+const DYNAMIC_NOTATION_RE = /\[(STR|DEX|CON|INT|WIS|CHA|FOR|DES|COS|SAG|CAR|PRO)\]|\[LVL:|[+-]\d+@\[[A-Z-]+\]/i;
 const BONUS_NOTATION_SPLIT = /([+-]\d+@\[[A-Z-]+\])/gi;
 const BONUS_NOTATION_PARSE = /^([+-]\d+)@\[([A-Z-]+)\]$/i;
+const COUNTER_NOTATION_SPLIT = /(\[\d+\])/g;
+const COUNTER_NOTATION_PARSE = /^\[(\d+)\]$/;
 
-export function KeywordText({ text, onRoll, label }) {
-  const { t } = useTranslation('game');
+export function KeywordText({ text, onRoll, label, counters, onCounterChange }) {
   const { t: tUi } = useTranslation();
-  const { abilities, charLevel } = useCharContext();
+  const { abilities, charLevel, profBonus } = useCharContext();
+  const glossary = useKeywordGlossary();
+
+  const keywordRegex = useMemo(() => {
+    const keys = Object.keys(glossary);
+    if (!keys.length) return null;
+    return new RegExp(
+      '(' + keys
+        .sort((a, b) => b.length - a.length)
+        .map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+        .join('|') + ')',
+      'gi'
+    );
+  }, [glossary]);
+
   const hasDynamic = DYNAMIC_NOTATION_RE.test(text || '');
-  const resolved = resolveNotations(text, abilities, charLevel);
+  const resolved = resolveNotations(text, abilities, charLevel, profBonus);
   if (!resolved) return null;
 
   const DICE_REGEX = /(\d*d\d+(?:\s*[+-]\s*\d+)?)/gi;
+  let counterIdx = 0;
 
   function renderSegments(lineText, keyPrefix) {
-    const bonusSegments = lineText.split(BONUS_NOTATION_SPLIT);
-    BONUS_NOTATION_SPLIT.lastIndex = 0;
-    return bonusSegments.map((seg, si) => {
-      const bonusMatch = seg.match(BONUS_NOTATION_PARSE);
-      if (bonusMatch) {
-        const value = Number(bonusMatch[1]);
-        const stat = bonusMatch[2].toUpperCase();
-        const statLabel = BONUS_STAT_OPTIONS.find(o => o.value === stat)?.label || stat;
+    const counterParts = lineText.split(COUNTER_NOTATION_SPLIT);
+    COUNTER_NOTATION_SPLIT.lastIndex = 0;
+    return counterParts.map((cSeg, cSi) => {
+      const counterMatch = cSeg.match(COUNTER_NOTATION_PARSE);
+      if (counterMatch) {
+        const n = parseInt(counterMatch[1]);
+        const idx = counterIdx++;
+        const existing = counters?.[idx];
+        const values = !existing
+          ? Array(n).fill(true)
+          : Array.from({ length: n }, (_, i) => (i < existing.length ? existing[i] : true));
         return (
-          <span key={`${keyPrefix}-b${si}`} className="bonus-inline-badge">
-            {statLabel} {value >= 0 ? '+' : ''}{value}
+          <span key={`${keyPrefix}-cnt${cSi}`} className="counter-group">
+            {values.map((on, pipIdx) => (
+              <span
+                key={pipIdx}
+                className={`counter-pip ${on ? 'on' : ''}`}
+                onClick={e => {
+                  e.stopPropagation();
+                  if (!onCounterChange) return;
+                  onCounterChange(idx, values.map((v, j) => j === pipIdx ? !v : v));
+                }}
+              />
+            ))}
           </span>
         );
       }
 
-      const parts = seg.split(KEYWORD_REGEX);
-      KEYWORD_REGEX.lastIndex = 0;
-      return parts.map((part, i) => {
-        const lowerPart = part.toLowerCase();
-        if (KEYWORD_GLOSSARY[lowerPart]) {
-          const tooltipText = t(`glossary.${lowerPart}`, { defaultValue: KEYWORD_GLOSSARY[lowerPart] });
+      const bonusSegments = cSeg.split(BONUS_NOTATION_SPLIT);
+      BONUS_NOTATION_SPLIT.lastIndex = 0;
+      return bonusSegments.map((seg, si) => {
+        const bonusMatch = seg.match(BONUS_NOTATION_PARSE);
+        if (bonusMatch) {
+          const value = Number(bonusMatch[1]);
+          const stat = bonusMatch[2].toUpperCase();
+          const statLabel = BONUS_STAT_OPTIONS.find(o => o.value === stat)?.label || stat;
           return (
-            <Tooltip key={`${keyPrefix}-${si}-${i}`} text={tooltipText}>
-              {part}
-            </Tooltip>
+            <span key={`${keyPrefix}-${cSi}-b${si}`} className="bonus-inline-badge">
+              {statLabel} {value >= 0 ? '+' : ''}{value}
+            </span>
           );
         }
 
-        if (/^\d*d\d+/.test(part) && onRoll) {
+        if (!keywordRegex) return <span key={`${keyPrefix}-${cSi}-${si}-0`}>{seg}</span>;
+        const parts = seg.split(keywordRegex);
+        keywordRegex.lastIndex = 0;
+        return parts.map((part, i) => {
+          const lowerPart = part.toLowerCase();
+          if (glossary[lowerPart] !== undefined) {
+            return (
+              <Tooltip key={`${keyPrefix}-${cSi}-${si}-${i}`} text={glossary[lowerPart]}>
+                {part}
+              </Tooltip>
+            );
+          }
+
+          if (/^\d*d\d+/.test(part) && onRoll) {
+            return (
+              <button
+                key={`${keyPrefix}-${cSi}-${si}-${i}`}
+                className="inline-dice-btn"
+                onClick={e => { e.stopPropagation(); onRoll(part, label || part); }}
+                title={`${tUi('notation.rollTitle')} ${part}`}
+              >
+                🎲 {part}
+              </button>
+            );
+          }
+
+          const diceParts = part.split(DICE_REGEX);
+          DICE_REGEX.lastIndex = 0;
+          if (diceParts.length === 1) return <span key={`${keyPrefix}-${cSi}-${si}-${i}`}>{part}</span>;
+
           return (
-            <button
-              key={`${keyPrefix}-${si}-${i}`}
-              className="inline-dice-btn"
-              onClick={e => { e.stopPropagation(); onRoll(part, label || part); }}
-              title={`${tUi('notation.rollTitle')} ${part}`}
-            >
-              🎲 {part}
-            </button>
+            <span key={`${keyPrefix}-${cSi}-${si}-${i}`}>
+              {diceParts.map((dp, j) => {
+                if (/^\d*d\d+/.test(dp) && onRoll) {
+                  return (
+                    <button
+                      key={j}
+                      className="inline-dice-btn"
+                      onClick={e => { e.stopPropagation(); onRoll(dp, label || dp); }}
+                    >
+                      🎲 {dp}
+                    </button>
+                  );
+                }
+                return <span key={j}>{dp}</span>;
+              })}
+            </span>
           );
-        }
-
-        const diceParts = part.split(DICE_REGEX);
-        DICE_REGEX.lastIndex = 0;
-        if (diceParts.length === 1) return <span key={`${keyPrefix}-${si}-${i}`}>{part}</span>;
-
-        return (
-          <span key={`${keyPrefix}-${si}-${i}`}>
-            {diceParts.map((dp, j) => {
-              if (/^\d*d\d+/.test(dp) && onRoll) {
-                return (
-                  <button
-                    key={j}
-                    className="inline-dice-btn"
-                    onClick={e => { e.stopPropagation(); onRoll(dp, label || dp); }}
-                  >
-                    🎲 {dp}
-                  </button>
-                );
-              }
-              return <span key={j}>{dp}</span>;
-            })}
-          </span>
-        );
+        });
       });
     });
   }

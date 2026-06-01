@@ -1,0 +1,28 @@
+{
+  "blinded":       { "name": "Blinded",       "desc": "Cannot see. Automatically fails checks requiring sight. Attack rolls against it have advantage; its attack rolls have disadvantage." },
+  "charmed":       { "name": "Charmed",       "desc": "Cannot attack the charmer or target them with harmful effects. The charmer has advantage on social interaction checks." },
+  "deafened":      { "name": "Deafened",      "desc": "Cannot hear. Automatically fails checks requiring hearing." },
+  "frightened":    { "name": "Frightened",    "desc": "Disadvantage on ability checks and attack rolls while the source of fear is in sight. Cannot willingly move closer to the source." },
+  "grappled":      { "name": "Grappled",      "desc": "Speed reduced to 0. Ends if the grappler is incapacitated or the creature is moved beyond the grappler's reach." },
+  "incapacitated": { "name": "Incapacitated", "desc": "Cannot take actions, bonus actions, or reactions." },
+  "invisible":     { "name": "Invisible",     "desc": "Cannot be seen without magic. Attack rolls against it have disadvantage; its attacks have advantage." },
+  "paralyzed":     { "name": "Paralyzed",     "desc": "Incapacitated, cannot move or speak. Fails STR and DEX saves. Melee hits within 5 ft are automatic criticals." },
+  "petrified":     { "name": "Petrified",     "desc": "Turned to stone. Incapacitated, resistance to all damage, immune to poison and disease, does not age." },
+  "poisoned":      { "name": "Poisoned",      "desc": "Disadvantage on attack rolls and ability checks." },
+  "prone":         { "name": "Prone",         "desc": "Can only crawl. Disadvantage on attack rolls. Melee hits have advantage; ranged hits have disadvantage." },
+  "restrained":    { "name": "Restrained",    "desc": "Speed 0. Disadvantage on attack rolls and DEX saves. Attack rolls against it have advantage." },
+  "stunned":       { "name": "Stunned",       "desc": "Incapacitated, cannot move, speaks only falteringly. Fails STR and DEX saves. Attack rolls against it have advantage." },
+  "unconscious":   { "name": "Unconscious",   "desc": "Incapacitated, cannot move or speak. Drops held items. Fails STR and DEX saves. Melee hits within 5 ft are automatic criticals." },
+  "exhaustion":    {
+    "name": "Exhaustion",
+    "desc": "Each level subtracts 2 from d20 rolls and reduces speed by 5 ft. Lv. 5: speed 0. Lv. 6: instant death. Reduces by 1 on each long rest.",
+    "levels": [
+      "Lv. 1: −2 to all d20 rolls · Speed −5 ft",
+      "Lv. 2: −4 to all d20 rolls · Speed −10 ft",
+      "Lv. 3: −6 to all d20 rolls · Speed −15 ft",
+      "Lv. 4: −8 to all d20 rolls · Speed −20 ft",
+      "Lv. 5: −10 to all d20 rolls · Speed 0",
+      "Lv. 6: Death"
+    ]
+  }
+}

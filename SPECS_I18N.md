@@ -260,7 +260,7 @@ Il sistema ha DUE impostazioni lingua separate:
     "gp": "MO",
     "sp": "MA",
     "cp": "MR",
-    "pp": "PE"
+    "pp": "MP"
   },
   "notes": {
     "personalityLabel": "Tratti della personalità",

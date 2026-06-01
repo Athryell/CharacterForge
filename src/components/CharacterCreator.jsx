@@ -1,187 +1,24 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ALIGNMENTS, ABILITIES, ABILITY_NAMES, SKILLS, HIT_DICE, SPELLCASTING_CLASS } from '../data/dnd5e';
+import { ALIGNMENTS, ABILITIES, SKILLS, HIT_DICE, SPELLCASTING_CLASS } from '../data/dnd5e';
 import { CLASS_FEATURES, SPECIES_FEATURES, BACKGROUND_FEATURES, getAutoFeatures } from '../data/features';
 import { CLASS_SAVE_PROFS, CLASS_SKILL_COUNT, CLASS_SKILL_OPTIONS } from '../data/srd/classes';
 import dataManager from '../data/dataManager';
 
 // SRD 5.5e (2024) — specie: solo tratti, nessun bonus caratteristica
 const SPECIES_SRD = [
-  { name: 'Umano',     traits: ['Versatile: 1 talento Origin a scelta al 1° livello', 'Eroico: vantaggio ai TS contro paura'] },
-  { name: 'Elfo',      traits: ['Visione nel buio 18 m', 'Sensi acuti (comp. Percezione)', 'Ascendenza fatata (vantaggio TS contro magie)', 'Passo fatato (teletrasporto 9 m, usi = bonus comp.)'] },
-  { name: 'Nano',      traits: ['Visione nel buio 18 m', 'Resistenza nanica (vantaggio TS veleno, immunità avvelenamento)', 'Tempra nanica', 'Competenza armi da guerra e armature medie'] },
-  { name: 'Halfling',  traits: ['Fortunato (ritira i risultati di 1)', 'Coraggioso (vantaggio TS contro paura)', 'Agilità halfling (muoversi nello spazio di creature più grandi)'] },
-  { name: 'Gnomo',     traits: ['Visione nel buio 18 m', 'Furbizia gnoma (vantaggio TS INT/SAG/CAR contro magie)', 'Competenza con strumenti artigianali'] },
-  { name: 'Dragonide', traits: ['Soffio (azione, scala con livello)', 'Resistenza al danno del tipo draconico', 'Visione nel buio 18 m'] },
-  { name: 'Tiefling',  traits: ['Visione nel buio 18 m', 'Resistenza al fuoco', 'Retaggio infernale: Thaumaturgia, Colpo infuocato (liv. 3), Oscurità (liv. 5)'] },
-  { name: 'Aasimar',   traits: ['Visione nel buio 18 m', 'Guarigione celeste (PF extra a riposo lungo = bonus prof.)', 'Forma celeste: ali luminose o forma fiamma (1 min, 1× riposo lungo)'] },
-  { name: 'Orco',      traits: ['Visione nel buio 18 m', 'Spietato (azione bonus: vantaggio al prossimo attacco nel turno)', 'Resistenza (PF extra pari al livello)'] },
-  { name: 'Goliath',   traits: ['Resistenza al freddo', 'Possanza gigante (taglia Grande, oggetti extra-pesanti)', 'Forma gigante: STR o COS Primordiale (1× riposo lungo)'] },
+  { id: 'human',      name: 'Human',      traits: ['Versatile: 1 talento Origin a scelta al 1° livello', 'Eroico: vantaggio ai TS contro paura'] },
+  { id: 'elf',        name: 'Elf',        traits: ['Visione nel buio 18 m', 'Sensi acuti (comp. Percezione)', 'Ascendenza fatata (vantaggio TS contro magie)', 'Passo fatato (teletrasporto 9 m, usi = bonus comp.)'] },
+  { id: 'dwarf',      name: 'Dwarf',      traits: ['Visione nel buio 18 m', 'Resistenza nanica (vantaggio TS veleno, immunità avvelenamento)', 'Tempra nanica', 'Competenza armi da guerra e armature medie'] },
+  { id: 'halfling',   name: 'Halfling',   traits: ['Fortunato (ritira i risultati di 1)', 'Coraggioso (vantaggio TS contro paura)', 'Agilità halfling (muoversi nello spazio di creature più grandi)'] },
+  { id: 'gnome',      name: 'Gnome',      traits: ['Visione nel buio 18 m', 'Furbizia gnoma (vantaggio TS INT/WIS/CHA contro magie)', 'Competenza con strumenti artigianali'] },
+  { id: 'dragonborn', name: 'Dragonborn', traits: ['Soffio (azione, scala con livello)', 'Resistenza al danno del tipo draconico', 'Visione nel buio 18 m'] },
+  { id: 'tiefling',   name: 'Tiefling',   traits: ['Visione nel buio 18 m', 'Resistenza al fuoco', 'Retaggio infernale: Thaumaturgia, Colpo infuocato (liv. 3), Oscurità (liv. 5)'] },
+  { id: 'aasimar',    name: 'Aasimar',    traits: ['Visione nel buio 18 m', 'Guarigione celeste (PF extra a riposo lungo = bonus prof.)', 'Forma celeste: ali luminose o forma fiamma (1 min, 1× riposo lungo)'] },
+  { id: 'orc',        name: 'Orc',        traits: ['Visione nel buio 18 m', 'Spietato (azione bonus: vantaggio al prossimo attacco nel turno)', 'Resistenza (PF extra pari al livello)'] },
+  { id: 'goliath',    name: 'Goliath',    traits: ['Resistenza al freddo', 'Possanza gigante (taglia Grande, oggetti extra-pesanti)', 'Forma gigante: STR o CON Primordiale (1× riposo lungo)'] },
 ];
 
-// PHB 2024 — background completi con abilityScores consigliati, feat, skills, tool, equipaggiamento
-const BACKGROUNDS_SRD = [
-  {
-    name: 'Accolito',
-    desc: 'Hai dedicato la tua vita a servire un tempio, studiando i riti sacri e le dottrine di una divinità. Il tuo spirito è guidato dalla fede.',
-    abilityScores: ['INT', 'SAG', 'CAR'],
-    feat: 'Iniziato alla Magia (Chierico)',
-    skills: ['Intuizione', 'Religione'],
-    tool: 'Strumenti calligrafici',
-    equipA: 'Simbolo sacro, libro di preghiere, 3 stecche d\'incenso, vesti, abiti comuni, 15 MO',
-    equipB: '50 MO',
-  },
-  {
-    name: 'Artigiano',
-    desc: 'Hai imparato i segreti di un mestiere artigianale e sei membro di una gilda. Le tue mani sanno creare oggetti di valore.',
-    abilityScores: ['FOR', 'DES', 'INT'],
-    feat: 'Fabbricante',
-    skills: ['Indagare', 'Persuasione'],
-    tool: 'Attrezzi da artigiano (a scelta)',
-    equipA: 'Attrezzi da artigiano, 2 borse di cuoio, abiti da viaggio, 15 MO',
-    equipB: '50 MO',
-  },
-  {
-    name: 'Impostore',
-    desc: 'Hai sempre avuto il talento di convincere le persone di qualsiasi cosa. Con un sorriso e le parole giuste puoi essere chiunque.',
-    abilityScores: ['DES', 'COS', 'CAR'],
-    feat: 'Esperto',
-    skills: ['Inganno', 'Prestidigitazione'],
-    tool: 'Kit per falsificazioni',
-    equipA: 'Kit per falsificazioni, costume, abiti eleganti, 15 MO',
-    equipB: '50 MO',
-  },
-  {
-    name: 'Criminale',
-    desc: 'Hai vissuto nell\'ombra della società, sviluppando le tue abilità nel crimine. Conosci chi compra e chi vende segreti.',
-    abilityScores: ['DES', 'COS', 'INT'],
-    feat: 'Allerta',
-    skills: ['Prestidigitazione', 'Furtività'],
-    tool: 'Attrezzi da ladro',
-    equipA: 'Attrezzi da ladro, piede di porco, 2 pugnali, abiti comuni con cappuccio, 16 MO',
-    equipB: '50 MO',
-  },
-  {
-    name: 'Intrattenitore',
-    desc: 'Hai trascorso la giovinezza a esibirti davanti ai pubblici, padroneggiando la musica, la danza o le arti dello spettacolo.',
-    abilityScores: ['FOR', 'DES', 'CAR'],
-    feat: 'Musicista',
-    skills: ['Acrobazia', 'Intrattenere'],
-    tool: 'Strumento musicale (a scelta)',
-    equipA: 'Strumento musicale, 2 costumi, specchio, profumo, abiti da viaggio, 11 MO',
-    equipB: '50 MO',
-  },
-  {
-    name: 'Contadino',
-    desc: 'Sei cresciuto lavorando la terra e ti sei guadagnato da vivere con sudore e fatica. La tua forza e resilienza vengono dalle radici.',
-    abilityScores: ['FOR', 'COS', 'SAG'],
-    feat: 'Tenace',
-    skills: ['Addestrare animali', 'Natura'],
-    tool: 'Attrezzi da carpentiere',
-    equipA: 'Falce, attrezzi da carpentiere, kit del guaritore, pentola di ferro, pala, abiti da viaggio, 30 MO',
-    equipB: '50 MO',
-  },
-  {
-    name: 'Guardia',
-    desc: 'Hai prestato servizio come guardia in una città, fortezza o alla corte di un nobile. Sei addestrato a sorvegliare e proteggere.',
-    abilityScores: ['FOR', 'INT', 'SAG'],
-    feat: 'Allerta',
-    skills: ['Atletica', 'Percezione'],
-    tool: 'Strumento musicale (a scelta)',
-    equipA: 'Lancia, balestra leggera, 20 dardi, strumento musicale, abiti eleganti, 5 MO',
-    equipB: '50 MO',
-  },
-  {
-    name: 'Guida',
-    desc: 'Hai trascorso anni a esplorare territori selvaggi, tracciando mappe e accompagnando viaggiatori attraverso le terre inesplorate.',
-    abilityScores: ['DES', 'COS', 'SAG'],
-    feat: 'Iniziato alla Magia (Druido)',
-    skills: ['Furtività', 'Sopravvivenza'],
-    tool: 'Strumenti del cartografo',
-    equipA: 'Arco corto, 20 frecce, strumenti del cartografo, sacco a pelo, corda (15 m), abiti da viaggio, 3 MO',
-    equipB: '50 MO',
-  },
-  {
-    name: 'Eremita',
-    desc: 'Hai vissuto in isolamento, meditando e studiando i misteri del mondo. La solitudine ti ha dato una profonda comprensione interiore.',
-    abilityScores: ['COS', 'INT', 'SAG'],
-    feat: 'Iniziato alla Magia (Druido)',
-    skills: ['Medicina', 'Religione'],
-    tool: 'Kit da erborista',
-    equipA: 'Bastone ferrato, kit da erborista, sacco a pelo, libro (filosofia), abiti comuni, 16 MO',
-    equipB: '50 MO',
-  },
-  {
-    name: 'Mercante',
-    desc: 'Hai guadagnato denaro comprando e vendendo merci in mercati e fiere. Sai riconoscere il valore di qualsiasi cosa e trattare con chiunque.',
-    abilityScores: ['COS', 'INT', 'SAG'],
-    feat: 'Fortunato',
-    skills: ['Addestrare animali', 'Persuasione'],
-    tool: 'Strumenti del navigatore',
-    equipA: 'Strumenti del navigatore, 2 borse, abiti da viaggio, 22 MO',
-    equipB: '50 MO',
-  },
-  {
-    name: 'Nobile',
-    desc: 'Sei cresciuto in una famiglia di alto rango, circondato da ricchezza, potere e intrighi di corte. Il tuo nome apre molte porte.',
-    abilityScores: ['FOR', 'INT', 'CAR'],
-    feat: 'Esperto',
-    skills: ['Storia', 'Persuasione'],
-    tool: 'Set da gioco (a scelta)',
-    equipA: 'Set da gioco, abiti eleganti, anello con sigillo, pergamena di pedigree, 25 MO',
-    equipB: '50 MO',
-  },
-  {
-    name: 'Saggio',
-    desc: 'Hai trascorso gli anni formativi viaggiando tra manieri e monasteri, studiando libri e pergamene e imparando la storia del multiverso.',
-    abilityScores: ['COS', 'INT', 'SAG'],
-    feat: 'Iniziato alla Magia (Mago)',
-    skills: ['Arcano', 'Storia'],
-    tool: 'Strumenti calligrafici',
-    equipA: 'Bastone ferrato, strumenti calligrafici, libro (storia), pergamena (8 fogli), veste, 8 MO',
-    equipB: '50 MO',
-  },
-  {
-    name: 'Marinaio',
-    desc: 'Hai trascorso anni in mare aperto, imparando i segreti della navigazione e affrontando tempeste e pirati. Il mare è la tua casa.',
-    abilityScores: ['FOR', 'DES', 'SAG'],
-    feat: 'Rissa da Taverna',
-    skills: ['Atletica', 'Percezione'],
-    tool: 'Strumenti del navigatore',
-    equipA: 'Pugnale, strumenti del navigatore, corda (15 m), abiti da viaggio, 20 MO',
-    equipB: '50 MO',
-  },
-  {
-    name: 'Scrivano',
-    desc: 'Hai imparato a leggere, scrivere e copiare documenti in un ufficio notarile o in una biblioteca. La penna è la tua arma.',
-    abilityScores: ['DES', 'INT', 'SAG'],
-    feat: 'Esperto',
-    skills: ['Indagare', 'Persuasione'],
-    tool: 'Strumenti calligrafici',
-    equipA: 'Strumenti calligrafici, abiti eleganti, lampada, 3 fiale d\'olio, pergamena (12 fogli), 23 MO',
-    equipB: '50 MO',
-  },
-  {
-    name: 'Soldato',
-    desc: 'Hai combattuto come parte di un esercito o milizia. La disciplina militare e l\'esperienza di battaglia ti hanno forgiato.',
-    abilityScores: ['FOR', 'DES', 'COS'],
-    feat: 'Assalitore Selvaggio',
-    skills: ['Atletica', 'Intimidire'],
-    tool: 'Set da gioco (a scelta)',
-    equipA: 'Lancia, arco corto, 20 frecce, set da gioco, abiti da viaggio, 18 MO',
-    equipB: '50 MO',
-  },
-  {
-    name: 'Viandante',
-    desc: 'Hai vissuto ai margini della società, imparando a sopravvivere con poco e a muoverti nell\'ombra delle grandi città.',
-    abilityScores: ['DES', 'SAG', 'CAR'],
-    feat: 'Fortunato',
-    skills: ['Intuizione', 'Furtività'],
-    tool: 'Attrezzi da ladro',
-    equipA: 'Pugnale, attrezzi da ladro, set da gioco, sacco a pelo, 2 costumi, 16 MO',
-    equipB: '50 MO',
-  },
-];
 
 // CLASS_SAVE_PROFS, CLASS_SKILL_COUNT, CLASS_SKILL_OPTIONS → importati da src/data/srd/classes.js
 
@@ -203,14 +40,14 @@ export default function CharacterCreator({ onComplete, onCancel }) {
   ];
   const [step, setStep] = useState(0);
   const [data, setData] = useState({
-    charName: '', charRace: '', charBackground: '', charAlignment: 'Legale Buono',
+    charName: '', charRace: '', charBackground: '', charAlignment: 'Lawful Good',
     charClass: '',
-    abilities: { FOR:8, DES:8, COS:8, INT:8, SAG:8, CAR:8 },
+    abilities: { STR:8, DEX:8, CON:8, INT:8, WIS:8, CHA:8 },
     abilitiesMethod: 'pointbuy',
     saveProficiencies: [],
     skillProficiencies: [],
     charLevel: 1,
-    bgAsi: { FOR:0, DES:0, COS:0, INT:0, SAG:0, CAR:0 },
+    bgAsi: { STR:0, DEX:0, CON:0, INT:0, WIS:0, CHA:0 },
     customSpecies: '',
     customBackground: '',
     customClass: '',
@@ -219,11 +56,11 @@ export default function CharacterCreator({ onComplete, onCancel }) {
   function patch(obj) { setData(prev => ({ ...prev, ...obj })); }
 
   const allBackgrounds = dataManager.getBackgrounds();
-  const speciesList = [...SPECIES_SRD, { name: CUSTOM_SENTINEL, label: 'Personalizzata...' }];
-  const bgList      = [...allBackgrounds, { name: CUSTOM_SENTINEL, label: 'Personalizzato...' }];
+  const speciesList = [...SPECIES_SRD, { id: CUSTOM_SENTINEL, name: CUSTOM_SENTINEL, label: t('identity.speciesCustom', 'Custom...') }];
+  const bgList      = [...allBackgrounds, { id: CUSTOM_SENTINEL, name: CUSTOM_SENTINEL, label: t('identity.backgroundCustom', 'Custom...') }];
   const classList   = [...dataManager.getClasses(), CUSTOM_SENTINEL];
 
-  const selectedBg  = data.charBackground === CUSTOM_SENTINEL ? null : allBackgrounds.find(b => b.name === data.charBackground);
+  const selectedBg  = data.charBackground === CUSTOM_SENTINEL ? null : allBackgrounds.find(b => (b.id || b.name) === data.charBackground);
   const selectedCls = data.charClass === CUSTOM_SENTINEL ? data.customClass : data.charClass;
 
   const pointsSpent = Object.values(data.abilities).reduce((sum, v) => sum + (POINT_BUY_COSTS[v] ?? 0), 0);
@@ -249,21 +86,21 @@ export default function CharacterCreator({ onComplete, onCancel }) {
   }
 
   const CLASS_STANDARD_ARRAYS = {
-    'Barbaro':   { FOR:15, DES:14, COS:13, INT:12, SAG:10, CAR:8  },
-    'Guerriero': { FOR:15, DES:14, COS:13, INT:12, SAG:10, CAR:8  },
-    'Monaco':    { FOR:12, DES:15, COS:13, INT:8,  SAG:14, CAR:10 },
-    'Paladino':  { FOR:15, DES:8,  COS:14, INT:10, SAG:12, CAR:14 },
-    'Ranger':    { FOR:12, DES:15, COS:14, INT:8,  SAG:13, CAR:10 },
-    'Ladro':     { FOR:8,  DES:15, COS:14, INT:10, SAG:13, CAR:12 },
-    'Bardo':     { FOR:8,  DES:14, COS:13, INT:10, SAG:12, CAR:15 },
-    'Chierico':  { FOR:10, DES:14, COS:13, INT:8,  SAG:15, CAR:12 },
-    'Druido':    { FOR:8,  DES:14, COS:13, INT:10, SAG:15, CAR:12 },
-    'Stregone':  { FOR:8,  DES:13, COS:14, INT:10, SAG:12, CAR:15 },
-    'Warlock':   { FOR:8,  DES:14, COS:13, INT:10, SAG:12, CAR:15 },
-    'Mago':      { FOR:8,  DES:13, COS:14, INT:15, SAG:12, CAR:10 },
+    'Barbarian': { STR:15, DEX:14, CON:13, INT:12, WIS:10, CHA:8  },
+    'Fighter':   { STR:15, DEX:14, CON:13, INT:12, WIS:10, CHA:8  },
+    'Monk':      { STR:12, DEX:15, CON:13, INT:8,  WIS:14, CHA:10 },
+    'Paladin':   { STR:15, DEX:8,  CON:14, INT:10, WIS:12, CHA:14 },
+    'Ranger':    { STR:12, DEX:15, CON:14, INT:8,  WIS:13, CHA:10 },
+    'Rogue':     { STR:8,  DEX:15, CON:14, INT:10, WIS:13, CHA:12 },
+    'Bard':      { STR:8,  DEX:14, CON:13, INT:10, WIS:12, CHA:15 },
+    'Cleric':    { STR:10, DEX:14, CON:13, INT:8,  WIS:15, CHA:12 },
+    'Druid':     { STR:8,  DEX:14, CON:13, INT:10, WIS:15, CHA:12 },
+    'Sorcerer':  { STR:8,  DEX:13, CON:14, INT:10, WIS:12, CHA:15 },
+    'Warlock':   { STR:8,  DEX:14, CON:13, INT:10, WIS:12, CHA:15 },
+    'Wizard':    { STR:8,  DEX:13, CON:14, INT:15, WIS:12, CHA:10 },
   };
   function setStandard() {
-    const arr = CLASS_STANDARD_ARRAYS[data.charClass] || { FOR:15, DES:14, COS:13, INT:12, SAG:10, CAR:8 };
+    const arr = CLASS_STANDARD_ARRAYS[data.charClass] || { STR:15, DEX:14, CON:13, INT:12, WIS:10, CHA:8 };
     patch({ abilities: arr });
   }
 
@@ -277,7 +114,7 @@ export default function CharacterCreator({ onComplete, onCancel }) {
 
   function calcHP(abs, cls) {
     const hd = HIT_DICE[cls] || 'd8';
-    const conMod = Math.floor((abs.COS - 10) / 2);
+    const conMod = Math.floor((abs.CON - 10) / 2);
     return parseInt(hd.replace('d', '')) + conMod;
   }
 
@@ -304,14 +141,14 @@ export default function CharacterCreator({ onComplete, onCancel }) {
       features: [...classFeats, ...speciesFeats, ...bgFeats],
       hpCurrent: calcHP(finalAbs, selectedCls),
       hpMax: calcHP(finalAbs, selectedCls),
-      ac: 10 + Math.floor((finalAbs.DES - 10) / 2),
-      speed: '9m',
+      ac: 10 + Math.floor((finalAbs.DEX - 10) / 2),
+      speed: '30ft',
     };
   }
 
-  const charRaceDisplay = data.charRace === CUSTOM_SENTINEL ? (data.customSpecies || 'Personalizzata') : data.charRace;
-  const charBgDisplay   = data.charBackground === CUSTOM_SENTINEL ? (data.customBackground || 'Personalizzato') : data.charBackground;
-  const charClsDisplay  = data.charClass === CUSTOM_SENTINEL ? (data.customClass || 'Personalizzata') : data.charClass;
+  const charRaceDisplay = data.charRace === CUSTOM_SENTINEL ? (data.customSpecies || '') : (data.charRace ? t(`data.species.${data.charRace}`, data.charRace) : '');
+  const charBgDisplay   = data.charBackground === CUSTOM_SENTINEL ? (data.customBackground || '') : (data.charBackground ? t(`data.backgrounds.${data.charBackground}`, data.charBackground) : '');
+  const charClsDisplay  = data.charClass === CUSTOM_SENTINEL ? (data.customClass || '') : (data.charClass ? t(`data.classes.${data.charClass}`, data.charClass) : '');
 
   const canNextStep = [
     data.charName && data.charRace && data.charBackground &&
@@ -350,7 +187,7 @@ export default function CharacterCreator({ onComplete, onCancel }) {
               <div className="field" style={{ marginBottom: 16 }}>
                 <label>{t('identity.alignment')}</label>
                 <select value={data.charAlignment} onChange={e => patch({ charAlignment: e.target.value })}>
-                  {ALIGNMENTS.map(a => <option key={a}>{a}</option>)}
+                  {ALIGNMENTS.map(a => <option key={a} value={a}>{t(`data.alignments.${a}`, a)}</option>)}
                 </select>
               </div>
 
@@ -358,11 +195,11 @@ export default function CharacterCreator({ onComplete, onCancel }) {
               <div className="creator-subtitle">{t('creator.speciesTitle')}</div>
               <div className="creator-grid">
                 {speciesList.map(r => {
-                  const isCustom = r.name === CUSTOM_SENTINEL;
-                  const selected = data.charRace === r.name;
+                  const isCustom = (r.id || r.name) === CUSTOM_SENTINEL;
+                  const selected = data.charRace === (r.id || r.name);
                   return (
-                    <div key={r.name} className={`creator-card ${selected ? 'selected' : ''}`} onClick={() => patch({ charRace: r.name })}>
-                      <div className="creator-card-name">{isCustom ? r.label : r.name}</div>
+                    <div key={r.name} className={`creator-card ${selected ? 'selected' : ''}`} onClick={() => patch({ charRace: r.id || r.name })}>
+                      <div className="creator-card-name">{isCustom ? r.label : t(`data.species.${r.id || r.name}`, r.name)}</div>
                       {isCustom && selected && (
                         <input className="creator-custom-input" value={data.customSpecies}
                           onChange={e => { e.stopPropagation(); patch({ customSpecies: e.target.value }); }}
@@ -382,15 +219,15 @@ export default function CharacterCreator({ onComplete, onCancel }) {
               <div className="creator-subtitle" style={{ marginTop: 16 }}>{t('creator.backgroundTitle')}</div>
               <div className="creator-grid">
                 {bgList.map(b => {
-                  const isCustom = b.name === CUSTOM_SENTINEL;
-                  const selected = data.charBackground === b.name;
+                  const isCustom = (b.id || b.name) === CUSTOM_SENTINEL;
+                  const selected = data.charBackground === (b.id || b.name);
                   return (
-                    <div key={b.name} className={`creator-card ${selected ? 'selected' : ''}`}
-                      onClick={() => patch({ charBackground: b.name, bgAsi: { FOR:0, DES:0, COS:0, INT:0, SAG:0, CAR:0 } })}>
-                      <div className="creator-card-name">{isCustom ? b.label : b.name}</div>
+                    <div key={b.id || b.name} className={`creator-card ${selected ? 'selected' : ''}`}
+                      onClick={() => patch({ charBackground: b.id || b.name, bgAsi: { STR:0, DEX:0, CON:0, INT:0, WIS:0, CHA:0 } })}>
+                      <div className="creator-card-name">{isCustom ? b.label : t(`data.backgrounds.${b.id || b.name}`, b.name)}</div>
                       {!isCustom && (
                         <div className="creator-card-sub">
-                          {b.skills.join(', ')} · {b.feat}
+                          {b.skills.map(s => t(`data.skills.${s}`, s)).join(', ')} · {b.feat}
                         </div>
                       )}
                       {isCustom && selected && (
@@ -417,7 +254,7 @@ export default function CharacterCreator({ onComplete, onCancel }) {
                   <strong>{t('creator.bgAsiLabel')}</strong>
                   {selectedBg?.abilityScores && (
                     <span style={{ color:'var(--c-muted)', marginLeft:6 }}>
-                      {t('creator.bgAsiRecommended')} {selectedBg.abilityScores.map(a => ABILITY_NAMES[a]).join(', ')}
+                      {t('creator.bgAsiRecommended')} {selectedBg.abilityScores.map(a => t(`data.abilities.${a}`)).join(', ')}
                     </span>
                   )}
                   {(() => {
@@ -431,7 +268,7 @@ export default function CharacterCreator({ onComplete, onCancel }) {
                             return (
                               <div key={a} style={{ display:'flex', alignItems:'center', gap:4 }}>
                                 <span style={{ fontSize:11, minWidth:32, color: recommended ? 'var(--c-accent)' : 'var(--c-muted)', fontWeight: recommended ? 600 : 400 }}>
-                                  {a}{recommended ? '★' : ''}
+                                  {t(`data.abilityAbbr.${a}`, a)}{recommended ? '★' : ''}
                                 </span>
                                 <button className="mod-btn" style={{ fontSize:11, padding:'1px 6px' }}
                                   onClick={() => val > 0 && patch({ bgAsi: { ...data.bgAsi, [a]: val - 1 } })}>−</button>
@@ -465,10 +302,10 @@ export default function CharacterCreator({ onComplete, onCancel }) {
                   const selected = data.charClass === cls;
                   return (
                     <div key={cls} className={`creator-card ${selected ? 'selected' : ''}`} onClick={() => patch({ charClass: cls })}>
-                      <div className="creator-card-name">{isCustom ? 'Personalizzata...' : cls}</div>
+                      <div className="creator-card-name">{isCustom ? t('creator.customClassLabel', 'Custom...') : t(`data.classes.${cls}`, cls)}</div>
                       {!isCustom && (
                         <div className="creator-card-sub">
-                          {HIT_DICE[cls] || 'd8'} HP{SPELLCASTING_CLASS[cls] ? ` · Incantatore (${SPELLCASTING_CLASS[cls]})` : ''}
+                          {HIT_DICE[cls] || 'd8'} HP{SPELLCASTING_CLASS[cls] ? ` · ${t('creator.spellcaster', 'Spellcaster')} (${t(`data.abilityAbbr.${SPELLCASTING_CLASS[cls]}`, SPELLCASTING_CLASS[cls])})` : ''}
                         </div>
                       )}
                       {isCustom && selected && (
@@ -478,7 +315,7 @@ export default function CharacterCreator({ onComplete, onCancel }) {
                       )}
                       {!isCustom && selected && (
                         <div className="creator-traits">
-                          <div className="creator-trait">• TS: {(CLASS_SAVE_PROFS[cls] || []).join(', ')}</div>
+                          <div className="creator-trait">• {t('creator.summarySavingThrows')}: {(CLASS_SAVE_PROFS[cls] || []).map(a => t(`data.abilityAbbr.${a}`, a)).join(', ')}</div>
                           <div className="creator-trait">• Abilità: {CLASS_SKILL_COUNT[cls] || 2} a scelta</div>
                         </div>
                       )}
@@ -499,7 +336,7 @@ export default function CharacterCreator({ onComplete, onCancel }) {
                       patch({ abilitiesMethod: v });
                       if (v === 'standard') setStandard();
                       if (v === 'roll') rollStats();
-                      if (v === 'pointbuy') patch({ abilities: { FOR:8,DES:8,COS:8,INT:8,SAG:8,CAR:8 } });
+                      if (v === 'pointbuy') patch({ abilities: { STR:8,DEX:8,CON:8,INT:8,WIS:8,CHA:8 } });
                     }}>{l}</button>
                 ))}
                 {data.abilitiesMethod === 'roll' && (
@@ -516,7 +353,7 @@ export default function CharacterCreator({ onComplete, onCancel }) {
 
               {Object.values(data.bgAsi).some(v => v > 0) && (
                 <div className="creator-info-box" style={{ marginBottom:8 }}>
-                  Background: {Object.entries(data.bgAsi).filter(([,v]) => v > 0).map(([a,v]) => `+${v} ${ABILITY_NAMES[a]}`).join(', ')} (applicati nel riepilogo)
+                  Background: {Object.entries(data.bgAsi).filter(([,v]) => v > 0).map(([a,v]) => `+${v} ${t(`data.abilityAbbr.${a}`, a)}`).join(', ')} (applicati nel riepilogo)
                 </div>
               )}
 
@@ -528,7 +365,7 @@ export default function CharacterCreator({ onComplete, onCancel }) {
                   const mod = Math.floor((final - 10) / 2);
                   return (
                     <div key={attr} className="creator-ability-row">
-                      <div className="creator-ability-name">{ABILITY_NAMES[attr]}</div>
+                      <div className="creator-ability-name">{t(`data.abilities.${attr}`)}</div>
                       <div className="creator-ability-controls">
                         {data.abilitiesMethod === 'pointbuy' ? (
                           <>
@@ -558,7 +395,7 @@ export default function CharacterCreator({ onComplete, onCancel }) {
             <div className="creator-section">
               {selectedBg && (
                 <div className="creator-info-box">
-                  <strong>{data.charBackground}:</strong> comp. automatiche in {selectedBg.skills.join(' e ')}.
+                  <strong>{selectedBg ? t(`data.backgrounds.${data.charBackground}`, data.charBackground) : data.charBackground}:</strong> comp. automatiche in {selectedBg.skills.map(s => t(`data.skills.${s}`, s)).join(' e ')}.
                   {selectedBg.tool && <> · Strumento: {selectedBg.tool}.</>}
                   {selectedBg.feat && <> · Talento Origin: <strong>{selectedBg.feat}</strong>.</>}
                 </div>
@@ -568,8 +405,8 @@ export default function CharacterCreator({ onComplete, onCancel }) {
                 {' '}{t('creator.profSelected', { selected: data.skillProficiencies.length, max: CLASS_SKILL_COUNT[selectedCls] || 2 })}
               </div>
               <div className="check-list">
-                {(CLASS_SKILL_OPTIONS[selectedCls] || SKILLS.map(s => s.name)).map(sk => {
-                  const fromBg = selectedBg?.skills.includes(sk);
+                {(CLASS_SKILL_OPTIONS[selectedCls] || SKILLS.map(s => s.id)).map(sk => {
+                  const fromBg = selectedBg?.skills?.includes(sk);
                   const selected = data.skillProficiencies.includes(sk);
                   const maxReached = data.skillProficiencies.length >= (CLASS_SKILL_COUNT[selectedCls] || 2);
                   return (
@@ -581,7 +418,7 @@ export default function CharacterCreator({ onComplete, onCancel }) {
                       }}
                       style={{ opacity: !selected && maxReached && !fromBg ? 0.4 : 1 }}>
                       <div className={`check-dot ${fromBg || selected ? 'proficient' : ''}`} />
-                      <span className="check-name">{sk}</span>
+                      <span className="check-name">{t(`data.skills.${sk}`, sk)}</span>
                       {fromBg && <span className="check-attr">background</span>}
                     </div>
                   );
@@ -594,13 +431,13 @@ export default function CharacterCreator({ onComplete, onCancel }) {
           {step === 4 && (() => {
             const final = getFinalAbilities();
             const hp = calcHP(final, selectedCls);
-            const conMod = Math.floor((final.COS - 10) / 2);
+            const conMod = Math.floor((final.CON - 10) / 2);
             return (
               <div className="creator-section">
                 <div className="creator-summary">
                   <div className="creator-summary-name">{data.charName || '—'}</div>
                   <div className="creator-summary-sub">{charRaceDisplay} · {charClsDisplay} · {charBgDisplay}</div>
-                  <div className="creator-summary-sub" style={{ marginTop:2 }}>{data.charAlignment}</div>
+                  <div className="creator-summary-sub" style={{ marginTop:2 }}>{data.charAlignment ? t(`data.alignments.${data.charAlignment}`, data.charAlignment) : ''}</div>
                   <div className="creator-summary-grid">
                     {ABILITIES.map(attr => {
                       const val = final[attr];
@@ -614,9 +451,9 @@ export default function CharacterCreator({ onComplete, onCancel }) {
                       );
                     })}
                   </div>
-                  <div className="creator-summary-row"><span>{t('creator.summaryMaxHP')}</span><strong>{hp} ({HIT_DICE[selectedCls] || 'd8'}+{conMod} COS)</strong></div>
-                  <div className="creator-summary-row"><span>{t('creator.summarySavingThrows')}</span><strong>{(CLASS_SAVE_PROFS[selectedCls] || []).join(', ') || '—'}</strong></div>
-                  <div className="creator-summary-row"><span>{t('creator.summaryProficiencies')}</span><strong>{[...(selectedBg?.skills || []), ...data.skillProficiencies].join(', ') || '—'}</strong></div>
+                  <div className="creator-summary-row"><span>{t('creator.summaryMaxHP')}</span><strong>{hp} ({HIT_DICE[selectedCls] || 'd8'}+{conMod} CON)</strong></div>
+                  <div className="creator-summary-row"><span>{t('creator.summarySavingThrows')}</span><strong>{(CLASS_SAVE_PROFS[selectedCls] || []).map(a => t(`data.abilityAbbr.${a}`, a)).join(', ') || '—'}</strong></div>
+                  <div className="creator-summary-row"><span>{t('creator.summaryProficiencies')}</span><strong>{[...(selectedBg?.skills || []), ...data.skillProficiencies].map(s => t(`data.skills.${s}`, s)).join(', ') || '—'}</strong></div>
                   {selectedBg && <>
                     <div className="creator-summary-row"><span>{t('creator.summaryOriginFeat')}</span><strong>{selectedBg.feat}</strong></div>
                     <div className="creator-summary-row"><span>{t('creator.summaryTool')}</span><strong>{selectedBg.tool}</strong></div>
@@ -628,7 +465,7 @@ export default function CharacterCreator({ onComplete, onCancel }) {
                     </div>
                   )}
                   {SPELLCASTING_CLASS[selectedCls] && (
-                    <div className="creator-summary-row"><span>{t('creator.summarySpellcaster')}</span><strong>Sì ({SPELLCASTING_CLASS[selectedCls]})</strong></div>
+                    <div className="creator-summary-row"><span>{t('creator.summarySpellcaster')}</span><strong>Yes ({t(`data.abilityAbbr.${SPELLCASTING_CLASS[selectedCls]}`, SPELLCASTING_CLASS[selectedCls])})</strong></div>
                   )}
                 </div>
               </div>

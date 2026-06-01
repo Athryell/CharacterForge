@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CONDITIONS } from '../data/conditions';
 
 export default function ConditionTracker({ active = [], onChange, exhaustionLevel = 0, onExhaustionChange }) {
+  const { t } = useTranslation();
   const [tooltip, setTooltip] = useState(null);
 
   function toggle(id) {
@@ -25,7 +27,7 @@ export default function ConditionTracker({ active = [], onChange, exhaustionLeve
               onMouseLeave={() => setTooltip(null)}
             >
               <span className="condition-icon">{c.icon}</span>
-              <span className="condition-name">{c.name}</span>
+              <span className="condition-name">{t(`data.conditions.${c.id}.name`, c.id)}</span>
             </div>
           );
         })}
@@ -38,7 +40,7 @@ export default function ConditionTracker({ active = [], onChange, exhaustionLeve
             onMouseLeave={() => setTooltip(null)}
           >
             <span className="condition-icon">{exhaustionDef.icon}</span>
-            <span className="condition-name">Affaticamento</span>
+            <span className="condition-name">{t('data.conditions.exhaustion.name', 'Exhaustion')}</span>
             <div className="exhaustion-controls" onClick={e => e.stopPropagation()}>
               <button className="exhaustion-btn"
                 onClick={() => onExhaustionChange && onExhaustionChange(Math.max(0, exhaustionLevel - 1))}
@@ -54,11 +56,11 @@ export default function ConditionTracker({ active = [], onChange, exhaustionLeve
 
       {tooltip && (
         <div className="condition-tooltip">
-          <strong>{tooltip.icon} {tooltip.name}</strong>
+          <strong>{tooltip.icon} {t(`data.conditions.${tooltip.id}.name`, tooltip.id)}</strong>
           {tooltip.type === 'counter' && exhaustionLevel > 0 ? (
             <div style={{ marginTop: 4 }}>{tooltip.levels[exhaustionLevel - 1]}</div>
           ) : (
-            <div style={{ marginTop: 4 }}>{tooltip.desc}</div>
+            <div style={{ marginTop: 4 }}>{t(`data.conditions.${tooltip.id}.desc`, tooltip.desc)}</div>
           )}
         </div>
       )}

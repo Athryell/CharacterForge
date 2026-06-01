@@ -1,0 +1,1742 @@
+{
+  "dancing_lights": {
+    "name": "Dancing Lights",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "120 piedi",
+    "desc": "You create up to four torch-size lights within range, making them appear as torches, lanterns, or glowing orbs that hover for the duration. Alternatively, you combine the four lights into one glowing Medium form that is vaguely humanlike."
+  },
+  "druidcraft": {
+    "name": "Druidcraft",
+    "duration": "Instantaneous",
+    "range": "30 feet",
+    "desc": "WWhiesaptehreinrg S teon tshoer .spirits of nature, you create one of the following effects within range. You create a Tiny, harmless sensory effect that predicts what the weather will be at your location for the next 24 hours."
+  },
+  "eldritch_blast": {
+    "name": "Buio magico",
+    "duration": "Istantanea",
+    "range": "120 piedi",
+    "desc": "1d8 danni necrotici a distanza."
+  },
+  "elementalism": {
+    "name": "Elementalism",
+    "duration": "Istantanea",
+    "range": "30 piedi",
+    "desc": "Y oBue ecxkeornt Acoirn.trol over the elements, creating one of the following effects within range. You create a breeze strong enough to ripple cloth, stir dust, rustle leaves, and close open doors and shutters, all in a 5-foot Cube. Doors and s hBuettcekrosn b Eeainrgt hh."
+  },
+  "fire_bolt": {
+    "name": "Fire Bolt",
+    "duration": "Instantaneous",
+    "range": "120 feet",
+    "desc": "You hurl a mote of fire at a creature or an object within range. Make a ranged spell attack against the target. On a hit, the target takes 1d10 Fire damage. A Cflaanmtmripab Ulep gobrajedcet .hit by this spell starts burning if it isn’t being worn or carried."
+  },
+  "guidance": {
+    "name": "Guidance",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "Tocco",
+    "desc": "You touch a willing creature and choose a skill. Until the spell ends, the creature adds 1d4 to any ability Guiding Bolt check using the chosen skill."
+  },
+  "light": {
+    "name": "Luce",
+    "duration": "1 ora",
+    "range": "Tocco",
+    "desc": "Un oggetto emette luce per 1 ora."
+  },
+  "mage_hand": {
+    "name": "Mano magica",
+    "duration": "1 minuto",
+    "range": "30 piedi",
+    "desc": "Mano spettrale che manipola oggetti a distanza."
+  },
+  "minor_illusion": {
+    "name": "Minor Illusion",
+    "duration": "1 minuto",
+    "range": "30 piedi",
+    "desc": "Crei suono o immagine illusoria per 1 minuto."
+  },
+  "produce_flame": {
+    "name": "Produce Flame",
+    "duration": "10 minuti",
+    "range": "Sé stessi",
+    "desc": "A flickering flame appears in your hand and remains there for the duration. While there, the flame emits no heat and ignites nothing, and it sheds Bright Light in a 20-foot radius and Dim Light for an additional 20 feet. The spell ends if you cast it again."
+  },
+  "ray_of_frost": {
+    "name": "Ray of Frost",
+    "duration": "Instantaneous",
+    "range": "60 feet",
+    "desc": "A frigid beam of blue-white light streaks toward a creature within range. Make a ranged spell attack against the target. On a hit, it takes 1d8 Cold dama gCea, anntrdi pit sU Sppgereadd eis. reduced by 10 feet until the start of your next turn."
+  },
+  "resistance": {
+    "name": "Resistenza",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "Tocco",
+    "desc": "+1d4 a un tiro salvezza entro 1 minuto."
+  },
+  "sacred_flame": {
+    "name": "Sacred Flame",
+    "duration": "Istantanea",
+    "range": "60 piedi",
+    "desc": "Flame-like radiance descends on a creature that you can see within range. The target must succeed on a Dexterity saving throw or take 1d8 Radiant dama gCea. Tnthrei pta Urpgegtr gaadien.s no benefit from Half Cover or Three-Quarters Cover for this save."
+  },
+  "shillelagh": {
+    "name": "Shillelagh",
+    "duration": "1 minute",
+    "range": "Self",
+    "desc": "A Club or Quarterstaff you are holding is imbued with nature’s power. For the duration, you can use your spellcasting ability instead of Strength for the attack and damage rolls of melee attacks using that weapon, and the weapon’s damage die becomes a d8."
+  },
+  "shocking_grasp": {
+    "name": "Shocking Grasp",
+    "duration": "Instantaneous",
+    "range": "Touch",
+    "desc": "Lightning springs from you to a creature that you try to touch. Make a melee spell attack against the target. On a hit, the target takes 1d8 Lightning damagCea, anntrdi pit Ucapng’rt amdaek.e Opportunity Attacks until the start of its next turn."
+  },
+  "sorcerous_burst": {
+    "name": "Sorcerous Burst",
+    "duration": "Istantanea",
+    "range": "120 piedi",
+    "desc": "You cast sorcerous energy at one creature or object within range. Make a ranged spell attack against the target. On a hit, the target takes 1d8 damage of a type you choose: Acid, Cold, Fire, Lightning, Poison, Psychic, or Thunder."
+  },
+  "spare_the_dying": {
+    "name": "Spare the Dying",
+    "duration": "Istantanea",
+    "range": "15 piedi",
+    "desc": "C hCoaonster aip c Urepagtruarde ew.ithin range that has 0 Hit Points and isn’t dead. The creature becomes Stable. The range doubles when you reach levels 5 (30 feet), 11 (60 feet), and 17 (120 feet). Speak with Animals"
+  },
+  "starry_wisp": {
+    "name": "Starry Wisp",
+    "duration": "Istantanea",
+    "range": "60 piedi",
+    "desc": "You launch a mote of light at one creature or object within range. Make a ranged spell attack against the target. On a hit, the target takes 1d8 Radiant damage, and until the end of your next turn, it emits Dim LiCgahtn itnr iap 1U0p-fgoroatd rea."
+  },
+  "thaumaturgy": {
+    "name": "Thaumaturgia",
+    "duration": "Up to 1 minute",
+    "range": "30 piedi",
+    "desc": "Manifesti un segno del potere divino."
+  },
+  "true_strike": {
+    "name": "True Strike",
+    "duration": "Istantanea",
+    "range": "Sé stessi",
+    "desc": "Guided by a flash of magical insight, you make one attack with the weapon used in the spell’s casting. The attack uses your spellcasting ability for the attack and damage rolls instead of using Strength or Dexterity."
+  },
+  "vicious_mockery": {
+    "name": "Vicious Mockery",
+    "duration": "Istantanea",
+    "range": "60 piedi",
+    "desc": "You unleash a string of insults laced with subtle enchantments at one creature you can see or hear within range. The target must succeed on a Wisdom saving throw or take 1d6 Psychic damage and have DiCsaadnvtrainpt aUgpeg orna dthee."
+  },
+  "alarm": {
+    "name": "Allarme",
+    "duration": "8 ore",
+    "range": "30 piedi",
+    "desc": "Imposta un allarme magico su un'area per 8 ore."
+  },
+  "bane": {
+    "name": "Bane",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "30 piedi",
+    "desc": "Up to three creatures of your choice that you can see within range must each make a Charisma saving throw. Whenever a target that fails this save makes an attack roll or a saving throw before the spell enUdssi,n tgh ea t Harigghete mr-Luestv esul Sbptrealcl tS 1lodt4."
+  },
+  "bless": {
+    "name": "Bless",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "30 piedi",
+    "desc": "You bless up to three creatures within range. Whenever a target makes an attack roll or a saving throw beUfosrineg t hae H sipgehlle ern-Ldesv, ethl eS ptaerllg Selto atd.ds 1d4 to the attack roll or save."
+  },
+  "burning_hands": {
+    "name": "Burning Hands",
+    "duration": "Instantaneous",
+    "range": "Self",
+    "desc": "A thin sheet of flames shoots forth from you. Each creature in a 15-foot Cone makes a Dexterity saving throw, taking 3d6 Fire damage on a failed save or half as much damage on a successful one. FUlsaimngm aa bHlieg ohbejre-cLtesv ienl tShpee Cllo Snleo tt."
+  },
+  "chromatic_orb": {
+    "name": "Chromatic Orb",
+    "duration": "Instantaneous",
+    "range": "90 feet",
+    "desc": "You hurl an orb of energy at a target within range. Choose Acid, Cold, Fire, Lightning, Poison, or Thunder for the type of orb you create, and then make a ranged spell attack against the target. On a hit, the target takes 3d8 damage of the chosen type."
+  },
+  "color_spray": {
+    "name": "Color Spray",
+    "duration": "Instantaneous",
+    "range": "Self",
+    "desc": "You launch a dazzling array of flashing, colorful light. Each creature in a 15-foot Cone originating from you must succeed on a Constitution saving throw or have the Blinded condition until the end of Command your next turn."
+  },
+  "command": {
+    "name": "Command",
+    "duration": "Istantanea",
+    "range": "60 piedi",
+    "desc": "You speak a one-word command to a creature you can see within range. The target must succeed on a Wisdom saving throw or follow the command on its Approach. next turn. Choose the command from these options: The target moves toward you by the Drsohpor."
+  },
+  "comprehend_languages": {
+    "name": "Comprensione lingue",
+    "duration": "1 ora",
+    "range": "Sé stessi",
+    "desc": "Capisci ogni lingua parlata o scritta per 1h."
+  },
+  "create_or_destroy_water": {
+    "name": "Calore metallico",
+    "duration": "Istantanea",
+    "range": "30 piedi",
+    "desc": "Surriscaldi un metallo. 2d8 danni da fuoco."
+  },
+  "detect_evil_and_good": {
+    "name": "Detect Evil and Good",
+    "duration": "Concentrazione, fino a 10 minuti",
+    "range": "Sé stessi",
+    "desc": "For the duration, you sense the location of any AberraHtiaolnlo, wCelestial, Elemental, Fey, Fiend, or Undead within 30 feet of yourself. You also sense whether the spell is active there and, if so, where."
+  },
+  "detect_poison_and_disease": {
+    "name": "Detect Poison and Disease",
+    "duration": "Concentrazione, fino a 10 minuti",
+    "range": "Sé stessi",
+    "desc": "For the duration, you sense the location of poisons, poisonous or venomous creatures, and magical contagions within 30 feet of yourself. You sense the kind of poison, creature, or contagion in each case."
+  },
+  "disguise_self": {
+    "name": "Disguise Self",
+    "duration": "1 hour",
+    "range": "Self",
+    "desc": "You make yourself—including your clothing, armor, weapons, and other belongings on your person— look different until the spell ends. You can seem 1 foot shorter or taller and can appear heavier or lighter."
+  },
+  "dissonant_whispers": {
+    "name": "Dissonant Whispers",
+    "duration": "Istantanea",
+    "range": "60 piedi",
+    "desc": "One creature of your choice that you can see within range hears a discordant melody in its mind. The target makes a Wisdom saving throw."
+  },
+  "divine_favor": {
+    "name": "Divine Favor",
+    "duration": "1 minuto",
+    "range": "Sé stessi",
+    "desc": "Until the spell ends, your attacks with weapons deal Divine Smite an extra 1d4 Radiant damage on a hit."
+  },
+  "entangle": {
+    "name": "Entangle",
+    "duration": "Concentration, up to 1 minute",
+    "range": "90 feet",
+    "desc": "Grasping plants sprout from the ground in a 20-foot square within range. For the duration, these plants turn the ground in the area into Difficult Terrain. They disappear when the spell ends."
+  },
+  "expeditious_retreat": {
+    "name": "Expeditious Retreat",
+    "duration": "Concentrazione, fino a 10 minuti",
+    "range": "Sé stessi",
+    "desc": "You take the Dash action, and until the spell ends, Eyebite you can take that action again as a Bonus Action."
+  },
+  "faerie_fire": {
+    "name": "Faerie Fire",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "60 piedi",
+    "desc": "Objects in a 20-foot Cube within range are outlined in blue, green, or violet light (your choice). Each creature in the Cube is also outlined if it fails a Dexterity saving throw."
+  },
+  "false_life": {
+    "name": "False Life",
+    "duration": "Instantaneous",
+    "range": "Self",
+    "desc": ""
+  },
+  "find_familiar": {
+    "name": "Find Familiar",
+    "duration": "Instantaneous",
+    "range": "10 feet",
+    "desc": "Bat, Cat, Frog, Hawk, YLoizua gradi,n O tchteo speursv,i cOew olf, aR faatm, Rilaiavre, na ,s Sppiridite trh, aWt teaakseesl , an animal form you choose: or another Beast that has a Challenge Rating of 0."
+  },
+  "floating_disk": {
+    "name": "Floating Disk",
+    "duration": "1 hour",
+    "range": "30 feet",
+    "desc": "This spell creates a circular, horizontal plane of force, 3 feet in diameter and 1 inch thick, that floats 3 feet above the ground in an unoccupied space of your choice that you can see within range. The disk remains for the duration and can hold up to 500 pounds."
+  },
+  "fog_cloud": {
+    "name": "Fog Cloud",
+    "duration": "Concentrazione, fino a 1 ora",
+    "range": "120 piedi",
+    "desc": "You create a 20-foot-radius Sphere of fog centered on a point within range. The SGpuhsetr oef iWs Hinedavily Obscured. It lasts for the duration or until a strong w Uinsdin (sgu ac hH aigs hoenreLcerevaetl eSdp belyl Slot. ) disperses it."
+  },
+  "goodberry": {
+    "name": "Goodberry",
+    "duration": "24 hours",
+    "range": "Self",
+    "desc": "Ten berries appear in your hand and are infused with magic for the duration. A creature can take a Bonus Action to eat one berry. Eating a berry restores 1 Hit Point, and the berry provides enough nourishment to sustain a creature for one day."
+  },
+  "grease": {
+    "name": "Rete di ragno",
+    "duration": "1 minuto",
+    "range": "60 piedi",
+    "desc": "Ragnatela difficile 6m³. TS FOR o trattenuti."
+  },
+  "guiding_bolt": {
+    "name": "Guiding Bolt",
+    "duration": "1 round",
+    "range": "120 piedi",
+    "desc": "You hurl a bolt of light toward a creature within range. Make a ranged spell attack against the target. On a hit, it takes 4d6 Radiant damage, and the n eUxsti antgt aac kH irgohlle mr-aLdeev ealg Sapinesltl Sitl obte.f ore the end of your next turn has Advantage."
+  },
+  "healing_word": {
+    "name": "Healing Word",
+    "duration": "Istantanea",
+    "range": "60 piedi",
+    "desc": "A creature of your choice that you can see within raUnsgien rge ag aHinigsh HeirtPLoeivnetls S epqeulla Sl ltoot 2.d4 plus your spellcasting ability modifier. The healing inHeat Metal creases by 2d4 for each spell slot level above 1."
+  },
+  "heroism": {
+    "name": "Heroism",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "Tocco",
+    "desc": "A willing creature you touch is imbued with bravery. Until the spell ends, the creature is immune to the Frightened condition and gains Temporary Hit PoUinsitns ge qau Hail gtho eyro-uLre vseple Sllpcaesllt Sinlogt a.bility modifier at the start of each of its turns."
+  },
+  "hex": {
+    "name": "Hex",
+    "duration": "Concentrazione, fino a 1 ora",
+    "range": "90 piedi",
+    "desc": "You place a curse on a creature that you can see within range. Until the spell ends, you deal an extra 1d6 Necrotic damage to the target whenever you hit it with an attack roll. Also, choose one ability when you cast the spell."
+  },
+  "hideous_laughter": {
+    "name": "Hideous Laughter",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "30 piedi",
+    "desc": "One creature of your choice that you can see within range makes a Wisdom saving throw. On a failed save, it has the Prone and Incapacitated conditions for the duration."
+  },
+  "hunters_mark": {
+    "name": "Hunter’s Mark",
+    "duration": "Concentrazione, fino a 1 ora",
+    "range": "90 piedi",
+    "desc": "You magically mark one creature you can see within range as your quarry. Until the spell ends, you deal an extra 1d6 Force damage to the target whenever you hit it with an attack roll. You also have Advantage on any Wisdom (Perception or Survival) check you make to find it."
+  },
+  "ice_knife": {
+    "name": "Ice Knife",
+    "duration": "Istantanea",
+    "range": "60 piedi",
+    "desc": "You create a shard of ice and fling it at one creature within range. Make a ranged spell attack against the target. On a hit, the target takes 1d10 Piercing damage. Hit or miss, the shard then explodes."
+  },
+  "identify": {
+    "name": "Identificazione",
+    "duration": "Istantanea",
+    "range": "Tocco",
+    "desc": "Rivela le proprietà magiche di un oggetto."
+  },
+  "illusory_script": {
+    "name": "Illusory Script",
+    "duration": "10 giorni",
+    "range": "Tocco",
+    "desc": "You write on parchment, paper, or another suitable material and imbue it with an illusion that lasts for the duration."
+  },
+  "inflict_wounds": {
+    "name": "Infliggere ferite",
+    "duration": "Istantanea",
+    "range": "Tocco",
+    "desc": "Tocco necrotico. 3d10 danni necrotici. Tiro attacco in mischia."
+  },
+  "longstrider": {
+    "name": "Longstrider",
+    "duration": "1 ora",
+    "range": "Tocco",
+    "desc": "YoUus tionugc ah Ha icgrheeartu-Lreev. Speed increases by 10 feet until the spell ends. You can target one additional creature for each spell slot level above 1. Mage Armor"
+  },
+  "mage_armor": {
+    "name": "Mage Armor",
+    "duration": "8 ore",
+    "range": "Tocco",
+    "desc": "You touch a willing creature who isn’t wearing armor. Until the spell ends, the target’s base AC becomes 13 plus its Dexterity modifier. The spell ends Mage Hand early if the target dons armor."
+  },
+  "magic_missile": {
+    "name": "Magic Missile",
+    "duration": "Instantaneous",
+    "range": "120 feet",
+    "desc": "You create three glowing darts of magical force. Each dart strikes a creature of your choice that you can see within range. A dart deals 1d4 + 1 Force damage to its target. The darts all strike simultaneo uUsslyin, agn ad Hyoiguh cearn-L deivreelc tS ptheellm S ltoot h."
+  },
+  "purify_food_and_drink": {
+    "name": "Purify Food and Drink",
+    "duration": "Istantanea",
+    "range": "10 piedi",
+    "desc": "You remove poison and rot from nonmagical food and drink in a 5-foot-radius Sphere centered on a point within range. Raise Dead"
+  },
+  "ray_of_sickness": {
+    "name": "Ray of Sickness",
+    "duration": "Instantaneous",
+    "range": "60 feet",
+    "desc": "You shoot a greenish ray at a creature within range. Make a ranged spell attack against the target. On a hiUt, stihneg t aa rHgiegth teark-eLse 2vde8l S Ppoeilslo Snl odta.mage and has the Poisoned condition until the end of your next turn."
+  },
+  "sanctuary": {
+    "name": "Rifugio",
+    "duration": "1 minuto",
+    "range": "30 piedi",
+    "desc": "Protezione su una creatura. Chi attacca deve superare TS SAG."
+  },
+  "shield_of_faith": {
+    "name": "Scudo della fede",
+    "duration": "Concentrazione, fino a 10 minuti",
+    "range": "60 piedi",
+    "desc": "+2 CA a una creatura per 10 min."
+  },
+  "silent_image": {
+    "name": "Silent Image",
+    "duration": "Concentration, up to 10 minutes",
+    "range": "60 feet",
+    "desc": "You create the image of an object, a creature, or some other visible phenomenon that is no larger than a 15-foot Cube. The image appears at a spot within range and lasts for the duration. The image is purely visual; it isn’t accompanied by sound, smell, or other sensory effects."
+  },
+  "sleep": {
+    "name": "Sonno",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "60 piedi",
+    "desc": "Addormenta creature per HP totali (5d8, non-morti e immuni esclusi)."
+  },
+  "speak_with_animals": {
+    "name": "Speak with Animals",
+    "duration": "10 minuti",
+    "range": "Sé stessi",
+    "desc": "For the duration, you can comprehend and verbally communicate with Beasts, and you can use any of the Influence action’s skill options with them."
+  },
+  "strength": {
+    "name": "Strength.",
+    "duration": "24 ore",
+    "range": "30 piedi",
+    "desc": "Target a Beast that you can see within range. The target must succeed on a Wisdom saving throw or have the Charmed condition for the duration. If you orU osnine go fa y Houigrh aelrli-eLse dveeal lSsp deallm Salogte. to the target, the spells ends."
+  },
+  "thunderwave": {
+    "name": "Ululato di tuono",
+    "duration": "Istantanea",
+    "range": "Sé stessi",
+    "desc": "Impulso di tuono 3m. 2d8 danni da tuono, TS COS o spinto 3m."
+  },
+  "unseen_servant": {
+    "name": "Unseen Servant",
+    "duration": "1 ora",
+    "range": "60 piedi",
+    "desc": "This spell creates an Invisible, mindless, shapeless, Medium force that performs simple tasks at your command until the spell ends. The servant springs into existence in an unoccupied space on the ground within range."
+  },
+  "acid_arrow": {
+    "name": "Dardo acido di Melf",
+    "duration": "Istantanea",
+    "range": "90 piedi",
+    "desc": "4d4 danni acido ora + 2d4 fine prossimo turno."
+  },
+  "alter_self": {
+    "name": "Alter Self",
+    "duration": "Concentration, up to 1 hour",
+    "range": "Self",
+    "desc": "You alter your physical form. Choose one of the following options. Its effects last for the duration, duArqinuga twich Aicdha ypotua tciaonn t.ake a Magic action to replace the option you chose with a different one."
+  },
+  "animal_messenger": {
+    "name": "Animal Messenger",
+    "duration": "24 ore",
+    "range": "30 piedi",
+    "desc": "A Tiny Beast of your choice that you can see within range must succeed on a Charisma saving throw, or it attempts to deliver a message for you (if the target’s Challenge Rating isn’t 0, it automatically succeeds)."
+  },
+  "arcane_lock": {
+    "name": "Tiro di scudi",
+    "duration": "Fino a dispellamento",
+    "range": "Tocco",
+    "desc": "Scudi magici. Protezione su più creature."
+  },
+  "arcanists_magic_aura": {
+    "name": "Arcanist’s Magic Aura",
+    "duration": "24 ore",
+    "range": "Tocco",
+    "desc": "With a touch, you place an illusion on a willing creature or an object that isn’t being worn or carried. A creature gains the Mask effect below, and an object gains the False Aura effect below. The effect lasts for the duration."
+  },
+  "augury": {
+    "name": "Augury",
+    "duration": "Istantanea",
+    "range": "Sé stessi",
+    "desc": "You receive an omen from an otherworldly entity about the results of a course of action that you plan to take within the next 30 minutes. The GM chooses tOhem oemnesn from the Omens table."
+  },
+  "barkskin": {
+    "name": "Barkskin",
+    "duration": "1 hour",
+    "range": "Touch",
+    "desc": "You touch a willing creature. Until the spell ends, the target’s skin assumes a bark-like appearance, and the target has an Armor Class of 17 if its AC is Beacon of Hope lower than that."
+  },
+  "blindnessdeafness": {
+    "name": "Blindness/Deafness",
+    "duration": "1 minuto",
+    "range": "120 piedi",
+    "desc": "One creature that you can see within range must succeed on a Constitution saving throw, or it has the Blinded or Deafened condition (your choice) for the duration. At the end of each of its turns, the taUrgseint gre ap eHaitgsh tehreLseavveel, eSnpdeliln Sgl tohte."
+  },
+  "blur": {
+    "name": "Blur",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "Sé stessi",
+    "desc": "Your body becomes blurred. For the duration, any creature has Disadvantage on attack rolls against you. An attacker is immune to this effect if it perBurning Hands ceives you with Blindsight or Truesight."
+  },
+  "calm_emotions": {
+    "name": "Calm Emotions",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "60 piedi",
+    "desc": "Each Humanoid in a 20-foot-radius Sphere centered on a point you choose within range must succeed on a Charisma saving throw or be affected by one of the following effects (choose for each creature): • The creature has Immunity to the Charmed and Frightened conditions until the s"
+  },
+  "continual_flame": {
+    "name": "Continual Flame",
+    "duration": "Fino a dispellamento",
+    "range": "Tocco",
+    "desc": "A flame springs from an object that you touch. The effect casts Bright Light in a 20-foot radius and Dim Light for an additional 20 feet. It looks like a regular flame, but it creates no heat and consumes no fuel."
+  },
+  "darkness": {
+    "name": "Darkness",
+    "duration": "Concentrazione, fino a 10 minuti",
+    "range": "60 piedi",
+    "desc": "For the duration, magical Darkness spreads from a point within range and fills a 15-foot-radius Sphere. Darkvision can’t see through it, and nonmagical light can’t illuminate it."
+  },
+  "detect_thoughts": {
+    "name": "Detect Thoughts",
+    "duration": "Concentration, up to 1 minute",
+    "range": "Self",
+    "desc": "You activate one of the effects below. Until the spell enSdesn, syeo uT hcaonu gahcttisv.ate either effect as a Magic action on your later turns. You sense the presence of thoughts within 30 feet of yourself that belong to creatures that know languages or are telepathic."
+  },
+  "dragons_breath": {
+    "name": "Dragon’s Breath",
+    "duration": "Concentration, up to 1 minute",
+    "range": "Touch",
+    "desc": "You touch one willing creature, and choose Acid, Cold, Fire, Lightning, or Poison. Until the spell ends, the target can take a Magic action to exhale a 15-foot Cone."
+  },
+  "enlargereduce": {
+    "name": "Enlarge/Reduce",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "30 piedi",
+    "desc": "For the duration, the spell enlarges or reduces a creature or an object you can see within range (see the chosen effect below). A targeted object must be neither worn nor carried. If the target is an unwilling creature, it can make a Constitution saving throw."
+  },
+  "enthrall": {
+    "name": "Enthrall",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "60 piedi",
+    "desc": "You weave a distracting string of words, causing creatures of your choice that you can see within range to make a Wisdom saving throw. Any creature you or your companions are fighting automatically succeeds on this save."
+  },
+  "find_steed": {
+    "name": "Find Steed",
+    "duration": "Istantanea",
+    "range": "30 piedi",
+    "desc": "You summon an otherworldly being tOhatht eaprwpeoarrlsd alys aS tleoeydal steed in an unoccupied space of your choice within range. This creature uses the stat block. If you already have a steed from this spell, the steed is replaced by the new one."
+  },
+  "find_traps": {
+    "name": "Find Traps",
+    "duration": "Istantanea",
+    "range": "120 piedi",
+    "desc": "You sense any trap within range that is within line of sight. A trap, for the purpose of this spell, includes any objectA olarr mmechaGnlyipsmh o tfh Wata wrdaisn gcreated to cause damage or other danger."
+  },
+  "flame_blade": {
+    "name": "Flame Blade",
+    "duration": "Concentrazione, fino a 10 minuti",
+    "range": "Sé stessi",
+    "desc": "You evoke a fiery blade in your free hand. The blade is similar in size and shape to a scimitar, and it lasts for the duration. If you let go of the blade, it disappears, but you can evoke it again as a Bonus Action."
+  },
+  "flaming_sphere": {
+    "name": "Nebbia fittissima",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "60 piedi",
+    "desc": "Nube di nebbia pesante 6m raggio. Area oscura."
+  },
+  "gentle_repose": {
+    "name": "Gentle Repose",
+    "duration": "10 giorni",
+    "range": "Tocco",
+    "desc": "You touch a corpse or other remains. For the duration, the target is protected from decay and can’t become Undead."
+  },
+  "gust_of_wind": {
+    "name": "Gust of Wind",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "Sé stessi",
+    "desc": "A Line of strong wind 60 feet long and 10 feet wide blasts from you in a direction you choose for the duration. Each creature in the Line must succeed on a Strength saving throw or be pushed 15 feet away from you in a direction following the Line."
+  },
+  "heat_metal": {
+    "name": "Heat Metal",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "60 piedi",
+    "desc": "Choose a manufactured metal object, such as a metal weapon or a suit of Heavy or Medium metal armor, that you can see within range. You cause the object to glow red-hot. Any creature in physical contact with the object takes 2d8 Fire damage when you cast the spell."
+  },
+  "invisibility": {
+    "name": "Invisibility",
+    "duration": "Concentration, up to 1 hour",
+    "range": "Touch",
+    "desc": "A creature you touch has the Invisible condition until the spell ends. The spell ends early immediately afUtesri nthge a t aHriggehte mr-aLkeevse la Snp aetltla Sclko rt.oll, deals damage, or casts a spell."
+  },
+  "knock": {
+    "name": "Knock",
+    "duration": "Istantanea",
+    "range": "60 piedi",
+    "desc": "Choose an object that you can see within range. The object can be a door, a box, a chest, a set of manacles, a padlock, or another object that contains a mundane or magical means that prevents access."
+  },
+  "levitate": {
+    "name": "Levitate",
+    "duration": "Concentration, up to 10 minutes",
+    "range": "60 feet",
+    "desc": "One creature or loose object of your choice that you can see within range rises vertically up to 20 feet and remains suspended there for the duration. The spell can levitate an object that weighs up to 500 pounds."
+  },
+  "locate_animals_or_plants": {
+    "name": "Locate Animals or Plants",
+    "duration": "Istantanea",
+    "range": "Sé stessi",
+    "desc": "Describe or name a specific kind of Beast, Plant creature, or nonmagical plant. You learn the direction and distance to the closest creature or plant of that kind within 5 miles, if any are present."
+  },
+  "magic_mouth": {
+    "name": "Magic Mouth",
+    "duration": "Fino a dispellamento",
+    "range": "30 piedi",
+    "desc": "You implant a message within an object in range—a message that is uttered when a trigger condition is met. Choose an object that you can see and that isn’t being worn or carried by another creature."
+  },
+  "mind_spike": {
+    "name": "Mind Spike",
+    "duration": "Concentrazione, fino a 1 ora",
+    "range": "120 piedi",
+    "desc": "You drive a spike of psionic energy into the mind of one creature you can see within range. The target makes a Wisdom saving throw, taking 3d8 Psychic damage on a failed save or half as much damage on a successful one."
+  },
+  "mirror_image": {
+    "name": "Mirror Image",
+    "duration": "1 minute",
+    "range": "Self",
+    "desc": "Three illusory duplicates of yourself appear in your space. Until the spell ends, the duplicates move with you and mimic your actions, shifting position so it’s impossible to track which image is real."
+  },
+  "misty_step": {
+    "name": "Misty Step",
+    "duration": "Istantanea",
+    "range": "Sé stessi",
+    "desc": "Briefly surrounded by silvery mist, you teleport up Modify Memory to 30 feet to an unoccupied space you can see."
+  },
+  "moonbeam": {
+    "name": "Raggio di luna",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "120 piedi",
+    "desc": "Fascio di luce lunare. 2d10 danni radianti ogni turno."
+  },
+  "pass_without_trace": {
+    "name": "Passare senza tracce",
+    "duration": "Concentrazione, fino a 1 ora",
+    "range": "Sé stessi",
+    "desc": "+10 alle prove Furtività per te e alleati entro 9m. Senza tracce."
+  },
+  "phantasmal_force": {
+    "name": "Phantasmal Force",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "60 piedi",
+    "desc": "You attempt to craft an illusion in the mind of a creature you can see within range. The target makes an Intelligence saving throw."
+  },
+  "prayer_of_healing": {
+    "name": "Prayer of Healing",
+    "duration": "Instantaneous",
+    "range": "30 feet",
+    "desc": "Up to five creatures of your choice who remain within range for the spell’s entire casting gain the benefits of a Short Rest and also regain 2d8 Hit Points. A creature can’t be affected by this spell again until that creature finishes a Long Rest."
+  },
+  "protection_from_poison": {
+    "name": "Protection from Poison",
+    "duration": "1 ora",
+    "range": "Tocco",
+    "desc": "You touch a creature and end the Poisoned condition on it. For the duration, the target has Advantage on saving throws to avoid or end the Poisoned Purify Food and Drink condition, and it has Resistance to Poison damage."
+  },
+  "ray_of_enfeeblement": {
+    "name": "Ray of Enfeeblement",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "60 piedi",
+    "desc": "A beam of enervating energy shoots from you toward a creature within range. The target must make a Constitution saving throw. On a successful save, the target has Disadvantage on the next attack roll it makes until the start of your next turn."
+  },
+  "rope_trick": {
+    "name": "Rope Trick",
+    "duration": "1 ora",
+    "range": "Tocco",
+    "desc": "You touch a rope. One end of it hovers upward until the rope hangs perpendicular to the ground or the rope reaches a ceiling. At the rope’s upper end, an Invisible 3-foot-by-5-foot portal opens to an extradimensional space that lasts until the spell ends."
+  },
+  "scorching_ray": {
+    "name": "Scorching Ray",
+    "duration": "Istantanea",
+    "range": "120 piedi",
+    "desc": "You hurl three fiery rays. You can hurl them at one target within range or at several. Make a ranged s pUeslli natgt aac Hk ifgohr eera-cLhe vraeyl .S Opne lal Shliot,t t.he target takes 2d6 Fire damage. You create one additional ray for each spell slot level above 2."
+  },
+  "see_invisibility": {
+    "name": "See Invisibility",
+    "duration": "1 hour",
+    "range": "Self",
+    "desc": "For the duration, you see creatures and objects that have the Invisible condition as if they were visible, and you can see into the Ethereal Plane. Creatures Seeming and objects there appear ghostly."
+  },
+  "shatter": {
+    "name": "Shatter",
+    "duration": "Istantanea",
+    "range": "60 piedi",
+    "desc": "A loud noise erupts from a point of your choice within range. Each creature in a 10-foot-radius Sphere centered there makes a Constitution saving throw, taking 3d8 Thunder damage on a failed save or half as much damage on a successful one."
+  },
+  "silence": {
+    "name": "Silenzio",
+    "duration": "Concentrazione, fino a 10 minuti",
+    "range": "120 piedi",
+    "desc": "Nessun suono in sfera 6m. Nessun incantesimo verbale."
+  },
+  "spider_climb": {
+    "name": "Spider Climb",
+    "duration": "Concentrazione, fino a 1 ora",
+    "range": "Tocco",
+    "desc": "Until the spell ends, one willing creature you touch gains the ability to move up, down, and across vertical surfaces and along ceilings, while leaving itsU hsainngd sa fHreigeh. Tehr-eL teavregle Stp aelsllo S gloatin.s a Climb Speed equal to its Speed."
+  },
+  "spike_growth": {
+    "name": "Spike Growth",
+    "duration": "Concentration, up to 10 minutes",
+    "range": "150 feet",
+    "desc": "The ground in a 20-foot-radius Sphere centered on a point within range sprouts hard spikes and thorns. The area becomes Difficult Terrain for the duration. When a creature moves into or within the area, it takes 2d4 Piercing damage for every 5 feet it travels."
+  },
+  "spiritual_weapon": {
+    "name": "Spiritual Weapon",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "60 piedi",
+    "desc": "You create a floating, spectral force that resembles a weapon of your choice and lasts for the duration. The force appears within range in a space of your choice, and you can immediately make one melee spell attack against one creature within 5 feet of the force."
+  },
+  "warding_bond": {
+    "name": "Warding Bond",
+    "duration": "1 hour",
+    "range": "Touch",
+    "desc": "You touch another creature that is willing and create a mystic connection between you and the target until the spell ends. While the target is within 60 feet of you, it gains a +1 bonus to AC and saving throws, and it has Resistance to all damage."
+  },
+  "web": {
+    "name": "Ragnatela",
+    "duration": "Concentrazione, fino a 1 ora",
+    "range": "60 piedi",
+    "desc": "Ragnatele in 6m³. Terreno difficile. TS DES o trattenuti."
+  },
+  "zone_of_truth": {
+    "name": "Zone of Truth",
+    "duration": "10 minuti",
+    "range": "60 piedi",
+    "desc": "You create a magical zone that guards against deception in a 15-foot-radius Sphere centered on a point within range. Until the spell ends, a creature that enters the spell’s area for the first time on a turn or starts its turn there makes a Charisma saving throw."
+  },
+  "animate_dead": {
+    "name": "Animate Dead",
+    "duration": "Istantanea",
+    "range": "10 piedi",
+    "desc": "Choose a pile of bones oSrk ae lceotropnse of a Medium or SmalZl oHmumbiaenoid within range. The target becomes an Undead creature: a if you chose bones or a if you chose a corpse (see “Monsters” for the stat blocks)."
+  },
+  "beacon_of_hope": {
+    "name": "Beacon of Hope",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "30 piedi",
+    "desc": "Choose any number of creatures within range. For the duration, each target has Advantage on Wisdom saving throws and Death Saving Throws and regains the maximum number of Hit Points possible Befuddlement from any healing."
+  },
+  "bestow_curse": {
+    "name": "Bestow Curse",
+    "duration": "Concentration, up to 1 minute",
+    "range": "Touch",
+    "desc": "You touch a creature, which must succeed on a Wisdom saving throw or become cursed for the duration. Until the curse ends, the target suffers one of the following effects of your choice: • Choose one ability."
+  },
+  "blink": {
+    "name": "Blink",
+    "duration": "1 minute",
+    "range": "Self",
+    "desc": "Roll 1d6 at the end of each of your turns for the duration. On a roll of 4–6, you vanish from your current plane of existence and appear in the Ethereal Plane (the spell ends instantly if you are already on that plane)."
+  },
+  "call_lightning": {
+    "name": "Chiamata del fulmine",
+    "duration": "Concentrazione, fino a 10 minuti",
+    "range": "120 piedi",
+    "desc": "Nube temporalesca. 3d10 danni da fulmine ogni turno per 10 min."
+  },
+  "clairvoyance": {
+    "name": "Clairvoyance",
+    "duration": "Concentrazione, fino a 10 minuti",
+    "range": "1 miglio",
+    "desc": "You create an Invisible sensor within range in a location familiar to you (a place you have visited or seen before) or in an obvious location that is unfamiliar to you (such as behind a door, around a corner, or in a grove of trees)."
+  },
+  "conjure_animals": {
+    "name": "Conjure Animals",
+    "duration": "Concentrazione, fino a 10 minuti",
+    "range": "60 piedi",
+    "desc": "You conjure nature spirits that appear as a Large pack of spectral, intangible animals in an unoccupied space you can see within range. The pack lasts for the duration, and you choose the spirits’ animal form, such as wolves, serpents, or birds."
+  },
+  "create_food_and_water": {
+    "name": "Create Food and Water",
+    "duration": "Istantanea",
+    "range": "30 piedi",
+    "desc": "You create 45 pounds of food and 30 gallons of fresh water on the ground or in containers within range—both useful in fending off the hazards of malnutrition and dehydration. The food is bland but nourishing and looks like a food of your choice, and the water is clean."
+  },
+  "fear": {
+    "name": "Fear",
+    "duration": "Concentration, up to 1 minute",
+    "range": "Self",
+    "desc": "Each creature in a 30-foot Cone must succeed on a Wisdom saving throw or drop whatever it is holding and have the Frightened condition for the duration."
+  },
+  "fireball": {
+    "name": "Fireball",
+    "duration": "Instantaneous",
+    "range": "150 feet",
+    "desc": "A bright streak flashes from you to a point you choose within range and then blossoms with a low roar into a fiery explosion."
+  },
+  "fly": {
+    "name": "Fly",
+    "duration": "Concentration, up to 10 minutes",
+    "range": "Touch",
+    "desc": "You touch a willing creature. For the duration, the target gains a Fly Speed of 60 feet and can hover. WUhseinn tgh ae Hspigelhl eern-dLse,v tehle S tpaerlgl eStl ofatl.ls if it is still aloft unless it can stop the fall."
+  },
+  "gaseous_form": {
+    "name": "Gaseous Form",
+    "duration": "Concentration, up to 1 hour",
+    "range": "Touch",
+    "desc": "A willing creature you touch shape-shifts, along with everything it’s wearing and carrying, into a misty cloud for the duration. The spell ends on the target if it drops to 0 Hit Points or if it takes a Magic action to end the spell on itself."
+  },
+  "glyph_of_warding": {
+    "name": "Glyph of Warding",
+    "duration": "Until dispelled or triggered",
+    "range": "Tocco",
+    "desc": "You inscribe a glyph that later unleashes a magical effect. You inscribe it either on a surface (such as a table or a section of floor) or within an object that can be closed (such as a book or chest) to conceal the glyph."
+  },
+  "haste": {
+    "name": "Haste",
+    "duration": "Concentration, up to 1 minute",
+    "range": "30 feet",
+    "desc": "Choose a willing creature that you can see within range. Until the spell ends, the target’s Speed is doubled, it gains a +2 bonus to Armor Class, it has Advantage on Dexterity saving throws, and it gains an additional action on each of its turns."
+  },
+  "hypnotic_pattern": {
+    "name": "Hypnotic Pattern",
+    "duration": "Concentration, up to 1 minute",
+    "range": "120 feet",
+    "desc": "You create a twisting pattern of colors in a 30-foot Cube within range. The pattern appears for a moment and vanishes. Each creature in the area who can see the pattern must succeed on a Wisdom saving throw or have the Charmed condition for the duration."
+  },
+  "lightning_bolt": {
+    "name": "Lightning Bolt",
+    "duration": "Instantaneous",
+    "range": "Self",
+    "desc": "A stroke of lightning forming a 100-foot-long, 5-foot-wide Line blasts out from you in a direction you choose. Each creature in the Line makes a Dexterity saving throw, taking 8d6 Lightning damage o nU as ifnagil ead H siagvhee orrLheavlef la Ss pmeullc Shl odta."
+  },
+  "magic_circle": {
+    "name": "Magic Circle",
+    "duration": "1 hour",
+    "range": "10 feet",
+    "desc": "You create a 10-foot-radius, 20-foot-tall Cylinder of magical energy centered on a point on the ground that you can see within range. Glowing runes appear wherever the Cylinder intersects with the floor or other surface."
+  },
+  "major_image": {
+    "name": "Major Image",
+    "duration": "Concentration, up to 10 minutes",
+    "range": "120 feet",
+    "desc": "You create the image of an object, a creature, or some other visible phenomenon that is no larger than a 20-foot Cube. The image appears at a spot that you can see within range and lasts for the duration."
+  },
+  "mass_healing_word": {
+    "name": "Mass Healing Word",
+    "duration": "Istantanea",
+    "range": "60 piedi",
+    "desc": "Up to six creatures of your choice that you can see wUitshiinng r aan Hgieg rheegra-iLne Hveitl SPpoeinllt sS leoqtu.al to 2d4 plus your spellcasting ability modifier. The healing inMass Suggestion creases by 1d4 for each spell slot level above 3."
+  },
+  "meld_into_stone": {
+    "name": "Meld into Stone",
+    "duration": "8 ore",
+    "range": "Tocco",
+    "desc": "You step into a stone object or surface large enough to fully contain your body, merging yourself and your equipment with the stone for the duration. You must touch the stone to do so. Nothing of your presence remains visible or otherwise detectable by nonmagical senses."
+  },
+  "nondetection": {
+    "name": "Nondetection",
+    "duration": "8 ore",
+    "range": "Tocco",
+    "desc": "For the duration, you hide a target that you touch from Divination spells. The target can be a willing creature, or it can be a place or an object no larger than 10 feet in any dimension."
+  },
+  "phantom_steed": {
+    "name": "Phantom Steed",
+    "duration": "1 ora",
+    "range": "30 piedi",
+    "desc": "A Large, quasi-real, horselike creature appears on the ground in an unoccupied space of your choice within range. You decide the creature’s appearance, and it is equipped with a saddle, bit, and bridle."
+  },
+  "remove_curse": {
+    "name": "Remove Curse",
+    "duration": "Instantaneous",
+    "range": "Touch",
+    "desc": "At your touch, all curses affecting one creature or object end. If the object is a cursed magic item, its curse remains, but the spell breaks its owner’s Attunement to the object so it can be removed or Resilient Sphere discarded."
+  },
+  "revivify": {
+    "name": "Revivify",
+    "duration": "Istantanea",
+    "range": "Tocco",
+    "desc": "You touch a creature that has died within the last minute. That creature revives with 1 Hit Point. This spell can’t revive a creature that has died of old age, Rope Trick nor does it restore any missing body parts."
+  },
+  "sending": {
+    "name": "Sending",
+    "duration": "Istantanea",
+    "range": "Illimitato",
+    "desc": "You send a short message of 25 words or fewer to a creature you have met or a creature described to you by someone who has met it. The target hears the message in its mind, recognizes you as the sender if it knows you, and can answer in a like manner immediately."
+  },
+  "sleet_storm": {
+    "name": "Tempesta di neve",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "150 piedi",
+    "desc": "2d8 danni da freddo + bersaglio cieco in area cilindrica."
+  },
+  "slow": {
+    "name": "Slow",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "120 piedi",
+    "desc": "You alter time around up to six creatures of your choice in a 40-foot Cube within range. Each target must succeed on a Wisdom saving throw or be affected by this spell for the duration."
+  },
+  "speak_with_dead": {
+    "name": "Speak with Dead",
+    "duration": "10 minutes",
+    "range": "10 feet",
+    "desc": "You grant the semblance of life to a corpse of your choice within range, allowing it to answer questions you pose. The corpse must have a mouth, and this spell fails if the deceased creature was Undead when it died."
+  },
+  "speak_with_plants": {
+    "name": "Speak with Plants",
+    "duration": "10 minuti",
+    "range": "Sé stessi",
+    "desc": "You imbue plants in an immobile 30-foot Emanation with limited sentience and animation, giving them the ability to communicate with you and follow your simple commands."
+  },
+  "spirit_guardians": {
+    "name": "Guardiani spirituali",
+    "duration": "Concentrazione, fino a 10 minuti",
+    "range": "Sé stessi",
+    "desc": "Spiriti tutelari in 4,5m raggio. 3d8 danni a nemici che entrano."
+  },
+  "stinking_cloud": {
+    "name": "Stinking Cloud",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "90 piedi",
+    "desc": "You create a 20-foot-radius Sphere of yellow, nauseating gas centered on a point within range. The cloud is Heavily ObGscuusrt eodf .W Tihned cloud lingers in the air for the duration or until a strong wind (such as the one created by ) disperses it."
+  },
+  "tiny_hut": {
+    "name": "Tiny Hut",
+    "duration": "8 ore",
+    "range": "Sé stessi",
+    "desc": "A 10-foot Emanation springs into existence around you and remains stationary for the duration. The spell fails when you cast it if the Emanation isn’t big enough to fully encapsulate all creatures in its area."
+  },
+  "vampiric_touch": {
+    "name": "Vampiric Touch",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "Sé stessi",
+    "desc": "The touch of your shadow-wreathed hand can siphon life force from others to heal your wounds. Make a melee spell attack against one creature within reach. On a hit, the target takes 3d6 Necrotic damage, and you regain Hit Points equal to half the amount of Necrotic damage dealt."
+  },
+  "water_walk": {
+    "name": "Water Walk",
+    "duration": "1 ora",
+    "range": "30 piedi",
+    "desc": "This spell grants the ability to move across any liquid surface—such as water, acid, mud, snow, quicksand, or lava—as if it were harmless solid ground (creatures crossing molten lava can still take damage from the heat)."
+  },
+  "wind_wall": {
+    "name": "Wind Wall",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "120 piedi",
+    "desc": "A wall of strong wind rises from the ground at a point you choose within range. You can make the wall up to 50 feet long, 15 feet high, and 1 foot thick. You can shape the wall in any way you choose so long as it makes one continuous path along the ground."
+  },
+  "arcane_eye": {
+    "name": "Arcano occhio",
+    "duration": "Concentrazione, fino a 1 ora",
+    "range": "30 piedi",
+    "desc": "Occhio invisibile che si muove 9m/turno. Visione nel buio."
+  },
+  "aura_of_life": {
+    "name": "Aura of Life",
+    "duration": "Concentration, up to 10 minutes",
+    "range": "Self",
+    "desc": "An aura radiates from you in a 30-foot Emanation for the duration. While in the aura, you and your allies have Resistance to Necrotic damage, and your Hit Point maximums can’t be reduced."
+  },
+  "black_tentacles": {
+    "name": "Black Tentacles",
+    "duration": "Concentration, up to 1 minute",
+    "range": "90 feet",
+    "desc": "Squirming, ebony tentacles fill a 20-foot square on ground that you can see within range. For the duration, these tentacles turn the ground in that area into Difficult Terrain. Each creature in that area makes a Strength saving throw."
+  },
+  "compulsion": {
+    "name": "Compulsion",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "30 piedi",
+    "desc": "Each creature of your choice that you can see within range must succeed on a Wisdom saving throw or have the Charmed condition until the spell ends. For the duration, you can take a Bonus Action to designate a direction that is horizontal to you."
+  },
+  "confusion": {
+    "name": "Confusione",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "90 piedi",
+    "desc": "Fino a 6 creature agiscono in modo caotico per 1 min."
+  },
+  "conjure_minor_elementals": {
+    "name": "Conjure Minor Elementals",
+    "duration": "Concentrazione, fino a 10 minuti",
+    "range": "Sé stessi",
+    "desc": "You conjure spirits from the Elemental Planes that flit around you in a 15-foot Emanation for the duration. Until the spell ends, any attack you make deals an extra 2d8 damage when you hit a creature in the Emanation."
+  },
+  "conjure_woodland_beings": {
+    "name": "Conjure Woodland Beings",
+    "duration": "Concentrazione, fino a 10 minuti",
+    "range": "Sé stessi",
+    "desc": "You conjure nature spirits that flit around you in a 10-foot Emanation for the duration."
+  },
+  "control_water": {
+    "name": "Control Water",
+    "duration": "Concentration, up to 10 minutes",
+    "range": "300 feet",
+    "desc": "Until the spell ends, you control any water inside an area you choose that is a Cube up to 100 feet on a side, using one of the following effects. As a Magic a cFtiloono do.n your later turns, you can repeat the same effect or choose a different one."
+  },
+  "death_ward": {
+    "name": "Death Ward",
+    "duration": "8 hours",
+    "range": "Touch",
+    "desc": "You touch a creature and grant it a measure of protection from death. The first time the target would drop to 0 Hit Points before the spell ends, the target instead drops to 1 Hit Point, and the spell ends."
+  },
+  "dimension_door": {
+    "name": "Dimensione porta",
+    "duration": "Istantanea",
+    "range": "500 piedi",
+    "desc": "Teletrasporto entro 500m verso luogo conosciuto."
+  },
+  "divination": {
+    "name": "Divination",
+    "duration": "Istantanea",
+    "range": "Sé stessi",
+    "desc": "This spell puts you in contact with a god or a god’s servants. You ask one question about a specific goal, event, or activity to occur within 7 days. The GM offers a truthful reply, which might be a short phrase or cryptic rhyme."
+  },
+  "dominate_beast": {
+    "name": "Dominate Beast",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "60 piedi",
+    "desc": "One Beast you can see within range must succeed on a Wisdom saving throw or have the Charmed condition for the duration. The target has Advantage on the save if you or your allies are fighting it."
+  },
+  "fabricate": {
+    "name": "Fabbricare",
+    "duration": "Istantanea",
+    "range": "120 piedi",
+    "desc": "Crei un oggetto da materie prime."
+  },
+  "faithful_hound": {
+    "name": "Faithful Hound",
+    "duration": "8 hours",
+    "range": "30 feet",
+    "desc": "You conjure a phantom watchdog in an unoccupied space that you can see within range. The hound remains for the duration or until the two of you are more than 300 feet apart from each other. No one but you can see the hound, and it is intangible and invulnerable."
+  },
+  "fire_shield": {
+    "name": "Fire Shield",
+    "duration": "10 minutes",
+    "range": "Self",
+    "desc": "Wispy flames wreathe your body for the duration, shedding Bright Light in a 10-foot radius and Dim Light for an additional 10 feet. The flames provide you with a warm shield or a chill shield, as you choose."
+  },
+  "freedom_of_movement": {
+    "name": "Freedom of Movement",
+    "duration": "1 ora",
+    "range": "Tocco",
+    "desc": "You touch a willing creature. For the duration, the target’s movement is unaffected by Difficult Terrain, and spells and other magical effects can neither reduce the target’s Speed nor cause the target to have the Paralyzed or Restrained conditions."
+  },
+  "giant_insect": {
+    "name": "Giant Insect",
+    "duration": "Concentrazione, fino a 10 minuti",
+    "range": "60 piedi",
+    "desc": "You summon a giant centipede, spider, or wasp (chosen Gwihaennt yInouse ccatst the spell). It manifests in an unoccupied space you can see within range and uses the stat block. The form you choose determines certain details in its stat block."
+  },
+  "greater_invisibility": {
+    "name": "Greater Invisibility",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "Tocco",
+    "desc": "A creature you touch has the Invisible condition unGreater Restoration til the spell ends."
+  },
+  "guardian_of_faith": {
+    "name": "Guardian of Faith",
+    "duration": "8 ore",
+    "range": "30 piedi",
+    "desc": "A Large spectral guardian appears and hovers for the duration in an unoccupied space that you can see within range. The guardian occupies that space and is invulnerable, and it appears in a form appropriate for your deity or pantheon."
+  },
+  "hallucinatory_terrain": {
+    "name": "Hallucinatory Terrain",
+    "duration": "24 ore",
+    "range": "300 piedi",
+    "desc": "You make natural terrain in a 150-foot Cube in range look, sound, and smell like another sort of natural terrain. Thus, open fields or a road can be made to resemble a swamp, hill, crevasse, or some other difficult or impassable terrain."
+  },
+  "ice_storm": {
+    "name": "Ice Storm",
+    "duration": "Instantaneous",
+    "range": "300 feet",
+    "desc": "Hail falls in a 20-foot-radius, 40-foot-high Cylinder centered on a point within range. Each creature in the Cylinder makes a Dexterity saving throw. A creature takes 2d10 Bludgeoning damage and 4d6 Cold damage on a failed save or half as much damage on a successful one."
+  },
+  "phantasmal_killer": {
+    "name": "Phantasmal Killer",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "120 piedi",
+    "desc": "You tap into the nightmares of a creature you can see within range and create an illusion of its deepest fears, visible only to that creature. The target makes a Wisdom saving throw."
+  },
+  "polymorph": {
+    "name": "Polymorph",
+    "duration": "Concentrazione, fino a 1 ora",
+    "range": "60 piedi",
+    "desc": "You attempt to transform a creature that you can see within range into a Beast. The target must succeed on a Wisdom saving throw or shape-shift into a Beast form for the duration."
+  },
+  "private_sanctum": {
+    "name": "Private Sanctum",
+    "duration": "24 hours",
+    "range": "120 feet",
+    "desc": "You make an area within range magically secure. The area is a Cube that can be as small as 5 feet to as large as 100 feet on each side. The spell lasts for the duration."
+  },
+  "resilient_sphere": {
+    "name": "Resilient Sphere",
+    "duration": "Concentration, up to 1 minute",
+    "range": "30 feet",
+    "desc": "A shimmering sphere encloses a Large or smaller creature or object within range. An unwilling creature must succeed on a Dexterity saving throw or be enclosed for the duration."
+  },
+  "secret_chest": {
+    "name": "Secret Chest",
+    "duration": "Until dispelled",
+    "range": "Touch",
+    "desc": "You hide a chest and all its contents on the Ethereal Plane. You must touch the chest and the miniature replica that serve as Material components for the spell. The chest can contain up to 12 cubic feet of nonliving material (3 feet by 2 feet by 2 feet)."
+  },
+  "stone_shape": {
+    "name": "Stone Shape",
+    "duration": "Instantaneous",
+    "range": "Touch",
+    "desc": "You touch a stone object of Medium size or smaller or a section of stone no more than 5 feet in any dimension and form it into any shape you like."
+  },
+  "vitriolic_sphere": {
+    "name": "Vitriolic Sphere",
+    "duration": "Istantanea",
+    "range": "150 piedi",
+    "desc": "You point at a location within range, and a glowing, 1-foot-diameter ball of acid streaks there and explodes in a 20-foot-radius Sphere. Each creature in that area makes a Dexterity saving throw."
+  },
+  "wall_of_fire": {
+    "name": "Wall of Fire",
+    "duration": "Concentration, up to 1 minute",
+    "range": "120 feet",
+    "desc": "You create a wall of fire on a solid surface within range. You can make the wall up to 60 feet long, 20 feet high, and 1 foot thick, or a ringed wall up to 20 feet in diameter, 20 feet high, and 1 foot thick. The wall is opaque and lasts for the duration."
+  },
+  "animate_objects": {
+    "name": "Animate Objects",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "120 piedi",
+    "desc": "Objects animate at your command. Choose a number of nonmagical objects within range that aren’t being worn or carried, aren’t fixed to a surface, and aren’t Gargantuan."
+  },
+  "antilife_shell": {
+    "name": "Antilife Shell",
+    "duration": "Concentrazione, fino a 1 ora",
+    "range": "Sé stessi",
+    "desc": "An aura extends from you in a 10-foot Emanation for the duration. The aura prevents creatures other than Constructs and Undead from passing or reaching through it. An affected creature can cast spells or make attacks with Ranged or Reach weapons through the barrier."
+  },
+  "arcane_hand": {
+    "name": "Cono di freddo",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "120 piedi",
+    "desc": "Cono 18m. 8d8 danni da freddo. TS COS dimezza."
+  },
+  "awaken": {
+    "name": "Awaken",
+    "duration": "Istantanea",
+    "range": "Tocco",
+    "desc": "You spend the casting time tracing magical pathways within a precious gemstone, and then touch the target. The target must be either a Beast or Plant creature with an Intelligence of 3 or less or a natural plant that isn’t a creature."
+  },
+  "cloudkill": {
+    "name": "Cloudkill",
+    "duration": "Concentrazione, fino a 10 minuti",
+    "range": "120 piedi",
+    "desc": "You create a 20-foot-radius Sphere of yellow-green fog centered onG au psto oinf tW winitdhin range. The fog lasts for the duration or until strong wind (such as the one created by ) disperses it, ending the spell. Its area is Heavily Obscured."
+  },
+  "commune": {
+    "name": "Commune",
+    "duration": "1 minuto",
+    "range": "Sé stessi",
+    "desc": "You contact a deity or a divine proxy and ask up to three questions that can be answered with yes or no. You must ask your questions before the spell ends. You receive a correct answer for each question."
+  },
+  "commune_with_nature": {
+    "name": "Commune with Nature",
+    "duration": "Istantanea",
+    "range": "Sé stessi",
+    "desc": "You commune with nature spirits and gain knowledge of the surrounding area. In the outdoors, the spell gives you knowledge of the area within 3 miles of you. In caves and other natural underground settings, the radius is limited to 300 feet."
+  },
+  "cone_of_cold": {
+    "name": "Cone of Cold",
+    "duration": "Instantaneous",
+    "range": "Self",
+    "desc": "You unleash a blast of cold air. Each creature in a 60-foot Cone originating from you makes a Constitution saving throw, taking 8d8 Cold damage on a failed save or half as much damage on a succeUsssfiunlg o an eH. iAg hcerer-aLteuvree lk Siplleeldl bSlyo tth."
+  },
+  "conjure_elemental": {
+    "name": "Conjure Elemental",
+    "duration": "Concentrazione, fino a 10 minuti",
+    "range": "60 piedi",
+    "desc": "You conjure a Large, intangible spirit from the Elemental Planes that appears in an unoccupied space within range. Choose the spirit’s element, which determines its damage type: air (Lightning), earth (Thunder), fire (Fire), or water (Cold). The spirit lasts for the duration."
+  },
+  "contact_other_plane": {
+    "name": "Contatto con altri piani",
+    "duration": "1 minuto",
+    "range": "Sé stessi",
+    "desc": "Contatta un'entità planare. 5 domande sì/no."
+  },
+  "contagion": {
+    "name": "Contagion",
+    "duration": "7 giorni",
+    "range": "Tocco",
+    "desc": "Your touch inflicts a magical contagion. The target must succeed on a Constitution saving throw or take 11d8 Necrotic damage and have the Poisoned condition. Also, choose one ability when you cast the spell."
+  },
+  "creation": {
+    "name": "Creation",
+    "duration": "Speciale",
+    "range": "30 piedi",
+    "desc": "You pull wisps of shadow material from the Shadowfell to create an object within range. It is either an object of vegetable matter (soft goods, rope, wood, and the like) or mineral matter (stone, crystal, metal, and the like)."
+  },
+  "dispel_evil_and_good": {
+    "name": "Dispel Evil and Good",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "Sé stessi",
+    "desc": "For the duration, Celestials, Elementals, Fey, Fiends, and Undead have Disadvantage on attack rolls agBarinesatk y Eonuc. hYaoun tcmane netn.d the spell early by using either of the following special functions."
+  },
+  "dominate_person": {
+    "name": "Dominare persona",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "60 piedi",
+    "desc": "Controllo completo su un umanoide. TS SAG ogni turno."
+  },
+  "dream": {
+    "name": "Dream",
+    "duration": "8 hours",
+    "range": "Special",
+    "desc": "You target a creature you know on the same plane of existence. You or a willing creature you touch enters a trance state to act as a dream messenger. While in the trance, the messenger is Incapacitated and has a Speed of 0."
+  },
+  "flame_strike": {
+    "name": "Flame Strike",
+    "duration": "Istantanea",
+    "range": "60 piedi",
+    "desc": "A vertical column of brilliant fire roars down from above. Each creature in a 10-foot-radius, 40-foothigh Cylinder centered on a point within range makes a Dexterity saving throw, taking 5d6 Fire d aUmsiangge aan Hdi g5hde6r R-Laedviealn St pdealml Salgoet ."
+  },
+  "hallow": {
+    "name": "Hallow",
+    "duration": "Fino a dispellamento",
+    "range": "Tocco",
+    "desc": "You touch a point and infuse an area around it with holy or unholy power. The area canH haalvloew a radius up to 60 feet, and the spell fails if the radius includes anH aarleloaw aelrde aWdayr udn.der the effect of . The affected area has the following effects."
+  },
+  "insect_plague": {
+    "name": "Insect Plague",
+    "duration": "Concentrazione, fino a 10 minuti",
+    "range": "300 piedi",
+    "desc": "Swarming locusts fill a 20-foot-radius Sphere centered on a point you choose within range. The Sphere remains for the duration, and its area is Lightly Obscured and Difficult Terrain."
+  },
+  "legend_lore": {
+    "name": "Legend Lore",
+    "duration": "Istantanea",
+    "range": "Sé stessi",
+    "desc": "Name or describe a famous person, place, or object. The spell brings to your mind a brief summary of the significant lore about that famous thing, as described by the GM."
+  },
+  "mass_cure_wounds": {
+    "name": "Grande restaurazione",
+    "duration": "Istantanea",
+    "range": "60 piedi",
+    "desc": "Rimuovi affaticamento, incantesimi, maledizioni, paralisi, pietrificazione."
+  },
+  "mislead": {
+    "name": "Mislead",
+    "duration": "Concentration, up to 1 hour",
+    "range": "Self",
+    "desc": "You gain the Invisible condition at the same time that an illusory double of you appears where you are standing. The double lasts for the duration, but the invisibility ends immediately after you make an attack roll, deal damage, or cast a spell."
+  },
+  "modify_memory": {
+    "name": "Modify Memory",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "30 piedi",
+    "desc": "You attempt to reshape another creature’s memories. One creature that you can see within range makes a Wisdom saving throw. If you are fighting the creature, it has Advantage on the save. On a failed save, the target has the Charmed condition for the duration."
+  },
+  "passwall": {
+    "name": "Scagliare incantesimo",
+    "duration": "1 ora",
+    "range": "30 piedi",
+    "desc": "Trasferisci un incantesimo in un'arma o oggetto."
+  },
+  "raise_dead": {
+    "name": "Raise Dead",
+    "duration": "Istantanea",
+    "range": "Tocco",
+    "desc": "With a touch, you revive a dead creature if it has been dead no longer than 10 days and it wasn’t Undead when it died. The creature returns to life with 1 Hit Point. This spell also neutralizes any poisons that affected the creature at the time of death."
+  },
+  "reincarnate": {
+    "name": "Reincarnate",
+    "duration": "Istantanea",
+    "range": "Tocco",
+    "desc": "You touch a dead Humanoid or a piece of one. If the creature has been dead no longer than 10 days, the spell forms a new body for it and calls the soul to enter that body."
+  },
+  "seeming": {
+    "name": "Seeming",
+    "duration": "8 ore",
+    "range": "30 piedi",
+    "desc": "You give an illusory appearance to each creature of your choice that you can see within range. An unwilling target can make a Charisma saving throw, and if it succeeds, it is unaffected by this spell. You can give the same appearance or different ones to the targets."
+  },
+  "summon_dragon": {
+    "name": "Summon Dragon",
+    "duration": "Concentrazione, fino a 1 ora",
+    "range": "60 piedi",
+    "desc": "You call fDorrtahc oa nDirca Sgpoinr istpirit. It manifests in an unoccupied space that you can see within range and uses the stat block. The creature disappears when it drops to 0 Hit Points or when the spell ends. The creature is an ally to you and your allies."
+  },
+  "telekinesis": {
+    "name": "Telecinesi",
+    "duration": "Concentrazione, fino a 10 minuti",
+    "range": "60 piedi",
+    "desc": "Muovi oggetti o creature a distanza con la mente."
+  },
+  "telepathic_bond": {
+    "name": "Telepathic Bond",
+    "duration": "1 ora",
+    "range": "30 piedi",
+    "desc": "You forge a telepathic link among up to eight willing creatures of your choice within range, psychically linking each creature to all the others for the duration. Creatures that can’t communicate in any languages aren’t affected by this spell."
+  },
+  "teleportation_circle": {
+    "name": "Teleportation Circle",
+    "duration": "1 round",
+    "range": "10 piedi",
+    "desc": "As you cast the spell, you draw a 5-foot-radius circle on the ground inscribed with sigils that link your location to a permanent teleportation circle of your choice whose sigil sequence you know and that is on the same plane of existence as you."
+  },
+  "tree_stride": {
+    "name": "Tree Stride",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "Sé stessi",
+    "desc": "You gain the ability to enter a tree and move from inside it to inside another tree of the same kind within 500 feet. Both trees must be living and at least the same size as you. You must use 5 feet of movement to enter a tree."
+  },
+  "wall_of_force": {
+    "name": "Telepatia",
+    "duration": "Concentrazione, fino a 10 minuti",
+    "range": "120 piedi",
+    "desc": "Comunicazione mentale con una creatura ovunque si trovi."
+  },
+  "wall_of_stone": {
+    "name": "Wall of Stone",
+    "duration": "Concentration, up to 10 minutes",
+    "range": "120 feet",
+    "desc": "A nonmagical wall of solid stone springs into existence at a point you choose within range. The wall is 6 inches thick and is composed of ten 10-foot-by10-foot panels. Each panel must be contiguous with another panel."
+  },
+  "blade_barrier": {
+    "name": "Barriera di lame",
+    "duration": "Concentrazione, fino a 10 minuti",
+    "range": "90 piedi",
+    "desc": "Muro di lame rotanti. 6d10 danni taglienti per attraversamento."
+  },
+  "chain_lightning": {
+    "name": "Chain Lightning",
+    "duration": "Instantaneous",
+    "range": "150 feet",
+    "desc": "You launch a lightning bolt toward a target you can see within range. Three bolts then leap from that target to as many as three other targets of your choice, each of which must be within 30 feet of the first target."
+  },
+  "circle_of_death": {
+    "name": "Circle of Death",
+    "duration": "Istantanea",
+    "range": "150 piedi",
+    "desc": "Negative energy ripples out in a 60-foot-radius Sphere from a point you choose within range. Each creature in that area makes a Constitution saving thUroswin,g t aak Hinigg h8edr8LNeevcerlo Stpice dlla Smloatg.e on a failed save or half as much damage on a successful one."
+  },
+  "conjure_fey": {
+    "name": "Conjure Fey",
+    "duration": "Concentration, up to 10 minutes",
+    "range": "60 feet",
+    "desc": "You conjure a Medium spirit from the Feywild in an unoccupied space you can see within range. The spirit lasts for the duration, and it looks like a Fey creature of your choice. When the spirit appears, you can make one melee spell attack against a creature within 5 feet of it."
+  },
+  "contingency": {
+    "name": "Contingency",
+    "duration": "10 giorni",
+    "range": "Sé stessi",
+    "desc": "Choose a spell of level 5 or lower that you can cast, that has a casting time of an acCtoinotni,n agnedn ctyhat can target you. You cast that spell—called the contingent spell—as part of casting , expending spell slots for both, but the contingent spell doesn’t come into effect."
+  },
+  "create_undead": {
+    "name": "Create Undead",
+    "duration": "Istantanea",
+    "range": "10 piedi",
+    "desc": "You can cast this spell only at nightG. hCohuolose up to three corpses of Medium or Small Humanoids within range. Each one becomes a under your control (see “Monsters” for its stat block)."
+  },
+  "disintegrate": {
+    "name": "Disintegrate",
+    "duration": "Istantanea",
+    "range": "60 piedi",
+    "desc": "You launch a green ray at a target you can see within range. The targWeta clal nof b Feo arc cer.eature, a nonmagical object, or a creation of magical force, such as the wall created by A creature targeted by this spell makes a Dexterity saving throw."
+  },
+  "eyebite": {
+    "name": "Eyebite",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "Sé stessi",
+    "desc": "For the duration, your eyes become an inky void. One creature of your choice within 60 feet of you that you can see must succeed on a Wisdom saving throw or be affected by one of the following effects of your choice for the duration."
+  },
+  "find_the_path": {
+    "name": "Find the Path",
+    "duration": "Concentrazione, fino a 1 giorno",
+    "range": "Sé stessi",
+    "desc": "You magically sense the most direct physical route to a location you name."
+  },
+  "flesh_to_stone": {
+    "name": "Flesh to Stone",
+    "duration": "Concentration, up to 1 minute",
+    "range": "60 feet",
+    "desc": "You attempt to turn one creature that you can see within range into stone. The target makes a Constitution saving throw. On a failed save, it has the Restrained condition for the duration. On a successful save, its Speed is 0 until the start of your next turn."
+  },
+  "forbiddance": {
+    "name": "Forbiddance",
+    "duration": "1 day",
+    "range": "Tocco",
+    "desc": "You create a ward against magical travel that protects up to 40,000 square feet of floor space to a height of 30 feet above the floGoart. eFor the duration, creatures can’t teleport into the area or use portals, such as those created by the spell, to enter the area."
+  },
+  "freezing_sphere": {
+    "name": "Freezing Sphere",
+    "duration": "Instantaneous",
+    "range": "300 feet",
+    "desc": "A frigid globe streaks from you to a point of your choice within range, where it explodes in a 60-foot-radius Sphere. Each creature in that area makes a Constitution saving throw, taking 10d6 Cold damage on failed save or half as much damage on a successful one."
+  },
+  "globe_of_invulnerability": {
+    "name": "Globe of Invulnerability",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "Sé stessi",
+    "desc": "Sfera 3m. Incantesimi 5° o inferiori non possono entrare."
+  },
+  "guards_and_wards": {
+    "name": "Guards and Wards",
+    "duration": "24 ore",
+    "range": "Tocco",
+    "desc": "You create a ward that protects up to 2,500 square feet of floor space. The warded area can be up to 20 feet tall, and you shape it as one 50-foot square, one hundred 5-foot squares that are contiguous, or twenty-five 10-foot squares that are contiguous."
+  },
+  "harm": {
+    "name": "Harm",
+    "duration": "Istantanea",
+    "range": "60 piedi",
+    "desc": "14d6 danni necrotici. TS COS dimezza. Riduce HP massimi."
+  },
+  "heal": {
+    "name": "Heal",
+    "duration": "Istantanea",
+    "range": "60 piedi",
+    "desc": "Choose a creature that you can see within range. Positive energy washes through the target, restorinUg s7i0n gH iat HPoiginhtesr. -TLheivse sl pSeplel lall Ssolo etn.ds the Blinded, Deafened, and Poisoned conditions on the target."
+  },
+  "heroes_feast": {
+    "name": "Heroes’ Feast",
+    "duration": "Istantanea",
+    "range": "Sé stessi",
+    "desc": "You conjure a feast that appears on a surface in an unoccupied 10-foot Cube next to you. The feast takes 1 hour to consume and disappears at the end of that time, and the beneficial effects don’t set in until this hour is over. Up to twelve creatures can partake of the feast."
+  },
+  "instant_summons": {
+    "name": "Instant Summons",
+    "duration": "Fino a dispellamento",
+    "range": "Tocco",
+    "desc": "You touch the sapphire used in the casting and an object weighing 10 pounds or less whose longest dimension is 6 feet or less. The spell leaves an Invisible mark on that object and invisibly inscribes the object’s name on the sapphire."
+  },
+  "irresistible_dance": {
+    "name": "Irresistible Dance",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "30 piedi",
+    "desc": "One creature that you can see within range must make a Wisdom saving throw. On a successful save, the target dances comically until the end of its next turn, during which it must spend all its movement to dance in place."
+  },
+  "magic_jar": {
+    "name": "Magic Jar",
+    "duration": "Fino a dispellamento",
+    "range": "Sé stessi",
+    "desc": "Your body falls into a catatonic state as your soul leaves it and enters the container you used for the spell’s Material component. While your soul inhabits the container, you are aware of your surroundings as if you were in the container’s space."
+  },
+  "mass_suggestion": {
+    "name": "Mass Suggestion",
+    "duration": "24 ore",
+    "range": "60 piedi",
+    "desc": "You suggest a course of activity—described in no more than 25 words—to twelve or fewer creatures you can see within range that can hear and understand you."
+  },
+  "move_earth": {
+    "name": "Move Earth",
+    "duration": "Concentration, up to 2 hours",
+    "range": "120 feet",
+    "desc": "Choose an area of terrain no larger than 40 feet on a side within range. You can reshape dirt, sand, or clay in the area in any manner you choose for the duration. You can raise or lower the area’s elevation, create or fill in a trench, erect or flatten a wall, or form a pillar."
+  },
+  "planar_ally": {
+    "name": "Planar Ally",
+    "duration": "Instantaneous",
+    "range": "60 feet",
+    "desc": "You beseech an otherworldly entity for aid. The being must be known to you: a god, a demon prince, or some other being of cosmic power. That entity sends a Celestial, an Elemental, or a Fiend loyal to it to aid you, making the creature appear in an unoccupied space within range."
+  },
+  "programmed_illusion": {
+    "name": "Programmed Illusion",
+    "duration": "Fino a dispellamento",
+    "range": "120 piedi",
+    "desc": "You create an illusion of an object, a creature, or some other visible phenomenon within range that activates when a specific trigger occurs. The illusion is imperceptible until then."
+  },
+  "sunbeam": {
+    "name": "Sunbeam",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "Sé stessi",
+    "desc": "You launch a sunbeam in a 5-foot-wide, 60-foot-long Line. Each creature in the Line makes a Constitution saving throw. On a failed save, a creature takes 6d8 Radiant damage and has the Blinded condition until the start of your next turn."
+  },
+  "transport_via_plants": {
+    "name": "Transport via Plants",
+    "duration": "1 minute",
+    "range": "10 feet",
+    "desc": "This spell creates a magical link between a Large or larger inanimate plant within range and another plant, at any distance, on the same plane of existence. You must have seen or touched the destination plant at least once before."
+  },
+  "wall_of_ice": {
+    "name": "Wall of Ice",
+    "duration": "Concentrazione, fino a 10 minuti",
+    "range": "120 piedi",
+    "desc": "You create a wall of ice on a solid surface within range. You can form it into a hemispherical dome or a globe with a radius of up to 10 feet, or you can shape a flat surface made up of ten 10-foot-square panels. Each panel must be contiguous with another panel."
+  },
+  "wall_of_thorns": {
+    "name": "Wall of Thorns",
+    "duration": "Concentration, up to 10 minutes",
+    "range": "120 feet",
+    "desc": "You create a wall of tangled brush bristling with needle-sharp thorns. The wall appears within range on a solid surface and lasts for the duration."
+  },
+  "wind_walk": {
+    "name": "Wind Walk",
+    "duration": "8 ore",
+    "range": "30 piedi",
+    "desc": "You and up to ten willing creatures of your choice within range assume gaseous forms for the duration, appearing as wisps of cloud."
+  },
+  "word_of_recall": {
+    "name": "Word of Recall",
+    "duration": "Instantaneous",
+    "range": "5 feet",
+    "desc": "You and up to five willing creatures within 5 feet of you instantly teleport to a previously designated sanctuary. You and any creatures that teleport with you appear in the nearest unoccupied space to the spot you designated when you prepared your sanctuary (see below)."
+  },
+  "arcane_sword": {
+    "name": "Arcane Sword",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "90 piedi",
+    "desc": "You create a spectral sword that hovers within range. It lasts for the duration. When the sword appears, you make a melee spell attack against a target within 5 feet of the sword. On a hit, the target takes Force damage equal to 4d12 plus your spellcasting ability modifier."
+  },
+  "conjure_celestial": {
+    "name": "Conjure Celestial",
+    "duration": "Concentrazione, fino a 10 minuti",
+    "range": "90 piedi",
+    "desc": "You conjure a spirit from the Upper Planes, which manifests as a pillar of light in a 10-foot-radius, 40-foot-high Cylinder centered on a point within range. For each creature you can see in the Cylinder, Healing Light. choose which of these lights shines on it: Searing Light."
+  },
+  "delayed_blast_fireball": {
+    "name": "Delayed Blast Fireball",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "150 piedi",
+    "desc": "A beam of yellow light flashes from you, then condenses at a chosen point within range as a glowing bead for the duration. When the spell ends, the bead explodes, and each creature in a 20-foot-radius Sphere centered on that point makes a Dexterity saving throw."
+  },
+  "divine_word": {
+    "name": "Divine Word",
+    "duration": "Istantanea",
+    "range": "30 piedi",
+    "desc": "You utter a word imbued with power from the Upper Planes. Each creature of your choice in range makes a Charisma saving throw. On a failed save, a target that has 50 Hit Points or fewer suffers an effect based on its current Hit Points, as shown in the Divine Word Effects table."
+  },
+  "finger_of_death": {
+    "name": "Dito della morte",
+    "duration": "Istantanea",
+    "range": "60 piedi",
+    "desc": "7d8+30 danni necrotici. TS COS dimezza. Se muore: zombie permanente."
+  },
+  "fire_storm": {
+    "name": "Fire Storm",
+    "duration": "Istantanea",
+    "range": "150 piedi",
+    "desc": "Area di fiamme 10 cubi 3m. 7d10 danni fuoco. TS DES dimezza."
+  },
+  "forcecage": {
+    "name": "Forcecage",
+    "duration": "Concentrazione, fino a 1 ora",
+    "range": "100 feet",
+    "desc": "An immobile, Invisible, Cube-shaped prison composed of magical force springs into existence around an area you choose within range. The prison can be a cage or a solid box, as you choose."
+  },
+  "magnificent_mansion": {
+    "name": "Magnificent Mansion",
+    "duration": "24 ore",
+    "range": "300 piedi",
+    "desc": "You conjure a shimmering door in range that lasts for the duration. The door leads to an extradimensional dwelling and is 5 feet wide and 10 feet tall."
+  },
+  "mirage_arcane": {
+    "name": "Mirage Arcane",
+    "duration": "10 giorni",
+    "range": "Visuale",
+    "desc": "You make terrain in an area up to 1 mile square look, sound, smell, and even feel like some other sort of terrain. Open fields or a road could be made to resemble a swamp, hill, crevasse, or some other rough or impassable terrain."
+  },
+  "prismatic_spray": {
+    "name": "Prismatic Spray",
+    "duration": "Istantanea",
+    "range": "Sé stessi",
+    "desc": "Eight rays of light flash from you in a 60-foot Cone. Each creature in the Cone makes a Dexterity saving throw. For each target, roll 1d8 to determine which color ray affects it, consulting the Prismatic Rays tParbilsem. atic Rays 1d8 Ray 1 Red. Failed Save: 12d6 Fire damage."
+  },
+  "project_image": {
+    "name": "Project Image",
+    "duration": "Concentrazione, fino a 1 giorno",
+    "range": "500 miglia",
+    "desc": "You create an illusory copy of yourself that lasts for the duration. The copy can appear at any location within range that you have seen before, regardless of intervening obstacles. The illusion looks and sounds like you, but it is intangible."
+  },
+  "regenerate": {
+    "name": "Regenerate",
+    "duration": "1 ora",
+    "range": "Tocco",
+    "desc": "Rigenera arti mancanti. 4d8+15 HP + 1 HP/turno per 1h."
+  },
+  "resurrection": {
+    "name": "Resurrection",
+    "duration": "Istantanea",
+    "range": "Tocco",
+    "desc": "Resuscita un morto da meno di 100 anni. Recupera tutti gli HP."
+  },
+  "reverse_gravity": {
+    "name": "Reverse Gravity",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "100 feet",
+    "desc": "This spell reverses gravity in a 50-foot-radius, 100foot high Cylinder centered on a point within range. All creatures and objects in that area that aren’t anchored to the ground fall upward and reach the top of the Cylinder."
+  },
+  "sequester": {
+    "name": "Sequester",
+    "duration": "Fino a dispellamento",
+    "range": "Tocco",
+    "desc": "With a touch, you magically sequester an object or a willing creature. For the duration, the target has the Invisible condition and can’t be targeted by Divination spells, detected by magic, or viewed remotely with magic."
+  },
+  "simulacrum": {
+    "name": "Simulacrum",
+    "duration": "Fino a dispellamento",
+    "range": "Tocco",
+    "desc": "You create a simulacrum of one Beast or Humanoid that is within 10 feet of you for the entire casting of the spell."
+  },
+  "symbol": {
+    "name": "Symbol",
+    "duration": "Until dispelled or triggered",
+    "range": "Tocco",
+    "desc": "You inscribe a harmful glyph either on a surface (such as a section of floor or wall) or within an object that can be closed (such as a book or chest). The glyph can cover an area no larger than 10 feet in diameter."
+  },
+  "teleport": {
+    "name": "Teleport",
+    "duration": "Istantanea",
+    "range": "10 piedi",
+    "desc": "Teletrasporto in qualsiasi luogo dello stesso piano."
+  },
+  "animal_shapes": {
+    "name": "Animal Shapes",
+    "duration": "24 ore",
+    "range": "30 piedi",
+    "desc": "Choose any number of willing creatures that you can see within range. Each target shape-shifts into a Large or smaller Beast of your choice that has a Challenge Rating of 4 or lower. You can choose a different form for each target."
+  },
+  "antimagic_field": {
+    "name": "Antimagic Field",
+    "duration": "Concentrazione, fino a 1 ora",
+    "range": "Sé stessi",
+    "desc": "Sfera 3m senza magia. Incantesimi e oggetti magici non funzionano."
+  },
+  "antipathysympathy": {
+    "name": "Antipathy/Sympathy",
+    "duration": "10 giorni",
+    "range": "60 piedi",
+    "desc": "As you cast the spell, choose whether it creates antipathy or sympathy, and target one creature or object that is Huge or smaller. Then specify a kind of creature, such as red dragons, goblins, or vampires."
+  },
+  "befuddlement": {
+    "name": "Befuddlement",
+    "duration": "Istantanea",
+    "range": "150 piedi",
+    "desc": "You blast the mind of a creature that you can see within range. The target makes an Intelligence saving throw. On a failed save, the target takes 10d12 Psychic damage and can’t cast spells or take the Magic action."
+  },
+  "clone": {
+    "name": "Clone",
+    "duration": "Istantanea",
+    "range": "Tocco",
+    "desc": "Crei un clone del tuo corpo come rifugio per la tua anima."
+  },
+  "control_weather": {
+    "name": "Control Weather",
+    "duration": "Concentrazione, fino a 8 ore",
+    "range": "Sé stessi",
+    "desc": "You take control of the weather within 5 miles of you for the duration. You must be outdoors to cast this spell, and it ends early if you go indoors. When you cast the spell, you change the current weather conditions, which are determined by the GM."
+  },
+  "demiplane": {
+    "name": "Demiplane",
+    "duration": "1 ora",
+    "range": "60 piedi",
+    "desc": "You create a shadowy Medium door on a flat solid surface that you can see within range. This door can be opened and closed, and it leads to a demiplane that is an empty room 30 feet in each dimension, made of wood or stone (your choice)."
+  },
+  "earthquake": {
+    "name": "Earthquake",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "500 piedi",
+    "desc": "Choose a point on the ground that you can see within range. For the duration, an intense tremor rips through the ground in a 100-foot-radius circle centered on that point. The ground there is Difficult Terrain."
+  },
+  "glibness": {
+    "name": "Glibness",
+    "duration": "1 ora",
+    "range": "Sé stessi",
+    "desc": "Until the spell ends, when you make a Charisma check, you can replace the number you roll with a 15. Additionally, no matter what you say, magic that would determine if you are telling the truth indiGlobe of Invulnerability cates that you are being truthful."
+  },
+  "holy_aura": {
+    "name": "Holy Aura",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "Sé stessi",
+    "desc": "For the duration, you emit an aura in a 30-foot Emanation. While in the aura, creatures of your choice have Advantage on all saving throws, and other creatures have Disadvantage on attack rolls against them."
+  },
+  "incendiary_cloud": {
+    "name": "Incendiary Cloud",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "150 piedi",
+    "desc": "A swirling cloud of embers and smoke fills a 20-foot-radius Sphere centered on a point within range. The Gcluosutd o’sf Warienad is Heavily Obscured. It lasts for the duration or until a strong wind (like that created by ) disperses it."
+  },
+  "maze": {
+    "name": "Maze",
+    "duration": "Concentrazione, fino a 10 minuti",
+    "range": "60 piedi",
+    "desc": "You banish a creature that you can see within range into a labyrinthine demiplane. The target remains there for the duration or until it escapes the maze. The target can take a Study action to try to escape. When it does so, it makes a DC 20 Intelligence (Investigation) check."
+  },
+  "mind_blank": {
+    "name": "Mind Blank",
+    "duration": "24 ore",
+    "range": "Tocco",
+    "desc": "Until the spell ends, one willing creature you touch has Immunity to Psychic damage and the Charmed condition."
+  },
+  "sunburst": {
+    "name": "Sunburst",
+    "duration": "Istantanea",
+    "range": "150 piedi",
+    "desc": "Brilliant sunlight flashes in a 60-foot-radius Sphere centered on a point you choose within range. Each creature in the Sphere makes a Constitution saving throw. On a failed save, a creature takes 12d6 Radiant damage and has the Blinded condition for 1 minute."
+  },
+  "tsunami": {
+    "name": "Tsunami",
+    "duration": "Concentration, up to 6 rounds",
+    "range": "1 miglio",
+    "desc": "A wall of water springs into existence at a point you choose within range. You can make the wall up to 300 feet long, 300 feet high, and 50 feet thick. The wall lasts for the duration."
+  },
+  "astral_projection": {
+    "name": "Astral Projection",
+    "duration": "Fino a dispellamento",
+    "range": "10 piedi",
+    "desc": "Proietta te e alleati nel Piano Astrale."
+  },
+  "foresight": {
+    "name": "Foresight",
+    "duration": "8 ore",
+    "range": "Tocco",
+    "desc": "Non puoi essere sorpreso. Vantaggio a tutto. Svantaggio contro di te. 8h."
+  },
+  "gate": {
+    "name": "Gate",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "60 piedi",
+    "desc": "You conjure a portal linking an unoccupied space you can see within range to a precise location on a different plane of existence. The portal is a circular opening, which you can make 5 to 20 feet in diameter. You can orient the portal in any direction you choose."
+  },
+  "imprisonment": {
+    "name": "Imprisonment",
+    "duration": "Fino a dispellamento",
+    "range": "30 piedi",
+    "desc": "Prigione magica permanente. 6 forme diverse."
+  },
+  "mass_heal": {
+    "name": "Mass Heal",
+    "duration": "Istantanea",
+    "range": "60 piedi",
+    "desc": "A flood of healing energy flows from you into creatures around you. You restore up to 700 Hit Points, divided as you choose among any number of creatures that you can see within range."
+  },
+  "meteor_swarm": {
+    "name": "Meteor Swarm",
+    "duration": "Istantanea",
+    "range": "1 miglio",
+    "desc": "4 meteore su punti entro 1,5km. 20d6 fuoco + 20d6 contundenti ciascuna."
+  },
+  "power_word_heal": {
+    "name": "Power Word Heal",
+    "duration": "Istantanea",
+    "range": "60 piedi",
+    "desc": "A wave of healing energy washes over one creature you can see within range. The target regains all its Hit Points. If the creature has the Charmed, Frightened, Paralyzed, Poisoned, or Stunned condition, the condition ends."
+  },
+  "prismatic_wall": {
+    "name": "Prismatic Wall",
+    "duration": "10 minuti",
+    "range": "60 piedi",
+    "desc": "A shimmering, multicolored plane of light forms a vertical opaque wall—up to 90 feet long, 30 feet high, and 1 inch thick—centered on a point within range. Alternatively, you shape the wall into a globe up to 30 feet in diameter centered on a point within range."
+  },
+  "shapechange": {
+    "name": "Shapechange",
+    "duration": "Concentrazione, fino a 1 ora",
+    "range": "Sé stessi",
+    "desc": "You shape-shift into another creature for the duration or until you take a Magic action to shape-shift into a different eligible form. The new form must be of a creature that has a Challenge Rating no higher than your level or Challenge Rating."
+  },
+  "storm_of_vengeance": {
+    "name": "Storm of Vengeance",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "1 miglio",
+    "desc": "A churning storm cloud forms for the duration, centered on a point within range and spreading to a radius of 300 feet."
+  },
+  "time_stop": {
+    "name": "Time Stop",
+    "duration": "Istantanea",
+    "range": "Sé stessi",
+    "desc": "Fermi il tempo. Ottieni 1d4+1 turni da solo."
+  },
+  "true_polymorph": {
+    "name": "True Polymorph",
+    "duration": "Concentrazione, fino a 1 ora",
+    "range": "30 piedi",
+    "desc": "Trasforma permanentemente una creatura o oggetto."
+  },
+  "true_resurrection": {
+    "name": "True Resurrection",
+    "duration": "Istantanea",
+    "range": "Tocco",
+    "desc": "You touch a creature that has been dead for no longer than 200 years and that died for any reason except old age. The creature is revived with all its Hit Points."
+  },
+  "weird": {
+    "name": "Weird",
+    "duration": "Concentrazione, fino a 1 minuto",
+    "range": "120 piedi",
+    "desc": "You try to create illusory terrors in others’ minds. Each creature of your choice in a 30-foot-radius Sphere centered on a point within range makes a Wisdom saving throw. On a failed save, a target takes 10d10 Psychic damage and has the Frightened condition for the duration."
+  },
+  "wish": {
+    "name": "Wish",
+    "duration": "Istantanea",
+    "range": "Sé stessi",
+    "desc": "Replica qualsiasi incantesimo 8° o inferiore, o esprimi un desiderio."
+  }
+}

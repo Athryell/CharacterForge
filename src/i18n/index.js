@@ -11,7 +11,7 @@ i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
-    fallbackLng: 'it',
+    fallbackLng: 'en',
     defaultNS: 'ui',
     resources: {
       it: { ui: itUI, game: itGame },
