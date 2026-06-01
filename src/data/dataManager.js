@@ -23,21 +23,13 @@ import speciesIT     from './srd/species.i18n.it.json';
 import backgroundsEN from './srd/backgrounds.i18n.json';
 import backgroundsIT from './srd/backgrounds.i18n.it.json';
 
-// PHB data — stubs are committed as empty; real content is local-only
-let PHB_BACKGROUNDS   = [];
-let phbBackgroundsEN  = {};
-let phbBackgroundsIT  = {};
-try { PHB_BACKGROUNDS  = require('./phb/backgrounds').PHB_BACKGROUNDS;       } catch {}
-try { phbBackgroundsEN = require('./phb/backgrounds.i18n.json');              } catch {}
-try { phbBackgroundsIT = require('./phb/backgrounds.i18n.it.json');           } catch {}
-
 const I18N = {
   spells:      { en: spellsEN,      it: spellsIT },
   weapons:     { en: weaponsEN,     it: weaponsIT },
   conditions:  { en: conditionsEN,  it: conditionsIT },
   classes:     { en: classesEN,     it: classesIT },
   species:     { en: speciesEN,     it: speciesIT },
-  backgrounds: { en: { ...backgroundsEN, ...phbBackgroundsEN }, it: { ...backgroundsIT, ...phbBackgroundsIT } },
+  backgrounds: { en: backgroundsEN, it: backgroundsIT },
 };
 
 const HOMEBREW_KEY    = 'characterforge_homebrew';
@@ -74,7 +66,6 @@ function mergeByKey(srdList, hbList, keyFn = item => item.name) {
 // ── Detect current language from i18next (optional dependency) ───────────────
 function getCurrentLang() {
   try {
-    // Works if i18next is initialised; safe no-op otherwise
     return window.__i18n_lang__ || 'en';
   } catch { return 'en'; }
 }
@@ -84,10 +75,7 @@ const dataManager = {
   getSpells(lang = getCurrentLang()) {
     const tr  = loadI18n('spells', lang);
     const hb  = loadHomebrew().flatMap(s => s.spells || []);
-    const srd = SRD_SPELLS.map(s => ({
-      ...s,
-      ...(tr[s.id] || {}),
-    }));
+    const srd = SRD_SPELLS.map(s => ({ ...s, ...(tr[s.id] || {}) }));
     return mergeByKey(srd, hb);
   },
 
@@ -107,20 +95,15 @@ const dataManager = {
   getConditions(lang = getCurrentLang()) {
     const tr  = loadI18n('conditions', lang);
     const hb  = loadHomebrew().flatMap(s => s.conditions || []);
-    const srd = SRD_CONDITIONS.map(c => ({
-      ...c,
-      ...(tr[c.id] || {}),
-    }));
+    const srd = SRD_CONDITIONS.map(c => ({ ...c, ...(tr[c.id] || {}) }));
     return mergeByKey(srd, hb, item => item.id);
   },
 
   // ── Classi ───────────────────────────────────────────────────────────────
   getClasses(lang = getCurrentLang()) {
-    const tr      = loadI18n('classes', lang);
     const hbNames = loadHomebrew()
       .flatMap(s => (s.classes || []).map(c => c.name))
       .filter(n => !SRD_CLASS_NAMES.includes(n));
-    // Return EN names for compatibility with HIT_DICE / CLASS_SAVE_PROFS keys
     return [...SRD_CLASS_NAMES, ...hbNames];
   },
 
@@ -137,9 +120,9 @@ const dataManager = {
 
   // ── Specie ───────────────────────────────────────────────────────────────
   getSpecies(lang = getCurrentLang()) {
-    const tr     = loadI18n('species', lang);
-    const srdIds = SRD_SPECIES.map(s => s.id);
-    const srd    = SRD_SPECIES.map(s => ({ ...s, ...(tr[s.id] || {}) }));
+    const tr      = loadI18n('species', lang);
+    const srdIds  = SRD_SPECIES.map(s => s.id);
+    const srd     = SRD_SPECIES.map(s => ({ ...s, ...(tr[s.id] || {}) }));
     const hbExtra = loadHomebrew()
       .flatMap(s => (s.species || []))
       .filter(sp => !srdIds.includes(sp.id || sp.name))
@@ -160,15 +143,14 @@ const dataManager = {
 
   // ── Background ───────────────────────────────────────────────────────────
   getBackgrounds(lang = getCurrentLang()) {
-    const tr     = loadI18n('backgrounds', lang);
-    const srd    = SRD_BACKGROUNDS.map(b => ({ ...b, ...(tr[b.id] || {}) }));
-    const phb    = PHB_BACKGROUNDS.map(b => ({ ...b, ...(tr[b.id] || {}) }));
-    const allIds = [...SRD_BACKGROUNDS, ...PHB_BACKGROUNDS].map(b => b.id);
+    const tr      = loadI18n('backgrounds', lang);
+    const srdIds  = SRD_BACKGROUNDS.map(b => b.id);
+    const srd     = SRD_BACKGROUNDS.map(b => ({ ...b, ...(tr[b.id] || {}) }));
     const hbExtra = loadHomebrew()
       .flatMap(s => s.backgrounds || [])
-      .filter(b => !allIds.includes(b.id))
+      .filter(b => !srdIds.includes(b.id))
       .map(b => ({ ...b, _homebrew: true }));
-    return [...srd, ...phb, ...hbExtra];
+    return [...srd, ...hbExtra];
   },
 
   // ── Sottoclassi ──────────────────────────────────────────────────────────
@@ -188,10 +170,8 @@ const dataManager = {
       backgrounds: SRD_BACKGROUNDS.length,
       conditions:  SRD_CONDITIONS.length,
     };
-    const phbCounts = { backgrounds: PHB_BACKGROUNDS.length };
     return [
       { id: 'srd', name: 'SRD 5.2.1', author: 'Wizards of the Coast', type: 'srd', counts: srdCounts },
-      { id: 'phb', name: "Player's Handbook", author: 'Wizards of the Coast', type: 'phb', counts: phbCounts },
       ...hb.map(s => ({
         ...s,
         type: 'homebrew',
