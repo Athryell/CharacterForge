@@ -1,154 +1,154 @@
 {
   "club": {
-    "name": "Clava",
-    "dmgType": "contundente"
+    "name": "Club",
+    "dmgType": "bludgeoning"
   },
   "dagger": {
-    "name": "Pugnale",
-    "dmgType": "perforante"
+    "name": "Dagger",
+    "dmgType": "piercing"
   },
   "greatclub": {
-    "name": "Randello",
-    "dmgType": "contundente"
+    "name": "Greatclub",
+    "dmgType": "bludgeoning"
   },
   "handaxe": {
-    "name": "Accetta",
-    "dmgType": "tagliente"
+    "name": "Handaxe",
+    "dmgType": "slashing"
   },
   "javelin": {
-    "name": "Giavellotto",
-    "dmgType": "perforante"
+    "name": "Javelin",
+    "dmgType": "piercing"
   },
   "light_hammer": {
-    "name": "Martello leggero",
-    "dmgType": "contundente"
+    "name": "Light Hammer",
+    "dmgType": "bludgeoning"
   },
   "mace": {
-    "name": "Mazza",
-    "dmgType": "contundente"
+    "name": "Mace",
+    "dmgType": "bludgeoning"
   },
   "quarterstaff": {
-    "name": "Bastone ferrato",
-    "dmgType": "contundente"
+    "name": "Quarterstaff",
+    "dmgType": "bludgeoning"
   },
   "sickle": {
-    "name": "Falcetto",
-    "dmgType": "tagliente"
+    "name": "Sickle",
+    "dmgType": "slashing"
   },
   "spear": {
-    "name": "Lancia",
-    "dmgType": "perforante"
+    "name": "Spear",
+    "dmgType": "piercing"
   },
   "dart": {
-    "name": "Dardo",
-    "dmgType": "perforante"
+    "name": "Dart",
+    "dmgType": "piercing"
   },
   "light_crossbow": {
-    "name": "Balestra leggera",
-    "dmgType": "perforante"
+    "name": "Light Crossbow",
+    "dmgType": "piercing"
   },
   "shortbow": {
-    "name": "Arco corto",
-    "dmgType": "perforante"
+    "name": "Shortbow",
+    "dmgType": "piercing"
   },
   "sling": {
-    "name": "Fionda",
-    "dmgType": "contundente"
+    "name": "Sling",
+    "dmgType": "bludgeoning"
   },
   "battleaxe": {
-    "name": "Ascia da battaglia",
-    "dmgType": "tagliente"
+    "name": "Battleaxe",
+    "dmgType": "slashing"
   },
   "flail": {
-    "name": "Flagello",
-    "dmgType": "contundente"
+    "name": "Flail",
+    "dmgType": "bludgeoning"
   },
   "glaive": {
-    "name": "Partigiana",
-    "dmgType": "tagliente"
+    "name": "Glaive",
+    "dmgType": "slashing"
   },
   "greataxe": {
-    "name": "Ascia bipenne",
-    "dmgType": "tagliente"
+    "name": "Greataxe",
+    "dmgType": "slashing"
   },
   "greatsword": {
-    "name": "Spadone",
-    "dmgType": "tagliente"
+    "name": "Greatsword",
+    "dmgType": "slashing"
   },
   "halberd": {
-    "name": "Alabarda",
-    "dmgType": "tagliente"
+    "name": "Halberd",
+    "dmgType": "slashing"
   },
   "lance": {
-    "name": "Lancia da guerra",
-    "dmgType": "perforante"
+    "name": "Lance",
+    "dmgType": "piercing"
   },
   "longsword": {
-    "name": "Spada lunga",
-    "dmgType": "tagliente"
+    "name": "Longsword",
+    "dmgType": "slashing"
   },
   "maul": {
-    "name": "Mazza bipenne",
-    "dmgType": "contundente"
+    "name": "Maul",
+    "dmgType": "bludgeoning"
   },
   "morningstar": {
-    "name": "Stella del mattino",
-    "dmgType": "perforante"
+    "name": "Morningstar",
+    "dmgType": "piercing"
   },
   "pike": {
-    "name": "Picca",
-    "dmgType": "perforante"
+    "name": "Pike",
+    "dmgType": "piercing"
   },
   "rapier": {
-    "name": "Stocco",
-    "dmgType": "perforante"
+    "name": "Rapier",
+    "dmgType": "piercing"
   },
   "scimitar": {
-    "name": "Scimitarra",
-    "dmgType": "tagliente"
+    "name": "Scimitar",
+    "dmgType": "slashing"
   },
   "shortsword": {
-    "name": "Spada corta",
-    "dmgType": "perforante"
+    "name": "Shortsword",
+    "dmgType": "piercing"
   },
   "trident": {
-    "name": "Tridente",
-    "dmgType": "perforante"
+    "name": "Trident",
+    "dmgType": "piercing"
   },
   "warhammer": {
-    "name": "Martello da guerra",
-    "dmgType": "contundente"
+    "name": "Warhammer",
+    "dmgType": "bludgeoning"
   },
   "war_pick": {
-    "name": "Piccone da guerra",
-    "dmgType": "perforante"
+    "name": "War Pick",
+    "dmgType": "piercing"
   },
   "whip": {
-    "name": "Frusta",
-    "dmgType": "tagliente"
+    "name": "Whip",
+    "dmgType": "slashing"
   },
   "blowgun": {
-    "name": "Cerbottana",
-    "dmgType": "perforante"
+    "name": "Blowgun",
+    "dmgType": "piercing"
   },
   "hand_crossbow": {
-    "name": "Balestra a mano",
-    "dmgType": "perforante"
+    "name": "Hand Crossbow",
+    "dmgType": "piercing"
   },
   "heavy_crossbow": {
-    "name": "Balestra pesante",
-    "dmgType": "perforante"
+    "name": "Heavy Crossbow",
+    "dmgType": "piercing"
   },
   "longbow": {
-    "name": "Arco lungo",
-    "dmgType": "perforante"
+    "name": "Longbow",
+    "dmgType": "piercing"
   },
   "musket": {
-    "name": "Moschetto",
-    "dmgType": "perforante"
+    "name": "Musket",
+    "dmgType": "piercing"
   },
   "pistol": {
-    "name": "Pistola",
-    "dmgType": "perforante"
+    "name": "Pistol",
+    "dmgType": "piercing"
   }
 }
