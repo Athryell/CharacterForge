@@ -2508,3 +2508,20 @@ button.corner-btn:hover {
   display: flex; flex-wrap: wrap; gap: 6px;
   margin: 12px 0 4px;
 }
+
+/* Community step buttons */
+.onboarding-community-btns {
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  margin: 12px 0 4px;
+}
+.onboarding-community-btns .onboarding-demo-note { margin: 0; flex-basis: 100%; }
+
+/* Welcome translate link */
+.onboarding-translate-link {
+  display: block;
+  margin-top: 14px;
+  font-size: 12.5px; color: var(--c-muted);
+  text-decoration: none;
+  transition: color .12s;
+}
+.onboarding-translate-link:hover { color: var(--c-accent); }

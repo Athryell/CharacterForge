@@ -6,9 +6,11 @@ import { TagPill } from './Tags';
 
 export const NOTION_FEEDBACK_URL = 'https://athryell.notion.site/3725e8a752d38094a5bac638b19360e7?pvs=105';
 export const KOFI_URL = 'https://ko-fi.com/athryell';
+const CROWDIN_URL = 'https://crowdin.com/project/characterforge';
+const GITHUB_URL = 'https://github.com/Athryell/CharacterForge';
 
 const STORAGE_KEY = 'characterforge_onboarding_seen';
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 9;
 
 const LANGUAGES = [
   { code: 'en', flag: '🇬🇧', label: 'English' },
@@ -160,8 +162,22 @@ export default function Onboarding({ onClose, onRoll: externalOnRoll }) {
   }
 
   function renderStepDemo() {
-    // step index: 1=Dice, 2=Notation, 3=Keywords, 5=Tags
-    if (step === 1) {
+    // step index: 0=Community, 2=Dice, 3=Notation, 4=Keywords, 6=Tags
+    if (step === 0) {
+      return (
+        <div className="onboarding-community-btns">
+          <a href={CROWDIN_URL} target="_blank" rel="noopener noreferrer" className="onboarding-btn onboarding-btn-secondary">
+            {t('onboarding.community.translateBtn')}
+          </a>
+          <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" className="onboarding-btn onboarding-btn-secondary">
+            {t('onboarding.community.contributBtn')}
+          </a>
+          <p className="onboarding-demo-note">{t('onboarding.community.note')}</p>
+        </div>
+      );
+    }
+
+    if (step === 2) {
       return (
         <>
           <CharContext.Provider value={DEMO_CHAR}>
@@ -180,7 +196,7 @@ export default function Onboarding({ onClose, onRoll: externalOnRoll }) {
       );
     }
 
-    if (step === 2) {
+    if (step === 3) {
       return (
         <>
           <NotationHelpBar />
@@ -215,7 +231,7 @@ export default function Onboarding({ onClose, onRoll: externalOnRoll }) {
       );
     }
 
-    if (step === 3) {
+    if (step === 4) {
       return (
         <>
           <CharContext.Provider value={DEMO_CHAR}>
@@ -234,7 +250,7 @@ export default function Onboarding({ onClose, onRoll: externalOnRoll }) {
       );
     }
 
-    if (step === 5) {
+    if (step === 6) {
       return (
         <>
           <div className="onboarding-tags-demo">
@@ -274,6 +290,9 @@ export default function Onboarding({ onClose, onRoll: externalOnRoll }) {
               <p>{t('onboarding.welcomeDesc')}</p>
               <p className="onboarding-hint-text">{t('onboarding.welcomeFeedback')}</p>
               <SupportGroup t={t} />
+              <a href={CROWDIN_URL} target="_blank" rel="noopener noreferrer" className="onboarding-translate-link">
+                {t('onboarding.welcome.translateLink')}
+              </a>
             </div>
             <div className="onboarding-footer">
               <button
@@ -293,10 +312,12 @@ export default function Onboarding({ onClose, onRoll: externalOnRoll }) {
               <div className="onboarding-step-label">
                 {t('onboarding.stepOf', { current: step + 1, total: TOTAL_STEPS })}
               </div>
-              <h2 className="onboarding-title">{t(`onboarding.step${step + 1}Title`)}</h2>
+              <h2 className="onboarding-title">
+                {step === 0 ? t('onboarding.community.title') : t(`onboarding.step${step}Title`)}
+              </h2>
             </div>
             <div className="onboarding-body">
-              <p>{t(`onboarding.step${step + 1}Text`)}</p>
+              <p>{step === 0 ? t('onboarding.community.body') : t(`onboarding.step${step}Text`)}</p>
               {renderStepDemo()}
               {demoMsg && <div className="onboarding-demo-toast">{demoMsg}</div>}
               {isLast && <SupportGroup t={t} />}

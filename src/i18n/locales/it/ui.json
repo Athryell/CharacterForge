@@ -675,6 +675,16 @@
     "startPlaying": "Inizia a giocare →",
     "stepOf": "{{current}} / {{total}}",
     "helpBtn": "?",
+    "community": {
+      "title":       "Disponibile in più lingue",
+      "body":        "CharacterForge è disponibile in italiano, inglese, francese, tedesco, spagnolo e altre lingue aggiunte dalla community. Puoi cambiare lingua in qualsiasi momento dalla barra in alto.",
+      "translateBtn":"Aiuta a tradurre →",
+      "contributBtn":"Contribuisci su GitHub →",
+      "note":        "Non servono competenze tecniche per tradurre — visita Crowdin e inizia a contribuire!"
+    },
+    "welcome": {
+      "translateLink": "🌍 Aiutaci a tradurre CharacterForge nella tua lingua"
+    },
     "demoLabel": "Prova →",
     "diceNote": "Clicca sui dadi per lanciarli — il modificatore [STR] viene calcolato automaticamente dal tuo personaggio.",
     "keywordNote": "Passa il mouse sulle parole sottolineate per vedere la spiegazione della regola.",

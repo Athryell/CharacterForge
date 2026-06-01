@@ -675,6 +675,16 @@
     "startPlaying": "Start playing →",
     "stepOf": "{{current}} / {{total}}",
     "helpBtn": "?",
+    "community": {
+      "title":       "Available in multiple languages",
+      "body":        "CharacterForge is available in Italian, English, French, German, Spanish and more languages added by the community. You can switch language anytime from the top bar.",
+      "translateBtn":"Help translate →",
+      "contributBtn":"Contribute on GitHub →",
+      "note":        "No coding skills required to translate — just visit Crowdin and start contributing!"
+    },
+    "welcome": {
+      "translateLink": "🌍 Help us translate CharacterForge into your language"
+    },
     "demoLabel": "Try it →",
     "diceNote": "Click the dice to roll — the [STR] modifier is calculated automatically from your character.",
     "keywordNote": "Hover over underlined words to see the rule explanation.",
