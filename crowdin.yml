@@ -1,0 +1,21 @@
+project_id: "902373"
+api_token_env: CROWDIN_PERSONAL_TOKEN
+
+files:
+  # UI strings
+  - source: /src/i18n/locales/en/ui.json
+    translation: /src/i18n/locales/%two_letters_code%/ui.json
+
+  # Game glossary
+  - source: /src/i18n/locales/en/game.json
+    translation: /src/i18n/locales/%two_letters_code%/game.json
+
+  # SRD weapons
+  - source: /src/data/srd/weapons.i18n.json
+    translation: /src/data/srd/weapons.i18n.%two_letters_code%.json
+
+  # Aggiungi altri file SRD man mano che li crei
+  # - source: /src/data/srd/spells.i18n.json
+  #   translation: /src/data/srd/spells.i18n.%two_letters_code%.json
+  # - source: /src/data/srd/conditions.i18n.json
+  #   translation: /src/data/srd/conditions.i18n.%two_letters_code%.json
