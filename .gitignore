@@ -19,4 +19,5 @@ yarn-debug.log*
 yarn-error.log*
 
 # Materiale non-SRD — non distribuire
-src/data/phb/
+# Nota: i file in src/data/phb/ sono stub vuoti nel repo.
+# Sostituisci il contenuto localmente con i dati PHB reali — non committare il contenuto.

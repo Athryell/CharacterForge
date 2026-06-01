@@ -9,11 +9,6 @@ import { SRD_CLASSES, SRD_CLASS_NAMES } from './srd/classes';
 import { SRD_SPECIES }     from './srd/species';
 import { SRD_BACKGROUNDS } from './srd/backgrounds';
 
-// PHB data — gitignored, local-only, not in public repo
-import { PHB_BACKGROUNDS }   from './phb/backgrounds';
-import phbBackgroundsEN from './phb/backgrounds.i18n.json';
-import phbBackgroundsIT from './phb/backgrounds.i18n.it.json';
-
 // ── i18n translation tables ──────────────────────────────────────────────────
 import spellsEN      from './srd/spells.i18n.json';
 import spellsIT      from './srd/spells.i18n.it.json';
@@ -27,6 +22,14 @@ import speciesEN     from './srd/species.i18n.json';
 import speciesIT     from './srd/species.i18n.it.json';
 import backgroundsEN from './srd/backgrounds.i18n.json';
 import backgroundsIT from './srd/backgrounds.i18n.it.json';
+
+// PHB data — stubs are committed as empty; real content is local-only
+let PHB_BACKGROUNDS   = [];
+let phbBackgroundsEN  = {};
+let phbBackgroundsIT  = {};
+try { PHB_BACKGROUNDS  = require('./phb/backgrounds').PHB_BACKGROUNDS;       } catch {}
+try { phbBackgroundsEN = require('./phb/backgrounds.i18n.json');              } catch {}
+try { phbBackgroundsIT = require('./phb/backgrounds.i18n.it.json');           } catch {}
 
 const I18N = {
   spells:      { en: spellsEN,      it: spellsIT },
