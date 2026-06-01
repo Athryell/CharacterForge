@@ -17,7 +17,7 @@ export function loadPinned() {
     const v = JSON.parse(localStorage.getItem(STORAGE_KEY));
     if (Array.isArray(v)) return v;
   } catch {}
-  return [];
+  return ['hp', 'inspiration'];
 }
 
 export function savePinned(pinned) {

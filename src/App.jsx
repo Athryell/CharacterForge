@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useCharacter } from './hooks/useCharacter';
 import { loadCharsIndex, deleteChar, getActiveCharId, setActiveCharId, generateCharId, migrateLegacy, saveCharState } from './chars';
 import CharacterSelect from './components/CharacterSelect';
+import Onboarding, { CornerButtons, loadOnboardingSeen } from './components/Onboarding';
 import { createDefaultState } from './data/dnd5e';
 import {
   ABILITIES, SKILLS, ALIGNMENTS,
@@ -61,7 +63,8 @@ function Field({ label, children }) {
 }
 
 function Toast({ message }) {
-  return message ? <div className="toast show">{message}</div> : null;
+  if (!message) return null;
+  return createPortal(<div className="toast show">{message}</div>, document.body);
 }
 
 function AbilityBox({ attr, score, effectiveScore, onAdjust, onInput, editing, onHover, onRoll, bonus, bonusSources = [] }) {
@@ -1332,6 +1335,7 @@ export default function App() {
     return getActiveCharId();
   });
   const [showCreator, setShowCreator] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(() => !loadOnboardingSeen());
 
   // Keep chars list in sync after any save
   useEffect(() => {
@@ -1362,31 +1366,33 @@ export default function App() {
     setShowCreator(false);
   }
 
-  if (!activeCharId) {
-    return (
-      <>
-        <CharacterSelect
-          chars={chars}
-          onSelect={handleSelect}
-          onCreate={() => setShowCreator(true)}
-          onDelete={handleDelete}
-        />
-        {showCreator && (
-          <CharacterCreator
-            onComplete={handleCreatorComplete}
-            onCancel={() => setShowCreator(false)}
-          />
-        )}
-      </>
-    );
-  }
-
   return (
-    <CharacterApp
-      key={activeCharId}
-      charId={activeCharId}
-      onBackToSelect={() => { setActiveCharId(null); setActive(null); setChars(loadCharsIndex()); }}
-      onNewChar={newState => { handleCreatorComplete(newState); }}
-    />
+    <>
+      {!activeCharId ? (
+        <>
+          <CharacterSelect
+            chars={chars}
+            onSelect={handleSelect}
+            onCreate={() => setShowCreator(true)}
+            onDelete={handleDelete}
+          />
+          {showCreator && (
+            <CharacterCreator
+              onComplete={handleCreatorComplete}
+              onCancel={() => setShowCreator(false)}
+            />
+          )}
+        </>
+      ) : (
+        <CharacterApp
+          key={activeCharId}
+          charId={activeCharId}
+          onBackToSelect={() => { setActiveCharId(null); setActive(null); setChars(loadCharsIndex()); }}
+          onNewChar={newState => { handleCreatorComplete(newState); }}
+        />
+      )}
+      {showOnboarding && <Onboarding onClose={() => setShowOnboarding(false)} />}
+      <CornerButtons onHelp={() => setShowOnboarding(true)} />
+    </>
   );
 }

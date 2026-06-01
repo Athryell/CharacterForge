@@ -9,6 +9,11 @@ import { SRD_CLASSES, SRD_CLASS_NAMES } from './srd/classes';
 import { SRD_SPECIES }     from './srd/species';
 import { SRD_BACKGROUNDS } from './srd/backgrounds';
 
+// PHB data — gitignored, local-only, not in public repo
+import { PHB_BACKGROUNDS }   from './phb/backgrounds';
+import phbBackgroundsEN from './phb/backgrounds.i18n.json';
+import phbBackgroundsIT from './phb/backgrounds.i18n.it.json';
+
 // ── i18n translation tables ──────────────────────────────────────────────────
 import spellsEN      from './srd/spells.i18n.json';
 import spellsIT      from './srd/spells.i18n.it.json';
@@ -29,7 +34,7 @@ const I18N = {
   conditions:  { en: conditionsEN,  it: conditionsIT },
   classes:     { en: classesEN,     it: classesIT },
   species:     { en: speciesEN,     it: speciesIT },
-  backgrounds: { en: backgroundsEN, it: backgroundsIT },
+  backgrounds: { en: { ...backgroundsEN, ...phbBackgroundsEN }, it: { ...backgroundsIT, ...phbBackgroundsIT } },
 };
 
 const HOMEBREW_KEY    = 'characterforge_homebrew';
@@ -153,13 +158,14 @@ const dataManager = {
   // ── Background ───────────────────────────────────────────────────────────
   getBackgrounds(lang = getCurrentLang()) {
     const tr     = loadI18n('backgrounds', lang);
-    const srdIds = SRD_BACKGROUNDS.map(b => b.id);
     const srd    = SRD_BACKGROUNDS.map(b => ({ ...b, ...(tr[b.id] || {}) }));
+    const phb    = PHB_BACKGROUNDS.map(b => ({ ...b, ...(tr[b.id] || {}) }));
+    const allIds = [...SRD_BACKGROUNDS, ...PHB_BACKGROUNDS].map(b => b.id);
     const hbExtra = loadHomebrew()
       .flatMap(s => s.backgrounds || [])
-      .filter(b => !srdIds.includes(b.id))
+      .filter(b => !allIds.includes(b.id))
       .map(b => ({ ...b, _homebrew: true }));
-    return [...srd, ...hbExtra];
+    return [...srd, ...phb, ...hbExtra];
   },
 
   // ── Sottoclassi ──────────────────────────────────────────────────────────
@@ -179,8 +185,10 @@ const dataManager = {
       backgrounds: SRD_BACKGROUNDS.length,
       conditions:  SRD_CONDITIONS.length,
     };
+    const phbCounts = { backgrounds: PHB_BACKGROUNDS.length };
     return [
       { id: 'srd', name: 'SRD 5.2.1', author: 'Wizards of the Coast', type: 'srd', counts: srdCounts },
+      { id: 'phb', name: "Player's Handbook", author: 'Wizards of the Coast', type: 'phb', counts: phbCounts },
       ...hb.map(s => ({
         ...s,
         type: 'homebrew',
