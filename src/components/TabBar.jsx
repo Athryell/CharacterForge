@@ -23,6 +23,7 @@ export default function TabBar({ tabs, activeTab, onTabChange, editMode, onReord
     <div className="topbar">
       <span className="topbar-brand">⚔ CharacterForge</span>
       <div style={{ flex: 1 }} />
+      <div className="tab-group-wrap">
       <div className="tab-group">
         {displayTabs.map((tab, i) => (
           <div key={tab.id}
@@ -49,6 +50,7 @@ export default function TabBar({ tabs, activeTab, onTabChange, editMode, onReord
             )}
           </div>
         ))}
+      </div>
       </div>
     </div>
   );

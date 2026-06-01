@@ -207,12 +207,28 @@ body {
   color: var(--c-accent-text);
   letter-spacing: .03em;
 }
+.tab-group-wrap {
+  position: relative;
+  min-width: 0;
+  flex-shrink: 1;
+}
+.tab-group-wrap::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 28px;
+  background: linear-gradient(to right, transparent, var(--c-bg));
+  pointer-events: none;
+  z-index: 2;
+  border-radius: 0 var(--r) var(--r) 0;
+}
 .tab-group {
   display: flex; gap: 2px;
   background: var(--c-surface); padding: 3px; border-radius: var(--r);
   overflow-x: auto; -webkit-overflow-scrolling: touch;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
+  min-width: 0; max-width: 100%;
 }
 .tab-group::-webkit-scrollbar { display: none; }
 .tab-btn-wrapper { scroll-snap-align: start; flex-shrink: 0; }
@@ -651,7 +667,8 @@ body {
   .grid-2 { grid-template-columns: 1fr; }
   .trait-grid { grid-template-columns: 1fr; }
   .tab-btn { padding: 5px 8px; font-size: 11px; }
-  .topbar { flex-direction: column; align-items: flex-start; }
+  .topbar { flex-direction: column; align-items: stretch; overflow-x: hidden; }
+  .tab-group-wrap { width: 100%; }
 }
 
 /* ── CHARACTER SELECT ──────────────────────────────────────────── */

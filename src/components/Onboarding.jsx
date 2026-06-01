@@ -60,20 +60,6 @@ export function CornerButtons({ onHelp }) {
   const { t } = useTranslation();
   return (
     <div className="corner-buttons">
-      <a
-        href={KOFI_URL}
-        target="_blank" rel="noopener noreferrer"
-        className="corner-btn"
-        aria-label="Ko-fi"
-        title="Ko-fi"
-      >☕</a>
-      <a
-        href={NOTION_FEEDBACK_URL}
-        target="_blank" rel="noopener noreferrer"
-        className="corner-btn"
-        aria-label={t('onboarding.feedbackBtn')}
-        title={t('onboarding.feedbackBtn')}
-      >📝</a>
       <button
         className="corner-btn"
         onClick={onHelp}
