@@ -1,0 +1,29 @@
+name: Crowdin sync
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/i18n/locales/en/**'
+      - 'src/data/srd/*.i18n.json'
+  workflow_dispatch:
+
+jobs:
+  synchronize-with-crowdin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Crowdin sync
+        uses: crowdin/github-action@v2
+        with:
+          upload_sources: true
+          upload_translations: false
+          download_translations: true
+          create_pull_request: true
+          pull_request_title: 'chore: update translations from Crowdin'
+          pull_request_branch: 'crowdin-translations'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
+          CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
