@@ -2,33 +2,56 @@
   "brand": "CharacterForge",
   "dh": {
     "widgets": {
-      "identity": "Identità", "traits": "Caratteristiche", "experiences": "Esperienze",
-      "domains": "Carte Dominio", "hp": "Punti Ferita", "stress": "Stress",
-      "hopeFear": "Speranza & Paura", "evasion": "Evasione & Armatura",
-      "armor": "Armatura & Soglie", "actions": "Azioni",
-      "conditions": "Condizioni", "weapons": "Armi",
-      "inventory": "Inventario", "gold": "Oro", "notes": "Note"
+      "identity": "Identity",
+      "traits": "Traits",
+      "experiences": "Experiences",
+      "domains": "Domain Cards",
+      "hp": "Hit Points",
+      "stress": "Stress",
+      "hopeFear": "Hope & Fear",
+      "evasion": "Evasion & Armor",
+      "armor": "Armor & Thresholds",
+      "actions": "Actions",
+      "conditions": "Conditions",
+      "weapons": "Weapons",
+      "inventory": "Inventory",
+      "gold": "Gold",
+      "notes": "Notes"
     },
     "traits": {
-      "AGI": "Agilità", "STR": "Forza", "FIN": "Destrezza",
-      "INS": "Istinto", "PRE": "Presenza", "KNO": "Conoscenza"
+      "AGI": "Agility",
+      "STR": "Strength",
+      "FIN": "Finesse",
+      "INS": "Instinct",
+      "PRE": "Presence",
+      "KNO": "Knowledge"
     },
-    "stress": "Stress", "hope": "Speranza", "fear": "Paura",
-    "evasion": "Evasione", "armorScore": "Punteggio Armatura",
-    "thresholds": { "minor": "Minore", "major": "Maggiore", "severe": "Grave" },
-    "experiences": "Esperienze", "domains": "Carte Dominio",
-    "ancestry": "Ancestria", "community": "Comunità",
-    "gold": "Oro (Manciate)", "proficiency": "Competenza",
-    "subclass": "Sottoclasse",
+    "stress": "Stress",
+    "hope": "Hope",
+    "fear": "Fear",
+    "evasion": "Evasion",
+    "armorScore": "Armor Score",
+    "thresholds": {
+      "minor": "Minor",
+      "major": "Major",
+      "severe": "Severe"
+    },
+    "experiences": "Experiences",
+    "domains": "Domain Cards",
+    "ancestry": "Ancestry",
+    "community": "Community",
+    "gold": "Gold (Handfuls)",
+    "proficiency": "Proficiency",
+    "subclass": "Subclass",
     "roll": {
-      "critical": "Critico! Entrambi i dadi mostrano {{val}} = {{total}}",
-      "hope": "{{trait}}: Speranza {{hope}} + Paura {{fear}} = {{total}} → Successo con Speranza!",
-      "fear": "{{trait}}: Paura {{fear}} + Speranza {{hope}} = {{total}} → Successo con Paura!",
-      "fail": "{{trait}}: {{total}} → Fallimento"
+      "critical": "Critical! Both dice show {{val}} = {{total}}",
+      "hope": "{{trait}}: Hope {{hope}} + Fear {{fear}} = {{total}} → Success with Hope!",
+      "fear": "{{trait}}: Fear {{fear}} + Hope {{hope}} = {{total}} → Success with Fear!",
+      "fail": "{{trait}}: {{total}} → Failure"
     }
   },
   "system": {
-    "selector": "Sistema di gioco",
+    "selector": "Game System",
     "dnd5e": "D&D 5e 2024",
     "daggerheart": "Daggerheart"
   },
@@ -435,7 +458,7 @@
     },
     "skills": {
       "acrobatics": "Acrobazia",
-      "animal-handling": "Addestrare Animali",
+      "animal-handling": "Addestrare animali",
       "arcana": "Arcano",
       "athletics": "Atletica",
       "deception": "Inganno",
@@ -449,7 +472,7 @@
       "performance": "Intrattenere",
       "persuasion": "Persuasione",
       "religion": "Religione",
-      "sleight-of-hand": "Rapidità di Mano",
+      "sleight-of-hand": "Prestidigitazione",
       "stealth": "Furtività",
       "survival": "Sopravvivenza"
     },
