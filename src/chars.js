@@ -22,10 +22,14 @@ export function saveCharState(id, state) {
   // update index entry
   try {
     const idx = loadCharsIndex();
-    const entry = { id, name: state.charName || 'Personaggio', charClass: state.charClass || '', charLevel: state.charLevel || 1, lastSaved: new Date().toISOString() };
+    const entry = { id, name: state.charName || 'Personaggio', charClass: state.charClass || '', charLevel: state.charLevel || 1, lastSaved: new Date().toISOString(), system: state.system || 'dnd5e' };
     const next = idx.find(c => c.id === id) ? idx.map(c => c.id === id ? entry : c) : [...idx, entry];
     saveCharsIndex(next);
   } catch {}
+}
+
+export function getCharsBySystem(systemId) {
+  return loadCharsIndex().filter(c => (c.system || 'dnd5e') === systemId);
 }
 
 export function deleteChar(id) {

@@ -27,7 +27,8 @@ import WidgetGrid from './components/WidgetGrid';
 import PinnedBar, { loadPinned, savePinned } from './components/PinnedBar';
 import FeatureManager from './components/FeatureManager';
 import { CLASS_FEATURES, SPECIES_FEATURES, BACKGROUND_FEATURES, getAutoFeatures } from './data/features';
-import { loadLayout, saveLayout, getDefaultLayout, getWidgetsForTab, WIDGET_DEFS, loadTabs, saveTabs, DEFAULT_TABS } from './layout';
+import { loadLayout, saveLayout, getDefaultLayoutForSystem, getWidgetsForTab, WIDGET_DEFS, loadTabs, saveTabs, DEFAULT_TABS } from './layout';
+import { SYSTEMS, DEFAULT_SYSTEM, getSystem } from './data/systems';
 import { useTheme, ACCENT_PRESETS } from './hooks/useTheme';
 import { useUnits, parseSpeedFt } from './hooks/useUnits';
 import './App.css';
@@ -126,6 +127,36 @@ function SpellSlots({ slots, onToggle }) {
           </div>
         );
       })}
+    </div>
+  );
+}
+
+function SystemSelector({ activeSystem, onChange }) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const sys = getSystem(activeSystem);
+  return (
+    <div className="system-selector">
+      <button className="system-selector-btn" onClick={() => setOpen(v => !v)}>
+        {sys.icon} {t(`system.${sys.id}`, sys.shortName)} <span className="system-selector-caret">▾</span>
+      </button>
+      {open && (
+        <>
+          <div className="hamburger-backdrop" onClick={() => setOpen(false)} />
+          <div className="system-dropdown">
+            {SYSTEMS.map(s => (
+              <button
+                key={s.id}
+                className={`system-dropdown-item ${activeSystem === s.id ? 'active' : ''}`}
+                onClick={() => { onChange(s.id); setOpen(false); }}
+              >
+                <span>{s.icon} {t(`system.${s.id}`, s.name)}</span>
+                <span className="system-dropdown-desc">{s.description}</span>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -235,7 +266,7 @@ function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag, o
 }
 
 // ── Character App (single character) ────────────────────────────
-function CharacterApp({ charId, onBackToSelect, onNewChar }) {
+function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSystemChange }) {
   const { t, i18n } = useTranslation();
   const char = useCharacter(charId);
   const { state, update } = char;
@@ -1167,7 +1198,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
     <CharContext.Provider value={{ abilities: effectiveAbilities, charLevel: state.charLevel, profBonus: char.profBonus }}>
     <div className="sheet">
       <Toast message={toast} />
-      {showCreator && <CharacterCreator onComplete={handleCreatorComplete} onCancel={() => setShowCreator(false)} />}
+      {showCreator && <CharacterCreator onComplete={handleCreatorComplete} onCancel={() => setShowCreator(false)} systemId={activeSystem || DEFAULT_SYSTEM} />}
 
       {showSources && (
         <div className="creator-overlay" onClick={() => setShowSources(false)}>
@@ -1185,7 +1216,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
 
       {/* Top bar */}
       <div className="top-bar">
-        <span className="top-bar-brand">D&amp;D 5.5e 2024</span>
+        <SystemSelector activeSystem={activeSystem || DEFAULT_SYSTEM} onChange={onSystemChange || (() => {})} />
         <div style={{ flex:1 }} />
         {onBackToSelect && (
           <button className="icon-btn" onClick={onBackToSelect} title="Tutti i personaggi">👥</button>
@@ -1193,7 +1224,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
         {editMode && (
           <>
             <button className="io-btn" style={{ fontSize: 12, padding: '4px 10px' }}
-              onClick={() => { const d = getDefaultLayout(); setLayout(d); saveLayout(d); setTabs(DEFAULT_TABS); saveTabs(DEFAULT_TABS); }}>
+              onClick={() => { const d = getDefaultLayoutForSystem(activeSystem || DEFAULT_SYSTEM); setLayout(d); saveLayout(d); setTabs(DEFAULT_TABS); saveTabs(DEFAULT_TABS); }}>
               {t('nav.reset')}
             </button>
             <button className="io-btn primary" style={{ fontSize: 12, padding: '4px 10px' }}
@@ -1225,7 +1256,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar }) {
                 {editMode ? t('menu.doneLayout') : t('menu.editLayout')}
               </button>
               <button className="hmenu-item" onClick={() => {
-                const d = getDefaultLayout(); setLayout(d); saveLayout(d);
+                const d = getDefaultLayoutForSystem(activeSystem || DEFAULT_SYSTEM); setLayout(d); saveLayout(d);
                 setTabs(DEFAULT_TABS); saveTabs(DEFAULT_TABS);
                 setShowMenu(false);
               }}>{t('menu.resetLayout')}</button>
@@ -1336,6 +1367,14 @@ export default function App() {
   });
   const [showCreator, setShowCreator] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(() => !loadOnboardingSeen());
+  const [activeSystem, setActiveSystem] = useState(() => {
+    try { return localStorage.getItem('characterforge_active_system') || DEFAULT_SYSTEM; } catch { return DEFAULT_SYSTEM; }
+  });
+
+  function handleSystemChange(systemId) {
+    setActiveSystem(systemId);
+    try { localStorage.setItem('characterforge_active_system', systemId); } catch {}
+  }
 
   // Keep chars list in sync after any save
   useEffect(() => {
@@ -1359,27 +1398,32 @@ export default function App() {
 
   function handleCreatorComplete(newState) {
     const id = generateCharId();
-    saveCharState(id, { ...createDefaultState(), ...newState });
+    saveCharState(id, { ...createDefaultState(), ...newState, system: newState.system || activeSystem });
     setActiveCharId(id);
     setActive(id);
     setChars(loadCharsIndex());
     setShowCreator(false);
   }
 
+  const filteredChars = chars.filter(c => (c.system || 'dnd5e') === activeSystem);
+  const systemSelectorNode = <SystemSelector activeSystem={activeSystem} onChange={handleSystemChange} />;
+
   return (
     <>
       {!activeCharId ? (
         <>
           <CharacterSelect
-            chars={chars}
+            chars={filteredChars}
             onSelect={handleSelect}
             onCreate={() => setShowCreator(true)}
             onDelete={handleDelete}
+            systemSelector={systemSelectorNode}
           />
           {showCreator && (
             <CharacterCreator
               onComplete={handleCreatorComplete}
               onCancel={() => setShowCreator(false)}
+              systemId={activeSystem}
             />
           )}
         </>
@@ -1389,6 +1433,8 @@ export default function App() {
           charId={activeCharId}
           onBackToSelect={() => { setActiveCharId(null); setActive(null); setChars(loadCharsIndex()); }}
           onNewChar={newState => { handleCreatorComplete(newState); }}
+          activeSystem={activeSystem}
+          onSystemChange={handleSystemChange}
         />
       )}
       {showOnboarding && <Onboarding onClose={() => setShowOnboarding(false)} />}

@@ -13,7 +13,7 @@ function fmtDate(iso) {
   catch { return ''; }
 }
 
-export default function CharacterSelect({ chars, onSelect, onCreate, onDelete }) {
+export default function CharacterSelect({ chars, onSelect, onCreate, onDelete, systemSelector }) {
   const { t } = useTranslation();
   return (
     <div className="char-select-overlay">
@@ -22,6 +22,9 @@ export default function CharacterSelect({ chars, onSelect, onCreate, onDelete })
           <div className="char-select-title">⚔ CharacterForge</div>
           <div className="char-select-sub">{t('charSelect.subtitle', 'Choose a character or create a new one')}</div>
         </div>
+        {systemSelector && (
+          <div className="char-select-system-bar">{systemSelector}</div>
+        )}
 
         <div className="char-select-list">
           {chars.length === 0 && (

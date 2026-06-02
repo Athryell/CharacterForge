@@ -89,3 +89,12 @@ export function getWidgetLabel(id) {
 }
 
 export const ALL_TABS = DEFAULT_TABS;
+
+export function getDefaultLayoutDaggerheart() {
+  return [];
+}
+
+export function getDefaultLayoutForSystem(systemId) {
+  if (systemId === 'daggerheart') return getDefaultLayoutDaggerheart();
+  return getDefaultLayout();
+}

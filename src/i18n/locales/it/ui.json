@@ -1,5 +1,10 @@
 {
   "brand": "CharacterForge",
+  "system": {
+    "selector": "Sistema di gioco",
+    "dnd5e": "D&D 5e 2024",
+    "daggerheart": "Daggerheart"
+  },
   "nav": {
     "newCharacter": "⚔ New",
     "export": "⬇ Export",

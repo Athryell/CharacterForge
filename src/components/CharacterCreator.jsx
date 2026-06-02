@@ -29,7 +29,7 @@ const POINT_BUY_TOTAL = 27;
 
 const CUSTOM_SENTINEL = '__custom__';
 
-export default function CharacterCreator({ onComplete, onCancel }) {
+export default function CharacterCreator({ onComplete, onCancel, systemId = 'dnd5e' }) {
   const { t } = useTranslation();
   const STEPS = [
     t('creator.steps.identity'),
@@ -128,6 +128,7 @@ export default function CharacterCreator({ onComplete, onCancel }) {
     const speciesFeats = raceName ? getAutoFeatures('species', raceName, SPECIES_FEATURES) : [];
     const bgFeats = bgName ? getAutoFeatures('background', bgName, BACKGROUND_FEATURES) : [];
     return {
+      system: systemId,
       charName: data.charName,
       charClass: selectedCls,
       charRace: data.charRace === CUSTOM_SENTINEL ? data.customSpecies : data.charRace,
