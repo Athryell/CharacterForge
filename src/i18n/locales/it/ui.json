@@ -1,5 +1,32 @@
 {
   "brand": "CharacterForge",
+  "dh": {
+    "widgets": {
+      "identity": "Identità", "traits": "Caratteristiche", "experiences": "Esperienze",
+      "domains": "Carte Dominio", "hp": "Punti Ferita", "stress": "Stress",
+      "hopeFear": "Speranza & Paura", "evasion": "Evasione & Armatura",
+      "armor": "Armatura & Soglie", "actions": "Azioni",
+      "conditions": "Condizioni", "weapons": "Armi",
+      "inventory": "Inventario", "gold": "Oro", "notes": "Note"
+    },
+    "traits": {
+      "AGI": "Agilità", "STR": "Forza", "FIN": "Destrezza",
+      "INS": "Istinto", "PRE": "Presenza", "KNO": "Conoscenza"
+    },
+    "stress": "Stress", "hope": "Speranza", "fear": "Paura",
+    "evasion": "Evasione", "armorScore": "Punteggio Armatura",
+    "thresholds": { "minor": "Minore", "major": "Maggiore", "severe": "Grave" },
+    "experiences": "Esperienze", "domains": "Carte Dominio",
+    "ancestry": "Ancestria", "community": "Comunità",
+    "gold": "Oro (Manciate)", "proficiency": "Competenza",
+    "subclass": "Sottoclasse",
+    "roll": {
+      "critical": "Critico! Entrambi i dadi mostrano {{val}} = {{total}}",
+      "hope": "{{trait}}: Speranza {{hope}} + Paura {{fear}} = {{total}} → Successo con Speranza!",
+      "fear": "{{trait}}: Paura {{fear}} + Speranza {{hope}} = {{total}} → Successo con Paura!",
+      "fail": "{{trait}}: {{total}} → Fallimento"
+    }
+  },
   "system": {
     "selector": "Sistema di gioco",
     "dnd5e": "D&D 5e 2024",

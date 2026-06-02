@@ -1,5 +1,32 @@
 {
   "brand": "CharacterForge",
+  "dh": {
+    "widgets": {
+      "identity": "Identity", "traits": "Traits", "experiences": "Experiences",
+      "domains": "Domain Cards", "hp": "Hit Points", "stress": "Stress",
+      "hopeFear": "Hope & Fear", "evasion": "Evasion & Armor",
+      "armor": "Armor & Thresholds", "actions": "Actions",
+      "conditions": "Conditions", "weapons": "Weapons",
+      "inventory": "Inventory", "gold": "Gold", "notes": "Notes"
+    },
+    "traits": {
+      "AGI": "Agility", "STR": "Strength", "FIN": "Finesse",
+      "INS": "Instinct", "PRE": "Presence", "KNO": "Knowledge"
+    },
+    "stress": "Stress", "hope": "Hope", "fear": "Fear",
+    "evasion": "Evasion", "armorScore": "Armor Score",
+    "thresholds": { "minor": "Minor", "major": "Major", "severe": "Severe" },
+    "experiences": "Experiences", "domains": "Domain Cards",
+    "ancestry": "Ancestry", "community": "Community",
+    "gold": "Gold (Handfuls)", "proficiency": "Proficiency",
+    "subclass": "Subclass",
+    "roll": {
+      "critical": "Critical! Both dice show {{val}} = {{total}}",
+      "hope": "{{trait}}: Hope {{hope}} + Fear {{fear}} = {{total}} → Success with Hope!",
+      "fear": "{{trait}}: Fear {{fear}} + Hope {{hope}} = {{total}} → Success with Fear!",
+      "fail": "{{trait}}: {{total}} → Failure"
+    }
+  },
   "system": {
     "selector": "Game System",
     "dnd5e": "D&D 5e 2024",

@@ -85,16 +85,91 @@ export function getWidgetsForTab(layout, tab) {
 }
 
 export function getWidgetLabel(id) {
+  if (id.startsWith('dh-')) return DH_WIDGET_DEFS.find(w => w.id === id)?.label || id;
   return WIDGET_DEFS.find(w => w.id === id)?.label || id;
 }
 
 export const ALL_TABS = DEFAULT_TABS;
 
+export const DH_WIDGET_DEFS = [
+  { id: 'dh-identity',    label: 'dh.widgets.identity',    defaultTab: 'main',      defaultCol: 0, defaultFullWidth: true  },
+  { id: 'dh-traits',      label: 'dh.widgets.traits',      defaultTab: 'main',      defaultCol: 0, defaultFullWidth: true  },
+  { id: 'dh-experiences', label: 'dh.widgets.experiences', defaultTab: 'main',      defaultCol: 0, defaultFullWidth: false },
+  { id: 'dh-domains',     label: 'dh.widgets.domains',     defaultTab: 'main',      defaultCol: 1, defaultFullWidth: false },
+  { id: 'dh-hp',          label: 'dh.widgets.hp',          defaultTab: 'combat',    defaultCol: 0, defaultFullWidth: false },
+  { id: 'dh-stress',      label: 'dh.widgets.stress',      defaultTab: 'combat',    defaultCol: 1, defaultFullWidth: false },
+  { id: 'dh-hope-fear',   label: 'dh.widgets.hopeFear',    defaultTab: 'combat',    defaultCol: 0, defaultFullWidth: false },
+  { id: 'dh-evasion',     label: 'dh.widgets.evasion',     defaultTab: 'combat',    defaultCol: 1, defaultFullWidth: false },
+  { id: 'dh-armor',       label: 'dh.widgets.armor',       defaultTab: 'combat',    defaultCol: 0, defaultFullWidth: true  },
+  { id: 'dh-actions',     label: 'dh.widgets.actions',     defaultTab: 'combat',    defaultCol: 0, defaultFullWidth: true  },
+  { id: 'dh-conditions',  label: 'dh.widgets.conditions',  defaultTab: 'combat',    defaultCol: 0, defaultFullWidth: true  },
+  { id: 'dh-weapons',     label: 'dh.widgets.weapons',     defaultTab: 'inventory', defaultCol: 0, defaultFullWidth: true  },
+  { id: 'dh-inventory',   label: 'dh.widgets.inventory',   defaultTab: 'inventory', defaultCol: 0, defaultFullWidth: true  },
+  { id: 'dh-gold',        label: 'dh.widgets.gold',        defaultTab: 'inventory', defaultCol: 0, defaultFullWidth: false },
+  { id: 'dh-notes',       label: 'dh.widgets.notes',       defaultTab: 'notes',     defaultCol: 0, defaultFullWidth: true  },
+];
+
+export const DH_DEFAULT_TABS = [
+  { id: 'main',      label: 'tabs.main',      icon: '🗡', visible: true },
+  { id: 'combat',    label: 'tabs.combat',    icon: '⚔',  visible: true },
+  { id: 'inventory', label: 'tabs.inventory', icon: '🎒',  visible: true },
+  { id: 'notes',     label: 'tabs.notes',     icon: '📝',  visible: true },
+];
+
 export function getDefaultLayoutDaggerheart() {
-  return [];
+  return DH_WIDGET_DEFS.map((w, i) => ({
+    id: w.id, tab: w.defaultTab, col: w.defaultCol,
+    order: i, visible: true, fullWidth: w.defaultFullWidth ?? false,
+  }));
 }
 
 export function getDefaultLayoutForSystem(systemId) {
   if (systemId === 'daggerheart') return getDefaultLayoutDaggerheart();
   return getDefaultLayout();
+}
+
+export function getDefaultTabsForSystem(systemId) {
+  return systemId === 'daggerheart' ? [...DH_DEFAULT_TABS] : [...DEFAULT_TABS];
+}
+
+export function loadLayoutForSystem(systemId) {
+  if (systemId === 'daggerheart') {
+    try {
+      const saved = JSON.parse(localStorage.getItem('characterforge_layout_daggerheart'));
+      if (saved && Array.isArray(saved)) {
+        const savedIds = new Set(saved.map(w => w.id));
+        const newWidgets = DH_WIDGET_DEFS
+          .filter(w => !savedIds.has(w.id))
+          .map((w, i) => ({ id: w.id, tab: w.defaultTab, col: w.defaultCol, order: i+1000, visible: true, fullWidth: w.defaultFullWidth }));
+        return [...saved, ...newWidgets];
+      }
+    } catch (e) {}
+    return getDefaultLayoutDaggerheart();
+  }
+  return loadLayout();
+}
+
+export function saveLayoutForSystem(systemId, layout) {
+  const key = systemId === 'daggerheart'
+    ? 'characterforge_layout_daggerheart'
+    : 'characterforge_layout';
+  try { localStorage.setItem(key, JSON.stringify(layout)); } catch (e) {}
+}
+
+export function loadTabsForSystem(systemId) {
+  if (systemId === 'daggerheart') {
+    try {
+      const saved = JSON.parse(localStorage.getItem('characterforge_tabs_daggerheart'));
+      if (saved && Array.isArray(saved) && saved.length) return saved;
+    } catch (e) {}
+    return [...DH_DEFAULT_TABS];
+  }
+  return loadTabs();
+}
+
+export function saveTabsForSystem(systemId, tabs) {
+  const key = systemId === 'daggerheart'
+    ? 'characterforge_tabs_daggerheart'
+    : 'characterforge_tabs';
+  try { localStorage.setItem(key, JSON.stringify(tabs)); } catch (e) {}
 }

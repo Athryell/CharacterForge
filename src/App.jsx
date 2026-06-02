@@ -27,7 +27,8 @@ import WidgetGrid from './components/WidgetGrid';
 import PinnedBar, { loadPinned, savePinned } from './components/PinnedBar';
 import FeatureManager from './components/FeatureManager';
 import { CLASS_FEATURES, SPECIES_FEATURES, BACKGROUND_FEATURES, getAutoFeatures } from './data/features';
-import { loadLayout, saveLayout, getDefaultLayoutForSystem, getWidgetsForTab, WIDGET_DEFS, loadTabs, saveTabs, DEFAULT_TABS } from './layout';
+import { getDefaultLayoutForSystem, getWidgetsForTab, loadLayoutForSystem, saveLayoutForSystem, loadTabsForSystem, saveTabsForSystem, getDefaultTabsForSystem, getWidgetLabel } from './layout';
+import { DH_TRAITS, DH_TRAIT_NAMES, DH_TRAIT_USES, DH_CLASSES, DH_DOMAINS, DH_ANCESTRIES, DH_COMMUNITIES, rollDualityDice, getDHProficiency } from './data/daggerheart';
 import { SYSTEMS, DEFAULT_SYSTEM, getSystem } from './data/systems';
 import { useTheme, ACCENT_PRESETS } from './hooks/useTheme';
 import { useUnits, parseSpeedFt } from './hooks/useUnits';
@@ -265,6 +266,40 @@ function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag, o
   );
 }
 
+// ── Daggerheart helpers ─────────────────────────────────────────
+function DHDomainCardForm({ domains, onAdd, onCancel, t }) {
+  const [form, setForm] = React.useState({ name:'', domain:'', level:'', type:'ability', desc:'' });
+  return (
+    <div className="weapon-add-panel" style={{ marginBottom:8 }}>
+      <div className="field-row">
+        <div className="field">
+          <label>{t('identity.name')}</label>
+          <input value={form.name} onChange={e => setForm(f => ({...f, name:e.target.value}))} placeholder="Card name..." autoFocus />
+        </div>
+        <div className="field">
+          <label>{t('dh.domains','Domain')}</label>
+          <select value={form.domain} onChange={e => setForm(f => ({...f, domain:e.target.value}))}>
+            <option value="">—</option>
+            {domains.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+          </select>
+        </div>
+        <div className="field">
+          <label>Level</label>
+          <input type="number" min="1" max="6" value={form.level} onChange={e => setForm(f => ({...f, level:e.target.value}))} style={{ width:52 }} />
+        </div>
+      </div>
+      <div className="field">
+        <label>{t('inventory.descLabel','Description')}</label>
+        <textarea rows={2} value={form.desc} onChange={e => setForm(f => ({...f, desc:e.target.value}))} placeholder="Card effect..." style={{ width:'100%' }} />
+      </div>
+      <div style={{ display:'flex', gap:6, marginTop:6 }}>
+        <button className="io-btn primary" onClick={() => form.name && onAdd(form)}>+ {t('common.add','Add')}</button>
+        <button className="io-btn" onClick={onCancel}>{t('common.cancel','Cancel')}</button>
+      </div>
+    </div>
+  );
+}
+
 // ── Character App (single character) ────────────────────────────
 function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSystemChange }) {
   const { t, i18n } = useTranslation();
@@ -272,9 +307,15 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
   const { state, update } = char;
 
   // Layout state
-  const [layout, setLayout] = useState(loadLayout);
+  const [layout, setLayout] = useState(() => loadLayoutForSystem(activeSystem || DEFAULT_SYSTEM));
   const [editMode, setEditMode] = useState(false);
-  const [tabs, setTabs] = useState(loadTabs);
+  const [tabs, setTabs] = useState(() => loadTabsForSystem(activeSystem || DEFAULT_SYSTEM));
+
+  useEffect(() => {
+    setLayout(loadLayoutForSystem(activeSystem || DEFAULT_SYSTEM));
+    setTabs(loadTabsForSystem(activeSystem || DEFAULT_SYSTEM));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeSystem]);
   const [pinned, setPinned] = useState(loadPinned);
   const [activityLog, setActivityLog] = useState(() => {
     try { const v = JSON.parse(localStorage.getItem('characterforge_log')); return Array.isArray(v) ? v : []; } catch { return []; }
@@ -373,7 +414,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
       if (!tab) return;
       if (tab.visible && (visibleCount <= 1 || tabId === activeTab)) return;
       const next = tabs.map(t => t.id === tabId ? { ...t, visible: !t.visible } : t);
-      setTabs(next); saveTabs(next);
+      setTabs(next); saveTabsForSystem(activeSystem || DEFAULT_SYSTEM, next);
       if (tabId === activeTab) {
         const first = next.find(t => t.visible && t.id !== tabId);
         if (first) setActiveTab(first.id);
@@ -464,18 +505,18 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
       next = [...otherTabs, ...newWidgets];
     }
     setLayout(next);
-    saveLayout(next);
+    saveLayoutForSystem(activeSystem || DEFAULT_SYSTEM, next);
   }
 
   function restoreWidget(id) {
     const next = layout.map(w => w.id === id ? { ...w, visible: true, tab: activeTab } : w);
-    setLayout(next); saveLayout(next);
+    setLayout(next); saveLayoutForSystem(activeSystem || DEFAULT_SYSTEM, next);
   }
 
   const tabWidgets = getWidgetsForTab(layout, activeTab);
   const hiddenWidgets = layout
     .filter(w => w.visible === false)
-    .map(w => ({ ...w, label: WIDGET_DEFS.find(d => d.id === w.id)?.label || w.id }));
+    .map(w => ({ ...w, label: getWidgetLabel(w.id) }));
 
   // ── Widget renderer ────────────────────────────────────────────
   const contentEditMap = {
@@ -1190,6 +1231,422 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
         </div>
       );
 
+      // ── Daggerheart widgets ──────────────────────────────────────
+
+      case 'dh-identity': {
+        const dhClass = DH_CLASSES.find(c => c.id === state.charClass);
+        return (
+          <div className={`card${editingIdentity ? ' content-editing' : ''}`}>
+            <div className="card-title" style={{ justifyContent:'space-between' }}>
+              <span>🗡 {t('dh.widgets.identity','Identity')}</span>
+              <button className={`icon-btn ${editingIdentity ? 'active' : ''}`} onClick={() => setEditingIdentity(v => !v)}>
+                {editingIdentity ? '✓' : '✏'}
+              </button>
+            </div>
+            {editingIdentity ? (
+              <div className="grid-2">
+                <Field label={t('creator.nameLabel')}><input value={state.charName||''} onChange={e => update({ charName: e.target.value })} /></Field>
+                <Field label={t('identity.class')}>
+                  <select value={state.charClass||''} onChange={e => {
+                    const cls = DH_CLASSES.find(c => c.id === e.target.value);
+                    update({ charClass: e.target.value, charSubclass:'', evasion: cls?.evasion||10, hpMax: cls?.hp||6, stressMax: cls?.stress||6 });
+                  }}>
+                    <option value="">—</option>
+                    {DH_CLASSES.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </Field>
+                <Field label={t('dh.subclass','Subclass')}>
+                  <select value={state.charSubclass||''} onChange={e => update({ charSubclass: e.target.value })} disabled={!dhClass}>
+                    <option value="">—</option>
+                    {(dhClass?.subclasses||[]).map(sc => <option key={sc} value={sc}>{sc}</option>)}
+                  </select>
+                </Field>
+                <Field label={t('dh.ancestry','Ancestry')}>
+                  <select value={state.ancestry||''} onChange={e => update({ ancestry: e.target.value })}>
+                    <option value="">—</option>
+                    {DH_ANCESTRIES.map(a => <option key={a} value={a}>{a}</option>)}
+                  </select>
+                </Field>
+                <Field label={t('dh.community','Community')}>
+                  <select value={state.community||''} onChange={e => update({ community: e.target.value })}>
+                    <option value="">—</option>
+                    {DH_COMMUNITIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </Field>
+                <Field label={t('identity.level')}>
+                  <div className="hp-stepper" style={{ gap:4 }}>
+                    <button className="mod-btn" onClick={() => { const lv=Math.max(1,(state.charLevel||1)-1); update({ charLevel:lv, proficiency:getDHProficiency(lv) }); }}>−</button>
+                    <input type="number" min="1" max="10" style={{ width:50, textAlign:'center' }} value={state.charLevel||1}
+                      onChange={e => { const lv=Math.max(1,parseInt(e.target.value)||1); update({ charLevel:lv, proficiency:getDHProficiency(lv) }); }} />
+                    <button className="mod-btn" onClick={() => { const lv=Math.min(10,(state.charLevel||1)+1); update({ charLevel:lv, proficiency:getDHProficiency(lv) }); }}>+</button>
+                  </div>
+                </Field>
+                <Field label={t('dh.proficiency','Proficiency')}><input value={`+${getDHProficiency(state.charLevel||1)}`} readOnly /></Field>
+              </div>
+            ) : (
+              <div className="identity-info-grid">
+                {[
+                  [t('identity.name'), state.charName||'—'],
+                  [t('identity.class'), dhClass?.name||'—'],
+                  [t('dh.subclass','Subclass'), state.charSubclass||'—'],
+                  [t('dh.ancestry','Ancestry'), state.ancestry||'—'],
+                  [t('dh.community','Community'), state.community||'—'],
+                  [t('identity.level'), state.charLevel||1],
+                  [t('dh.proficiency','Proficiency'), `+${getDHProficiency(state.charLevel||1)}`],
+                ].map(([label,val]) => (
+                  <div key={label} className="identity-info-item">
+                    <div className="identity-info-label">{label}</div>
+                    <div className="identity-info-val">{val}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      case 'dh-traits': {
+        const traits = state.traits || { AGI:0, STR:0, FIN:0, INS:0, PRE:0, KNO:0 };
+        return (
+          <div className={`card${editingAbilities ? ' content-editing' : ''}`}>
+            <div className="card-title" style={{ justifyContent:'space-between' }}>
+              <span>🎲 {t('dh.widgets.traits','Traits')}</span>
+              <button className={`icon-btn ${editingAbilities ? 'active' : ''}`} onClick={() => setEditingAbilities(v => !v)}>
+                {editingAbilities ? '✓' : '✏'}
+              </button>
+            </div>
+            <div className="grid-6">
+              {DH_TRAITS.map(tr => {
+                const mod = traits[tr] ?? 0;
+                return (
+                  <div key={tr} className={`ability-box ${editingAbilities ? 'editing' : ''}`}>
+                    <div className="ability-label">{t(`dh.traits.${tr}`, DH_TRAIT_NAMES[tr])}</div>
+                    {editingAbilities ? (
+                      <div className="hp-stepper" style={{ gap:2, justifyContent:'center' }}>
+                        <button className="mod-btn" onClick={() => update({ traits:{ ...traits, [tr]:mod-1 } })}>−</button>
+                        <span style={{ minWidth:20, textAlign:'center', fontWeight:700 }}>{mod>=0?`+${mod}`:mod}</span>
+                        <button className="mod-btn" onClick={() => update({ traits:{ ...traits, [tr]:mod+1 } })}>+</button>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="ability-mod" style={{ cursor:'pointer' }} onClick={() => {
+                          const res = rollDualityDice(mod);
+                          const trName = t(`dh.traits.${tr}`, DH_TRAIT_NAMES[tr]);
+                          let msg;
+                          if (res.result==='critical') msg = `Critical! Both dice show ${res.hopeRoll} = ${res.total}`;
+                          else if (res.result==='hope') msg = `${trName}: Hope ${res.hopeRoll} + Fear ${res.fearRoll} = ${res.total} → Success with Hope! ⭐`;
+                          else if (res.result==='fear') msg = `${trName}: Fear ${res.fearRoll} + Hope ${res.hopeRoll} = ${res.total} → Success with Fear!`;
+                          else msg = `${trName}: ${res.total} → Failure`;
+                          showToast(msg); addLog('🎲', msg);
+                        }}>{mod>=0?`+${mod}`:mod}</div>
+                        <div style={{ fontSize:9, color:'var(--c-muted)', textAlign:'center', padding:'0 2px 3px' }}>{DH_TRAIT_USES[tr]}</div>
+                      </>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            {editingAbilities && (
+              <p className="hint-text" style={{ marginTop:8 }}>
+                Array: {[2,1,1,0,0,-1].map(v => v>=0?`+${v}`:v).join(', ')}
+              </p>
+            )}
+          </div>
+        );
+      }
+
+      case 'dh-experiences': {
+        const experiences = state.experiences || [];
+        return (
+          <div className="card">
+            <div className="card-title" style={{ justifyContent:'space-between' }}>
+              <span>⭐ {t('dh.experiences','Experiences')}</span>
+              <button className="icon-btn" onClick={() => update({ experiences:[...experiences,{ name:'', modifier:2 }] })}>+</button>
+            </div>
+            {experiences.map((exp, i) => (
+              <div key={i} className="field-row" style={{ alignItems:'center', marginBottom:6 }}>
+                <input style={{ flex:1 }} value={exp.name} placeholder="Experience name..."
+                  onChange={e => update({ experiences: experiences.map((x,j) => j===i ? {...x, name:e.target.value} : x) })} />
+                <div className="hp-stepper" style={{ gap:2 }}>
+                  <button className="mod-btn" onClick={() => update({ experiences: experiences.map((x,j) => j===i ? {...x, modifier:(x.modifier||2)-1} : x) })}>−</button>
+                  <span style={{ minWidth:24, textAlign:'center', fontWeight:700, fontSize:13 }}>{(exp.modifier||0)>=0?`+${exp.modifier||0}`:exp.modifier}</span>
+                  <button className="mod-btn" onClick={() => update({ experiences: experiences.map((x,j) => j===i ? {...x, modifier:(x.modifier||2)+1} : x) })}>+</button>
+                </div>
+                <button className="mod-btn" style={{ color:'var(--c-muted)', marginLeft:4 }} onClick={() => update({ experiences: experiences.filter((_,j) => j!==i) })}>✕</button>
+              </div>
+            ))}
+            {experiences.length === 0 && <p className="hint-text">No experiences yet. Click + to add one.</p>}
+            <p className="hint-text" style={{ marginTop:6 }}>Spend 1 Hope to add a relevant Experience to your roll.</p>
+          </div>
+        );
+      }
+
+      case 'dh-domains': {
+        const dhClassD = DH_CLASSES.find(c => c.id === state.charClass);
+        const classDomains = dhClassD ? DH_DOMAINS.filter(d => dhClassD.domains.includes(d.id)) : [];
+        const domainCards = state.domainCards || [];
+        return (
+          <div className="card">
+            <div className="card-title" style={{ justifyContent:'space-between' }}>
+              <span>🃏 {t('dh.domains','Domain Cards')}</span>
+              <button className={`icon-btn ${addOpenFor==='dh-domains'?'active':''}`}
+                onClick={() => setAddOpenFor(v => v==='dh-domains'?null:'dh-domains')}>+</button>
+            </div>
+            {classDomains.length > 0 && (
+              <div style={{ marginBottom:8, paddingBottom:8, borderBottom:'0.5px solid var(--c-border)' }}>
+                {classDomains.map(d => (
+                  <div key={d.id} style={{ display:'flex', gap:6, alignItems:'baseline', marginBottom:3 }}>
+                    <span style={{ fontWeight:600, fontSize:12 }}>{d.name}</span>
+                    <span style={{ fontSize:11, color:'var(--c-muted)' }}>{d.desc}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {addOpenFor === 'dh-domains' && (
+              <DHDomainCardForm domains={DH_DOMAINS}
+                onAdd={card => { update({ domainCards:[...domainCards,{ ...card, id:Date.now() }] }); setAddOpenFor(null); }}
+                onCancel={() => setAddOpenFor(null)} t={t} />
+            )}
+            {domainCards.length === 0 && addOpenFor !== 'dh-domains' && <p className="hint-text">No domain cards yet.</p>}
+            {domainCards.map(card => (
+              <div key={card.id} className="check-item" style={{ alignItems:'flex-start', marginBottom:4 }}>
+                <div style={{ flex:1 }}>
+                  <span style={{ fontWeight:600, fontSize:13 }}>{card.name}</span>
+                  {card.domain && <span style={{ fontSize:11, color:'var(--c-muted)', marginLeft:6 }}>{card.domain}{card.level ? ` · Lv.${card.level}` : ''}</span>}
+                  {card.desc && <div style={{ fontSize:12, color:'var(--c-muted)', marginTop:2 }}>{card.desc}</div>}
+                </div>
+                <button className="mod-btn" style={{ color:'var(--c-muted)' }} onClick={() => update({ domainCards: domainCards.filter(c => c.id!==card.id) })}>✕</button>
+              </div>
+            ))}
+          </div>
+        );
+      }
+
+      case 'dh-hp': return (
+        <div className={`card${editingHP?' content-editing':''}`}>
+          <div className="card-title" style={{ justifyContent:'space-between' }}>
+            <span>❤ {t('dh.widgets.hp','Hit Points')}</span>
+            <button className={`icon-btn ${editingHP?'active':''}`} onClick={() => setEditingHP(v => !v)}>
+              {editingHP ? '✓' : '✏'}
+            </button>
+          </div>
+          <div className="hp-labeled-row">
+            <div className="hp-labeled-group">
+              <div className="hp-label">{t('hp.current')}</div>
+              <div className="hp-stepper">
+                <button className="mod-btn" onClick={() => update({ hpCurrent:Math.max(0,(state.hpCurrent||0)-1) })}>−</button>
+                <input type="number" className="hp-input" value={state.hpCurrent||0}
+                  onChange={e => update({ hpCurrent:parseInt(e.target.value)||0 })} />
+                <button className="mod-btn" onClick={() => update({ hpCurrent:Math.min(state.hpMax||6,(state.hpCurrent||0)+1) })}>+</button>
+              </div>
+            </div>
+            <div className="hp-sep">/</div>
+            <div className="hp-labeled-group">
+              <div className="hp-label">{t('hp.max')}</div>
+              {editingHP
+                ? <input type="number" className="hp-input" value={state.hpMax||6} onChange={e => update({ hpMax:parseInt(e.target.value)||6 })} />
+                : <div className="hp-max-display">{state.hpMax||6}</div>}
+            </div>
+          </div>
+          {!editingHP && (
+            <div style={{ display:'flex', gap:8, marginTop:8 }}>
+              <button className="io-btn" onClick={() => update({ hpCurrent:Math.max(0,(state.hpCurrent||0)-hpAmount) })}>{t('hp.damage')}</button>
+              <input type="number" className="hp-amount-input" value={hpAmount} onChange={e => setHpAmount(Math.max(0,parseInt(e.target.value)||0))} style={{ width:52, textAlign:'center' }} />
+              <button className="io-btn primary" onClick={() => update({ hpCurrent:Math.min(state.hpMax||6,(state.hpCurrent||0)+hpAmount) })}>{t('hp.heal')}</button>
+            </div>
+          )}
+        </div>
+      );
+
+      case 'dh-stress': {
+        const stressCurrent = state.stressCurrent || 0;
+        const stressMax = state.stressMax || 6;
+        return (
+          <div className="card">
+            <div className="card-title">{t('dh.stress','Stress')}</div>
+            <div className="dh-pip-row">
+              {Array.from({ length: stressMax }).map((_,i) => (
+                <div key={i} className={`dh-pip dh-stress-pip${i < stressCurrent?' on':''}`}
+                  onClick={() => update({ stressCurrent: i < stressCurrent ? i : i+1 })} />
+              ))}
+            </div>
+            <div className="hint-text" style={{ marginTop:6 }}>{t('dh.stress','Stress')}: {stressCurrent}/{stressMax}</div>
+            <p className="hint-text" style={{ marginTop:2 }}>At max stress, mark an HP or drop to 0.</p>
+          </div>
+        );
+      }
+
+      case 'dh-hope-fear': {
+        const hope = state.hope ?? 2;
+        const fear = state.fear ?? 0;
+        return (
+          <div className="card">
+            <div className="card-title">{t('dh.widgets.hopeFear','Hope & Fear')}</div>
+            <div className="dh-hope-fear-row">
+              <div className="dh-hf-group">
+                <div className="dh-hf-label dh-hope-label">⭐ {t('dh.hope','Hope')}</div>
+                <div className="hp-stepper" style={{ gap:4 }}>
+                  <button className="mod-btn" onClick={() => update({ hope:Math.max(0,hope-1) })}>−</button>
+                  <span className="dh-hf-val">{hope}</span>
+                  <button className="mod-btn" onClick={() => update({ hope:hope+1 })}>+</button>
+                </div>
+              </div>
+              <div className="dh-hf-group">
+                <div className="dh-hf-label dh-fear-label">💀 {t('dh.fear','Fear')}</div>
+                <div className="hp-stepper" style={{ gap:4 }}>
+                  <button className="mod-btn" onClick={() => update({ fear:Math.max(0,fear-1) })}>−</button>
+                  <span className="dh-hf-val">{fear}</span>
+                  <button className="mod-btn" onClick={() => update({ fear:fear+1 })}>+</button>
+                </div>
+              </div>
+            </div>
+            <p className="hint-text" style={{ marginTop:6 }}>Spend Hope to add an Experience or activate Hope Features.</p>
+          </div>
+        );
+      }
+
+      case 'dh-evasion': return (
+        <div className="card">
+          <div className="card-title">{t('dh.widgets.evasion','Evasion & Armor')}</div>
+          <div className="field-row">
+            <Field label={t('dh.evasion','Evasion')}>
+              <input type="number" value={state.evasion||10} onChange={e => update({ evasion:parseInt(e.target.value)||10 })} />
+            </Field>
+            <Field label={t('dh.armorScore','Armor Score')}>
+              <input type="number" value={state.armorScore||0} onChange={e => update({ armorScore:parseInt(e.target.value)||0 })} />
+            </Field>
+          </div>
+        </div>
+      );
+
+      case 'dh-armor': return (
+        <div className="card">
+          <div className="card-title">🛡 {t('dh.widgets.armor','Armor & Thresholds')}</div>
+          <div className="field-row">
+            <Field label={t('identity.name')}>
+              <input value={state.armorName||''} onChange={e => update({ armorName:e.target.value })} placeholder="Leather armor..." />
+            </Field>
+            <Field label={t('dh.armorScore','Armor Score')}>
+              <input type="number" value={state.armorScore||0} onChange={e => update({ armorScore:parseInt(e.target.value)||0 })} />
+            </Field>
+          </div>
+          <div className="field-row" style={{ marginTop:6 }}>
+            <Field label={`${t('dh.thresholds.minor','Minor')} Threshold`}>
+              <input type="number" value={state.thresholdMinor||0} onChange={e => update({ thresholdMinor:parseInt(e.target.value)||0 })} />
+            </Field>
+            <Field label={`${t('dh.thresholds.major','Major')} Threshold`}>
+              <input type="number" value={state.thresholdMajor||0} onChange={e => update({ thresholdMajor:parseInt(e.target.value)||0 })} />
+            </Field>
+            <Field label={`${t('dh.thresholds.severe','Severe')} Threshold`}>
+              <input type="number" value={state.thresholdSevere||0} onChange={e => update({ thresholdSevere:parseInt(e.target.value)||0 })} />
+            </Field>
+          </div>
+          <p className="hint-text" style={{ marginTop:6 }}>Thresholds = Base + Level. Damage below Minor has no effect.</p>
+        </div>
+      );
+
+      case 'dh-actions': return renderWidget('actions');
+
+      case 'dh-conditions': return renderWidget('conditions');
+
+      case 'dh-weapons': return (
+        <div className="card">
+          <div className="card-title" style={{ justifyContent:'space-between' }}>
+            <span>⚔ {t('dh.widgets.weapons','Weapons')}</span>
+            <button className={`icon-btn ${addOpenFor==='weapons'?'active':''}`}
+              onClick={() => setAddOpenFor(v => v==='weapons'?null:'weapons')}>+</button>
+          </div>
+          <WeaponManager
+            weapons={state.weapons||[]}
+            onUpdate={weapons => update({ weapons })}
+            onRoll={handleRoll}
+            allTags={allTags}
+            onUpdateTags={(id,tags) => update({ weapons:(state.weapons||[]).map(w => w.id===id?{...w,tags}:w) })}
+            onCreateTag={createTag}
+            profBonus={getDHProficiency(state.charLevel||1)}
+            proficiency={state.weaponProficiencies||''}
+            onUpdateProficiency={v => update({ weaponProficiencies:v })}
+            actionNames={actionNames}
+            onAddAction={action => { if (!actionNames.has(action.name)) update({ actions:[...(state.actions||[]),action] }); }}
+            onRemoveAction={name => update({ actions:(state.actions||[]).filter(a => a.name!==name) })}
+            addOpen={addOpenFor==='weapons'} onAddClose={() => setAddOpenFor(null)}
+          />
+        </div>
+      );
+
+      case 'dh-inventory': return (
+        <div className="card">
+          <div className="card-title" style={{ justifyContent:'space-between' }}>
+            <span>🎒 {t('dh.widgets.inventory','Inventory')}</span>
+            <button className={`icon-btn ${addOpenFor==='dh-inventory'?'active':''}`}
+              onClick={() => setAddOpenFor(v => v==='dh-inventory'?null:'dh-inventory')}>+</button>
+          </div>
+          <InventoryManager
+            items={state.equipment||[]}
+            onUpdate={equipment => update({ equipment })}
+            onRoll={handleRoll}
+            allTags={allTags}
+            onUpdateTags={(id,tags) => {
+              const item = (state.equipment||[]).find(i => i.id===id);
+              const upd = { equipment:(state.equipment||[]).map(i => i.id===id?{...i,tags}:i) };
+              if (item) upd.actions = (state.actions||[]).map(a => a.name===item.name?{...a,tags}:a);
+              update(upd);
+            }}
+            onCreateTag={createTag}
+            actionNames={actionNames}
+            onAddAction={action => { if (!actionNames.has(action.name)) update({ actions:[...(state.actions||[]),action] }); }}
+            onRemoveAction={name => update({ actions:(state.actions||[]).filter(a => a.name!==name) })}
+            currentWeightKg={0} maxWeightKg={0} coinWeightKg={0}
+            weightUnit={weightUnit} toDisplayWeight={toDisplayWeight}
+            addOpen={addOpenFor==='dh-inventory'} onAddClose={() => setAddOpenFor(null)}
+          />
+        </div>
+      );
+
+      case 'dh-gold': {
+        const gold = state.gold || 0;
+        const HANDFUL = 6;
+        const handfuls = Math.floor(gold / HANDFUL);
+        const remainder = gold % HANDFUL;
+        return (
+          <div className="card">
+            <div className="card-title">💰 {t('dh.gold','Gold (Handfuls)')}</div>
+            <div className="dh-pip-row" style={{ marginBottom:8, flexWrap:'wrap' }}>
+              {Array.from({ length: HANDFUL }).map((_,i) => (
+                <div key={i} className={`dh-pip dh-gold-pip${i < remainder?' on':''}`}
+                  onClick={() => update({ gold: handfuls*HANDFUL + (i < remainder ? i : i+1) })} />
+              ))}
+              {handfuls > 0 && <span style={{ marginLeft:6, fontWeight:600, fontSize:13 }}>×{handfuls+1}</span>}
+            </div>
+            <div className="hp-stepper" style={{ gap:4, justifyContent:'center' }}>
+              <button className="mod-btn" onClick={() => update({ gold:Math.max(0,gold-1) })}>−</button>
+              <input type="number" style={{ width:64, textAlign:'center' }} value={gold}
+                onChange={e => update({ gold:Math.max(0,parseInt(e.target.value)||0) })} />
+              <button className="mod-btn" onClick={() => update({ gold:gold+1 })}>+</button>
+            </div>
+          </div>
+        );
+      }
+
+      case 'dh-notes': return (
+        <div className="card">
+          <div className="card-title">📝 {t('dh.widgets.notes','Notes')}</div>
+          <div className="trait-grid">
+            {[
+              ['background', 'Background Questions', 'What drives your character?'],
+              ['connections', 'Connections', 'Who are your allies, rivals, loved ones?'],
+              ['free', 'Free Notes', 'Session notes, clues, reminders...'],
+            ].map(([key,label,ph]) => (
+              <Field key={key} label={label}>
+                <textarea className="notes-area" placeholder={ph}
+                  value={(state.notes||{})[key]||''}
+                  onChange={e => update({ notes:{ ...(state.notes||{}), [key]:e.target.value } })} />
+              </Field>
+            ))}
+          </div>
+        </div>
+      );
+
       default: return <div className="card"><div className="hint-text">Widget "{id}" non trovato.</div></div>;
     }
   }
@@ -1224,7 +1681,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
         {editMode && (
           <>
             <button className="io-btn" style={{ fontSize: 12, padding: '4px 10px' }}
-              onClick={() => { const d = getDefaultLayoutForSystem(activeSystem || DEFAULT_SYSTEM); setLayout(d); saveLayout(d); setTabs(DEFAULT_TABS); saveTabs(DEFAULT_TABS); }}>
+              onClick={() => { const d = getDefaultLayoutForSystem(activeSystem || DEFAULT_SYSTEM); setLayout(d); saveLayoutForSystem(activeSystem || DEFAULT_SYSTEM, d); const dt = getDefaultTabsForSystem(activeSystem || DEFAULT_SYSTEM); setTabs(dt); saveTabsForSystem(activeSystem || DEFAULT_SYSTEM, dt); }}>
               {t('nav.reset')}
             </button>
             <button className="io-btn primary" style={{ fontSize: 12, padding: '4px 10px' }}
@@ -1256,8 +1713,8 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                 {editMode ? t('menu.doneLayout') : t('menu.editLayout')}
               </button>
               <button className="hmenu-item" onClick={() => {
-                const d = getDefaultLayoutForSystem(activeSystem || DEFAULT_SYSTEM); setLayout(d); saveLayout(d);
-                setTabs(DEFAULT_TABS); saveTabs(DEFAULT_TABS);
+                const d = getDefaultLayoutForSystem(activeSystem || DEFAULT_SYSTEM); setLayout(d); saveLayoutForSystem(activeSystem || DEFAULT_SYSTEM, d);
+                const dt = getDefaultTabsForSystem(activeSystem || DEFAULT_SYSTEM); setTabs(dt); saveTabsForSystem(activeSystem || DEFAULT_SYSTEM, dt);
                 setShowMenu(false);
               }}>{t('menu.resetLayout')}</button>
             </div>
@@ -1326,7 +1783,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
         activeTab={activeTab}
         onTabChange={handleTabChange}
         editMode={editMode}
-        onReorderTabs={next => { setTabs(next); saveTabs(next); }}
+        onReorderTabs={next => { setTabs(next); saveTabsForSystem(activeSystem || DEFAULT_SYSTEM, next); }}
       />
 
       <PinnedBar
