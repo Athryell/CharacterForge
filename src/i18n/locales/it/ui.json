@@ -1,7 +1,7 @@
 {
   "brand": "CharacterForge",
   "system": {
-    "selector": "Sistema di gioco",
+    "selector": "Game System",
     "dnd5e": "D&D 5e 2024",
     "daggerheart": "Daggerheart"
   },
