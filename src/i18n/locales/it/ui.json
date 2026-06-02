@@ -1,7 +1,7 @@
 {
   "brand": "CharacterForge",
   "system": {
-    "selector": "Game System",
+    "selector": "Sistema di gioco",
     "dnd5e": "D&D 5e 2024",
     "daggerheart": "Daggerheart"
   },
@@ -407,22 +407,22 @@
       "CHA": "CAR"
     },
     "skills": {
-      "acrobatics": "Acrobazia",
-      "animal-handling": "Addestrare animali",
+      "acrobatics": "Acrobazie",
+      "animal-handling": "Addestrare Animali",
       "arcana": "Arcano",
       "athletics": "Atletica",
       "deception": "Inganno",
       "history": "Storia",
-      "insight": "Intuizione",
+      "insight": "Perspicacia",
       "intimidation": "Intimidire",
-      "investigation": "Indagare",
+      "investigation": "Investigare",
       "medicine": "Medicina",
       "nature": "Natura",
       "perception": "Percezione",
       "performance": "Intrattenere",
       "persuasion": "Persuasione",
       "religion": "Religione",
-      "sleight-of-hand": "Prestidigitazione",
+      "sleight-of-hand": "Rapidità di Mano",
       "stealth": "Furtività",
       "survival": "Sopravvivenza"
     },
