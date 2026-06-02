@@ -1,14 +1,98 @@
 {
-  "Barbarian": { "name": "Barbaro",   "primaryAbility": "FOR",     "subclassName": "Percorso primordiale",   "srdSubclasses": ["Percorso del Berserker"] },
-  "Bard":      { "name": "Bardo",     "primaryAbility": "CAR",     "subclassName": "Collegio bardico",       "srdSubclasses": ["Collegio del Sapere"] },
-  "Cleric":    { "name": "Chierico",  "primaryAbility": "SAG",     "subclassName": "Ordine divino",          "srdSubclasses": ["Dominio della Vita"] },
-  "Druid":     { "name": "Druido",    "primaryAbility": "SAG",     "subclassName": "Cerchio druidico",       "srdSubclasses": ["Cerchio della Terra"] },
-  "Fighter":   { "name": "Guerriero", "primaryAbility": "FOR o DES","subclassName": "Archetipo marziale",    "srdSubclasses": ["Campione"] },
-  "Monk":      { "name": "Monaco",    "primaryAbility": "FOR o DES","subclassName": "Tradizione monastica",  "srdSubclasses": ["Guerriero della Mano Aperta"] },
-  "Paladin":   { "name": "Paladino",  "primaryAbility": "FOR",     "subclassName": "Giuramento sacro",       "srdSubclasses": ["Giuramento di Devozione"] },
-  "Ranger":    { "name": "Ranger",    "primaryAbility": "DES o FOR","subclassName": "Convocazione del ranger","srdSubclasses": ["Cacciatore"] },
-  "Rogue":     { "name": "Ladro",     "primaryAbility": "DES",     "subclassName": "Archetipo del ladro",   "srdSubclasses": ["Furfante"] },
-  "Sorcerer":  { "name": "Stregone",  "primaryAbility": "CAR",     "subclassName": "Origine stregonesca",   "srdSubclasses": ["Sangue dragonico"] },
-  "Warlock":   { "name": "Warlock",   "primaryAbility": "CAR",     "subclassName": "Patrono ultraterreno",  "srdSubclasses": ["Il Demonio"] },
-  "Wizard":    { "name": "Mago",      "primaryAbility": "INT",     "subclassName": "Tradizione arcana",     "srdSubclasses": ["Scuola di Evocazione"] }
+  "Barbarian": {
+    "name": "Barbarian",
+    "primaryAbility": "STR",
+    "subclassName": "Primal Path",
+    "srdSubclasses": [
+      "Path of the Berserker"
+    ]
+  },
+  "Bard": {
+    "name": "Bard",
+    "primaryAbility": "CHA",
+    "subclassName": "Bard College",
+    "srdSubclasses": [
+      "College of Lore"
+    ]
+  },
+  "Cleric": {
+    "name": "Cleric",
+    "primaryAbility": "WIS",
+    "subclassName": "Divine Order",
+    "srdSubclasses": [
+      "Life Domain"
+    ]
+  },
+  "Druid": {
+    "name": "Druid",
+    "primaryAbility": "WIS",
+    "subclassName": "Druid Circle",
+    "srdSubclasses": [
+      "Circle of the Land"
+    ]
+  },
+  "Fighter": {
+    "name": "Fighter",
+    "primaryAbility": "STR or DEX",
+    "subclassName": "Martial Archetype",
+    "srdSubclasses": [
+      "Champion"
+    ]
+  },
+  "Monk": {
+    "name": "Monk",
+    "primaryAbility": "STR or DEX",
+    "subclassName": "Monastic Tradition",
+    "srdSubclasses": [
+      "Warrior of the Open Hand"
+    ]
+  },
+  "Paladin": {
+    "name": "Paladin",
+    "primaryAbility": "STR",
+    "subclassName": "Sacred Oath",
+    "srdSubclasses": [
+      "Oath of Devotion"
+    ]
+  },
+  "Ranger": {
+    "name": "Ranger",
+    "primaryAbility": "DEX or STR",
+    "subclassName": "Ranger Conclave",
+    "srdSubclasses": [
+      "Hunter"
+    ]
+  },
+  "Rogue": {
+    "name": "Rogue",
+    "primaryAbility": "DEX",
+    "subclassName": "Roguish Archetype",
+    "srdSubclasses": [
+      "Thief"
+    ]
+  },
+  "Sorcerer": {
+    "name": "Sorcerer",
+    "primaryAbility": "CHA",
+    "subclassName": "Sorcerous Origin",
+    "srdSubclasses": [
+      "Draconic Bloodline"
+    ]
+  },
+  "Warlock": {
+    "name": "Warlock",
+    "primaryAbility": "CHA",
+    "subclassName": "Otherworldly Patron",
+    "srdSubclasses": [
+      "The Fiend"
+    ]
+  },
+  "Wizard": {
+    "name": "Wizard",
+    "primaryAbility": "INT",
+    "subclassName": "Arcane Tradition",
+    "srdSubclasses": [
+      "School of Evocation"
+    ]
+  }
 }
