@@ -6,7 +6,7 @@ import { TagPill, TagSelector } from './Tags';
 
 const EMPTY_FORM = { name: '', qty: 1, desc: '', weight: '' };
 
-export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen, onAddClose, allTags = [], onUpdateTags, onCreateTag, onAddAction, onRemoveAction, actionNames, currentWeightKg = 0, maxWeightKg, coinWeightKg = 0, weightUnit = 'kg', toDisplayWeight }) {
+export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen, onAddClose, allTags = [], onUpdateTags, onCreateTag, onAddAction, onRemoveAction, actionNames, currentWeightKg = 0, maxWeightKg, coinWeightKg = 0, weightUnit = 'kg', toDisplayWeight, hideWeight = false }) {
   const { t } = useTranslation();
   const [addForm, setAddForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState(null);
@@ -62,7 +62,7 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
 
   return (
     <div>
-      {maxWeightKg !== undefined && (
+      {!hideWeight && maxWeightKg !== undefined && (
         <div className="weight-summary">
           <div className="weight-summary-text">
             <span>{t('inventory.carried')}: <strong>{displayW(currentWeightKg)} {weightUnit}</strong> / {displayW(maxWeightKg)} {weightUnit}</span>
@@ -98,10 +98,12 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
                 <button className="mod-btn" onClick={() => patchAdd({ qty: (addForm.qty||1) + 1 })}>+</button>
               </div>
             </div>
+            {!hideWeight && (
             <div className="field" style={{ flex: '0 0 80px' }}>
               <label>{t('inventory.weight')}</label>
               <input type="text" value={addForm.weight} onChange={e => patchAdd({ weight: e.target.value })} placeholder="0.5" />
             </div>
+            )}
           </div>
           <div className="field" style={{ marginTop: 8 }}>
             <label>{t('inventory.descLabel')}</label>

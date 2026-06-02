@@ -1,13 +1,20 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-const PINNABLE = [
+const PINNABLE_DND = [
   { id: 'hp',            labelKey: 'pinned.hp' },
   { id: 'inspiration',   labelKey: 'pinned.inspiration' },
   { id: 'concentration', labelKey: 'pinned.concentration' },
   { id: 'conditions',    labelKey: 'pinned.conditions' },
   { id: 'exhaustion',    labelKey: 'pinned.exhaustion' },
   { id: 'deathSaves',    labelKey: 'pinned.deathSaves' },
+];
+
+const PINNABLE_DH = [
+  { id: 'hp',       labelKey: 'pinned.hp' },
+  { id: 'dh-armor', labelKey: 'pinned.dhArmor' },
+  { id: 'dh-hope',  labelKey: 'pinned.dhHope' },
+  { id: 'dh-fear',  labelKey: 'pinned.dhFear' },
 ];
 
 const STORAGE_KEY = 'characterforge_pinned';
@@ -24,10 +31,11 @@ export function savePinned(pinned) {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(pinned)); } catch {}
 }
 
-export default function PinnedBar({ state, editMode, pinned, onTogglePin, onUpdate }) {
+export default function PinnedBar({ state, editMode, pinned, onTogglePin, onUpdate, system }) {
   const { t } = useTranslation();
   if (!editMode && pinned.length === 0) return null;
 
+  const PINNABLE = system === 'daggerheart' ? PINNABLE_DH : PINNABLE_DND;
   const items = editMode ? PINNABLE : PINNABLE.filter(p => pinned.includes(p.id));
 
   return (
@@ -52,6 +60,21 @@ export default function PinnedBar({ state, editMode, pinned, onTogglePin, onUpda
         );
       })}
     </div>
+  );
+}
+
+function DHPipRow({ emoji, current, max, pipClass, onUpdate, stateKey, editMode }) {
+  return (
+    <span className="pin-content pin-dh-pips">
+      <span className="pin-dh-emoji">{emoji}</span>
+      {Array.from({ length: max }).map((_, i) => (
+        <span
+          key={i}
+          className={`pin-pip ${pipClass}${i < current ? ' on' : ''}`}
+          onClick={editMode ? undefined : () => onUpdate({ [stateKey]: i < current ? i : i + 1 })}
+        />
+      ))}
+    </span>
   );
 }
 
@@ -145,6 +168,26 @@ function PinContent({ id, labelKey, state, onUpdate, active, editMode }) {
           </span>
         </span>
       );
+    }
+    case 'dh-armor': {
+      const slots = state.armorSlots ?? 0;
+      const max = state.armorSlotsMax ?? 0;
+      if (max === 0) return (
+        <span className="pin-content pin-hint">
+          🛡 {state.armorName || t('pinned.dhArmor', 'Armor')}
+        </span>
+      );
+      return <DHPipRow emoji="🛡" current={slots} max={max} pipClass="dh-armor-pin-pip" onUpdate={onUpdate} stateKey="armorSlots" editMode={editMode} />;
+    }
+    case 'dh-hope': {
+      const cur = state.hope ?? 0;
+      const max = state.hopeMax ?? 6;
+      return <DHPipRow emoji="⭐" current={cur} max={max} pipClass="dh-hope-pin-pip" onUpdate={onUpdate} stateKey="hope" editMode={editMode} />;
+    }
+    case 'dh-fear': {
+      const cur = state.fear ?? 0;
+      const max = state.fearMax ?? 6;
+      return <DHPipRow emoji="💀" current={cur} max={max} pipClass="dh-fear-pin-pip" onUpdate={onUpdate} stateKey="fear" editMode={editMode} />;
     }
     default: return null;
   }

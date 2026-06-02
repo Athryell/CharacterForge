@@ -26,12 +26,15 @@ import { CharContext } from './components/CharContext';
 import WidgetGrid from './components/WidgetGrid';
 import PinnedBar, { loadPinned, savePinned } from './components/PinnedBar';
 import FeatureManager from './components/FeatureManager';
+import DHWeaponManager from './components/DHWeaponManager';
+import DHArmorManager from './components/DHArmorManager';
 import { CLASS_FEATURES, SPECIES_FEATURES, BACKGROUND_FEATURES, getAutoFeatures } from './data/features';
 import { getDefaultLayoutForSystem, getWidgetsForTab, loadLayoutForSystem, saveLayoutForSystem, loadTabsForSystem, saveTabsForSystem, getDefaultTabsForSystem, getWidgetLabel } from './layout';
-import { DH_TRAITS, DH_TRAIT_NAMES, DH_TRAIT_USES, DH_CLASSES, DH_DOMAINS, DH_ANCESTRIES, DH_COMMUNITIES, rollDualityDice, getDHProficiency } from './data/daggerheart';
+import { DH_TRAITS, DH_TRAIT_NAMES, rollDualityDice, getDHTier, getDHClasses, getDHDomains, getDHAncestries, getDHCommunities, getDHConditions, getDHTraitUses } from './data/daggerheart';
 import { SYSTEMS, DEFAULT_SYSTEM, getSystem } from './data/systems';
 import { useTheme, ACCENT_PRESETS } from './hooks/useTheme';
 import { useUnits, parseSpeedFt } from './hooks/useUnits';
+import { Icon, useIconMode } from './config/icons';
 import './App.css';
 
 
@@ -300,11 +303,31 @@ function DHDomainCardForm({ domains, onAdd, onCancel, t }) {
   );
 }
 
+function DHPipRow({ current, max, pipClass, onToggle }) {
+  return (
+    <div className="dh-pip-row">
+      {Array.from({ length: max }).map((_, i) => (
+        <span key={i}
+          className={`dh-pip ${pipClass}${i < current ? ' on' : ''}`}
+          onClick={() => onToggle(i < current ? i : i + 1)}
+        />
+      ))}
+    </div>
+  );
+}
+
 // ── Character App (single character) ────────────────────────────
 function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSystemChange }) {
   const { t, i18n } = useTranslation();
   const char = useCharacter(charId);
   const { state, update } = char;
+
+  const dhClasses    = useMemo(() => getDHClasses(i18n.language),    [i18n.language]);
+  const dhDomains    = useMemo(() => getDHDomains(i18n.language),    [i18n.language]);
+  const dhAncestries = useMemo(() => getDHAncestries(i18n.language), [i18n.language]);
+  const dhCommunities= useMemo(() => getDHCommunities(i18n.language),[i18n.language]);
+  const dhConditions = useMemo(() => getDHConditions(i18n.language), [i18n.language]);
+  const dhTraitUses  = useMemo(() => getDHTraitUses(i18n.language),  [i18n.language]);
 
   // Layout state
   const [layout, setLayout] = useState(() => loadLayoutForSystem(activeSystem || DEFAULT_SYSTEM));
@@ -344,6 +367,8 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
   const [editingAbilities, setEditingAbilities] = useState(false);
   const [editingHP, setEditingHP] = useState(false);
   const [editingIdentity, setEditingIdentity] = useState(false);
+  const [editingDHEvasion, setEditingDHEvasion] = useState(false);
+  const [dhOpenFeature, setDhOpenFeature] = useState(null);
   const [actionTagFilter, setActionTagFilter] = useState(null);
   const [showMenu, setShowMenu] = useState(false);
   const [hoveredAttr, setHoveredAttr] = useState(null);
@@ -353,6 +378,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
   const [showSources, setShowSources] = useState(false);
   const [speedInputVal, setSpeedInputVal] = useState(null);
   const { mode: themeMode, accentId, setThemeMode, setAccent } = useTheme();
+  const { iconMode, setIconMode, iconAccent, setIconAccent } = useIconMode();
   const { weightUnit, speedUnit, setPref: setUnitPref, toDisplayWeight, toDisplaySpeed, fromDisplaySpeed } = useUnits();
   const fileInputRef = useRef();
   const toastTimer = useRef();
@@ -531,7 +557,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
       case 'identity': return (
         <div className={`card${ce}`}>
           <div className="card-title" style={{ justifyContent:'space-between' }}>
-            <span>👤 {t('widgets.identity')}</span>
+            <span><Icon id="widget.identity" /> {t('widgets.identity')}</span>
             <button className={`icon-btn ${editingIdentity ? 'active' : ''}`} onClick={() => setEditingIdentity(v => !v)}>
               {editingIdentity ? '✓' : '✏'}
             </button>
@@ -641,7 +667,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
       case 'abilities': return (
         <div className={`card${ce}`}>
           <div className="card-title" style={{ justifyContent:'space-between' }}>
-            <span>🎲 {t('widgets.abilities')}</span>
+            <span><Icon id="widget.abilities" /> {t('widgets.abilities')}</span>
             <button className={`icon-btn ${editingAbilities ? 'active' : ''}`} onClick={() => setEditingAbilities(e => !e)}>
               {editingAbilities ? '✓' : '✏'}
             </button>
@@ -662,7 +688,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
 
       case 'saves': return (
         <div className="card">
-          <div className="card-title">🛡 {t('widgets.saves')}</div>
+          <div className="card-title"><Icon id="widget.saves" /> {t('widgets.saves')}</div>
           <div className="check-list">
             {ABILITIES.map(attr => {
               const prof = state.saveProficiencies.includes(attr);
@@ -686,7 +712,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
 
       case 'skills': return (
         <div className="card">
-          <div className="card-title">🔧 {t('widgets.skills')}</div>
+          <div className="card-title"><Icon id="widget.skills" /> {t('widgets.skills')}</div>
           <div className="check-list">
             {SKILLS.map(sk => {
               const prof = state.skillProficiencies.includes(sk.id);
@@ -709,7 +735,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
 
       case 'senses': return (
         <div className="card">
-          <div className="card-title">👁 {t('widgets.senses')}</div>
+          <div className="card-title"><Icon id="widget.senses" /> {t('widgets.senses')}</div>
           <div className="field-row">
             <Field label={t('senses.passivePerception')}><input value={char.passivePerception} readOnly /></Field>
             <Field label={t('senses.hitDice')}><input value={char.hitDice} readOnly /></Field>
@@ -720,7 +746,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
       case 'hp': return (
         <div className={`card${ce}`}>
           <div className="card-title" style={{ justifyContent:'space-between' }}>
-            <span>❤ {t('widgets.hp')}</span>
+            <span><Icon id="widget.hp" /> {t('widgets.hp')}</span>
             <button className={`icon-btn ${editingHP ? 'active' : ''}`} onClick={() => setEditingHP(e => !e)}>
               {editingHP ? '✓' : '✏'}
             </button>
@@ -787,7 +813,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
 
       case 'combatStats': return (
         <div className="card">
-          <div className="card-title">⚔ {t('widgets.combatStats')}</div>
+          <div className="card-title"><Icon id="widget.combatStats" /> {t('widgets.combatStats')}</div>
           <div className="grid-3">
             <div className="stat-pill">
               <div className="stat-pill-label">{t('combat.ac')}</div>
@@ -839,7 +865,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
 
       case 'inspiration': return (
         <div className="card">
-          <div className="card-title" style={{ marginBottom:12 }}>⭐ {t('widgets.inspiration')}</div>
+          <div className="card-title" style={{ marginBottom:12 }}><Icon id="widget.inspiration" /> {t('widgets.inspiration')}</div>
           <div style={{ display:'flex', alignItems:'center', gap:10 }}>
             <button className={`inspiration-btn ${state.inspiration ? 'active' : ''}`} onClick={() => update({ inspiration:!state.inspiration })}>⭐</button>
             <span className="toggle-label" style={{ color: state.inspiration ? '#856404' : 'var(--c-hint)' }}>
@@ -851,7 +877,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
 
       case 'deathSaves': return (
         <div className="card">
-          <div className="card-title">💀 Tiri salvezza morte</div>
+          <div className="card-title"><Icon id="widget.deathSaves" /> {t('widgets.deathSaves')}</div>
           <div className="death-saves">
             {['success','failure'].map(type => (
               <div key={type} className="save-group">
@@ -877,7 +903,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
 
       case 'conditions': return (
         <div className="card">
-          <div className="card-title">🔮 {t('widgets.conditions')}</div>
+          <div className="card-title"><Icon id="widget.conditions" /> {t('widgets.conditions')}</div>
           <ConditionTracker
             active={state.conditions||[]}
             onChange={conditions => update({ conditions })}
@@ -890,7 +916,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
       case 'actions': return (
         <div className="card">
           <div className="card-title" style={{ justifyContent:'space-between' }}>
-            <span>⚡ {t('widgets.actions')}</span>
+            <span><Icon id="widget.actions" /> {t('widgets.actions')}</span>
             <button className={`icon-btn ${addOpenFor === 'actions' ? 'active' : ''}`}
               onClick={() => setAddOpenFor(v => v === 'actions' ? null : 'actions')}>+</button>
           </div>
@@ -960,7 +986,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
       case 'weapons': return (
         <div className="card">
           <div className="card-title" style={{ justifyContent:'space-between' }}>
-            <span>⚔ {t('widgets.weapons')}</span>
+            <span><Icon id="widget.weapons" /> {t('widgets.weapons')}</span>
             <button className={`icon-btn ${addOpenFor === 'weapons' ? 'active' : ''}`}
               onClick={() => setAddOpenFor(v => v === 'weapons' ? null : 'weapons')}>+</button>
           </div>
@@ -1007,7 +1033,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
         return (
           <div className="card">
             <div className="card-title" style={{ justifyContent:'space-between' }}>
-              <span>🛡 {t('widgets.armor')}</span>
+              <span><Icon id="widget.armor" /> {t('widgets.armor')}</span>
               <button className={`icon-btn ${addOpenFor === 'armor' ? 'active' : ''}`}
                 onClick={() => setAddOpenFor(v => v === 'armor' ? null : 'armor')}>+</button>
             </div>
@@ -1027,7 +1053,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
 
       case 'spellStats': return (
         <div className="card">
-          <div className="card-title">✨ {t('widgets.spellStats')}</div>
+          <div className="card-title"><Icon id="widget.spellStats" /> {t('widgets.spellStats')}</div>
           {hasSpells ? (
             <div className="field-row">
               <Field label={t('spells.spellcastingStat')}><input value={char.spellStat||'—'} readOnly /></Field>
@@ -1051,7 +1077,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
       case 'spellSlots': return (
         <div className="card">
           <div className="card-title" style={{ justifyContent:'space-between' }}>
-            <span>🔥 {t('widgets.spellSlots')}</span>
+            <span><Icon id="widget.spellSlots" /> {t('widgets.spellSlots')}</span>
             <div style={{ display:'flex', gap:6 }}>
               <button className="rest-btn" onClick={handleShortRest}>{t('spells.shortRest')}</button>
               <button className="rest-btn" onClick={handleLongRest}>{t('spells.longRest')}</button>
@@ -1065,7 +1091,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
 
       case 'spells': return (
         <div className="card">
-          <div className="card-title">📖 {t('widgets.spells')}</div>
+          <div className="card-title"><Icon id="widget.spells" /> {t('widgets.spells')}</div>
           <SpellManager spells={state.spells} charClass={state.charClass} onUpdate={spells => update({ spells })}
             onRoll={handleRoll} allTags={allTags}
             onUpdateTags={(name,tags) => update({
@@ -1098,7 +1124,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
         }
         return (
         <div className="card">
-          <div className="card-title">💰 {t('widgets.currency')}</div>
+          <div className="card-title"><Icon id="widget.currency" /> {t('widgets.currency')}</div>
           <div className="currency-row">
             {CURR.map(([key,label,color], idx) => (
               <React.Fragment key={key}>
@@ -1128,7 +1154,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
       case 'inventory': return (
         <div className="card">
           <div className="card-title" style={{ justifyContent:'space-between' }}>
-            <span>🎒 {t('widgets.inventory')}</span>
+            <span><Icon id="tab.inventory" /> {t('widgets.inventory')}</span>
             <button className={`icon-btn ${addOpenFor === 'inventory' ? 'active' : ''}`}
               onClick={() => setAddOpenFor(v => v === 'inventory' ? null : 'inventory')}>+</button>
           </div>
@@ -1155,7 +1181,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
 
       case 'traits': return (
         <div className="card">
-          <div className="card-title">👤 {t('widgets.traits')}</div>
+          <div className="card-title"><Icon id="widget.traits" /> {t('widgets.traits')}</div>
           <div className="trait-grid">
             {[
               ['personality', t('notes.personalityLabel'), t('notes.personalityPlaceholder')],
@@ -1174,7 +1200,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
 
       case 'freeNotes': return (
         <div className="card">
-          <div className="card-title">📝 {t('widgets.freeNotes')}</div>
+          <div className="card-title"><Icon id="widget.notes" /> {t('widgets.freeNotes')}</div>
           <textarea className="notes-area" style={{ minHeight:180 }}
             placeholder={t('notes.freeNotesPlaceholder')}
             value={state.notes.free||''} onChange={e => update({ notes:{...state.notes,free:e.target.value} })} />
@@ -1184,7 +1210,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
       case 'classFeatures': return (
         <div className="card">
           <div className="card-title" style={{ justifyContent:'space-between' }}>
-            <span>✨ {t('widgets.classFeatures')}</span>
+            <span><Icon id="widget.spellStats" /> {t('widgets.classFeatures')}</span>
             <button className={`icon-btn ${addOpenFor === 'features' ? 'active' : ''}`}
               onClick={() => setAddOpenFor(v => v === 'features' ? null : 'features')}>+</button>
           </div>
@@ -1206,7 +1232,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
       case 'activityLog': return (
         <div className="card">
           <div className="card-title" style={{ justifyContent:'space-between' }}>
-            <span>📋 {t('widgets.activityLog')}</span>
+            <span><Icon id="widget.activityLog" /> {t('widgets.activityLog')}</span>
             {activityLog.length > 0 && (
               <button className="icon-btn" onClick={() => {
                 setActivityLog([]);
@@ -1234,11 +1260,11 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
       // ── Daggerheart widgets ──────────────────────────────────────
 
       case 'dh-identity': {
-        const dhClass = DH_CLASSES.find(c => c.id === state.charClass);
+        const dhClass = dhClasses.find(c => c.id === state.charClass);
         return (
           <div className={`card${editingIdentity ? ' content-editing' : ''}`}>
             <div className="card-title" style={{ justifyContent:'space-between' }}>
-              <span>🗡 {t('dh.widgets.identity','Identity')}</span>
+              <span><Icon id="widget.identity" /> {t('dh.widgets.identity','Identity')}</span>
               <button className={`icon-btn ${editingIdentity ? 'active' : ''}`} onClick={() => setEditingIdentity(v => !v)}>
                 {editingIdentity ? '✓' : '✏'}
               </button>
@@ -1248,11 +1274,12 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                 <Field label={t('creator.nameLabel')}><input value={state.charName||''} onChange={e => update({ charName: e.target.value })} /></Field>
                 <Field label={t('identity.class')}>
                   <select value={state.charClass||''} onChange={e => {
-                    const cls = DH_CLASSES.find(c => c.id === e.target.value);
+                    const cls = dhClasses.find(c => c.id === e.target.value);
                     update({ charClass: e.target.value, charSubclass:'', evasion: cls?.evasion||10, hpMax: cls?.hp||6, stressMax: cls?.stress||6 });
+                    setDhOpenFeature(null);
                   }}>
                     <option value="">—</option>
-                    {DH_CLASSES.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    {dhClasses.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </select>
                 </Field>
                 <Field label={t('dh.subclass','Subclass')}>
@@ -1264,24 +1291,31 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                 <Field label={t('dh.ancestry','Ancestry')}>
                   <select value={state.ancestry||''} onChange={e => update({ ancestry: e.target.value })}>
                     <option value="">—</option>
-                    {DH_ANCESTRIES.map(a => <option key={a} value={a}>{a}</option>)}
+                    {dhAncestries.map(a => <option key={a} value={a}>{a}</option>)}
                   </select>
                 </Field>
                 <Field label={t('dh.community','Community')}>
                   <select value={state.community||''} onChange={e => update({ community: e.target.value })}>
                     <option value="">—</option>
-                    {DH_COMMUNITIES.map(c => <option key={c} value={c}>{c}</option>)}
+                    {dhCommunities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </select>
                 </Field>
                 <Field label={t('identity.level')}>
                   <div className="hp-stepper" style={{ gap:4 }}>
-                    <button className="mod-btn" onClick={() => { const lv=Math.max(1,(state.charLevel||1)-1); update({ charLevel:lv, proficiency:getDHProficiency(lv) }); }}>−</button>
+                    <button className="mod-btn" onClick={() => { const lv=Math.max(1,(state.charLevel||1)-1); update({ charLevel:lv, proficiency:getDHTier(lv) }); }}>−</button>
                     <input type="number" min="1" max="10" style={{ width:50, textAlign:'center' }} value={state.charLevel||1}
-                      onChange={e => { const lv=Math.max(1,parseInt(e.target.value)||1); update({ charLevel:lv, proficiency:getDHProficiency(lv) }); }} />
-                    <button className="mod-btn" onClick={() => { const lv=Math.min(10,(state.charLevel||1)+1); update({ charLevel:lv, proficiency:getDHProficiency(lv) }); }}>+</button>
+                      onChange={e => { const lv=Math.max(1,Math.min(10,parseInt(e.target.value)||1)); update({ charLevel:lv, proficiency:getDHTier(lv) }); }} />
+                    <button className="mod-btn" onClick={() => { const lv=Math.min(10,(state.charLevel||1)+1); update({ charLevel:lv, proficiency:getDHTier(lv) }); }}>+</button>
                   </div>
                 </Field>
-                <Field label={t('dh.proficiency','Proficiency')}><input value={`+${getDHProficiency(state.charLevel||1)}`} readOnly /></Field>
+                <Field label={t('dh.proficiency','Proficiency')}>
+                  <div className="hp-stepper" style={{ gap:4 }}>
+                    <button className="mod-btn" onClick={() => update({ proficiency:Math.max(getDHTier(state.charLevel||1),(state.proficiency||1)-1) })}>−</button>
+                    <input type="number" style={{ width:50, textAlign:'center' }} value={state.proficiency||1}
+                      onChange={e => update({ proficiency:Math.max(getDHTier(state.charLevel||1),parseInt(e.target.value)||1) })} />
+                    <button className="mod-btn" onClick={() => update({ proficiency:(state.proficiency||1)+1 })}>+</button>
+                  </div>
+                </Field>
               </div>
             ) : (
               <div className="identity-info-grid">
@@ -1291,12 +1325,29 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                   [t('dh.subclass','Subclass'), state.charSubclass||'—'],
                   [t('dh.ancestry','Ancestry'), state.ancestry||'—'],
                   [t('dh.community','Community'), state.community||'—'],
-                  [t('identity.level'), state.charLevel||1],
-                  [t('dh.proficiency','Proficiency'), `+${getDHProficiency(state.charLevel||1)}`],
+                  [t('identity.level'), `${state.charLevel||1} (Tier ${getDHTier(state.charLevel||1)})`],
+                  [t('dh.proficiency','Proficiency'), `+${state.proficiency||getDHTier(state.charLevel||1)}`],
                 ].map(([label,val]) => (
                   <div key={label} className="identity-info-item">
                     <div className="identity-info-label">{label}</div>
                     <div className="identity-info-val">{val}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {dhClass?.features?.length > 0 && (
+              <div className="dh-class-features">
+                <div className="dh-class-features-title">{t('dh.classFeatures','Class Features')}</div>
+                {dhClass.features.map(feat => (
+                  <div key={feat.name} className={`dh-class-feature-item${dhOpenFeature === feat.name ? ' open' : ''}`}
+                    onClick={() => setDhOpenFeature(dhOpenFeature === feat.name ? null : feat.name)}>
+                    <div className="dh-class-feature-header">
+                      <span className="dh-class-feature-name">{feat.name}</span>
+                      <span className="dh-class-feature-chevron">{dhOpenFeature === feat.name ? '▲' : '▼'}</span>
+                    </div>
+                    {dhOpenFeature === feat.name && (
+                      <div className="dh-class-feature-desc">{feat.desc}</div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -1310,7 +1361,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
         return (
           <div className={`card${editingAbilities ? ' content-editing' : ''}`}>
             <div className="card-title" style={{ justifyContent:'space-between' }}>
-              <span>🎲 {t('dh.widgets.traits','Traits')}</span>
+              <span><Icon id="widget.abilities" /> {t('dh.widgets.traits','Traits')}</span>
               <button className={`icon-btn ${editingAbilities ? 'active' : ''}`} onClick={() => setEditingAbilities(v => !v)}>
                 {editingAbilities ? '✓' : '✏'}
               </button>
@@ -1339,7 +1390,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                           else msg = `${trName}: ${res.total} → Failure`;
                           showToast(msg); addLog('🎲', msg);
                         }}>{mod>=0?`+${mod}`:mod}</div>
-                        <div style={{ fontSize:9, color:'var(--c-muted)', textAlign:'center', padding:'0 2px 3px' }}>{DH_TRAIT_USES[tr]}</div>
+                        <div style={{ fontSize:9, color:'var(--c-muted)', textAlign:'center', padding:'0 2px 3px' }}>{dhTraitUses[tr]}</div>
                       </>
                     )}
                   </div>
@@ -1360,7 +1411,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
         return (
           <div className="card">
             <div className="card-title" style={{ justifyContent:'space-between' }}>
-              <span>⭐ {t('dh.experiences','Experiences')}</span>
+              <span><Icon id="widget.inspiration" /> {t('dh.experiences','Experiences')}</span>
               <button className="icon-btn" onClick={() => update({ experiences:[...experiences,{ name:'', modifier:2 }] })}>+</button>
             </div>
             {experiences.map((exp, i) => (
@@ -1382,13 +1433,13 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
       }
 
       case 'dh-domains': {
-        const dhClassD = DH_CLASSES.find(c => c.id === state.charClass);
-        const classDomains = dhClassD ? DH_DOMAINS.filter(d => dhClassD.domains.includes(d.id)) : [];
+        const dhClassD = dhClasses.find(c => c.id === state.charClass);
+        const classDomains = dhClassD ? dhDomains.filter(d => dhClassD.domains.includes(d.id)) : [];
         const domainCards = state.domainCards || [];
         return (
           <div className="card">
             <div className="card-title" style={{ justifyContent:'space-between' }}>
-              <span>🃏 {t('dh.domains','Domain Cards')}</span>
+              <span><Icon id="widget.spells" /> {t('dh.domains','Domain Cards')}</span>
               <button className={`icon-btn ${addOpenFor==='dh-domains'?'active':''}`}
                 onClick={() => setAddOpenFor(v => v==='dh-domains'?null:'dh-domains')}>+</button>
             </div>
@@ -1403,7 +1454,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
               </div>
             )}
             {addOpenFor === 'dh-domains' && (
-              <DHDomainCardForm domains={DH_DOMAINS}
+              <DHDomainCardForm domains={dhDomains}
                 onAdd={card => { update({ domainCards:[...domainCards,{ ...card, id:Date.now() }] }); setAddOpenFor(null); }}
                 onCancel={() => setAddOpenFor(null)} t={t} />
             )}
@@ -1422,154 +1473,132 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
         );
       }
 
-      case 'dh-hp': return (
-        <div className={`card${editingHP?' content-editing':''}`}>
-          <div className="card-title" style={{ justifyContent:'space-between' }}>
-            <span>❤ {t('dh.widgets.hp','Hit Points')}</span>
-            <button className={`icon-btn ${editingHP?'active':''}`} onClick={() => setEditingHP(v => !v)}>
-              {editingHP ? '✓' : '✏'}
-            </button>
-          </div>
-          <div className="hp-labeled-row">
-            <div className="hp-labeled-group">
-              <div className="hp-label">{t('hp.current')}</div>
-              <div className="hp-stepper">
-                <button className="mod-btn" onClick={() => update({ hpCurrent:Math.max(0,(state.hpCurrent||0)-1) })}>−</button>
-                <input type="number" className="hp-input" value={state.hpCurrent||0}
-                  onChange={e => update({ hpCurrent:parseInt(e.target.value)||0 })} />
-                <button className="mod-btn" onClick={() => update({ hpCurrent:Math.min(state.hpMax||6,(state.hpCurrent||0)+1) })}>+</button>
+      case 'dh-vitals': {
+        const hpCur = state.hpCurrent ?? 0;
+        const hpMax = state.hpMax ?? 6;
+        const stressCur = state.stressCurrent ?? 0;
+        const stressMax = state.stressMax ?? 6;
+        const hopeCur = state.hope ?? 0;
+        const hopeMax = state.hopeMax ?? 6;
+        const numericV = state.dhCounterMode === 'numeric';
+        const VitalRow = ({ label, cur, max, pipClass, setCur, setMax, maxKey }) => (
+          <div className="dh-vitals-section">
+            <div className="dh-vitals-label">
+              <span>{label}</span>
+              <span className="dh-vitals-count">{cur} / {max}</span>
+            </div>
+            {numericV ? (
+              <div className="hp-stepper" style={{ gap:4 }}>
+                <button className="mod-btn" onClick={() => setCur(Math.max(0, cur - 1))}>−</button>
+                <input type="number" className="hp-input" value={cur} onChange={e => setCur(Math.max(0, Math.min(max, parseInt(e.target.value)||0)))} />
+                <button className="mod-btn" onClick={() => setCur(Math.min(max, cur + 1))}>+</button>
               </div>
-            </div>
-            <div className="hp-sep">/</div>
-            <div className="hp-labeled-group">
-              <div className="hp-label">{t('hp.max')}</div>
-              {editingHP
-                ? <input type="number" className="hp-input" value={state.hpMax||6} onChange={e => update({ hpMax:parseInt(e.target.value)||6 })} />
-                : <div className="hp-max-display">{state.hpMax||6}</div>}
-            </div>
+            ) : (
+              <DHPipRow current={cur} max={max} pipClass={pipClass} onToggle={setCur} />
+            )}
+            {editingHP && (
+              <div className="dh-vitals-max-row">
+                <span>Max</span>
+                <button className="mod-btn" onClick={() => setMax(Math.max(1, max - 1))}>−</button>
+                <span className="dh-vitals-max-val">{max}</span>
+                <button className="mod-btn" onClick={() => setMax(max + 1)}>+</button>
+              </div>
+            )}
           </div>
-          {!editingHP && (
-            <div style={{ display:'flex', gap:8, marginTop:8 }}>
-              <button className="io-btn" onClick={() => update({ hpCurrent:Math.max(0,(state.hpCurrent||0)-hpAmount) })}>{t('hp.damage')}</button>
-              <input type="number" className="hp-amount-input" value={hpAmount} onChange={e => setHpAmount(Math.max(0,parseInt(e.target.value)||0))} style={{ width:52, textAlign:'center' }} />
-              <button className="io-btn primary" onClick={() => update({ hpCurrent:Math.min(state.hpMax||6,(state.hpCurrent||0)+hpAmount) })}>{t('hp.heal')}</button>
-            </div>
-          )}
-        </div>
-      );
-
-      case 'dh-stress': {
-        const stressCurrent = state.stressCurrent || 0;
-        const stressMax = state.stressMax || 6;
+        );
         return (
-          <div className="card">
-            <div className="card-title">{t('dh.stress','Stress')}</div>
-            <div className="dh-pip-row">
-              {Array.from({ length: stressMax }).map((_,i) => (
-                <div key={i} className={`dh-pip dh-stress-pip${i < stressCurrent?' on':''}`}
-                  onClick={() => update({ stressCurrent: i < stressCurrent ? i : i+1 })} />
-              ))}
+          <div className={`card${editingHP ? ' content-editing' : ''}`}>
+            <div className="card-title" style={{ justifyContent:'space-between' }}>
+              <span><Icon id="widget.hp" /> {t('dh.widgets.vitals','Vitals')}</span>
+              <button className={`icon-btn ${editingHP?'active':''}`} onClick={() => setEditingHP(v => !v)}>
+                {editingHP ? '✓' : '✏'}
+              </button>
             </div>
-            <div className="hint-text" style={{ marginTop:6 }}>{t('dh.stress','Stress')}: {stressCurrent}/{stressMax}</div>
-            <p className="hint-text" style={{ marginTop:2 }}>At max stress, mark an HP or drop to 0.</p>
+            <VitalRow label="Hit Points" cur={hpCur} max={hpMax} pipClass="dh-hp-pip"
+              setCur={v => update({ hpCurrent:v })} setMax={v => update({ hpMax:v })} />
+            <VitalRow label="Stress" cur={stressCur} max={stressMax} pipClass="dh-stress-pip"
+              setCur={v => update({ stressCurrent:v })} setMax={v => update({ stressMax:v })} />
+            <VitalRow label="⭐ Hope" cur={hopeCur} max={hopeMax} pipClass="dh-hope-pip"
+              setCur={v => update({ hope:v })} setMax={v => update({ hopeMax:v })} />
+            {editingHP && (
+              <label className="dh-counter-mode-toggle">
+                <input type="checkbox" checked={numericV}
+                  onChange={e => update({ dhCounterMode: e.target.checked ? 'numeric' : 'pip' })} />
+                Contatori numerici
+              </label>
+            )}
           </div>
         );
       }
 
-      case 'dh-hope-fear': {
-        const hope = state.hope ?? 2;
-        const fear = state.fear ?? 0;
+      case 'dh-evasion': {
+        const numericE = state.dhCounterMode === 'numeric';
         return (
-          <div className="card">
-            <div className="card-title">{t('dh.widgets.hopeFear','Hope & Fear')}</div>
-            <div className="dh-hope-fear-row">
-              <div className="dh-hf-group">
-                <div className="dh-hf-label dh-hope-label">⭐ {t('dh.hope','Hope')}</div>
-                <div className="hp-stepper" style={{ gap:4 }}>
-                  <button className="mod-btn" onClick={() => update({ hope:Math.max(0,hope-1) })}>−</button>
-                  <span className="dh-hf-val">{hope}</span>
-                  <button className="mod-btn" onClick={() => update({ hope:hope+1 })}>+</button>
-                </div>
-              </div>
-              <div className="dh-hf-group">
-                <div className="dh-hf-label dh-fear-label">💀 {t('dh.fear','Fear')}</div>
-                <div className="hp-stepper" style={{ gap:4 }}>
-                  <button className="mod-btn" onClick={() => update({ fear:Math.max(0,fear-1) })}>−</button>
-                  <span className="dh-hf-val">{fear}</span>
-                  <button className="mod-btn" onClick={() => update({ fear:fear+1 })}>+</button>
-                </div>
+          <div className={`card${editingDHEvasion ? ' content-editing' : ''}`}>
+            <div className="card-title" style={{ justifyContent:'space-between' }}>
+              <span><Icon id="widget.saves" /> {t('dh.widgets.evasion','Evasion & Armor')}</span>
+              <button className={`icon-btn ${editingDHEvasion?'active':''}`} onClick={() => setEditingDHEvasion(v => !v)}>
+                {editingDHEvasion ? '✓' : '✏'}
+              </button>
+            </div>
+            <div className="dh-evasion-row" style={{ marginBottom: 10 }}>
+              <div className="dh-evasion-box">
+                <div className="dh-evasion-label">{t('dh.evasion','Evasion')}</div>
+                {editingDHEvasion
+                  ? <input type="number" className="dh-evasion-input" value={state.evasion||10} onChange={e => update({ evasion:parseInt(e.target.value)||10 })} />
+                  : <div className="dh-evasion-val">{state.evasion||10}</div>}
               </div>
             </div>
-            <p className="hint-text" style={{ marginTop:6 }}>Spend Hope to add an Experience or activate Hope Features.</p>
+            <DHArmorManager
+              armorName={state.armorName||''}
+              armorFeature={state.armorFeature||''}
+              thresholdMinor={state.thresholdMinor||0}
+              thresholdMajor={state.thresholdMajor||0}
+              thresholdSevere={state.thresholdSevere||0}
+              armorSlotsMax={state.armorSlotsMax??0}
+              armorSlots={state.armorSlots??0}
+              charLevel={state.charLevel||1}
+              numericMode={numericE}
+              onUpdate={update}
+            />
+            {editingDHEvasion && (
+              <label className="dh-counter-mode-toggle" style={{ marginTop: 8 }}>
+                <input type="checkbox" checked={numericE}
+                  onChange={e => update({ dhCounterMode: e.target.checked ? 'numeric' : 'pip' })} />
+                Contatori numerici
+              </label>
+            )}
           </div>
         );
       }
-
-      case 'dh-evasion': return (
-        <div className="card">
-          <div className="card-title">{t('dh.widgets.evasion','Evasion & Armor')}</div>
-          <div className="field-row">
-            <Field label={t('dh.evasion','Evasion')}>
-              <input type="number" value={state.evasion||10} onChange={e => update({ evasion:parseInt(e.target.value)||10 })} />
-            </Field>
-            <Field label={t('dh.armorScore','Armor Score')}>
-              <input type="number" value={state.armorScore||0} onChange={e => update({ armorScore:parseInt(e.target.value)||0 })} />
-            </Field>
-          </div>
-        </div>
-      );
-
-      case 'dh-armor': return (
-        <div className="card">
-          <div className="card-title">🛡 {t('dh.widgets.armor','Armor & Thresholds')}</div>
-          <div className="field-row">
-            <Field label={t('identity.name')}>
-              <input value={state.armorName||''} onChange={e => update({ armorName:e.target.value })} placeholder="Leather armor..." />
-            </Field>
-            <Field label={t('dh.armorScore','Armor Score')}>
-              <input type="number" value={state.armorScore||0} onChange={e => update({ armorScore:parseInt(e.target.value)||0 })} />
-            </Field>
-          </div>
-          <div className="field-row" style={{ marginTop:6 }}>
-            <Field label={`${t('dh.thresholds.minor','Minor')} Threshold`}>
-              <input type="number" value={state.thresholdMinor||0} onChange={e => update({ thresholdMinor:parseInt(e.target.value)||0 })} />
-            </Field>
-            <Field label={`${t('dh.thresholds.major','Major')} Threshold`}>
-              <input type="number" value={state.thresholdMajor||0} onChange={e => update({ thresholdMajor:parseInt(e.target.value)||0 })} />
-            </Field>
-            <Field label={`${t('dh.thresholds.severe','Severe')} Threshold`}>
-              <input type="number" value={state.thresholdSevere||0} onChange={e => update({ thresholdSevere:parseInt(e.target.value)||0 })} />
-            </Field>
-          </div>
-          <p className="hint-text" style={{ marginTop:6 }}>Thresholds = Base + Level. Damage below Minor has no effect.</p>
-        </div>
-      );
 
       case 'dh-actions': return renderWidget('actions');
 
-      case 'dh-conditions': return renderWidget('conditions');
+      case 'dh-conditions': return (
+        <div className="card">
+          <div className="card-title"><Icon id="widget.conditions" /> {t('dh.widgets.conditions','Conditions')}</div>
+          <ConditionTracker
+            active={state.conditions||[]}
+            onChange={conditions => update({ conditions })}
+            conditions={dhConditions}
+          />
+        </div>
+      );
 
       case 'dh-weapons': return (
         <div className="card">
           <div className="card-title" style={{ justifyContent:'space-between' }}>
-            <span>⚔ {t('dh.widgets.weapons','Weapons')}</span>
-            <button className={`icon-btn ${addOpenFor==='weapons'?'active':''}`}
-              onClick={() => setAddOpenFor(v => v==='weapons'?null:'weapons')}>+</button>
+            <span><Icon id="widget.weapons" /> {t('dh.widgets.weapons','Weapons')}</span>
+            <button className={`icon-btn ${addOpenFor==='dh-weapons'?'active':''}`}
+              onClick={() => setAddOpenFor(v => v==='dh-weapons'?null:'dh-weapons')}>+</button>
           </div>
-          <WeaponManager
+          <DHWeaponManager
             weapons={state.weapons||[]}
+            proficiency={state.proficiency||1}
             onUpdate={weapons => update({ weapons })}
             onRoll={handleRoll}
-            allTags={allTags}
-            onUpdateTags={(id,tags) => update({ weapons:(state.weapons||[]).map(w => w.id===id?{...w,tags}:w) })}
-            onCreateTag={createTag}
-            profBonus={getDHProficiency(state.charLevel||1)}
-            proficiency={state.weaponProficiencies||''}
-            onUpdateProficiency={v => update({ weaponProficiencies:v })}
-            actionNames={actionNames}
-            onAddAction={action => { if (!actionNames.has(action.name)) update({ actions:[...(state.actions||[]),action] }); }}
-            onRemoveAction={name => update({ actions:(state.actions||[]).filter(a => a.name!==name) })}
-            addOpen={addOpenFor==='weapons'} onAddClose={() => setAddOpenFor(null)}
+            addOpen={addOpenFor==='dh-weapons'}
+            onAddClose={() => setAddOpenFor(null)}
           />
         </div>
       );
@@ -1577,7 +1606,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
       case 'dh-inventory': return (
         <div className="card">
           <div className="card-title" style={{ justifyContent:'space-between' }}>
-            <span>🎒 {t('dh.widgets.inventory','Inventory')}</span>
+            <span><Icon id="tab.inventory" /> {t('dh.widgets.inventory','Inventory')}</span>
             <button className={`icon-btn ${addOpenFor==='dh-inventory'?'active':''}`}
               onClick={() => setAddOpenFor(v => v==='dh-inventory'?null:'dh-inventory')}>+</button>
           </div>
@@ -1596,33 +1625,53 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
             actionNames={actionNames}
             onAddAction={action => { if (!actionNames.has(action.name)) update({ actions:[...(state.actions||[]),action] }); }}
             onRemoveAction={name => update({ actions:(state.actions||[]).filter(a => a.name!==name) })}
-            currentWeightKg={0} maxWeightKg={0} coinWeightKg={0}
-            weightUnit={weightUnit} toDisplayWeight={toDisplayWeight}
+            hideWeight
             addOpen={addOpenFor==='dh-inventory'} onAddClose={() => setAddOpenFor(null)}
           />
         </div>
       );
 
       case 'dh-gold': {
-        const gold = state.gold || 0;
-        const HANDFUL = 6;
-        const handfuls = Math.floor(gold / HANDFUL);
-        const remainder = gold % HANDFUL;
+        // gold stored as flat handfuls. 10 handfuls = 1 bag, 10 bags = 1 chest.
+        const total = state.gold || 0;
+        const handfuls = total % 10;
+        const bags = Math.floor(total / 10) % 10;
+        const chests = Math.floor(total / 100);
+        const setTotal = v => update({ gold: Math.max(0, v) });
         return (
           <div className="card">
-            <div className="card-title">💰 {t('dh.gold','Gold (Handfuls)')}</div>
-            <div className="dh-pip-row" style={{ marginBottom:8, flexWrap:'wrap' }}>
-              {Array.from({ length: HANDFUL }).map((_,i) => (
-                <div key={i} className={`dh-pip dh-gold-pip${i < remainder?' on':''}`}
-                  onClick={() => update({ gold: handfuls*HANDFUL + (i < remainder ? i : i+1) })} />
-              ))}
-              {handfuls > 0 && <span style={{ marginLeft:6, fontWeight:600, fontSize:13 }}>×{handfuls+1}</span>}
-            </div>
-            <div className="hp-stepper" style={{ gap:4, justifyContent:'center' }}>
-              <button className="mod-btn" onClick={() => update({ gold:Math.max(0,gold-1) })}>−</button>
-              <input type="number" style={{ width:64, textAlign:'center' }} value={gold}
-                onChange={e => update({ gold:Math.max(0,parseInt(e.target.value)||0) })} />
-              <button className="mod-btn" onClick={() => update({ gold:gold+1 })}>+</button>
+            <div className="card-title"><Icon id="widget.currency" /> {t('dh.gold','Gold')}</div>
+            <div className="dh-gold-denoms">
+              <div className="dh-gold-denom">
+                <div className="dh-gold-denom-label">🪙 Chests</div>
+                <div className="dh-pip-row">
+                  <span className={`dh-pip dh-gold-pip${chests > 0 ? ' on' : ''}`}
+                    onClick={() => setTotal((chests > 0 ? 0 : 100) + bags*10 + handfuls)} />
+                </div>
+                <span className="dh-gold-denom-count">{chests} / 1</span>
+              </div>
+              <div className="dh-gold-denom">
+                <div className="dh-gold-denom-label">👝 Bags</div>
+                <div className="dh-pip-row">
+                  {Array.from({ length: 9 }).map((_,i) => (
+                    <span key={i}
+                      className={`dh-pip dh-gold-pip${i < bags ? ' on' : ''}`}
+                      onClick={() => setTotal(chests*100 + (i < bags ? i : i+1)*10 + handfuls)} />
+                  ))}
+                </div>
+                <span className="dh-gold-denom-count">{bags} / 9</span>
+              </div>
+              <div className="dh-gold-denom">
+                <div className="dh-gold-denom-label">🤏 Handfuls</div>
+                <div className="dh-pip-row">
+                  {Array.from({ length: 9 }).map((_,i) => (
+                    <span key={i}
+                      className={`dh-pip dh-gold-pip${i < handfuls ? ' on' : ''}`}
+                      onClick={() => setTotal(chests*100 + bags*10 + (i < handfuls ? i : i+1))} />
+                  ))}
+                </div>
+                <span className="dh-gold-denom-count">{handfuls} / 9</span>
+              </div>
             </div>
           </div>
         );
@@ -1630,7 +1679,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
 
       case 'dh-notes': return (
         <div className="card">
-          <div className="card-title">📝 {t('dh.widgets.notes','Notes')}</div>
+          <div className="card-title"><Icon id="widget.notes" /> {t('dh.widgets.notes','Notes')}</div>
           <div className="trait-grid">
             {[
               ['background', 'Background Questions', 'What drives your character?'],
@@ -1673,8 +1722,9 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
 
       {/* Top bar */}
       <div className="top-bar">
-        <SystemSelector activeSystem={activeSystem || DEFAULT_SYSTEM} onChange={onSystemChange || (() => {})} />
-        <div style={{ flex:1 }} />
+        <div className="top-bar-system-name">
+          {getSystem(activeSystem || DEFAULT_SYSTEM).icon} {t(`system.${(activeSystem || DEFAULT_SYSTEM)}`, getSystem(activeSystem || DEFAULT_SYSTEM).shortName)}
+        </div>
         {onBackToSelect && (
           <button className="icon-btn" onClick={onBackToSelect} title="Tutti i personaggi">👥</button>
         )}
@@ -1748,6 +1798,33 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                 ))}
               </div>
             </div>
+            <div className="hmenu-section">
+              <div className="hmenu-label">{t('menu.iconMode')}</div>
+              <div className="hmenu-row">
+                {[
+                  { value: 'emoji',  label: t('menu.iconEmoji'),  preview: '⚔ 🎲 ❤' },
+                  { value: 'lucide', label: t('menu.iconLucide'), preview: '◈' },
+                  { value: 'none',   label: t('menu.iconNone'),   preview: 'Aa' },
+                ].map(opt => (
+                  <button key={opt.value}
+                    className={`hmenu-theme-btn ${iconMode === opt.value ? 'active' : ''}`}
+                    onClick={() => setIconMode(opt.value)}
+                    title={opt.label}>
+                    {opt.preview}
+                  </button>
+                ))}
+              </div>
+              {iconMode === 'lucide' && (
+                <div style={{ marginTop: 6 }}>
+                  <button
+                    className={`hmenu-theme-btn ${iconAccent ? 'active' : ''}`}
+                    onClick={() => setIconAccent(!iconAccent)}
+                    style={{ width: '100%', justifyContent: 'center' }}>
+                    {t('menu.iconAccent')}
+                  </button>
+                </div>
+              )}
+            </div>
             <div className="hmenu-divider" />
             <div className="hmenu-section">
               <div className="hmenu-label">{t('menu.units')}</div>
@@ -1771,7 +1848,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
               <div className="hmenu-label">{t('menu.data')}</div>
               <button className="hmenu-item" onClick={() => { handleExport(); setShowMenu(false); }}>{t('menu.exportChar')}</button>
               <button className="hmenu-item" onClick={() => { fileInputRef.current?.click(); setShowMenu(false); }}>{t('menu.importChar')}</button>
-              <button className="hmenu-item" onClick={() => { setShowSources(true); setShowMenu(false); }}>📦 {t('menu.sources')}</button>
+              <button className="hmenu-item" onClick={() => { setShowSources(true); setShowMenu(false); }}><Icon id="tab.sources" /> {t('menu.sources')}</button>
             </div>
           </div>
         </>
@@ -1792,6 +1869,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
         pinned={pinned}
         onTogglePin={handleTogglePin}
         onUpdate={update}
+        system={activeSystem || DEFAULT_SYSTEM}
       />
 
       {editMode && (

@@ -1,0 +1,63 @@
+{
+  "traits": {
+    "AGI": { "uses": "Sprint, Leap, Maneuver" },
+    "STR": { "uses": "Lift, Smash, Grapple" },
+    "FIN": { "uses": "Control, Hide, Tinker" },
+    "INS": { "uses": "Perceive, Sense, Navigate" },
+    "PRE": { "uses": "Charm, Perform, Deceive" },
+    "KNO": { "uses": "Recall, Analyze, Comprehend" }
+  },
+  "classes": {
+    "bard":     { "name": "Bard",     "subclasses": ["Troubadour", "Wordsmith"] },
+    "druid":    { "name": "Druid",    "subclasses": ["Warden of the Elements", "Warden of Renewal"] },
+    "guardian": { "name": "Guardian", "subclasses": ["Stalwart", "Vengeance"] },
+    "ranger":   { "name": "Ranger",   "subclasses": ["Beastbound", "Wayfinder"] },
+    "rogue":    { "name": "Rogue",    "subclasses": ["Nightwalker", "Syndicate"] },
+    "seraph":   { "name": "Seraph",   "subclasses": ["Divine Wielder", "Winged Sentinel"] },
+    "sorcerer": { "name": "Sorcerer", "subclasses": ["Elemental Origin", "Primal Origin"] },
+    "warrior":  { "name": "Warrior",  "subclasses": ["Call of the Brave", "Call of the Slayer"] },
+    "wizard":   { "name": "Wizard",   "subclasses": ["School of Knowledge", "School of War"] }
+  },
+  "domains": {
+    "arcana":   { "name": "Arcana",   "desc": "Domain of innate and instinctual magic." },
+    "blade":    { "name": "Blade",    "desc": "Domain of weapon mastery." },
+    "bone":     { "name": "Bone",     "desc": "Domain of tactics and the body." },
+    "codex":    { "name": "Codex",    "desc": "Domain of intensive magical study." },
+    "grace":    { "name": "Grace",    "desc": "Domain of charisma." },
+    "midnight": { "name": "Midnight", "desc": "Domain of shadows and secrecy." },
+    "sage":     { "name": "Sage",     "desc": "Domain of the natural world." },
+    "splendor": { "name": "Splendor", "desc": "Domain of life." },
+    "valor":    { "name": "Valor",    "desc": "Domain of protection." }
+  },
+  "ancestries": {
+    "Clank":    "Clank",    "Drakona":  "Drakona",  "Dwarf":    "Dwarf",
+    "Elf":      "Elf",      "Faerie":   "Faerie",   "Faun":     "Faun",
+    "Firbolg":  "Firbolg",  "Fungril":  "Fungril",  "Galapa":   "Galapa",
+    "Giant":    "Giant",    "Goblin":   "Goblin",   "Halfling": "Halfling",
+    "Human":    "Human",    "Infernis": "Infernis", "Katari":   "Katari",
+    "Orc":      "Orc",      "Ribbet":   "Ribbet",   "Simiah":   "Simiah"
+  },
+  "communities": {
+    "Highborne": "Highborne", "Loreborne":   "Loreborne",  "Orderborne":  "Orderborne",
+    "Ridgeborne": "Ridgeborne", "Seaborne":  "Seaborne",   "Slyborne":    "Slyborne",
+    "Underborne": "Underborne", "Wanderborne": "Wanderborne", "Wildborne": "Wildborne"
+  },
+  "conditions": {
+    "hidden":     { "name": "Hidden",     "desc": "Out of sight from all enemies. Rolls against you have disadvantage. Cleared when enemies see you, you enter their line of sight, or you attack." },
+    "restrained": { "name": "Restrained", "desc": "Can't move, but can still take actions from your current position." },
+    "vulnerable": { "name": "Vulnerable", "desc": "All rolls targeting you have advantage." },
+    "poisoned":   { "name": "Poisoned",   "desc": "Roll a d6 before each action roll. On 4 or lower, mark a Stress." },
+    "cursed":     { "name": "Cursed",     "desc": "An opponent can mark a Stress when you roll with Hope to turn it into a roll with Fear instead." },
+    "ignited":    { "name": "Ignited",    "desc": "Take 1d4 magic damage when you make an action roll." },
+    "exiled":     { "name": "Exiled",     "desc": "You and your allies have disadvantage during social situations within the Noble's domain." },
+    "protected":  { "name": "Protected",  "desc": "Resistance to all damage." },
+    "entranced":  { "name": "Entranced",  "desc": "Can't act and is Vulnerable." },
+    "enveloped":  { "name": "Enveloped",  "desc": "Mark an additional Stress every action roll. Cleared when the Ooze takes Severe damage." },
+    "dazed":      { "name": "Dazed",      "desc": "Can't use Regeneration but immune to magic damage." },
+    "rooted":     { "name": "Rooted",     "desc": "Resistance to physical damage." },
+    "marked":     { "name": "Marked",     "desc": "Evasion is halved." },
+    "chilled":    { "name": "Chilled",    "desc": "Disadvantage on attack rolls." },
+    "trapped":    { "name": "Trapped",    "desc": "Restrained and Vulnerable. Break free with a successful Instinct Roll." },
+    "guilty":     { "name": "Guilty",     "desc": "Standard attacks against you deal Severe damage instead." }
+  }
+}

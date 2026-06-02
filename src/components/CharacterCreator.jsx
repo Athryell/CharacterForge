@@ -266,7 +266,7 @@ function DHCharacterCreator({ onComplete, onCancel }) {
           <button className="io-btn" onClick={onCancel}>{t('creator.cancel')}</button>
           {step > 0 && <button className="io-btn" onClick={() => setStep(s => s-1)}>{t('creator.back')}</button>}
           {step < DH_STEPS.length-1
-            ? <button className="io-btn primary" onClick={() => setStep(s => s+1)} disabled={!canNext}>{t('creator.next')}</button>
+            ? <button className={`io-btn primary ${!canNext ? 'disabled' : ''}`} onClick={() => canNext && setStep(s => s+1)}>{t('creator.next')}</button>
             : <button className="io-btn primary" onClick={() => onComplete(buildState())}>{t('creator.create')}</button>
           }
         </div>

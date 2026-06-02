@@ -1,0 +1,63 @@
+{
+  "traits": {
+    "AGI": { "uses": "Scatto, Salto, Manovra" },
+    "STR": { "uses": "Sollevare, Schiacciare, Afferrare" },
+    "FIN": { "uses": "Controllo, Nascondersi, Armeggiare" },
+    "INS": { "uses": "Percepire, Sentire, Navigare" },
+    "PRE": { "uses": "Ammaliare, Esibirsi, Ingannare" },
+    "KNO": { "uses": "Ricordare, Analizzare, Comprendere" }
+  },
+  "classes": {
+    "bard":     { "name": "Bardo",     "subclasses": ["Trovatore", "Fabbro delle Parole"] },
+    "druid":    { "name": "Druido",    "subclasses": ["Custode degli Elementi", "Custode del Rinnovamento"] },
+    "guardian": { "name": "Guardiano", "subclasses": ["Fermo", "Vendetta"] },
+    "ranger":   { "name": "Ranger",    "subclasses": ["Vincolato alla Bestia", "Cercacamminiero"] },
+    "rogue":    { "name": "Ladro",     "subclasses": ["Camminatore Notturno", "Sindacato"] },
+    "seraph":   { "name": "Serafino",  "subclasses": ["Portatore Divino", "Sentinella Alata"] },
+    "sorcerer": { "name": "Stregone",  "subclasses": ["Origine Elementale", "Origine Primordiale"] },
+    "warrior":  { "name": "Guerriero", "subclasses": ["Richiamo del Coraggioso", "Richiamo dello Sterminatore"] },
+    "wizard":   { "name": "Mago",      "subclasses": ["Scuola della Conoscenza", "Scuola della Guerra"] }
+  },
+  "domains": {
+    "arcana":   { "name": "Arcana",     "desc": "Dominio della magia innata e istintuale." },
+    "blade":    { "name": "Lama",       "desc": "Dominio della maestria delle armi." },
+    "bone":     { "name": "Ossa",       "desc": "Dominio delle tattiche e del corpo." },
+    "codex":    { "name": "Codice",     "desc": "Dominio dello studio magico intensivo." },
+    "grace":    { "name": "Grazia",     "desc": "Dominio del carisma." },
+    "midnight": { "name": "Mezzanotte", "desc": "Dominio delle ombre e del segreto." },
+    "sage":     { "name": "Saggio",     "desc": "Dominio del mondo naturale." },
+    "splendor": { "name": "Splendore",  "desc": "Dominio della vita." },
+    "valor":    { "name": "Valore",     "desc": "Dominio della protezione." }
+  },
+  "ancestries": {
+    "Clank":    "Clank",    "Drakona":  "Drakona",  "Dwarf":    "Nano",
+    "Elf":      "Elfo",     "Faerie":   "Fatata",   "Faun":     "Fauno",
+    "Firbolg":  "Firbolg",  "Fungril":  "Fungril",  "Galapa":   "Galapa",
+    "Giant":    "Gigante",  "Goblin":   "Goblin",   "Halfling": "Halfling",
+    "Human":    "Umano",    "Infernis": "Infernis", "Katari":   "Katari",
+    "Orc":      "Orco",     "Ribbet":   "Ribbet",   "Simiah":   "Simiah"
+  },
+  "communities": {
+    "Highborne":  "Nobile",      "Loreborne":   "Erudito",     "Orderborne":  "Ordinato",
+    "Ridgeborne": "Montanaro",   "Seaborne":    "Marinaro",    "Slyborne":    "Astuto",
+    "Underborne": "Sotterraneo", "Wanderborne": "Viaggiatore", "Wildborne":   "Selvaggio"
+  },
+  "conditions": {
+    "hidden":     { "name": "Nascosto",     "desc": "Fuori dalla vista di tutti i nemici. I tiri contro di te hanno svantaggio. Si elimina quando i nemici ti vedono, entri nel loro campo visivo, o attacchi." },
+    "restrained": { "name": "Trattenuto",   "desc": "Non puoi muoverti, ma puoi ancora compiere azioni dalla tua posizione attuale." },
+    "vulnerable": { "name": "Vulnerabile",  "desc": "Tutti i tiri che ti prendono di mira hanno vantaggio." },
+    "poisoned":   { "name": "Avvelenato",   "desc": "Tira 1d6 prima di ogni tiro azione. Con 4 o meno, segna uno Stress." },
+    "cursed":     { "name": "Maledetto",    "desc": "Un avversario può segnare uno Stress quando tiri con Speranza per trasformarlo in un tiro con Paura." },
+    "ignited":    { "name": "In Fiamme",    "desc": "Subisci 1d4 danni magici quando esegui un tiro azione." },
+    "exiled":     { "name": "Esiliato",     "desc": "Tu e i tuoi alleati avete svantaggio nelle situazioni sociali nel dominio del Nobile." },
+    "protected":  { "name": "Protetto",     "desc": "Resistenza a tutti i danni." },
+    "entranced":  { "name": "Incantato",    "desc": "Non puoi agire ed è Vulnerabile." },
+    "enveloped":  { "name": "Avvolto",      "desc": "Segna uno Stress aggiuntivo per ogni tiro azione. Si elimina quando l'Ooze subisce danni Severi." },
+    "dazed":      { "name": "Stordito",     "desc": "Non puoi usare la Rigenerazione ma sei immune ai danni magici." },
+    "rooted":     { "name": "Radicato",     "desc": "Resistenza ai danni fisici." },
+    "marked":     { "name": "Segnato",      "desc": "L'Evasione è dimezzata." },
+    "chilled":    { "name": "Congelato",    "desc": "Svantaggio ai tiri d'attacco." },
+    "trapped":    { "name": "Intrappolato", "desc": "Trattenuto e Vulnerabile. Liberati con un tiro di Istinto riuscito." },
+    "guilty":     { "name": "Colpevole",    "desc": "Gli attacchi standard contro di te infliggono danni Severi invece." }
+  }
+}

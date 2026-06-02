@@ -3,33 +3,51 @@
   "dh": {
     "widgets": {
       "identity": "Identità", "traits": "Caratteristiche", "experiences": "Esperienze",
-      "domains": "Carte Dominio", "hp": "Punti Ferita", "stress": "Stress",
-      "hopeFear": "Speranza & Paura", "evasion": "Evasione & Armatura",
-      "armor": "Armatura & Soglie", "actions": "Azioni",
+      "domains": "Carte Dominio", "vitals": "Parametri Vitali",
+      "evasion": "Evasione & Armatura", "actions": "Azioni",
       "conditions": "Condizioni", "weapons": "Armi",
       "inventory": "Inventario", "gold": "Oro", "notes": "Note"
     },
     "traits": {
-      "AGI": "Agilità", "STR": "Forza", "FIN": "Destrezza",
+      "AGI": "Agilità", "STR": "Forza", "FIN": "Astuzia",
       "INS": "Istinto", "PRE": "Presenza", "KNO": "Conoscenza"
     },
-    "stress": "Stress", "hope": "Speranza", "fear": "Paura",
+    "stress": "Stress", "hope": "Speranza",
     "evasion": "Evasione", "armorScore": "Punteggio Armatura",
     "thresholds": { "minor": "Minore", "major": "Maggiore", "severe": "Grave" },
     "experiences": "Esperienze", "domains": "Carte Dominio",
-    "ancestry": "Ancestria", "community": "Comunità",
+    "ancestry": "Ascendenza", "community": "Comunità",
     "gold": "Oro (Manciate)", "proficiency": "Competenza",
-    "subclass": "Sottoclasse",
+    "subclass": "Sottoclasse", "classFeatures": "Abilità di Classe",
     "roll": {
       "critical": "Critico! Entrambi i dadi mostrano {{val}} = {{total}}",
       "hope": "{{trait}}: Speranza {{hope}} + Paura {{fear}} = {{total}} → Successo con Speranza!",
       "fear": "{{trait}}: Paura {{fear}} + Speranza {{hope}} = {{total}} → Successo con Paura!",
       "fail": "{{trait}}: {{total}} → Fallimento"
+    },
+    "weapons": {
+      "name": "Nome", "trait": "Caratteristica", "range": "Gittata",
+      "dmgDie": "Dado Danno", "dmgType": "Tipo", "hands": "Mani", "feature": "Abilità",
+      "phy": "FIS", "mag": "MAG",
+      "oneHanded": "Una mano", "twoHanded": "Due mani",
+      "secondary": "SEC", "none": "Nessuna arma. Aggiungine una con +.",
+      "featurePlaceholder": "Gittata, Lancio, effetto speciale…",
+      "ranges": {
+        "Melee": "Mischia", "Very Close": "Molto Vicino",
+        "Close": "Vicino", "Far": "Lontano", "Very Far": "Molto Lontano"
+      }
+    },
+    "armor": {
+      "thresholds": "Soglie", "minor": "Minore", "major": "Maggiore",
+      "score": "Punteggio Armatura", "feature": "Abilità",
+      "levelNote": "Soglie base + livello personaggio ({{level}})",
+      "none": "Senza Armatura", "select": "Scegli armatura preimpostata",
+      "name": "Nome armatura", "custom": "Armatura personalizzata"
     }
   },
   "system": {
     "selector": "Sistema di gioco",
-    "dnd5e": "D&D 5e 2024",
+    "dnd5e": "D&D 5.5e 2024",
     "daggerheart": "Daggerheart"
   },
   "nav": {
@@ -324,6 +342,11 @@
     "importChar": "⬆ Importa personaggio",
     "sources": "Sorgenti dati",
     "uiLang": "Lingua",
+    "iconMode": "Icone",
+    "iconEmoji": "Emoji",
+    "iconLucide": "Icone",
+    "iconNone": "Nessuna",
+    "iconAccent": "Colore tema",
     "units": "Unità di misura",
     "weightUnit": "Peso",
     "speedUnit": "Velocità"
@@ -667,7 +690,10 @@
     "none": "Nessuna",
     "exhaustionShort": "Aff.",
     "noExhaustion": "Nessun aff.",
-    "exhaustionLevel": "Affaticamento liv."
+    "exhaustionLevel": "Affaticamento liv.",
+    "dhArmor": "Armatura",
+    "dhHope": "Speranza",
+    "dhFear": "Paura"
   },
   "charSelect": {
     "subtitle": "Scegli un personaggio o creane uno nuovo",

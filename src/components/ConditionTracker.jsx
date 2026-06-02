@@ -1,18 +1,30 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CONDITIONS } from '../data/conditions';
+import { useIconMode } from '../config/icons';
 
-export default function ConditionTracker({ active = [], onChange, exhaustionLevel = 0, onExhaustionChange }) {
+export default function ConditionTracker({ active = [], onChange, exhaustionLevel = 0, onExhaustionChange, conditions: customConditions }) {
   const { t } = useTranslation();
+  const { iconMode } = useIconMode();
   const [tooltip, setTooltip] = useState(null);
+
+  const conditions = customConditions || CONDITIONS;
 
   function toggle(id) {
     if (active.includes(id)) onChange(active.filter(c => c !== id));
     else onChange([...active, id]);
   }
 
-  const normalConditions = CONDITIONS.filter(c => c.type !== 'counter');
-  const exhaustionDef = CONDITIONS.find(c => c.id === 'exhaustion');
+  // 'counter' type is D&D exhaustion — not present in DH conditions
+  const normalConditions = conditions.filter(c => c.type !== 'counter');
+  const exhaustionDef = conditions.find(c => c.id === 'exhaustion');
+
+  function condName(c) {
+    return c.name || t(`data.conditions.${c.id}.name`, c.id);
+  }
+  function condDesc(c) {
+    return c.desc || t(`data.conditions.${c.id}.desc`, '');
+  }
 
   return (
     <div>
@@ -26,13 +38,12 @@ export default function ConditionTracker({ active = [], onChange, exhaustionLeve
               onMouseEnter={() => setTooltip(c)}
               onMouseLeave={() => setTooltip(null)}
             >
-              <span className="condition-icon">{c.icon}</span>
-              <span className="condition-name">{t(`data.conditions.${c.id}.name`, c.id)}</span>
+              {iconMode !== 'none' && <span className="condition-icon">{c.icon}</span>}
+              <span className="condition-name">{condName(c)}</span>
             </div>
           );
         })}
 
-        {/* Exhaustion counter chip */}
         {exhaustionDef && (
           <div
             className={`condition-chip exhaustion-chip ${exhaustionLevel > 0 ? 'active' : ''}`}
@@ -40,7 +51,7 @@ export default function ConditionTracker({ active = [], onChange, exhaustionLeve
             onMouseLeave={() => setTooltip(null)}
           >
             <span className="condition-icon">{exhaustionDef.icon}</span>
-            <span className="condition-name">{t('data.conditions.exhaustion.name', 'Exhaustion')}</span>
+            <span className="condition-name">{condName(exhaustionDef)}</span>
             <div className="exhaustion-controls" onClick={e => e.stopPropagation()}>
               <button className="exhaustion-btn"
                 onClick={() => onExhaustionChange && onExhaustionChange(Math.max(0, exhaustionLevel - 1))}
@@ -56,11 +67,11 @@ export default function ConditionTracker({ active = [], onChange, exhaustionLeve
 
       {tooltip && (
         <div className="condition-tooltip">
-          <strong>{tooltip.icon} {t(`data.conditions.${tooltip.id}.name`, tooltip.id)}</strong>
+          <strong>{iconMode !== 'none' && tooltip.icon} {condName(tooltip)}</strong>
           {tooltip.type === 'counter' && exhaustionLevel > 0 ? (
             <div style={{ marginTop: 4 }}>{tooltip.levels[exhaustionLevel - 1]}</div>
           ) : (
-            <div style={{ marginTop: 4 }}>{t(`data.conditions.${tooltip.id}.desc`, tooltip.desc)}</div>
+            <div style={{ marginTop: 4 }}>{condDesc(tooltip)}</div>
           )}
         </div>
       )}

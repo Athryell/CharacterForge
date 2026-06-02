@@ -3,9 +3,8 @@
   "dh": {
     "widgets": {
       "identity": "Identity", "traits": "Traits", "experiences": "Experiences",
-      "domains": "Domain Cards", "hp": "Hit Points", "stress": "Stress",
-      "hopeFear": "Hope & Fear", "evasion": "Evasion & Armor",
-      "armor": "Armor & Thresholds", "actions": "Actions",
+      "domains": "Domain Cards", "vitals": "Vitals",
+      "evasion": "Evasion & Armor", "actions": "Actions",
       "conditions": "Conditions", "weapons": "Weapons",
       "inventory": "Inventory", "gold": "Gold", "notes": "Notes"
     },
@@ -13,23 +12,42 @@
       "AGI": "Agility", "STR": "Strength", "FIN": "Finesse",
       "INS": "Instinct", "PRE": "Presence", "KNO": "Knowledge"
     },
-    "stress": "Stress", "hope": "Hope", "fear": "Fear",
+    "stress": "Stress", "hope": "Hope",
     "evasion": "Evasion", "armorScore": "Armor Score",
     "thresholds": { "minor": "Minor", "major": "Major", "severe": "Severe" },
     "experiences": "Experiences", "domains": "Domain Cards",
     "ancestry": "Ancestry", "community": "Community",
     "gold": "Gold (Handfuls)", "proficiency": "Proficiency",
-    "subclass": "Subclass",
+    "subclass": "Subclass", "classFeatures": "Class Features",
     "roll": {
       "critical": "Critical! Both dice show {{val}} = {{total}}",
       "hope": "{{trait}}: Hope {{hope}} + Fear {{fear}} = {{total}} → Success with Hope!",
       "fear": "{{trait}}: Fear {{fear}} + Hope {{hope}} = {{total}} → Success with Fear!",
       "fail": "{{trait}}: {{total}} → Failure"
+    },
+    "weapons": {
+      "name": "Name", "trait": "Trait", "range": "Range",
+      "dmgDie": "Damage Die", "dmgType": "Type", "hands": "Hands", "feature": "Feature",
+      "phy": "PHY", "mag": "MAG",
+      "oneHanded": "One-handed", "twoHanded": "Two-handed",
+      "secondary": "SEC", "none": "No weapons. Add one with +.",
+      "featurePlaceholder": "Reach, Thrown, special effect…",
+      "ranges": {
+        "Melee": "Melee", "Very Close": "Very Close",
+        "Close": "Close", "Far": "Far", "Very Far": "Very Far"
+      }
+    },
+    "armor": {
+      "thresholds": "Thresholds", "minor": "Minor", "major": "Major",
+      "score": "Armor Score", "feature": "Feature",
+      "levelNote": "Base thresholds + your level ({{level}})",
+      "none": "No Armor", "select": "Select armor preset",
+      "name": "Armor name", "custom": "Custom armor"
     }
   },
   "system": {
     "selector": "Game System",
-    "dnd5e": "D&D 5e 2024",
+    "dnd5e": "D&D 5.5e 2024",
     "daggerheart": "Daggerheart"
   },
   "nav": {
@@ -324,6 +342,11 @@
     "importChar": "⬆ Import character",
     "sources": "Data Sources",
     "uiLang": "Language",
+    "iconMode": "Icons",
+    "iconEmoji": "Emoji",
+    "iconLucide": "Icons",
+    "iconNone": "None",
+    "iconAccent": "Accent color",
     "units": "Units",
     "weightUnit": "Weight",
     "speedUnit": "Speed"
@@ -667,7 +690,10 @@
     "none": "None",
     "exhaustionShort": "Exh.",
     "noExhaustion": "No exhaustion",
-    "exhaustionLevel": "Exhaustion level"
+    "exhaustionLevel": "Exhaustion level",
+    "dhArmor": "Armor",
+    "dhHope": "Hope",
+    "dhFear": "Fear"
   },
   "charSelect": {
     "subtitle": "Choose a character or create a new one",

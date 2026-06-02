@@ -1,11 +1,24 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Icon } from '../config/icons';
 
 export default function TabBar({ tabs, activeTab, onTabChange, editMode, onReorderTabs }) {
   const { t } = useTranslation();
   const dragIdx     = useRef(null);
   const dragOverIdx = useRef(null);
+  const groupRef    = useRef(null);
+  const [overflows, setOverflows] = useState(false);
   const displayTabs = editMode ? tabs : tabs.filter(t => t.visible);
+
+  useEffect(() => {
+    const el = groupRef.current;
+    if (!el) return;
+    const check = () => setOverflows(el.scrollWidth > el.clientWidth);
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [displayTabs]);
 
   function onDragStart(i)        { dragIdx.current = i; }
   function onDragOver(e, i)      { e.preventDefault(); dragOverIdx.current = i; }
@@ -23,8 +36,8 @@ export default function TabBar({ tabs, activeTab, onTabChange, editMode, onReord
     <div className="topbar">
       <span className="topbar-brand">⚔ CharacterForge</span>
       <div style={{ flex: 1 }} />
-      <div className="tab-group-wrap">
-      <div className="tab-group">
+      <div className={`tab-group-wrap${overflows ? ' scrollable' : ''}`}>
+      <div className="tab-group" ref={groupRef}>
         {displayTabs.map((tab, i) => (
           <div key={tab.id}
             draggable={editMode}
@@ -38,14 +51,14 @@ export default function TabBar({ tabs, activeTab, onTabChange, editMode, onReord
               onClick={() => !editMode && tab.visible && onTabChange(tab.id)}
               style={{ opacity: !tab.visible ? 0.4 : 1, cursor: editMode ? 'grab' : 'pointer' }}
             >
-              {editMode && <span className="drag-handle">⠿</span>}
-              {tab.icon} {t(tab.label)}
+              {editMode && <span className="drag-handle"><Icon id="action.layout" size={12} fallback="⠿" /></span>}
+              <Icon id={`tab.${tab.id}`} fallback={tab.icon} /> {t(tab.label)}
             </button>
             {editMode && (
               <button className={`tab-eye ${tab.visible ? 'on' : 'off'}`}
                 onClick={e => { e.stopPropagation(); onTabChange('__toggle__' + tab.id); }}
                 title={tab.visible ? 'Nascondi tab' : 'Mostra tab'}>
-                {tab.visible ? '👁' : '🚫'}
+                <Icon id={tab.visible ? 'action.show' : 'action.hide'} size={12} fallback={tab.visible ? '👁' : '🚫'} />
               </button>
             )}
           </div>
