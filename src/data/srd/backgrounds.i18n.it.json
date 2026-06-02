@@ -1,6 +1,34 @@
 {
-  "acolyte":  { "name": "Accolito",  "desc": "Hai dedicato la tua vita a servire un tempio, studiando i riti sacri e le dottrine di una divinità. Il tuo spirito è guidato dalla fede.",                             "feat": "Iniziato alla Magia (Cleric)",   "tool": "Strumenti calligrafici",  "equipA": "Simbolo sacro, libro di preghiere, 3 stecche d'incenso, vesti, abiti comuni, 15 MO",  "equipB": "50 MO" },
-  "criminal": { "name": "Criminale", "desc": "Hai vissuto nell'ombra della società, sviluppando le tue abilità nel crimine. Conosci chi compra e chi vende segreti.",                                               "feat": "Allerta",                        "tool": "Attrezzi da ladro",       "equipA": "Attrezzi da ladro, piede di porco, 2 pugnali, abiti comuni con cappuccio, 16 MO",     "equipB": "50 MO" },
-  "sage":     { "name": "Saggio",    "desc": "Hai trascorso gli anni formativi viaggiando tra manieri e monasteri, studiando libri e pergamene e imparando la storia del multiverso.",                              "feat": "Iniziato alla Magia (Wizard)",   "tool": "Strumenti calligrafici",  "equipA": "Bastone ferrato, strumenti calligrafici, libro (storia), pergamena (8 fogli), veste, 8 MO", "equipB": "50 MO" },
-  "soldier":  { "name": "Soldato",   "desc": "Hai combattuto come parte di un esercito o milizia. La disciplina militare e l'esperienza di battaglia ti hanno forgiato.",                                           "feat": "Assalitore Selvaggio",           "tool": "Set da gioco (a scelta)", "equipA": "Lancia, arco corto, 20 frecce, set da gioco, abiti da viaggio, 18 MO",               "equipB": "50 MO" }
+  "acolyte": {
+    "name": "Acolyte",
+    "desc": "You devoted your life to serving a temple, studying sacred rites and the doctrines of a deity. Your spirit is guided by faith.",
+    "feat": "Magic Initiate (Cleric)",
+    "tool": "Calligrapher's Supplies",
+    "equipA": "Holy symbol, prayer book, 3 sticks of incense, vestments, common clothes, 15 GP",
+    "equipB": "50 GP"
+  },
+  "criminal": {
+    "name": "Criminal",
+    "desc": "You lived in the shadows of society, honing your skills in crime. You know who buys and sells secrets.",
+    "feat": "Alert",
+    "tool": "Thieves' Tools",
+    "equipA": "Thieves' tools, crowbar, 2 daggers, common clothes with hood, 16 GP",
+    "equipB": "50 GP"
+  },
+  "sage": {
+    "name": "Sage",
+    "desc": "You spent your formative years traveling among manors and monasteries, studying books and scrolls and learning the history of the multiverse.",
+    "feat": "Magic Initiate (Wizard)",
+    "tool": "Calligrapher's Supplies",
+    "equipA": "Quarterstaff, calligrapher's supplies, book (history), parchment (8 sheets), robe, 8 GP",
+    "equipB": "50 GP"
+  },
+  "soldier": {
+    "name": "Soldier",
+    "desc": "You fought as part of an army or militia. Military discipline and the experience of battle forged you.",
+    "feat": "Savage Attacker",
+    "tool": "Gaming Set (your choice)",
+    "equipA": "Spear, shortbow, 20 arrows, gaming set, traveler's clothes, 14 GP",
+    "equipB": "50 GP"
+  }
 }
