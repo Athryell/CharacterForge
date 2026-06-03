@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DH_ARMORS } from '../data/daggerheart';
+import { DH_ARMORS } from '../data/systems/daggerheart/armor';
 
 function PipRow({ current, max, pipClass, onToggle, numeric }) {
   if (numeric) {

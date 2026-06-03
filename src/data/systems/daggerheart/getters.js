@@ -1,19 +1,13 @@
-// Compatibility shim — data moved to data/systems/daggerheart/
-import dhEN from './systems/daggerheart/i18n/daggerheart.i18n.json';
-import dhIT from './systems/daggerheart/i18n/daggerheart.i18n.it.json';
-import dhDE from './systems/daggerheart/i18n/daggerheart.i18n.de.json';
-import dhES from './systems/daggerheart/i18n/daggerheart.i18n.es.json';
-import dhFR from './systems/daggerheart/i18n/daggerheart.i18n.fr.json';
+// Daggerheart — i18n-aware getter functions
+import dhEN from './i18n/daggerheart.i18n.json';
+import dhIT from './i18n/daggerheart.i18n.it.json';
+import dhDE from './i18n/daggerheart.i18n.de.json';
+import dhES from './i18n/daggerheart.i18n.es.json';
+import dhFR from './i18n/daggerheart.i18n.fr.json';
 
-import { DH_CLASSES, DH_DOMAINS } from './systems/daggerheart/classes';
-import { DH_TRAITS, DH_ANCESTRIES, DH_COMMUNITIES, DH_TRAIT_USES } from './systems/daggerheart/mechanics';
-import { DH_CONDITIONS } from './systems/daggerheart/conditions';
-
-export * from './systems/daggerheart/mechanics';
-export * from './systems/daggerheart/classes';
-export * from './systems/daggerheart/weapons';
-export * from './systems/daggerheart/armor';
-export * from './systems/daggerheart/conditions';
+import { DH_CLASSES, DH_DOMAINS } from './classes';
+import { DH_TRAITS, DH_ANCESTRIES, DH_COMMUNITIES, DH_TRAIT_USES } from './mechanics';
+import { DH_CONDITIONS } from './conditions';
 
 const DH_I18N = { en: dhEN, it: dhIT, de: dhDE, es: dhES, fr: dhFR };
 

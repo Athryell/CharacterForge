@@ -5,11 +5,10 @@ import { useCharacter } from './hooks/useCharacter';
 import { loadCharsIndex, deleteChar, getActiveCharId, setActiveCharId, generateCharId, migrateLegacy, saveCharState } from './chars';
 import CharacterSelect from './components/CharacterSelect';
 import Onboarding, { CornerButtons, loadOnboardingSeen } from './components/Onboarding';
-import { createDefaultState } from './data/dnd5e';
 import {
-  ABILITIES, SKILLS, ALIGNMENTS,
+  createDefaultState, ABILITIES, SKILLS, ALIGNMENTS,
   SPELLCASTING_CLASS, getMod, fmtMod,
-} from './data/dnd5e';
+} from './data/systems/dnd5e/mechanics';
 import dataManager from './data/dataManager';
 import SourceManager from './components/SourceManager';
 import CharacterCreator from './components/CharacterCreator';
@@ -32,7 +31,8 @@ import { CLASS_FEATURES } from './data/systems/dnd5e/classes';
 import { SPECIES_FEATURES, getAutoFeatures } from './data/systems/dnd5e/species';
 import { BACKGROUND_FEATURES } from './data/systems/dnd5e/backgrounds';
 import { getDefaultLayoutForSystem, getWidgetsForTab, loadLayoutForSystem, saveLayoutForSystem, loadTabsForSystem, saveTabsForSystem, getDefaultTabsForSystem, getWidgetLabel } from './layout';
-import { DH_TRAITS, DH_TRAIT_NAMES, rollDualityDice, getDHTier, getDHClasses, getDHDomains, getDHAncestries, getDHCommunities, getDHConditions, getDHTraitUses, getDHProficiency } from './data/daggerheart';
+import { DH_TRAITS, DH_TRAIT_NAMES, rollDualityDice, getDHTier, getDHProficiency } from './data/systems/daggerheart/mechanics';
+import { getDHClasses, getDHDomains, getDHAncestries, getDHCommunities, getDHConditions, getDHTraitUses } from './data/systems/daggerheart/getters';
 import { SYSTEMS, DEFAULT_SYSTEM, getSystem } from './data/systems';
 import { useTheme, ACCENT_PRESETS } from './hooks/useTheme';
 import { useUnits, parseSpeedFt } from './hooks/useUnits';

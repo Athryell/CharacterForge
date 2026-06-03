@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ALIGNMENTS, ABILITIES, SKILLS, HIT_DICE, SPELLCASTING_CLASS } from '../data/dnd5e';
-import { DH_CLASSES, DH_ANCESTRIES, DH_COMMUNITIES, DH_TRAIT_ARRAY, createDHDefaultState, getDHProficiency } from '../data/daggerheart';
+import { ALIGNMENTS, ABILITIES, SKILLS, HIT_DICE, SPELLCASTING_CLASS } from '../data/systems/dnd5e/mechanics';
+import { DH_ANCESTRIES, DH_COMMUNITIES, DH_TRAIT_ARRAY, createDHDefaultState, getDHProficiency } from '../data/systems/daggerheart/mechanics';
+import { DH_CLASSES } from '../data/systems/daggerheart/classes';
 import { CLASS_FEATURES, CLASS_SAVE_PROFS, CLASS_SKILL_COUNT, CLASS_SKILL_OPTIONS } from '../data/systems/dnd5e/classes';
 import { SPECIES_FEATURES, getAutoFeatures } from '../data/systems/dnd5e/species';
 import { BACKGROUND_FEATURES } from '../data/systems/dnd5e/backgrounds';

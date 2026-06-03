@@ -2,20 +2,18 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import {
   createDefaultState, getMod, getProfBonus, fmtMod,
   SPELLCASTING_CLASS, HIT_DICE, SLOT_TABLE, SKILLS, JSON_SCHEMA_VERSION,
-} from '../data/dnd5e';
+} from '../data/systems/dnd5e/mechanics';
 import { saveCharState, loadCharState } from '../chars';
-import { migrateCharState } from '../data/migration';
-
 const LEGACY_KEY = 'characterforge_state';
 
 function loadFromStorage(charId) {
   try {
     if (charId) {
       const saved = loadCharState(charId);
-      if (saved) return { ...createDefaultState(), ...migrateCharState(saved) };
+      if (saved) return { ...createDefaultState(), ...saved };
     } else {
       const raw = localStorage.getItem(LEGACY_KEY);
-      if (raw) return { ...createDefaultState(), ...migrateCharState(JSON.parse(raw)) };
+      if (raw) return { ...createDefaultState(), ...JSON.parse(raw) };
     }
   } catch { /* ignore */ }
   return createDefaultState();
