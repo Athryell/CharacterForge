@@ -2,40 +2,66 @@
 // Singleton che fonde dati SRD built-in con pacchetti homebrew salvati in localStorage.
 // I pacchetti homebrew NON vanno mai nel codice sorgente o nel repo.
 
-import { SRD_SPELLS }      from './srd/spells';
-import { SRD_WEAPONS }     from './srd/weapons';
-import { SRD_CONDITIONS }  from './srd/conditions';
-import { SRD_CLASSES, SRD_CLASS_NAMES } from './srd/classes';
-import { SRD_SPECIES }     from './srd/species';
-import { SRD_BACKGROUNDS } from './srd/backgrounds';
+import dnd5eAdapter   from './systems/dnd5e/adapter';
+import dhAdapter      from './systems/daggerheart/adapter';
 
-// ── i18n translation tables ──────────────────────────────────────────────────
-import spellsEN      from './srd/spells.i18n.json';
-import spellsIT      from './srd/spells.i18n.it.json';
-import weaponsEN     from './srd/weapons.i18n.json';
-import weaponsIT     from './srd/weapons.i18n.it.json';
-import conditionsEN  from './srd/conditions.i18n.json';
-import conditionsIT  from './srd/conditions.i18n.it.json';
-import classesEN     from './srd/classes.i18n.json';
-import classesIT     from './srd/classes.i18n.it.json';
-import speciesEN     from './srd/species.i18n.json';
-import speciesIT     from './srd/species.i18n.it.json';
-import backgroundsEN from './srd/backgrounds.i18n.json';
-import backgroundsIT from './srd/backgrounds.i18n.it.json';
+// Raw data for SRD counts in getSources()
+import { DND_SPELLS }      from './systems/dnd5e/spells';
+import { DND_WEAPONS }     from './systems/dnd5e/weapons';
+import { DND_CONDITIONS }  from './systems/dnd5e/conditions';
+import { DND_CLASS_NAMES } from './systems/dnd5e/classes';
+import { DND_SPECIES }     from './systems/dnd5e/species';
+import { DND_BACKGROUNDS } from './systems/dnd5e/backgrounds';
+
+// ── i18n — D&D 5e (da nuova posizione) ──────────────────────────────────────
+import spellsEN      from './systems/dnd5e/i18n/spells.i18n.json';
+import spellsIT      from './systems/dnd5e/i18n/spells.i18n.it.json';
+import spellsDE      from './systems/dnd5e/i18n/spells.i18n.de.json';
+import spellsES      from './systems/dnd5e/i18n/spells.i18n.es.json';
+import spellsFR      from './systems/dnd5e/i18n/spells.i18n.fr.json';
+import weaponsEN     from './systems/dnd5e/i18n/weapons.i18n.json';
+import weaponsIT     from './systems/dnd5e/i18n/weapons.i18n.it.json';
+import weaponsDE     from './systems/dnd5e/i18n/weapons.i18n.de.json';
+import weaponsES     from './systems/dnd5e/i18n/weapons.i18n.es.json';
+import weaponsFR     from './systems/dnd5e/i18n/weapons.i18n.fr.json';
+import conditionsEN  from './systems/dnd5e/i18n/conditions.i18n.json';
+import conditionsIT  from './systems/dnd5e/i18n/conditions.i18n.it.json';
+import conditionsDE  from './systems/dnd5e/i18n/conditions.i18n.de.json';
+import conditionsES  from './systems/dnd5e/i18n/conditions.i18n.es.json';
+import conditionsFR  from './systems/dnd5e/i18n/conditions.i18n.fr.json';
+import classesEN     from './systems/dnd5e/i18n/classes.i18n.json';
+import classesIT     from './systems/dnd5e/i18n/classes.i18n.it.json';
+import classesDE     from './systems/dnd5e/i18n/classes.i18n.de.json';
+import classesES     from './systems/dnd5e/i18n/classes.i18n.es.json';
+import classesFR     from './systems/dnd5e/i18n/classes.i18n.fr.json';
+import speciesEN     from './systems/dnd5e/i18n/species.i18n.json';
+import speciesIT     from './systems/dnd5e/i18n/species.i18n.it.json';
+import speciesDE     from './systems/dnd5e/i18n/species.i18n.de.json';
+import speciesES     from './systems/dnd5e/i18n/species.i18n.es.json';
+import speciesFR     from './systems/dnd5e/i18n/species.i18n.fr.json';
+import backgroundsEN from './systems/dnd5e/i18n/backgrounds.i18n.json';
+import backgroundsIT from './systems/dnd5e/i18n/backgrounds.i18n.it.json';
+import backgroundsDE from './systems/dnd5e/i18n/backgrounds.i18n.de.json';
+import backgroundsES from './systems/dnd5e/i18n/backgrounds.i18n.es.json';
+import backgroundsFR from './systems/dnd5e/i18n/backgrounds.i18n.fr.json';
 
 const I18N = {
-  spells:      { en: spellsEN,      it: spellsIT },
-  weapons:     { en: weaponsEN,     it: weaponsIT },
-  conditions:  { en: conditionsEN,  it: conditionsIT },
-  classes:     { en: classesEN,     it: classesIT },
-  species:     { en: speciesEN,     it: speciesIT },
-  backgrounds: { en: backgroundsEN, it: backgroundsIT },
+  spells:      { en: spellsEN,      it: spellsIT,      de: spellsDE,      es: spellsES,      fr: spellsFR },
+  weapons:     { en: weaponsEN,     it: weaponsIT,     de: weaponsDE,     es: weaponsES,     fr: weaponsFR },
+  conditions:  { en: conditionsEN,  it: conditionsIT,  de: conditionsDE,  es: conditionsES,  fr: conditionsFR },
+  classes:     { en: classesEN,     it: classesIT,     de: classesDE,     es: classesES,     fr: classesFR },
+  species:     { en: speciesEN,     it: speciesIT,     de: speciesDE,     es: speciesES,     fr: speciesFR },
+  backgrounds: { en: backgroundsEN, it: backgroundsIT, de: backgroundsDE, es: backgroundsES, fr: backgroundsFR },
 };
 
-const HOMEBREW_KEY    = 'characterforge_homebrew';
-const SCHEMA_VERSION  = '1.0.0';
+const ADAPTERS = {
+  dnd5e:       dnd5eAdapter,
+  daggerheart: dhAdapter,
+};
 
-// Resolve language code to one we have translations for (en fallback)
+const HOMEBREW_KEY   = 'characterforge_homebrew';
+const SCHEMA_VERSION = '1.0.0';
+
 function resolveLang(lang) {
   if (!lang) return 'en';
   const code = lang.toLowerCase().slice(0, 2);
@@ -57,82 +83,75 @@ function saveHomebrew(sources) {
   catch (e) { console.error('dataManager: failed to save homebrew', e); }
 }
 
-function mergeByKey(srdList, hbList, keyFn = item => item.name) {
-  const map = new Map(srdList.map(item => [keyFn(item), item]));
-  hbList.forEach(item => map.set(keyFn(item), { ...item, _homebrew: true }));
-  return Array.from(map.values());
-}
-
-// ── Detect current language from i18next (optional dependency) ───────────────
 function getCurrentLang() {
-  try {
-    return window.__i18n_lang__ || 'en';
-  } catch { return 'en'; }
+  try { return window.__i18n_lang__ || 'en'; }
+  catch { return 'en'; }
 }
 
 const dataManager = {
+  // ── Adapter registry ─────────────────────────────────────────────────────
+  getAdapter(systemId = 'dnd5e') {
+    return ADAPTERS[systemId] || ADAPTERS.dnd5e;
+  },
+
   // ── Incantesimi ──────────────────────────────────────────────────────────
   getSpells(lang = getCurrentLang()) {
-    const tr  = loadI18n('spells', lang);
-    const hb  = loadHomebrew().flatMap(s => s.spells || []);
-    const srd = SRD_SPELLS.map(s => ({ ...s, ...(tr[s.id] || {}) }));
-    return mergeByKey(srd, hb);
+    const tr = loadI18n('spells', lang);
+    const hb = loadHomebrew().flatMap(s => s.spells || []);
+    const srd = dnd5eAdapter.getSpells(lang, tr);
+    return dnd5eAdapter.mergeHomebrew(srd, hb, 'spells');
   },
 
   // ── Armi ─────────────────────────────────────────────────────────────────
   getWeapons(lang = getCurrentLang()) {
-    const tr  = loadI18n('weapons', lang);
-    const hb  = loadHomebrew().flatMap(s => s.weapons || []);
-    const srd = SRD_WEAPONS.map(w => ({
-      ...w,
-      name:    tr[w.id]?.name    || w.id,
-      dmgType: tr[w.id]?.dmgType || '',
-    }));
-    return mergeByKey(srd, hb);
+    const tr = loadI18n('weapons', lang);
+    const hb = loadHomebrew().flatMap(s => s.weapons || []);
+    const srd = dnd5eAdapter.getWeapons(lang, tr);
+    return dnd5eAdapter.mergeHomebrew(srd, hb, 'weapons');
   },
 
   // ── Condizioni ───────────────────────────────────────────────────────────
   getConditions(lang = getCurrentLang()) {
-    const tr  = loadI18n('conditions', lang);
-    const hb  = loadHomebrew().flatMap(s => s.conditions || []);
-    const srd = SRD_CONDITIONS.map(c => ({ ...c, ...(tr[c.id] || {}) }));
-    return mergeByKey(srd, hb, item => item.id);
+    const tr = loadI18n('conditions', lang);
+    const hb = loadHomebrew().flatMap(s => s.conditions || []);
+    const srd = dnd5eAdapter.getConditions(lang, tr);
+    return dnd5eAdapter.mergeHomebrew(srd, hb, 'conditions');
   },
 
   // ── Classi ───────────────────────────────────────────────────────────────
   getClasses(lang = getCurrentLang()) {
     const hbNames = loadHomebrew()
       .flatMap(s => (s.classes || []).map(c => c.name))
-      .filter(n => !SRD_CLASS_NAMES.includes(n));
-    return [...SRD_CLASS_NAMES, ...hbNames];
+      .filter(n => !DND_CLASS_NAMES.includes(n));
+    return [...dnd5eAdapter.getClasses(), ...hbNames];
   },
 
   getClassData(name, lang = getCurrentLang()) {
-    const tr  = loadI18n('classes', lang);
-    const srd = SRD_CLASSES.find(c => c.name === name);
-    if (srd) return { ...srd, ...(tr[name] || {}) };
+    const tr = loadI18n('classes', lang);
+    const cls = dnd5eAdapter.getClassData(name, tr);
+    if (cls) return cls;
     for (const src of loadHomebrew()) {
-      const cls = (src.classes || []).find(c => c.name === name);
-      if (cls) return { ...cls, _homebrew: true };
+      const hbCls = (src.classes || []).find(c => c.name === name);
+      if (hbCls) return { ...hbCls, _homebrew: true };
     }
     return null;
   },
 
   // ── Specie ───────────────────────────────────────────────────────────────
   getSpecies(lang = getCurrentLang()) {
-    const tr      = loadI18n('species', lang);
-    const srdIds  = SRD_SPECIES.map(s => s.id);
-    const srd     = SRD_SPECIES.map(s => ({ ...s, ...(tr[s.id] || {}) }));
+    const tr = loadI18n('species', lang);
+    const srd = dnd5eAdapter.getSpecies(lang, tr);
+    const srdIds = DND_SPECIES.map(s => s.id);
     const hbExtra = loadHomebrew()
-      .flatMap(s => (s.species || []))
+      .flatMap(s => s.species || [])
       .filter(sp => !srdIds.includes(sp.id || sp.name))
       .map(sp => ({ id: sp.id || sp.name, name: sp.name, _homebrew: true }));
     return [...srd, ...hbExtra];
   },
 
   getSpeciesData(id, lang = getCurrentLang()) {
-    const tr  = loadI18n('species', lang);
-    const srd = SRD_SPECIES.find(s => s.id === id);
+    const tr = loadI18n('species', lang);
+    const srd = DND_SPECIES.find(s => s.id === id);
     if (srd) return { ...srd, ...(tr[id] || {}) };
     for (const src of loadHomebrew()) {
       const sp = (src.species || []).find(s => s.id === id || s.name === id);
@@ -143,9 +162,9 @@ const dataManager = {
 
   // ── Background ───────────────────────────────────────────────────────────
   getBackgrounds(lang = getCurrentLang()) {
-    const tr      = loadI18n('backgrounds', lang);
-    const srdIds  = SRD_BACKGROUNDS.map(b => b.id);
-    const srd     = SRD_BACKGROUNDS.map(b => ({ ...b, ...(tr[b.id] || {}) }));
+    const tr = loadI18n('backgrounds', lang);
+    const srd = dnd5eAdapter.getBackgrounds(lang, tr);
+    const srdIds = DND_BACKGROUNDS.map(b => b.id);
     const hbExtra = loadHomebrew()
       .flatMap(s => s.backgrounds || [])
       .filter(b => !srdIds.includes(b.id))
@@ -163,12 +182,12 @@ const dataManager = {
   getSources() {
     const hb = loadHomebrew();
     const srdCounts = {
-      spells:      SRD_SPELLS.length,
-      weapons:     SRD_WEAPONS.length,
-      classes:     SRD_CLASS_NAMES.length,
-      species:     SRD_SPECIES.length,
-      backgrounds: SRD_BACKGROUNDS.length,
-      conditions:  SRD_CONDITIONS.length,
+      spells:      DND_SPELLS.length,
+      weapons:     DND_WEAPONS.length,
+      classes:     DND_CLASS_NAMES.length,
+      species:     DND_SPECIES.length,
+      backgrounds: DND_BACKGROUNDS.length,
+      conditions:  DND_CONDITIONS.length,
     };
     return [
       { id: 'srd', name: 'SRD 5.2.1', author: 'Wizards of the Coast', type: 'srd', counts: srdCounts },

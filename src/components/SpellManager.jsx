@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SCHOOLS, SPELL_CLASSES, filterSpells } from '../data/spells';
+import { SCHOOLS, SPELL_CLASSES, filterSpells } from '../data/systems/dnd5e/spells';
 import dataManager from '../data/dataManager';
 import { TagPill, TagSelector, TagFilterBar } from './Tags';
 import { KeywordText, NotationHelpBar } from './Tooltip';
@@ -147,7 +147,6 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
   const [expanded, setExpanded] = useState(null);
   const [spellFilter, setSpellFilter] = useState('all');
   const [spellTagFilter, setSpellTagFilter] = useState(null);
-  const [editingTagsFor, setEditingTagsFor] = useState(null);
   const [customForm, setCustomForm] = useState(EMPTY_CUSTOM);
   const [editingSpellName, setEditingSpellName] = useState(null);
 
@@ -158,6 +157,7 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
     ['free', t('actions.typeFree')],
   ];
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const srdByName = useMemo(() => Object.fromEntries(dataManager.getSpells().map(s => [s.name, s])), [homebrewKey]);
   const knownNames = useMemo(() => new Set(spells.map(s => s.name)), [spells]);
 
@@ -170,7 +170,7 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
     school: filterSchool || undefined,
     cls: filterClass || undefined,
     search: filterSearch || undefined,
-  }), [filterLevel, filterSchool, filterClass, filterSearch, homebrewKey]);
+  }), [filterLevel, filterSchool, filterClass, filterSearch, homebrewKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function addSRDSpell(spell) {
     if (knownNames.has(spell.name)) return;

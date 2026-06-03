@@ -1,7 +1,8 @@
-// D&D 5e SRD 5.2 Conditions (CC BY 4.0 — Wizards of the Coast)
+// CharacterForge — D&D 5e SRD 5.2 Conditions (CC BY 4.0 — Wizards of the Coast)
+// Unified from data/srd/conditions.js (icons) + data/conditions.js (rich desc)
 // English base — translations via i18n data.conditions.<id>.{name,desc}
 
-export const CONDITIONS = [
+export const DND_CONDITIONS = [
   { id: 'blinded',       icon: '👁️',  desc: 'Cannot see. Automatically fails checks requiring sight. Attack rolls against it have advantage; its attack rolls have disadvantage.' },
   { id: 'charmed',       icon: '💫',  desc: 'Cannot attack the charmer or target them with harmful effects. The charmer has advantage on social interaction checks.' },
   { id: 'deafened',      icon: '🔇',  desc: 'Cannot hear. Automatically fails checks requiring hearing.' },
@@ -32,3 +33,7 @@ export const CONDITIONS = [
     desc: 'Each level subtracts 2 from d20 rolls and reduces speed by 5 ft. Lv. 5: speed 0. Lv. 6: instant death. Reduces by 1 on each long rest.',
   },
 ];
+
+// Backward-compat aliases
+export const CONDITIONS = DND_CONDITIONS;
+export const SRD_CONDITIONS = DND_CONDITIONS;

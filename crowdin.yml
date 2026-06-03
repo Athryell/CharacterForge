@@ -5,17 +5,17 @@ files:
     translation: /src/i18n/locales/%two_letters_code%/ui.json
   - source: /src/i18n/locales/en/game.json
     translation: /src/i18n/locales/%two_letters_code%/game.json
-  - source: /src/data/srd/weapons.i18n.json
-    translation: /src/data/srd/weapons.i18n.%two_letters_code%.json
-  - source: /src/data/srd/spells.i18n.json
-    translation: /src/data/srd/spells.i18n.%two_letters_code%.json
-  - source: /src/data/srd/conditions.i18n.json
-    translation: /src/data/srd/conditions.i18n.%two_letters_code%.json
-  - source: /src/data/srd/classes.i18n.json
-    translation: /src/data/srd/classes.i18n.%two_letters_code%.json
-  - source: /src/data/srd/species.i18n.json
-    translation: /src/data/srd/species.i18n.%two_letters_code%.json
-  - source: /src/data/srd/backgrounds.i18n.json
-    translation: /src/data/srd/backgrounds.i18n.%two_letters_code%.json
-  - source: /src/data/daggerheart.i18n.json
-    translation: /src/data/daggerheart.i18n.%two_letters_code%.json
+  - source: /src/data/systems/dnd5e/i18n/weapons.i18n.json
+    translation: /src/data/systems/dnd5e/i18n/weapons.i18n.%two_letters_code%.json
+  - source: /src/data/systems/dnd5e/i18n/spells.i18n.json
+    translation: /src/data/systems/dnd5e/i18n/spells.i18n.%two_letters_code%.json
+  - source: /src/data/systems/dnd5e/i18n/conditions.i18n.json
+    translation: /src/data/systems/dnd5e/i18n/conditions.i18n.%two_letters_code%.json
+  - source: /src/data/systems/dnd5e/i18n/classes.i18n.json
+    translation: /src/data/systems/dnd5e/i18n/classes.i18n.%two_letters_code%.json
+  - source: /src/data/systems/dnd5e/i18n/species.i18n.json
+    translation: /src/data/systems/dnd5e/i18n/species.i18n.%two_letters_code%.json
+  - source: /src/data/systems/dnd5e/i18n/backgrounds.i18n.json
+    translation: /src/data/systems/dnd5e/i18n/backgrounds.i18n.%two_letters_code%.json
+  - source: /src/data/systems/daggerheart/i18n/daggerheart.i18n.json
+    translation: /src/data/systems/daggerheart/i18n/daggerheart.i18n.%two_letters_code%.json

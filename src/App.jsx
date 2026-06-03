@@ -16,7 +16,7 @@ import CharacterCreator from './components/CharacterCreator';
 import ConditionTracker from './components/ConditionTracker';
 import WeaponManager from './components/WeaponManager';
 import ArmorManager from './components/ArmorManager';
-import { calcArmorAC } from './data/armors';
+import { calcArmorAC } from './data/systems/dnd5e/armors';
 import TabBar from './components/TabBar';
 import SpellManager from './components/SpellManager';
 import InventoryManager from './components/InventoryManager';
@@ -28,9 +28,11 @@ import PinnedBar, { loadPinned, savePinned } from './components/PinnedBar';
 import FeatureManager from './components/FeatureManager';
 import DHWeaponManager from './components/DHWeaponManager';
 import DHArmorManager from './components/DHArmorManager';
-import { CLASS_FEATURES, SPECIES_FEATURES, BACKGROUND_FEATURES, getAutoFeatures } from './data/features';
+import { CLASS_FEATURES } from './data/systems/dnd5e/classes';
+import { SPECIES_FEATURES, getAutoFeatures } from './data/systems/dnd5e/species';
+import { BACKGROUND_FEATURES } from './data/systems/dnd5e/backgrounds';
 import { getDefaultLayoutForSystem, getWidgetsForTab, loadLayoutForSystem, saveLayoutForSystem, loadTabsForSystem, saveTabsForSystem, getDefaultTabsForSystem, getWidgetLabel } from './layout';
-import { DH_TRAITS, DH_TRAIT_NAMES, rollDualityDice, getDHTier, getDHClasses, getDHDomains, getDHAncestries, getDHCommunities, getDHConditions, getDHTraitUses } from './data/daggerheart';
+import { DH_TRAITS, DH_TRAIT_NAMES, rollDualityDice, getDHTier, getDHClasses, getDHDomains, getDHAncestries, getDHCommunities, getDHConditions, getDHTraitUses, getDHProficiency } from './data/daggerheart';
 import { SYSTEMS, DEFAULT_SYSTEM, getSystem } from './data/systems';
 import { useTheme, ACCENT_PRESETS } from './hooks/useTheme';
 import { useUnits, parseSpeedFt } from './hooks/useUnits';
@@ -1701,7 +1703,13 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
   }
 
   return (
-    <CharContext.Provider value={{ abilities: effectiveAbilities, charLevel: state.charLevel, profBonus: char.profBonus }}>
+    <CharContext.Provider value={{
+      abilities:   activeSystem === 'daggerheart' ? (state.traits || {}) : effectiveAbilities,
+      traitValues: activeSystem === 'daggerheart' ? (state.traits || {}) : effectiveAbilities,
+      charLevel:   state.charLevel,
+      profBonus:   activeSystem === 'daggerheart' ? getDHProficiency(state.charLevel) : char.profBonus,
+      systemId:    activeSystem || 'dnd5e',
+    }}>
     <div className="sheet">
       <Toast message={toast} />
       {showCreator && <CharacterCreator onComplete={handleCreatorComplete} onCancel={() => setShowCreator(false)} systemId={activeSystem || DEFAULT_SYSTEM} />}

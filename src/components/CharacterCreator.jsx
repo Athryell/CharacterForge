@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ALIGNMENTS, ABILITIES, SKILLS, HIT_DICE, SPELLCASTING_CLASS } from '../data/dnd5e';
 import { DH_CLASSES, DH_ANCESTRIES, DH_COMMUNITIES, DH_TRAIT_ARRAY, createDHDefaultState, getDHProficiency } from '../data/daggerheart';
-import { CLASS_FEATURES, SPECIES_FEATURES, BACKGROUND_FEATURES, getAutoFeatures } from '../data/features';
-import { CLASS_SAVE_PROFS, CLASS_SKILL_COUNT, CLASS_SKILL_OPTIONS } from '../data/srd/classes';
+import { CLASS_FEATURES, CLASS_SAVE_PROFS, CLASS_SKILL_COUNT, CLASS_SKILL_OPTIONS } from '../data/systems/dnd5e/classes';
+import { SPECIES_FEATURES, getAutoFeatures } from '../data/systems/dnd5e/species';
+import { BACKGROUND_FEATURES } from '../data/systems/dnd5e/backgrounds';
 import dataManager from '../data/dataManager';
 
 // SRD 5.5e (2024) — specie: solo tratti, nessun bonus caratteristica

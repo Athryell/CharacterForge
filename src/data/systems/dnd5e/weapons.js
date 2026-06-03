@@ -1,7 +1,9 @@
-// SRD 5.2.1 (CC BY 4.0) — Wizards of the Coast LLC — https://www.dndbeyond.com/srd
-// Weapon mechanical data — translatable strings in weapons.i18n.{lang}.json
+// CharacterForge — D&D 5e SRD 5.2 Weapons (CC BY 4.0 — Wizards of the Coast)
+// Unified from data/srd/weapons.js (mechanical data) + data/weapons.js (properties, masteries, helpers)
 
-export const SRD_WEAPONS = [
+// ── SRD Weapon Data ──────────────────────────────────────────────────────────
+
+export const DND_WEAPONS = [
   // ── Simple Melee ─────────────────────────────────────────────────────────
   { id: 'club',           category: 'simple-melee',   dmg: '1d4',  properties: ['light'],                          mastery: 'slow',   weight: '2 lb.',   cost: '1 SP' },
   { id: 'dagger',         category: 'simple-melee',   dmg: '1d4',  properties: ['finesse','light','thrown'],        mastery: 'nick',   weight: '1 lb.',   cost: '2 GP',  range: '20/60' },
@@ -48,3 +50,72 @@ export const SRD_WEAPONS = [
   { id: 'musket',         category: 'martial-ranged', dmg: '1d12', properties: ['ammunition','loading','two-handed'], mastery: 'slow', weight: '10 lb.',  cost: '500 GP', range: '40/120' },
   { id: 'pistol',         category: 'martial-ranged', dmg: '1d10', properties: ['ammunition','loading'],             mastery: 'vex',    weight: '3 lb.',   cost: '250 GP', range: '30/90' },
 ];
+
+// Backward-compat alias
+export const SRD_WEAPONS = DND_WEAPONS;
+
+// ── Weapon Mechanics (from data/weapons.js) ──────────────────────────────────
+
+export const WEAPON_PROPERTIES = {
+  finesse:    'finesse',
+  thrown:     'thrown',
+  ranged:     'ranged',
+  twoHanded:  'twoHanded',
+  versatile:  'versatile',
+  light:      'light',
+  heavy:      'heavy',
+  reach:      'reach',
+  loading:    'loading',
+  ammunition: 'ammunition',
+};
+
+export const WEAPON_MASTERIES = {
+  none:   { label: 'none',   desc: '' },
+  cleave: { label: 'cleave', desc: 'On a hit, attack one adjacent creature within reach using the same action.' },
+  graze:  { label: 'graze',  desc: 'On a miss, deal damage equal to your STR or DEX modifier (minimum 0).' },
+  nick:   { label: 'nick',   desc: 'With this Light weapon you can make the extra two-weapon-fighting attack as a free action, without spending a bonus action.' },
+  push:   { label: 'push',   desc: 'On a hit, push the target 10 ft (if Large or smaller) provided it has two feet on the ground.' },
+  sap:    { label: 'sap',    desc: 'On a hit, the target has disadvantage on its next attack roll until the start of your next turn.' },
+  slow:   { label: 'slow',   desc: 'On a hit, the target\'s speed is reduced by 10 ft until the start of your next turn.' },
+  topple: { label: 'topple', desc: 'On a hit, the target must succeed on a STR save (DC = 8 + prof bonus + mod) or fall prone.' },
+  vex:    { label: 'vex',    desc: 'On a hit, you gain advantage on your next attack roll against the same target before the end of your next turn.' },
+};
+
+export const ABILITY_OPTIONS = [
+  { value: 'auto', label: 'Auto (STR/DEX)' },
+  { value: 'STR',  label: 'Strength (STR)' },
+  { value: 'DEX',  label: 'Dexterity (DEX)' },
+  { value: 'CON',  label: 'Constitution (CON)' },
+  { value: 'INT',  label: 'Intelligence (INT)' },
+  { value: 'WIS',  label: 'Wisdom (WIS)' },
+  { value: 'CHA',  label: 'Charisma (CHA)' },
+];
+
+export function calcWeaponAttack({ weapon, abilities, profBonus, isProficient }) {
+  const override = weapon.abilityBonus;
+  let statMod;
+
+  if (override && override !== 'auto') {
+    statMod = Math.floor(((abilities[override] ?? 10) - 10) / 2);
+  } else if (weapon.properties?.includes('finesse')) {
+    const strMod = Math.floor(((abilities.STR ?? 10) - 10) / 2);
+    const dexMod = Math.floor(((abilities.DEX ?? 10) - 10) / 2);
+    statMod = Math.max(strMod, dexMod);
+  } else if (weapon.properties?.includes('ranged')) {
+    statMod = Math.floor(((abilities.DEX ?? 10) - 10) / 2);
+  } else {
+    statMod = Math.floor(((abilities.STR ?? 10) - 10) / 2);
+  }
+
+  const prof = isProficient ? profBonus : 0;
+  const attackBonus = statMod + prof;
+  const dmgBonus = statMod;
+
+  return { attackBonus, dmgBonus, statMod, prof };
+}
+
+export function fmtWeaponDmg(baseDmg, dmgBonus) {
+  if (dmgBonus === 0) return baseDmg;
+  if (dmgBonus > 0)  return `${baseDmg}+${dmgBonus}`;
+  return `${baseDmg}${dmgBonus}`;
+}

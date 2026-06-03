@@ -2,10 +2,10 @@ import React, { createContext, useContext, useState } from 'react';
 import {
   Sword, Shield, Heart, Star, Zap, BookOpen, Scroll,
   Package, StickyNote, User, Dices, Flame, Skull,
-  ChevronRight, Settings, Plus, X, Edit, Check,
+  Settings, Plus, X, Edit, Check,
   Moon, Sun, RefreshCw, Download, Upload, HelpCircle,
   Coffee, MessageSquare, Tag, Eye, EyeOff, Grip,
-  ChevronUp, ChevronDown, AlertTriangle, Sparkles,
+  AlertTriangle, Sparkles,
   Target, Crosshair, Activity, ShoppingBag,
 } from 'lucide-react';
 

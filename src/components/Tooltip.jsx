@@ -26,13 +26,16 @@ export function parseTextBonuses(text = '') {
 const IT_TO_EN_ABBR = { FOR:'STR', DES:'DEX', COS:'CON', SAG:'WIS', CAR:'CHA', INT:'INT' };
 
 // Resolve [ATTR], [PRO], and [LVL:...] notations in a text string
-// Supports both IT ([FOR],[DES],...) and EN ([STR],[DEX],...) ability notations
-export function resolveNotations(text, abilities, charLevel, profBonus) {
+// Supports D&D ([STR],[FOR],...) and DH ([AGI],[FIN],...) traits via optional traitMap.
+// traitMap: { AGI: mod, FIN: mod, ... } — DH modifiers already resolved, no score conversion needed.
+export function resolveNotations(text, abilities, charLevel, profBonus, traitMap = null) {
   if (!text) return text;
 
-  const resolved1 = text.replace(/(?<!@)\[(STR|DEX|CON|INT|WIS|CHA|FOR|DES|COS|SAG|CAR|PRO)\]/gi, (_, attr) => {
+  const resolved1 = text.replace(/(?<!@)\[(STR|DEX|CON|INT|WIS|CHA|FOR|DES|COS|SAG|CAR|PRO|AGI|FIN|INS|PRE|KNO)\]/gi, (_, attr) => {
     if (attr.toUpperCase() === 'PRO') return String(profBonus ?? 2);
-    const key = IT_TO_EN_ABBR[attr.toUpperCase()] || attr.toUpperCase();
+    const upper = attr.toUpperCase();
+    if (traitMap && upper in traitMap) return String(traitMap[upper] ?? 0);
+    const key = IT_TO_EN_ABBR[upper] || upper;
     const score = (abilities || {})[key] ?? 10;
     const mod = Math.floor((score - 10) / 2);
     return String(mod);
@@ -110,7 +113,7 @@ function Tooltip({ text, children }) {
 
 // Renders text with keyword tooltips applied automatically
 // Supports [ATTR], [LVL:...], and +N@[STAT] notations resolved from CharContext
-const DYNAMIC_NOTATION_RE = /\[(STR|DEX|CON|INT|WIS|CHA|FOR|DES|COS|SAG|CAR|PRO)\]|\[LVL:|[+-]\d+@\[[A-Z-]+\]/i;
+const DYNAMIC_NOTATION_RE = /\[(STR|DEX|CON|INT|WIS|CHA|FOR|DES|COS|SAG|CAR|PRO|AGI|FIN|INS|PRE|KNO)\]|\[LVL:|[+-]\d+@\[[A-Z-]+\]/i;
 const BONUS_NOTATION_SPLIT = /([+-]\d+@\[[A-Z-]+\])/gi;
 const BONUS_NOTATION_PARSE = /^([+-]\d+)@\[([A-Z-]+)\]$/i;
 const COUNTER_NOTATION_SPLIT = /(\[\d+\])/g;
@@ -118,8 +121,13 @@ const COUNTER_NOTATION_PARSE = /^\[(\d+)\]$/;
 
 export function KeywordText({ text, onRoll, label, counters, onCounterChange }) {
   const { t: tUi } = useTranslation();
-  const { abilities, charLevel, profBonus } = useCharContext();
+  const { abilities, traitValues, charLevel, profBonus, systemId } = useCharContext();
   const glossary = useKeywordGlossary();
+
+  const traitMap = systemId === 'daggerheart'
+    ? { AGI: traitValues?.AGI, STR: traitValues?.STR, FIN: traitValues?.FIN,
+        INS: traitValues?.INS, PRE: traitValues?.PRE, KNO: traitValues?.KNO }
+    : null;
 
   const keywordRegex = useMemo(() => {
     const keys = Object.keys(glossary);
@@ -134,7 +142,7 @@ export function KeywordText({ text, onRoll, label, counters, onCounterChange }) 
   }, [glossary]);
 
   const hasDynamic = DYNAMIC_NOTATION_RE.test(text || '');
-  const resolved = resolveNotations(text, abilities, charLevel, profBonus);
+  const resolved = resolveNotations(text, abilities, charLevel, profBonus, traitMap);
   if (!resolved) return null;
 
   const DICE_REGEX = /(\d*d\d+(?:\s*[+-]\s*\d+)?)/gi;

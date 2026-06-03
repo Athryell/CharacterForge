@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CONDITIONS } from '../data/conditions';
+import { DND_CONDITIONS as CONDITIONS } from '../data/systems/dnd5e/conditions';
 import { useIconMode } from '../config/icons';
 
 export default function ConditionTracker({ active = [], onChange, exhaustionLevel = 0, onExhaustionChange, conditions: customConditions }) {

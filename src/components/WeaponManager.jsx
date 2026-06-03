@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { WEAPON_PROPERTIES, WEAPON_MASTERIES } from '../data/weapons';
+import { WEAPON_PROPERTIES, WEAPON_MASTERIES } from '../data/systems/dnd5e/weapons';
 import dataManager from '../data/dataManager';
 import { TagPill, TagSelector } from './Tags';
 import { NotationHelpBar, KeywordText } from './Tooltip';
@@ -163,7 +163,6 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState(null);
   const [expandedId, setExpandedId] = useState(null);
-  const [editingTagsFor, setEditingTagsFor] = useState(null);
 
   function startEdit(w) {
     setEditingId(w.id);

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ARMOR_PRESETS, TYPE_LABEL, calcArmorAC } from '../data/armors';
+import { DND_ARMOR_PRESETS as ARMOR_PRESETS, TYPE_LABEL, calcArmorAC } from '../data/systems/dnd5e/armors';
 import { TagPill, TagSelector } from './Tags';
 import { KeywordText, NotationHelpBar } from './Tooltip';
 import BonusTextarea from './BonusTextarea';

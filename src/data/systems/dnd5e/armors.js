@@ -1,4 +1,6 @@
-export const ARMOR_PRESETS = [
+// CharacterForge — D&D 5e SRD 5.2 Armor (CC BY 4.0 — Wizards of the Coast)
+
+export const DND_ARMOR_PRESETS = [
   // Light
   { id: 'padded',    name: 'Imbottita',        type: 'light',  ac: 11, strReq: 0  },
   { id: 'leather',   name: 'Cuoio',            type: 'light',  ac: 11, strReq: 0  },
@@ -15,6 +17,9 @@ export const ARMOR_PRESETS = [
   { id: 'splint',    name: 'Lamelle',          type: 'heavy',  ac: 17, strReq: 15 },
   { id: 'plate',     name: 'Piastra',          type: 'heavy',  ac: 18, strReq: 15 },
 ];
+
+// Backward-compat alias
+export const ARMOR_PRESETS = DND_ARMOR_PRESETS;
 
 export const TYPE_LABEL = { light: 'Leggera', medium: 'Media', heavy: 'Pesante' };
 
