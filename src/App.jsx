@@ -320,6 +320,42 @@ function DHPipRow({ current, max, pipClass, onToggle }) {
   );
 }
 
+function SubclassFeaturesEditor({ features, currentLevel, onChange }) {
+  const { t } = useTranslation();
+  function add() {
+    onChange([...(features || []), { id: `scf_${Date.now()}`, level: Math.min(20, currentLevel + 1), name: '', desc: '' }]);
+  }
+  function remove(id) { onChange((features || []).filter(f => f.id !== id)); }
+  function patch(id, obj) { onChange((features || []).map(f => f.id === id ? { ...f, ...obj } : f)); }
+  const sorted = [...(features || [])].sort((a, b) => a.level - b.level);
+  return (
+    <div>
+      {sorted.map(f => (
+        <div key={f.id} style={{ display: 'flex', gap: 6, marginBottom: 8, alignItems: 'flex-start' }}>
+          <div style={{ flex: '0 0 58px' }}>
+            <label style={{ fontSize: 11, color: 'var(--c-muted)' }}>Lv.</label>
+            <input type="number" min="1" max="20" value={f.level}
+              onChange={e => patch(f.id, { level: Math.max(1, Math.min(20, parseInt(e.target.value) || 1)) })}
+              style={{ width: 50, marginTop: 2 }} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <input value={f.name} placeholder={t('identity.subclassFeatureName')}
+              onChange={e => patch(f.id, { name: e.target.value })} />
+            <textarea value={f.desc} placeholder={t('identity.subclassFeatureDesc')}
+              onChange={e => patch(f.id, { desc: e.target.value })}
+              className="notes-area" style={{ marginTop: 4, minHeight: 44 }} />
+          </div>
+          <button onClick={() => remove(f.id)} className="mod-btn"
+            style={{ marginTop: 20, color: 'var(--c-warn)', fontSize: 16, lineHeight: 1 }}>×</button>
+        </div>
+      ))}
+      <button className="io-btn" style={{ fontSize: 12, marginTop: 2 }} onClick={add}>
+        + {t('identity.addSubclassFeature')}
+      </button>
+    </div>
+  );
+}
+
 // ── Character App (single character) ────────────────────────────
 function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSystemChange }) {
   const { t, i18n } = useTranslation();
@@ -589,6 +625,9 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                     {dataManager.getClasses().map(c => <option key={c} value={c}>{t(`data.classes.${c}`, c)}</option>)}
                   </select>
                 </Field>
+                <Field label={t('identity.subclass')}>
+                  <input value={state.charSubclass||''} onChange={e => update({ charSubclass: e.target.value })} placeholder={t('identity.subclassPlaceholder')} />
+                </Field>
                 <Field label={t('identity.species')}>
                   <select value={state.charRace} onChange={e => {
                     const race = e.target.value;
@@ -648,12 +687,21 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                 <Field label={t('identity.xp')}>
                   <input type="number" min="0" value={state.charXP} onChange={e => update({ charXP: parseInt(e.target.value)||0 })} />
                 </Field>
+                <div style={{ gridColumn: '1 / -1', marginTop: 4 }}>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--c-muted)', marginBottom: 6 }}>{t('identity.subclassFeatures')}</div>
+                  <SubclassFeaturesEditor
+                    features={state.subclassFeatures||[]}
+                    currentLevel={state.charLevel}
+                    onChange={feats => update({ subclassFeatures: feats })}
+                  />
+                </div>
               </div>
             ) : (
               <div className="identity-info-grid">
                 {[
                   [t('identity.name'), state.charName || '—'],
                   [t('identity.class'), state.charClass ? t(`data.classes.${state.charClass}`, state.charClass) : '—'],
+                  ...(state.charSubclass ? [[t('identity.subclass'), state.charSubclass]] : []),
                   [t('identity.level'), state.charLevel],
                   [t('identity.profBonus'), `+${char.profBonus}`],
                   [t('identity.species'), state.charRace === '__custom__' ? (state.charRaceCustom||'—') : (state.charRace ? t(`data.species.${state.charRace}`, state.charRace) : '—')],

@@ -146,7 +146,13 @@
     "alignment": "Allineamento",
     "xp": "Esperienza (XP)",
     "experienceShort": "Esperienza",
-    "imageUrl": "🖼 Immagine personaggio (URL)"
+    "imageUrl": "🖼 Immagine personaggio (URL)",
+    "subclass": "Sottoclasse",
+    "subclassPlaceholder": "Es. Via del Berserker",
+    "subclassFeatures": "Feature di Sottoclasse",
+    "subclassFeatureName": "Nome feature",
+    "subclassFeatureDesc": "Descrizione",
+    "addSubclassFeature": "Aggiungi feature di sottoclasse"
   },
   "abilities": {
     "editBtn": "✏ Modifica",

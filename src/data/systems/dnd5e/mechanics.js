@@ -131,5 +131,7 @@ export function createDefaultState() {
       classFeatures: '',
     },
     levelHistory: {},
+    charSubclass: '',
+    subclassFeatures: [],
   };
 }

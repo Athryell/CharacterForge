@@ -19,7 +19,16 @@ export default function LevelUpModal({ currentLevel, charClass, charState, onCom
   const conMod = Math.floor(((charState.abilities?.CON || 10) - 10) / 2);
   const avgHp = Math.max(1, Math.ceil(dieSides / 2) + 1 + conMod);
 
-  const autoFeatures = useMemo(() => (ld.features || []).filter(f => f.auto), [ld]);
+  const customSubclassFeatures = useMemo(
+    () => (charState.subclassFeatures || [])
+      .filter(f => f.level === targetLevel && f.name?.trim())
+      .map(f => ({ name: f.name.trim(), desc: f.desc || '', auto: true, _subclass: true })),
+    [charState.subclassFeatures, targetLevel]
+  );
+  const autoFeatures = useMemo(
+    () => [...(ld.features || []).filter(f => f.auto), ...customSubclassFeatures],
+    [ld, customSubclassFeatures]
+  );
   const choiceFeatures = useMemo(() => (ld.features || []).filter(f => !f.auto), [ld]);
   const isSpellcaster = !!classData?.spellcasting;
   const spellsToLearn = ld.spellsToLearn || 0;
@@ -79,13 +88,15 @@ export default function LevelUpModal({ currentLevel, charClass, charState, onCom
     return true;
   }
 
+  const subclassName = charState.charSubclass || charClass;
+
   function buildChanges() {
     const features = autoFeatures.map(f => ({
-      id: `${charClass}_lv${targetLevel}_${f.name.replace(/\W+/g, '_')}_${Date.now()}_${Math.random().toString(36).slice(2,6)}`,
+      id: `${f._subclass ? subclassName : charClass}_lv${targetLevel}_${f.name.replace(/\W+/g, '_')}_${Date.now()}_${Math.random().toString(36).slice(2,6)}`,
       name: f.name,
       desc: f.desc,
-      source: charClass,
-      sourceType: 'class',
+      source: f._subclass ? subclassName : charClass,
+      sourceType: f._subclass ? 'subclass' : 'class',
     }));
 
     choiceFeatures.forEach(f => {
@@ -115,7 +126,7 @@ export default function LevelUpModal({ currentLevel, charClass, charState, onCom
   }
 
   const changes = useMemo(buildChanges, // eslint-disable-next-line react-hooks/exhaustive-deps
-    [hpGained, autoFeatures, choiceFeatures, choices, asiType, asiMode, asiPlus2, asiPlus1A, asiPlus1B, featName, epicBoonName, ld]);
+    [hpGained, autoFeatures, choiceFeatures, choices, asiType, asiMode, asiPlus2, asiPlus1A, asiPlus1B, featName, epicBoonName, ld, subclassName]);
 
   function handleComplete() {
     window.umami?.track('level-up', { class: charClass, level: targetLevel });
@@ -177,7 +188,7 @@ export default function LevelUpModal({ currentLevel, charClass, charState, onCom
               <div className="creator-subtitle">{t('levelUp.stepFeatures')}</div>
               <div className="feature-list" style={{ marginTop: 8 }}>
                 {autoFeatures.map((f, i) => (
-                  <ExpandableFeature key={i} feature={f} noted={t('levelUp.noted')} />
+                  <ExpandableFeature key={i} feature={f} noted={t('levelUp.noted')} subclass={f._subclass} />
                 ))}
               </div>
             </div>
@@ -362,11 +373,11 @@ export default function LevelUpModal({ currentLevel, charClass, charState, onCom
   );
 }
 
-function ExpandableFeature({ feature, noted }) {
+function ExpandableFeature({ feature, noted, subclass }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="feature-item expanded" style={{ cursor: 'pointer' }} onClick={() => setOpen(o => !o)}>
-      <div className="feature-source-dot" style={{ background: 'var(--c-accent)' }} />
+      <div className="feature-source-dot" style={{ background: subclass ? 'var(--c-warn)' : 'var(--c-accent)' }} />
       <div style={{ flex: 1 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div className="feature-name">{feature.name}</div>

@@ -109,7 +109,13 @@
     "alignment": "Alignment",
     "xp": "Experience (XP)",
     "experienceShort": "Experience",
-    "imageUrl": "🖼 Character image (URL)"
+    "imageUrl": "🖼 Character image (URL)",
+    "subclass": "Subclass",
+    "subclassPlaceholder": "E.g. Path of the Berserker",
+    "subclassFeatures": "Subclass Features",
+    "subclassFeatureName": "Feature name",
+    "subclassFeatureDesc": "Description",
+    "addSubclassFeature": "Add subclass feature"
   },
   "abilities": {
     "editBtn": "✏ Edit",
