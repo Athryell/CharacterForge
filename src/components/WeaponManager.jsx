@@ -261,6 +261,7 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                 <div className="weapon-name">{w.name}</div>
                 {added && <span className="action-added-badge" title={t('common.inAction', 'In azioni')}>⚡</span>}
+                {w.acquiredAtLevel && <span className="level-badge">Lv. {w.acquiredAtLevel}</span>}
                 {(w.tags || []).map(tag => <TagPill key={tag} tag={tag} allTags={allTags} small />)}
                 {w.mastery && w.mastery !== 'none' && (
                   <span className="weapon-prop" style={{ fontSize: 10, color: 'var(--c-accent-text)', background: 'var(--c-accent-light)' }}

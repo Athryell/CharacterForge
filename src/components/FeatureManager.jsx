@@ -120,7 +120,10 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
                         {(feature.tags||[]).map(tag => <TagPill key={tag} tag={tag} allTags={allTags} small />)}
                       </div>
                       {feature.source && feature.sourceType !== 'custom' && (
-                        <div className="feature-source-label">{feature.source}</div>
+                        <div className="feature-source-label">
+                          {feature.source}
+                          {feature.acquiredAtLevel && <span className="level-badge"> · Lv. {feature.acquiredAtLevel}</span>}
+                        </div>
                       )}
 
                       {isEditing && editForm && (

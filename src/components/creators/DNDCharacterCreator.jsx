@@ -925,7 +925,7 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
             <button className={`io-btn primary ${!canNextStep ? 'disabled' : ''}`}
               onClick={() => canNextStep && setStep(s => s + 1)}>{t('creator.next')}</button>
           ) : (
-            <button className="io-btn primary" onClick={() => onComplete(buildFinalState())}>{t('creator.create')}</button>
+            <button className="io-btn primary" onClick={() => { window.umami?.track('character-created', { system: 'dnd5e', class: data.charClass }); onComplete(buildFinalState()); }}>{t('creator.create')}</button>
           )}
         </div>
       </div>

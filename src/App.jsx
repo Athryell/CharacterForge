@@ -12,6 +12,8 @@ import {
 import dataManager from './data/dataManager';
 import SourceManager from './components/SourceManager';
 import CharacterCreator from './components/CharacterCreator';
+import LevelUpModal from './components/LevelUpModal';
+import LevelDownModal from './components/LevelDownModal';
 import ConditionTracker from './components/ConditionTracker';
 import WeaponManager from './components/WeaponManager';
 import ArmorManager from './components/ArmorManager';
@@ -379,6 +381,8 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
   const [homebrewVersion, setHomebrewVersion] = useState(0);
   const [showSources, setShowSources] = useState(false);
   const [speedInputVal, setSpeedInputVal] = useState(null);
+  const [showLevelUp, setShowLevelUp] = useState(false);
+  const [showLevelDown, setShowLevelDown] = useState(false);
   const { mode: themeMode, accentId, setThemeMode, setAccent } = useTheme();
   const { iconMode, setIconMode, iconAccent, setIconAccent } = useIconMode();
   const { weightUnit, speedUnit, setPref: setUnitPref, toDisplayWeight, toDisplaySpeed, fromDisplaySpeed } = useUnits();
@@ -468,6 +472,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
     char.longRest();
     showToast(t('toast.longRest'));
     addLog('🌙', t('toast.longRest'));
+    window.umami?.track('long-rest');
   }
   function handleShortRest() {
     char.shortRest();
@@ -504,7 +509,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
     const file = e.target.files[0]; if (!file) return;
     const reader = new FileReader();
     reader.onload = ev => {
-      try { char.importState(JSON.parse(ev.target.result)); showToast(t('toast.imported')); }
+      try { char.importState(JSON.parse(ev.target.result)); showToast(t('toast.imported')); window.umami?.track('character-imported'); }
       catch { showToast(t('toast.importError')); }
     };
     reader.readAsText(file); e.target.value = '';
@@ -515,6 +520,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
     const a = document.createElement('a');
     a.href = url; a.download = `${state.charName||'personaggio'}.json`;
     a.click(); URL.revokeObjectURL(url);
+    window.umami?.track('character-exported');
   }
   const filteredActions = (state.actions||[])
     .filter(a => actionFilter === 'all' || a.type === actionFilter);
@@ -622,9 +628,15 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                 </Field>
                 <Field label={t('identity.level')}>
                   <div className="hp-stepper" style={{ gap:4 }}>
-                    <button className="mod-btn" onClick={() => char.onClassOrLevelChange({ charLevel: Math.max(1, state.charLevel-1) })}>−</button>
+                    {activeSystem === 'dnd5e'
+                      ? <button className="mod-btn" style={{ color: state.charLevel > 1 ? 'var(--c-warn)' : undefined }} disabled={state.charLevel <= 1} onClick={() => setShowLevelDown(true)}>−</button>
+                      : <button className="mod-btn" onClick={() => char.onClassOrLevelChange({ charLevel: Math.max(1, state.charLevel-1) })}>−</button>
+                    }
                     <input type="number" min="1" max="20" style={{ width:50, textAlign:'center' }} value={state.charLevel} onChange={e => char.onClassOrLevelChange({ charLevel: Math.max(1, parseInt(e.target.value)||1) })} />
-                    <button className="mod-btn" onClick={() => char.onClassOrLevelChange({ charLevel: Math.min(20, state.charLevel+1) })}>+</button>
+                    {activeSystem === 'dnd5e'
+                      ? <button className="mod-btn" style={{ color: state.charLevel < 20 ? 'var(--c-accent)' : undefined }} disabled={state.charLevel >= 20} onClick={() => setShowLevelUp(true)}>+</button>
+                      : <button className="mod-btn" onClick={() => char.onClassOrLevelChange({ charLevel: Math.min(20, state.charLevel+1) })}>+</button>
+                    }
                   </div>
                 </Field>
                 <Field label={t('identity.profBonus')}><input value={`+${char.profBonus}`} readOnly /></Field>
@@ -1713,6 +1725,23 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
     <div className="sheet">
       <Toast message={toast} />
       {showCreator && <CharacterCreator onComplete={handleCreatorComplete} onCancel={() => setShowCreator(false)} systemId={activeSystem || DEFAULT_SYSTEM} />}
+      {showLevelUp && activeSystem === 'dnd5e' && (
+        <LevelUpModal
+          currentLevel={state.charLevel}
+          charClass={state.charClass}
+          charState={state}
+          onComplete={changes => { char.levelUp(changes); setShowLevelUp(false); }}
+          onCancel={() => setShowLevelUp(false)}
+        />
+      )}
+      {showLevelDown && activeSystem === 'dnd5e' && (
+        <LevelDownModal
+          currentLevel={state.charLevel}
+          charState={state}
+          onConfirm={keepIds => { char.levelDown(keepIds); setShowLevelDown(false); }}
+          onCancel={() => setShowLevelDown(false)}
+        />
+      )}
 
       {showSources && (
         <div className="creator-overlay" onClick={() => setShowSources(false)}>
@@ -1759,7 +1788,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
           <div className="hamburger-dropdown">
             <div className="hmenu-section">
               <div className="hmenu-label">{t('menu.character')}</div>
-              <button className="hmenu-item" onClick={() => { setShowCreator(true); setShowMenu(false); }}>
+              <button className="hmenu-item" onClick={() => { setShowCreator(true); setShowMenu(false); window.umami?.track('creator-opened', { system: activeSystem }); }}>
                 {t('menu.newCharacter')}
               </button>
             </div>
@@ -1917,6 +1946,7 @@ export default function App() {
   function handleSystemChange(systemId) {
     setActiveSystem(systemId);
     try { localStorage.setItem('characterforge_active_system', systemId); } catch {}
+    window.umami?.track('system-selected', { system: systemId });
   }
 
   // Keep chars list in sync after any save
@@ -1958,7 +1988,7 @@ export default function App() {
           <CharacterSelect
             chars={filteredChars}
             onSelect={handleSelect}
-            onCreate={() => setShowCreator(true)}
+            onCreate={() => { setShowCreator(true); window.umami?.track('creator-opened', { system: activeSystem }); }}
             onDelete={handleDelete}
             systemSelector={systemSelectorNode}
           />
@@ -1981,7 +2011,7 @@ export default function App() {
         />
       )}
       {showOnboarding && <Onboarding onClose={() => setShowOnboarding(false)} />}
-      <CornerButtons onHelp={() => setShowOnboarding(true)} />
+      <CornerButtons onHelp={() => { setShowOnboarding(true); window.umami?.track('tutorial-opened'); }} />
     </>
   );
 }

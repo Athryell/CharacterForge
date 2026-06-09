@@ -842,5 +842,37 @@
     "step7Text": "In the Spells tab use the Short Rest and Long Rest buttons to manage recovery. Long rest restores all spell slots and HP to maximum. Death saves reset automatically. Temporary HP are managed from the Combat tab with the 🛡 button.",
     "step8Title": "Help us improve",
     "step8Text": "CharacterForge is a free project in continuous evolution. If you find a bug, have a feature idea, or want to request support for a specific RPG system, use the feedback form — every report is read."
+  },
+  "levelUp": {
+    "title": "Avanza al livello {{level}}",
+    "stepHp": "Punti Ferita",
+    "stepFeatures": "Nuove Capacità",
+    "stepChoices": "Scelte",
+    "stepAsi": "Miglioramento Caratteristica",
+    "stepSpells": "Nuovi Incantesimi",
+    "stepSummary": "Riepilogo",
+    "rollDie": "Tira {{die}}",
+    "takeAverage": "Prendi media ({{val}})",
+    "newHp": "Nuovo max PF: {{current}} + {{gain}} = {{total}}",
+    "confirm": "Conferma Avanzamento",
+    "noted": "✓ Ricevuto",
+    "customChoice": "Personalizzato (scrivi sotto)",
+    "asiOption": "Miglioramento Caratteristica",
+    "featOption": "Talento",
+    "featPlaceholder": "Nome talento",
+    "featCategories": "Categorie: Origine / Generale / Stile di Combattimento / Dono Epico",
+    "epicBoonPlaceholder": "Nome Dono Epico",
+    "epicBoonRecommended": "Boon of Combat Prowess consigliato",
+    "asiPlus2": "+2 a una caratteristica",
+    "asiPlus1": "+1 a due caratteristiche",
+    "spellsToLearn": "Scegli {{count}} incantesimo/i da imparare"
+  },
+  "levelDown": {
+    "title": "Tornare al livello {{level}}?",
+    "willRemove": "Sarà rimosso:",
+    "keepItem": "Mantieni",
+    "noHistory": "Nessun dato di livello registrato — solo gli slot incantesimo e il livello saranno modificati.",
+    "confirm": "Conferma",
+    "cancel": "Annulla"
   }
 }

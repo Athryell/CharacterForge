@@ -295,6 +295,7 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
                         <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
                           <div className="spell-name">{spell.name}</div>
                           {added && <span className="action-added-badge" title={t('common.inAction', 'In azioni')}>⚡</span>}
+                          {spell.acquiredAtLevel && <span className="level-badge">Lv. {spell.acquiredAtLevel}</span>}
                           {(spell.tags || []).map(tag => <TagPill key={tag} tag={tag} allTags={allTags} small />)}
                         </div>
                         {!isExpanded && !isEditing && (range || duration) && (

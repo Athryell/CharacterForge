@@ -47,6 +47,7 @@ export default function SourceManager({ onHomebrewChange }) {
     const result = dataManager.addSource(pending);
     if (result.ok) {
       setImportStatus({ ok: true, errors: [], counts: result.counts, name: pending.name });
+      window.umami?.track('homebrew-imported', { name: pending.name });
       refresh();
     } else {
       setImportStatus({ ok: false, errors: result.errors, name: pending.name });

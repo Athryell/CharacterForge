@@ -130,5 +130,6 @@ export function createDefaultState() {
       free: '',
       classFeatures: '',
     },
+    levelHistory: {},
   };
 }

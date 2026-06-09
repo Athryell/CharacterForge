@@ -136,6 +136,7 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
                     <div className="inventory-name">{item.name}</div>
                     {added && <span className="action-added-badge" title={t('common.inAction', 'In azioni')}>⚡</span>}
+                    {item.acquiredAtLevel && <span className="level-badge">Lv. {item.acquiredAtLevel}</span>}
                     {(item.tags||[]).map(tag => <TagPill key={tag} tag={tag} allTags={allTags} small />)}
                   </div>
                   {item.desc && !isExpanded && !isEditing && (

@@ -73,10 +73,10 @@ export function CornerButtons({ onHelp }) {
 function SupportGroup({ t }) {
   return (
     <div className="onboarding-support-group">
-      <a href={NOTION_FEEDBACK_URL} target="_blank" rel="noopener noreferrer" className="onboarding-btn onboarding-btn-accent">
+      <a href={NOTION_FEEDBACK_URL} target="_blank" rel="noopener noreferrer" className="onboarding-btn onboarding-btn-accent" onClick={() => window.umami?.track('feedback-clicked')}>
         {t('onboarding.feedbackBtn')}
       </a>
-      <a href={KOFI_URL} target="_blank" rel="noopener noreferrer" className="onboarding-btn onboarding-btn-kofi">
+      <a href={KOFI_URL} target="_blank" rel="noopener noreferrer" className="onboarding-btn onboarding-btn-kofi" onClick={() => window.umami?.track('kofi-clicked')}>
         {t('onboarding.kofiBtn')}
       </a>
       <span className="onboarding-kofi-desc">{t('onboarding.kofiDesc')}</span>

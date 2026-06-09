@@ -805,5 +805,37 @@
     "step7Text": "In the Spells tab use the Short Rest and Long Rest buttons to manage recovery. Long rest restores all spell slots and HP to maximum. Death saves reset automatically. Temporary HP are managed from the Combat tab with the 🛡 button.",
     "step8Title": "Help us improve",
     "step8Text": "CharacterForge is a free project in continuous evolution. If you find a bug, have a feature idea, or want to request support for a specific RPG system, use the feedback form — every report is read."
+  },
+  "levelUp": {
+    "title": "Level Up to {{level}}",
+    "stepHp": "Hit Points",
+    "stepFeatures": "New Features",
+    "stepChoices": "Choices",
+    "stepAsi": "Ability Score Improvement",
+    "stepSpells": "New Spells",
+    "stepSummary": "Summary",
+    "rollDie": "Roll {{die}}",
+    "takeAverage": "Take average ({{val}})",
+    "newHp": "New max HP: {{current}} + {{gain}} = {{total}}",
+    "confirm": "Confirm Level Up",
+    "noted": "✓ Noted",
+    "customChoice": "Custom (write below)",
+    "asiOption": "Ability Score Improvement",
+    "featOption": "Feat",
+    "featPlaceholder": "Feat name",
+    "featCategories": "Categories: Origin / General / Fighting Style / Epic Boon",
+    "epicBoonPlaceholder": "Epic Boon name",
+    "epicBoonRecommended": "Boon of Combat Prowess recommended",
+    "asiPlus2": "+2 to one ability",
+    "asiPlus1": "+1 to two abilities",
+    "spellsToLearn": "Choose {{count}} spell(s) to learn"
+  },
+  "levelDown": {
+    "title": "Go back to level {{level}}?",
+    "willRemove": "Will be removed:",
+    "keepItem": "Keep",
+    "noHistory": "No level data recorded — only spell slots and level will be adjusted.",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
   }
 }

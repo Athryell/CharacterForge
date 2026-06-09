@@ -3032,3 +3032,9 @@ button.corner-btn:hover {
   background: var(--c-border-mid);
   color: var(--c-muted);
 }
+
+.level-badge {
+  font-size: 11px;
+  color: var(--c-muted);
+  font-weight: 400;
+}

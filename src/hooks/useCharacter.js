@@ -179,6 +179,81 @@ export function useCharacter(charId) {
     update(prev => ({ ...prev, equipment: prev.equipment.filter((_, i) => i !== idx) }));
   }
 
+  function levelUp(changes) {
+    update(prev => {
+      const newLevel = prev.charLevel + 1;
+      const newHistory = {
+        ...prev.levelHistory,
+        [newLevel]: {
+          hpGained: changes.hpGained,
+          features: (changes.features || []).map(f => f.id),
+          spells: (changes.spells || []).map(s => s.name),
+          subclass: changes.subclass || null,
+          feat: changes.feat || changes.epicBoon || null,
+          abilityScoreImprovement: changes.asi || null,
+        },
+      };
+      const newFeatures = [
+        ...prev.features,
+        ...(changes.features || []).map(f => ({ ...f, acquiredAtLevel: newLevel })),
+      ];
+      const newSpells = [
+        ...prev.spells,
+        ...(changes.spells || []).map(s => ({ ...s, acquiredAtLevel: newLevel })),
+      ];
+      const newAbilities = changes.asi
+        ? Object.fromEntries(Object.entries(prev.abilities).map(([k, v]) => [k, v + (changes.asi[k] || 0)]))
+        : prev.abilities;
+      const slots = (SLOT_TABLE[newLevel] || SLOT_TABLE[1]).map(max => ({ max, used: 0 }));
+      return {
+        ...prev,
+        charLevel: newLevel,
+        hpMax: prev.hpMax + changes.hpGained,
+        hpCurrent: Math.min(prev.hpCurrent + changes.hpGained, prev.hpMax + changes.hpGained),
+        abilities: newAbilities,
+        features: newFeatures,
+        spells: newSpells,
+        spellSlots: slots,
+        levelHistory: newHistory,
+      };
+    });
+  }
+
+  function levelDown(keepIds = []) {
+    update(prev => {
+      if (prev.charLevel <= 1) return prev;
+      const removingLevel = prev.charLevel;
+      const history = (prev.levelHistory || {})[removingLevel] || {};
+      const newFeatures = prev.features.filter(f =>
+        f.acquiredAtLevel !== removingLevel || keepIds.includes(f.id)
+      );
+      const newSpells = prev.spells.filter(s =>
+        s.acquiredAtLevel !== removingLevel || keepIds.includes(s.name)
+      );
+      const removedAsi = history.abilityScoreImprovement;
+      const newAbilities = removedAsi
+        ? Object.fromEntries(Object.entries(prev.abilities).map(([k, v]) => [k, v - (removedAsi[k] || 0)]))
+        : prev.abilities;
+      const hpGained = history.hpGained || 0;
+      const newHistory = { ...(prev.levelHistory || {}) };
+      delete newHistory[removingLevel];
+      const newLevel = prev.charLevel - 1;
+      const slots = (SLOT_TABLE[newLevel] || SLOT_TABLE[1]).map(max => ({ max, used: 0 }));
+      const newHpMax = Math.max(1, prev.hpMax - hpGained);
+      return {
+        ...prev,
+        charLevel: newLevel,
+        hpMax: newHpMax,
+        hpCurrent: Math.min(prev.hpCurrent, newHpMax),
+        abilities: newAbilities,
+        features: newFeatures,
+        spells: newSpells,
+        spellSlots: slots,
+        levelHistory: newHistory,
+      };
+    });
+  }
+
   function save(s) {
     const id = charIdRef.current;
     if (id) saveCharState(id, s);
@@ -211,6 +286,7 @@ export function useCharacter(charId) {
     // mutators
     setAbility, toggleSaveProficiency, toggleSkillProficiency,
     modHP, longRest, shortRest, onClassOrLevelChange,
+    levelUp, levelDown,
     toggleSpellSlot, toggleSpellPrepared,
     addAction, removeAction, addSpell, removeSpell,
     addEquipment, removeEquipment,
