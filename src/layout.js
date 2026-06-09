@@ -20,9 +20,9 @@ export const WIDGET_DEFS = [
   { id: 'spells',        label: 'widgets.spells',        defaultTab: 'spells',    defaultCol: 0, defaultFullWidth: true,  defaultBottomFull: true },
   { id: 'inventory',     label: 'widgets.inventory',     defaultTab: 'inventory', defaultCol: 1, defaultFullWidth: false },
   { id: 'currency',      label: 'widgets.currency',      defaultTab: 'inventory', defaultCol: 1, defaultFullWidth: false },
-  { id: 'traits',        label: 'widgets.traits',        defaultTab: 'notes',     defaultCol: 0, defaultFullWidth: true  },
-  { id: 'freeNotes',     label: 'widgets.freeNotes',     defaultTab: 'notes',     defaultCol: 0, defaultFullWidth: false },
-  { id: 'classFeatures', label: 'widgets.classFeatures', defaultTab: 'notes',     defaultCol: 1, defaultFullWidth: false },
+  { id: 'classFeatures', label: 'widgets.classFeatures', defaultTab: 'notes',     defaultCol: 0, defaultFullWidth: false },
+  { id: 'traits',        label: 'widgets.traits',        defaultTab: 'notes',     defaultCol: 1, defaultFullWidth: false },
+  { id: 'freeNotes',     label: 'widgets.freeNotes',     defaultTab: 'notes',     defaultCol: 0, defaultFullWidth: true,  defaultBottomFull: true },
   { id: 'activityLog',   label: 'widgets.activityLog',   defaultTab: 'log',       defaultCol: 0, defaultFullWidth: true  },
 ];
 

@@ -6,7 +6,7 @@ import { loadCharsIndex, deleteChar, getActiveCharId, setActiveCharId, generateC
 import CharacterSelect from './components/CharacterSelect';
 import Onboarding, { CornerButtons, loadOnboardingSeen } from './components/Onboarding';
 import {
-  createDefaultState, ABILITIES, SKILLS, ALIGNMENTS,
+  createDefaultState, ABILITIES, SKILLS,
   SPELLCASTING_CLASS, getMod, fmtMod,
 } from './data/systems/dnd5e/mechanics';
 import dataManager from './data/dataManager';
@@ -27,6 +27,7 @@ import { CharContext } from './components/CharContext';
 import WidgetGrid from './components/WidgetGrid';
 import PinnedBar, { loadPinned, savePinned } from './components/PinnedBar';
 import FeatureManager from './components/FeatureManager';
+import AlignmentPicker from './components/AlignmentPicker';
 import DHWeaponManager from './components/DHWeaponManager';
 import DHArmorManager from './components/DHArmorManager';
 import { CLASS_FEATURES } from './data/systems/dnd5e/classes';
@@ -691,9 +692,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                 </Field>
                 <Field label={t('identity.profBonus')}><input value={`+${char.profBonus}`} readOnly /></Field>
                 <Field label={t('identity.alignment')}>
-                  <select value={state.charAlignment} onChange={e => update({ charAlignment: e.target.value })}>
-                    {ALIGNMENTS.map(a => <option key={a} value={a}>{t(`data.alignments.${a}`, a)}</option>)}
-                  </select>
+                  <AlignmentPicker value={state.charAlignment} onChange={a => update({ charAlignment: a })} />
                 </Field>
                 <Field label={t('identity.xp')}>
                   <input type="number" min="0" value={state.charXP} onChange={e => update({ charXP: parseInt(e.target.value)||0 })} />
@@ -1252,10 +1251,12 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
         </div>
       );
 
-      case 'traits': return (
+      case 'traits': {
+        const traitsFullWidth = layout.find(w => w.id === 'traits')?.fullWidth ?? true;
+        return (
         <div className="card">
           <div className="card-title"><Icon id="widget.traits" /> {t('widgets.traits')}</div>
-          <div className="trait-grid">
+          <div style={{ display: 'grid', gridTemplateColumns: traitsFullWidth ? '1fr 1fr' : '1fr', gap: 10 }}>
             {[
               ['personality', t('notes.personalityLabel'), t('notes.personalityPlaceholder')],
               ['ideals',      t('notes.idealsLabel'),      t('notes.idealsPlaceholder')],
@@ -1270,6 +1271,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
           </div>
         </div>
       );
+      }
 
       case 'freeNotes': return (
         <div className="card">

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ALIGNMENTS, ABILITIES, SKILLS, HIT_DICE, SPELLCASTING_CLASS } from '../../data/systems/dnd5e/mechanics';
+import { ABILITIES, SKILLS, HIT_DICE, SPELLCASTING_CLASS } from '../../data/systems/dnd5e/mechanics';
+import AlignmentPicker from '../AlignmentPicker';
 import { CLASS_FEATURES, CLASS_SAVE_PROFS, CLASS_SKILL_COUNT, CLASS_SKILL_OPTIONS } from '../../data/systems/dnd5e/classes';
 import { SPECIES_FEATURES, getAutoFeatures } from '../../data/systems/dnd5e/species';
 import { BACKGROUND_FEATURES } from '../../data/systems/dnd5e/backgrounds';
@@ -282,9 +283,7 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
               </div>
               <div className="field" style={{ marginBottom: 16 }}>
                 <label>{t('identity.alignment')}</label>
-                <select value={data.charAlignment} onChange={e => patch({ charAlignment: e.target.value })}>
-                  {ALIGNMENTS.map(a => <option key={a} value={a}>{t(`data.alignments.${a}`, a)}</option>)}
-                </select>
+                <AlignmentPicker value={data.charAlignment} onChange={a => patch({ charAlignment: a })} />
               </div>
 
               {/* SPECIE */}
