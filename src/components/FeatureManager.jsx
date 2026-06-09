@@ -166,7 +166,7 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
                             </div>
                             <div style={{ display: 'flex', gap: 8 }}>
                               <button className="io-btn" onClick={e => { e.stopPropagation(); cancelEdit(); }}>{t('common.cancel', 'Cancel')}</button>
-                              <button className="io-btn primary" onClick={e => { e.stopPropagation(); saveEdit(); }}>✓ {t('common.save', 'Save')}</button>
+                              <button className="io-btn primary" onClick={e => { e.stopPropagation(); saveEdit(); }}>{t('common.save', 'Save')}</button>
                             </div>
                           </div>
                         </div>
@@ -193,7 +193,7 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
                             )}
                           </div>
                           <div className="item-edit-actions">
-                            <button className="io-btn" onClick={e => { e.stopPropagation(); startEdit(feature); }}>✏ {t('common.edit', 'Edit')}</button>
+                            <button className="io-btn" onClick={e => { e.stopPropagation(); startEdit(feature); }}>{t('common.edit', 'Edit')}</button>
                           </div>
                         </div>
                       )}

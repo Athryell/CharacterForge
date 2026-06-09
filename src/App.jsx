@@ -615,15 +615,22 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
               <div className="grid-2" style={{ flex:1 }}>
                 <Field label={t('identity.name')}><input value={state.charName} onChange={e => update({ charName: e.target.value })} placeholder="Es. Aldric Voss" /></Field>
                 <Field label={t('identity.class')}>
-                  <select value={state.charClass} onChange={e => {
-                    const cls = e.target.value;
-                    char.onClassOrLevelChange({ charClass: cls });
-                    const kept = (state.features||[]).filter(f => f.sourceType !== 'class');
-                    update({ features: [...kept, ...getAutoFeatures('class', cls, CLASS_FEATURES)] });
-                  }}>
-                    <option value="">{t('identity.classPlaceholder')}</option>
-                    {dataManager.getClasses().map(c => <option key={c} value={c}>{t(`data.classes.${c}`, c)}</option>)}
-                  </select>
+                  {(() => {
+                    const knownClasses = dataManager.getClasses();
+                    const isCustomClass = state.charClass && !knownClasses.includes(state.charClass);
+                    return (
+                      <select value={state.charClass} onChange={e => {
+                        const cls = e.target.value;
+                        char.onClassOrLevelChange({ charClass: cls });
+                        const kept = (state.features||[]).filter(f => f.sourceType !== 'class');
+                        update({ features: [...kept, ...getAutoFeatures('class', cls, CLASS_FEATURES)] });
+                      }}>
+                        <option value="">{t('identity.classPlaceholder')}</option>
+                        {isCustomClass && <option value={state.charClass}>{state.charClass}</option>}
+                        {knownClasses.map(c => <option key={c} value={c}>{t(`data.classes.${c}`, c)}</option>)}
+                      </select>
+                    );
+                  })()}
                 </Field>
                 <Field label={t('identity.subclass')}>
                   <input value={state.charSubclass||''} onChange={e => update({ charSubclass: e.target.value })} placeholder={t('identity.subclassPlaceholder')} />
@@ -641,7 +648,9 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                   }}>
                     <option value="">{t('identity.speciesPlaceholder')}</option>
                     {dataManager.getSpecies().map(r => <option key={r.id} value={r.id}>{t(`data.species.${r.id}`, r.name)}</option>)}
-                    <option value="__custom__">{t('identity.speciesCustom')}</option>
+                    <option value="__custom__">
+                      {state.charRace === '__custom__' && state.charRaceCustom ? state.charRaceCustom : t('identity.speciesCustom')}
+                    </option>
                   </select>
                   {state.charRace === '__custom__' && (
                     <input style={{ marginTop:4 }} value={state.charRaceCustom||''} onChange={e => update({ charRaceCustom: e.target.value })} placeholder={t('identity.speciesCustomPlaceholder')} />
@@ -659,7 +668,9 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                   }}>
                     <option value="">{t('identity.backgroundPlaceholder')}</option>
                     {dataManager.getBackgrounds().map(b => <option key={b.id || b.name} value={b.id || b.name}>{t(`data.backgrounds.${b.id || b.name}`, b.name)}</option>)}
-                    <option value="__custom__">{t('identity.backgroundCustom')}</option>
+                    <option value="__custom__">
+                      {state.charBackground === '__custom__' && state.charBackgroundCustom ? state.charBackgroundCustom : t('identity.backgroundCustom')}
+                    </option>
                   </select>
                   {state.charBackground === '__custom__' && (
                     <input style={{ marginTop:4 }} value={state.charBackgroundCustom||''} onChange={e => update({ charBackgroundCustom: e.target.value })} placeholder={t('identity.backgroundCustomPlaceholder')} />
