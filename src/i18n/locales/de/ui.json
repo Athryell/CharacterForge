@@ -326,10 +326,63 @@
   "notation": {
     "dynamicTitle": "Dynamic value — original:",
     "rollTitle": "Roll",
+    "slashHint": "Type / to insert notation",
     "attrHelp": "→ ability modifier",
     "lvlHelp": "→ scales with level",
-    "bonusHelp": "→ equipment bonus (type @ for list)",
-    "counterHelp": "→ clickable counter (e.g. charges)"
+    "bonusHelp": "→ equipment bonus",
+    "counterHelp": "→ clickable counter",
+    "group": {
+      "dice": "Dice",
+      "abilities": "Ability modifiers",
+      "traits": "Trait modifiers",
+      "scaling": "Scaling",
+      "counters": "Counters",
+      "bonuses": "Equipment bonuses"
+    },
+    "item": {
+      "diceRoll": "Dice roll",
+      "str": "Strength (STR)",
+      "dex": "Dexterity (DEX)",
+      "con": "Constitution (CON)",
+      "int": "Intelligence (INT)",
+      "wis": "Wisdom (WIS)",
+      "cha": "Charisma (CHA)",
+      "pro": "Proficiency bonus",
+      "lvl": "Scales with level",
+      "counter": "Counter / charges",
+      "bonusAC": "Armor Class bonus",
+      "bonusINIT": "Initiative bonus",
+      "bonusSPD": "Speed bonus",
+      "bonusHP": "Max HP bonus",
+      "bonusSTR": "STR bonus",
+      "bonusDEX": "DEX bonus",
+      "bonusCON": "CON bonus",
+      "bonusINT": "INT bonus",
+      "bonusWIS": "WIS bonus",
+      "bonusCHA": "CHA bonus",
+      "bonusTSSTR": "STR save bonus",
+      "bonusTSDEX": "DEX save bonus",
+      "bonusTSCON": "CON save bonus",
+      "bonusTSINT": "INT save bonus",
+      "bonusTSWIS": "WIS save bonus",
+      "bonusTSCHA": "CHA save bonus"
+    },
+    "dh": {
+      "agi": "Agility (AGI)",
+      "str": "Strength (STR)",
+      "fin": "Finesse (FIN)",
+      "ins": "Instinct (INS)",
+      "pre": "Presence (PRE)",
+      "kno": "Knowledge (KNO)"
+    },
+    "desc": {
+      "diceRoll": "Clickable die — rolls automatically",
+      "modifier": "Character ability modifier",
+      "proficiency": "Proficiency bonus",
+      "lvl": "Changes value based on character level",
+      "counter": "Toggleable pips (e.g. spell charges)",
+      "bonus": "Passive bonus applied to this stat"
+    }
   },
   "weapons": {
     "noWeapons": "No weapons added. Click \"+\" to add one.",
@@ -809,7 +862,7 @@
     "helpBtn": "?",
     "community": {
       "title": "Available in multiple languages",
-      "body": "CharacterForge is available in Italian, English, French, German, Spanish and more languages added by the community. You can switch language anytime from the top bar.",
+      "body": "CharacterForge is available in Italian, English, French, German, Spanish and more languages added by the community (Just send me a request and we'll add the translation file!). You can switch language anytime from the settings menu.",
       "translateBtn": "Help translate →",
       "contributBtn": "Contribute on GitHub →",
       "note": "No coding skills required to translate — just visit Crowdin and start contributing!"
@@ -833,19 +886,37 @@
       "counterRow": "Clickable counter (e.g. charges)"
     },
     "step1Title": "Your sheet, your way",
-    "step1Text": "Activate Layout mode with the ⠿ button at the top to customize everything: drag widgets to reorder them, expand them to full width or reduce to half column, move them to different tabs or hide them. Tabs themselves are reorderable and hideable. The layout is saved automatically.",
+    "step1Text": "Activate Layout mode with the ⠿ Edit Layout button in the menu to customize everything:",
+    "step1Points": [
+      "Drag widgets to reorder them",
+      "Expand to full width or reduce to half column",
+      "Move widgets to different tabs or hide them",
+      "Tabs are reorderable and hideable too"
+    ],
+    "step1Footer": "The layout is saved automatically.",
     "step2Title": "Clickable dice everywhere",
     "step2Text": "In any description field — items, spells, actions, weapons — you can write dice notations like 2d6+3 or 1d8 and they become clickable buttons that roll automatically. The result appears in a toast notification at the top right.",
     "step3Title": "Smart Notation",
-    "step3Text": "Use [STR], [PRO], [LVL:...] and +N@[STAT] notation directly in any description field. Values resolve automatically from your character's current stats.",
+    "step3Text": "Type / in any description field to open the notation menu. Values resolve automatically from your character's current stats.",
     "step4Title": "Keyword Glossary",
     "step4Text": "In action and spell descriptions, game terms like blinded, advantage, disadvantage, finesse, concentration and many others are underlined. Hover over them with your mouse (or long-press on mobile) to see a quick explanation.",
     "step5Title": "Build your arsenal",
-    "step5Text": "In the Combat tab you can add custom actions with type (Action / Bonus Action / Reaction / Free) and associated dice. In the Spells tab browse the SRD catalog with filters by class, level and school, or add custom spells. In Inventory, items with the same name automatically stack together.",
+    "step5Text": "Manage all your combat tools and gear:",
+    "step5Points": [
+      "Combat tab: add custom actions with type (Action / Bonus Action / Reaction / Free) and dice",
+      "Spells tab: browse the SRD catalog filtered by class, level and school, or add custom spells",
+      "Inventory: items with the same name automatically stack together"
+    ],
     "step6Title": "Organize with tags",
     "step6Text": "You can add custom tags to any action or spell — expand the entry and click 🏷. Tags you create become available as quick filters at the top of the list. Useful examples: 'attack', 'utility', 'heal', 'bonus action'.",
     "step7Title": "Rests and recovery",
-    "step7Text": "In the Spells tab use the Short Rest and Long Rest buttons to manage recovery. Long rest restores all spell slots and HP to maximum. Death saves reset automatically. Temporary HP are managed from the Combat tab with the 🛡 button.",
+    "step7Text": "Manage recovery from the Spells tab:",
+    "step7Points": [
+      "Long rest: restores all spell slots and HP to maximum",
+      "Short rest: use hit dice to recover HP",
+      "Death saves reset automatically after a long rest",
+      "Temporary HP: manage from the Combat tab with the 🛡 button"
+    ],
     "step8Title": "Help us improve",
     "step8Text": "CharacterForge is a free project in continuous evolution. If you find a bug, have a feature idea, or want to request support for a specific RPG system, use the feedback form — every report is read."
   },
