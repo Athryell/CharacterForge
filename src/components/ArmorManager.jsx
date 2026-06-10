@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DND_ARMOR_PRESETS as ARMOR_PRESETS, TYPE_LABEL, calcArmorAC } from '../data/systems/dnd5e/armors';
 import { TagPill, TagSelector } from './Tags';
-import { KeywordText, NotationHelpBar } from './Tooltip';
+import { KeywordText } from './Tooltip';
 import NotationTextarea from './NotationTextarea';
 
 const BLANK_FORM = { name: '', type: 'armor', armorType: 'medium', acValue: 14, isProficient: true, equipped: false, desc: '', weight: '' };
@@ -73,7 +73,6 @@ function ArmorEditForm({ form, onChange, onSave, onCancel, onDelete, allTags, it
         <NotationTextarea className="notes-area" style={{ minHeight: 40 }}
           value={form.desc || ''} onChange={e => patch({ desc: e.target.value })}
           placeholder={t('armor.descPlaceholder', 'Es. Richiede competenza in armature pesanti...')} />
-        <NotationHelpBar />
       </div>
 
       {allTags && itemId && (

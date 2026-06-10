@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { KeywordText, NotationHelpBar } from './Tooltip';
+import { KeywordText } from './Tooltip';
 import NotationTextarea from './NotationTextarea';
 import { TagPill, TagSelector } from './Tags';
 
@@ -80,7 +80,6 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
             <NotationTextarea className="notes-area" style={{ minHeight: 60 }}
               value={addForm.desc} onChange={e => setAddForm(f => ({ ...f, desc: e.target.value }))}
               placeholder={t('features.descPlaceholder', 'Feature description...')} />
-            <NotationHelpBar />
           </div>
           <div style={{ display: 'flex', gap: 8, marginTop: 8, justifyContent: 'flex-end' }}>
             <button className="io-btn" onClick={() => { onAddClose && onAddClose(); setAddForm(EMPTY_FORM); }}>{t('common.cancel', 'Cancel')}</button>
@@ -137,7 +136,6 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
                             <label>{t('features.formDesc', 'Description')}</label>
                             <NotationTextarea className="notes-area" style={{ minHeight: 72 }}
                               value={editForm.desc} onChange={e => setEditForm(f => ({ ...f, desc: e.target.value }))} />
-                            <NotationHelpBar />
                           </div>
                           <div style={{ marginTop: 6 }}>
                             {editingTagsFor === feature.id ? (

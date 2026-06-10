@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { SCHOOLS, SPELL_CLASSES, filterSpells } from '../data/systems/dnd5e/spells';
 import dataManager from '../data/dataManager';
 import { TagPill, TagSelector, TagFilterBar } from './Tags';
-import { KeywordText, NotationHelpBar } from './Tooltip';
+import { KeywordText } from './Tooltip';
 
 const LEVEL_LABELS = {
   0: 'Trucchetti', 1: '1°', 2: '2°', 3: '3°', 4: '4°',
@@ -104,7 +104,6 @@ function SpellEditForm({ spell, srd, onSave, onCancel, onDelete, added, onToggle
         <textarea className="notes-area" style={{ minHeight: 72 }}
           value={form.desc} onChange={e => patch({ desc: e.target.value })}
           placeholder={t('spells.customDescPlaceholder')} />
-        <NotationHelpBar />
       </div>
       {onUpdateTags && (
         <div style={{ marginTop: 6 }}>
@@ -482,7 +481,6 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
             <textarea className="notes-area" style={{ minHeight: 64 }}
               value={customForm.desc} onChange={e => setCustomForm(f => ({ ...f, desc: e.target.value }))}
               placeholder={t('spells.customDescPlaceholder')} />
-            <NotationHelpBar />
           </div>
           <div style={{ display: 'flex', gap: 16, marginTop: 8, alignItems: 'center' }}>
             <label className="toggle-box">

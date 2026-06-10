@@ -218,6 +218,181 @@ body {
 .hmenu-divider {
   height: 0.5px; background: var(--c-border); margin: 4px 0;
 }
+.hmenu-group-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--c-ink);
+  font-family: var(--font-body);
+  transition: background .1s;
+}
+.hmenu-group-btn:hover { background: var(--c-surface); }
+.hmenu-group-caret {
+  color: var(--c-muted);
+  font-size: 12px;
+  line-height: 1;
+}
+.hmenu-group-body {
+  border-top: 0.5px solid var(--c-border);
+  padding-top: 4px;
+}
+.hmenu-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--c-ink);
+  cursor: pointer;
+  padding: 4px 14px;
+}
+.hmenu-toggle input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--c-accent);
+  flex-shrink: 0;
+}
+
+/* ── ACCESSIBILITY ─────────────────────────────────────────────── */
+
+/* Fonts */
+.font-opendyslexic, .font-opendyslexic * {
+  font-family: 'OpenDyslexicRegular', sans-serif !important;
+  letter-spacing: 0.05em;
+  word-spacing: 0.1em;
+  line-height: 1.8;
+}
+.font-atkinson, .font-atkinson * {
+  font-family: 'Atkinson Hyperlegible', sans-serif !important;
+  letter-spacing: 0.02em;
+}
+
+/* Text size */
+.text-large  { font-size: 18px; }
+.text-xlarge { font-size: 21px; }
+
+/* Scale key content elements to inherit the larger body size */
+.text-large .field input, .text-large .field select, .text-large .field textarea,
+.text-large .check-name, .text-large .check-val,
+.text-large .action-name, .text-large .action-desc-full, .text-large .action-desc-short,
+.text-large .feature-name, .text-large .feature-desc,
+.text-large .tab-btn, .text-large .notes-area,
+.text-xlarge .field input, .text-xlarge .field select, .text-xlarge .field textarea,
+.text-xlarge .check-name, .text-xlarge .check-val,
+.text-xlarge .action-name, .text-xlarge .action-desc-full, .text-xlarge .action-desc-short,
+.text-xlarge .feature-name, .text-xlarge .feature-desc,
+.text-xlarge .tab-btn, .text-xlarge .notes-area { font-size: inherit; }
+
+/* High contrast — light */
+.high-contrast {
+  --c-ink:          #000000;
+  --c-muted:        #000000;
+  --c-hint:         #333333;
+  --c-bg:           #ffffff;
+  --c-surface:      #eeeeee;
+  --c-border:       #000000;
+  --c-border-mid:   #000000;
+  --c-accent:       #004400;
+  --c-accent-light: #c8e8c8;
+  --c-accent-text:  #000000;
+  --c-warn-text:    #5c3000;
+  --shadow-card:    0 0 0 1.5px #000000;
+}
+
+/* High contrast — dark (media query fallback) */
+@media (prefers-color-scheme: dark) {
+  .high-contrast {
+    --c-ink:          #ffffff;
+    --c-muted:        #ffffff;
+    --c-hint:         #dddddd;
+    --c-bg:           #000000;
+    --c-surface:      #111111;
+    --c-border:       #ffffff;
+    --c-border-mid:   #ffffff;
+    --c-accent:       #00cc00;
+    --c-accent-light: #003300;
+    --c-accent-text:  #ffffff;
+    --c-warn-text:    #ffcc44;
+    --shadow-card:    0 0 0 1.5px #ffffff;
+  }
+}
+
+/* High contrast — dark (explicit data-theme) */
+[data-theme="dark"].high-contrast {
+  --c-ink:          #ffffff;
+  --c-muted:        #ffffff;
+  --c-hint:         #dddddd;
+  --c-bg:           #000000;
+  --c-surface:      #111111;
+  --c-border:       #ffffff;
+  --c-border-mid:   #ffffff;
+  --c-accent:       #00cc00;
+  --c-accent-light: #003300;
+  --c-accent-text:  #ffffff;
+  --c-warn-text:    #ffcc44;
+  --shadow-card:    0 0 0 1.5px #ffffff;
+}
+
+/* Selezione testo visibile in alto contrasto */
+body.high-contrast ::selection {
+  background-color: #ffff00;
+  color: #000000;
+}
+
+/* Override colori hardcoded non accessibili */
+body.high-contrast .check-dot.expertise {
+  background: var(--c-ink) !important;
+  border-color: var(--c-ink) !important;
+}
+body.high-contrast .spell-conc { color: var(--c-ink) !important; }
+body.high-contrast .pin-action.pin-blue { color: var(--c-ink) !important; }
+
+/* Focus visibile in alto contrasto */
+body.high-contrast *:focus-visible {
+  outline: 3px solid var(--c-ink) !important;
+  outline-offset: 2px !important;
+}
+
+/* Large touch targets */
+.large-targets .mod-btn,
+.large-targets .icon-btn,
+.large-targets .filter-chip,
+.large-targets .tab-btn,
+.large-targets .slot-pip,
+.large-targets .counter-pip,
+.large-targets .check-dot {
+  min-width: 44px !important;
+  min-height: 44px !important;
+  padding: 10px 14px !important;
+}
+.large-targets input[type="number"],
+.large-targets input[type="text"],
+.large-targets select {
+  min-height: 44px !important;
+  font-size: 16px !important;
+}
+
+/* Onboarding accessibility note */
+.onboarding-a11y-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--c-ink);
+  background: var(--c-surface);
+  border: 0.5px solid var(--c-border-mid);
+  border-radius: var(--r);
+  padding: 10px 12px;
+  margin-top: 12px;
+  line-height: 1.5;
+}
+
 /* legacy (unused but kept for safety) */
 .template-chip.active {
   border-color: var(--c-accent);
@@ -591,6 +766,9 @@ body {
 .notation-dynamic-badge {
   font-size: 10px; color: var(--c-accent-text); font-weight: 600;
   opacity: 0.7; cursor: help;
+}
+.notation-slash-hint {
+  margin: 3px 0 0; font-size: 11px; color: var(--c-muted); font-style: italic;
 }
 
 /* ── NOTATION SLASH MENU ────────────────────────────────────────── */
@@ -2517,7 +2695,7 @@ input[type=number] {
   white-space: nowrap;
 }
 .onboarding-btn-accent {
-  background: var(--c-accent); color: #fff;
+  background: var(--c-accent); color: #000;
 }
 .onboarding-btn-accent:hover { opacity: .85; }
 
@@ -2617,31 +2795,40 @@ button.corner-btn:hover {
   animation: onboarding-fadein .15s ease;
 }
 
-/* Notation reference table */
-.onboarding-notation-table {
-  width: 100%; border-collapse: collapse;
-  font-size: 12.5px; margin: 10px 0 4px;
+/* Notation step — side-by-side layout */
+.onboarding-notation-layout {
+  display: flex; gap: 14px; align-items: flex-start; margin: 8px 0 4px;
 }
-.onboarding-notation-table th {
-  text-align: left;
-  font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em;
-  color: var(--c-muted);
-  padding: 4px 8px 6px;
-  border-bottom: 1px solid var(--c-border);
-}
-.onboarding-notation-table td {
-  padding: 5px 8px;
-  border-bottom: 1px solid var(--c-border);
-  vertical-align: middle;
-}
-.onboarding-notation-table tr:last-child td { border-bottom: none; }
-.onboarding-notation-table td:first-child { width: 46%; }
-.onboarding-notation-table td code {
-  font-size: 11px; font-family: monospace;
+.onboarding-notation-layout .onboarding-demo-box { flex: 1 1 0; margin: 0; }
+.onboarding-notation-sidebar {
+  flex: 0 0 auto;
   background: var(--c-bg);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r);
+  padding: 10px 12px;
+  font-size: 13px; line-height: 1.6;
+}
+.onboarding-notation-sidebar-hint {
+  margin: 0 0 7px; font-size: 12px; color: var(--c-muted); font-style: italic;
+}
+.onboarding-notation-sidebar-list {
+  margin: 0; padding: 0; list-style: none;
+}
+.onboarding-notation-sidebar-list li { margin: 0 0 5px; color: var(--c-ink); }
+.onboarding-notation-sidebar-list li:last-child { margin-bottom: 0; }
+.onboarding-notation-sidebar-list code {
+  font-size: 12px; font-family: monospace;
+  background: var(--c-surface);
   border: 1px solid var(--c-border-mid);
-  border-radius: 4px; padding: 2px 5px;
-  white-space: nowrap; color: var(--c-accent);
+  border-radius: 3px; padding: 1px 4px;
+  color: var(--c-accent); white-space: nowrap;
+}
+.onboarding-notation-sidebar-dynamic {
+  margin: 8px 0 0; font-size: 12px; color: var(--c-muted);
+  font-style: italic;
+}
+.onboarding-skip-hint {
+  margin: 4px 0 0; font-size: 11px; color: var(--c-muted); text-align: center;
 }
 
 /* Tags demo row */

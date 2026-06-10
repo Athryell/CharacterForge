@@ -931,3 +931,194 @@ export { CLASS_FEATURES };
 // Backward-compat aliases
 export const SRD_CLASSES     = DND_CLASSES;
 export const SRD_CLASS_NAMES = DND_CLASS_NAMES;
+
+export const SUBCLASS_DATA = {
+  Barbarian: {
+    Berserker: {
+      3:  [{ name: 'Frenzy', desc: 'When you enter your Rage, you can go into a frenzy. Until the Rage ends, you can make one extra attack as a Bonus Action on each of your turns. When your Rage ends, you suffer one level of Exhaustion.', auto: true }],
+      6:  [{ name: 'Mindless Rage', desc: "You can't be Charmed or Frightened while Raging. If you are Charmed or Frightened when you enter your Rage, the condition is suspended for the duration of the Rage.", auto: true }],
+      10: [{ name: 'Intimidating Presence', desc: 'As a Bonus Action, choose one creature within 30 feet of you that you can see or hear. That creature must succeed on a Wisdom saving throw (DC = 8 + your proficiency bonus + your Charisma modifier) or have the Frightened condition until the start of your next turn.', auto: true }],
+      14: [{ name: 'Retaliation', desc: 'When you take damage from a creature within 5 feet of you, you can use your Reaction to make one melee attack against that creature immediately after the damage.', auto: true }],
+    }
+  },
+  Bard: {
+    'College of Lore': {
+      3:  [
+        { name: 'Bonus Proficiencies', desc: 'You gain proficiency in three skills of your choice.', auto: true },
+        { name: 'Cutting Words', desc: "When a creature within 60 feet of you that you can see makes an attack roll, ability check, or damage roll, you can use your Reaction to expend one use of your Bardic Inspiration, rolling a Bardic Inspiration die and subtracting the number rolled from the creature's roll.", auto: true },
+      ],
+      6:  [{ name: 'Magical Discoveries', desc: "You learn two spells of your choice. These spells can come from any class's spell list, and they count as Bard spells for you. Each spell you choose must be of a level you can cast.", auto: true }],
+      7:  [{ name: 'Additional Magical Secrets', desc: 'You learn two additional spells of your choice from any class spell list. These count as Bard spells for you.', auto: true }],
+      11: [{ name: 'Peerless Skill', desc: 'When you make an ability check and fail, you can expend one use of Bardic Inspiration and add the result of the Bardic Inspiration die to the check, potentially turning the failure into a success.', auto: true }],
+      14: [{ name: 'Unmatched Artistry', desc: 'Whenever you use your Bardic Inspiration feature, you can use this feature to have the creature add double the result of the Bardic Inspiration die.', auto: true }],
+    }
+  },
+  Cleric: {
+    'Life Domain': {
+      1:  [
+        { name: 'Disciple of Life', desc: "When you cast a spell of 1st level or higher that restores hit points to a creature, that creature regains additional hit points equal to 2 + the spell's level.", auto: true },
+        { name: 'Preserve Life (Channel Divinity)', desc: "As an action, you expend one use of Channel Divinity to restore hit points to nearby creatures. Choose any creatures within 30 feet of you. Divide a pool of hit points equal to five times your Cleric level among those creatures; you can't restore a creature above half its hit point maximum with this feature.", auto: true },
+      ],
+      3:  [{ name: 'Blessed Healer', desc: 'The healing spells you cast on others heal you as well. When you cast a healing spell on a creature other than yourself, you regain hit points equal to 2 + the spell\'s level.', auto: true }],
+      6:  [{ name: 'Divine Strike', desc: 'Once per turn when you hit a creature with a weapon attack, you can cause the attack to deal an extra 1d8 Radiant damage. This increases to 2d8 at 14th level.', auto: true }],
+      17: [{ name: 'Supreme Healing', desc: 'When you would normally roll one or more dice to restore hit points with a spell, you instead use the highest number possible for each die. For example, instead of rolling 2d6, you use 12.', auto: true }],
+    }
+  },
+  Druid: {
+    'Circle of the Land': {
+      3:  [
+        { name: 'Circle of the Land Spells', desc: 'Your mystical connection to the land infuses you with the ability to cast certain spells. When you choose this circle, choose one of the following terrains: Arid, Polar, Temperate, or Tropical. You gain access to bonus spells based on your terrain.', auto: true },
+        { name: "Land's Aid", desc: "As a Magic action, you can expend a use of Wild Shape and target a point within 60 feet. Blighted vegetation withers, and one creature of your choice in range regains hit points equal to 1d6 + your Wisdom modifier.", auto: true },
+      ],
+      5:  [{ name: 'Natural Recovery', desc: 'You can restore expended spell slots by meditating during a Short Rest. The total level of the slots restored must be less than or equal to half your Druid level (rounded up), and none of the slots can be 6th level or higher. You can use this feature once per Long Rest.', auto: true }],
+      6:  [{ name: "Nature's Ward", desc: "You are immune to the Poisoned condition, and you have Immunity to diseases. You also have Resistance to a damage type associated with your chosen terrain (DM's choice).", auto: true }],
+      10: [{ name: "Nature's Sanctuary", desc: "Whenever a Beast or Plant creature attacks you, that creature must make a Wisdom saving throw against your spell save DC. On a failed save, the creature must choose a different target, or the attack automatically misses.", auto: true }],
+      14: [{ name: "Nature's Presence", desc: "You can cast Commune with Nature without using a spell slot. Once you use this feature, you can't use it again until you finish a Long Rest.", auto: true }],
+    },
+    'Circle of the Moon': {
+      3:  [
+        { name: 'Circle Forms', desc: 'You can channel lunar magic when you assume a Wild Shape form, transforming into more powerful beasts. You can transform into any Beast with a Challenge Rating up to 1 (this increases as you gain Druid levels).', auto: true },
+        { name: 'Combat Wild Shape', desc: 'You can use Wild Shape as a Bonus Action. Additionally, while in a Wild Shape form, you can use a Bonus Action to expend one spell slot to regain 1d8 hit points per level of the spell slot expended.', auto: true },
+      ],
+      5:  [{ name: 'Elemental Wild Shape', desc: 'You can expend two uses of Wild Shape at the same time to transform into an Air Elemental, Earth Elemental, Fire Elemental, or Water Elemental.', auto: true }],
+      6:  [{ name: 'Primal Strike', desc: 'Your attacks in Wild Shape form count as magical for the purpose of overcoming resistance and immunity to nonmagical attacks and damage.', auto: true }],
+      10: [{ name: 'Thousand Forms', desc: 'You have learned to use magic to alter your physical form in more subtle ways. You can cast Alter Self at will, without using a spell slot.', auto: true }],
+      14: [{ name: 'Beast Spells', desc: 'You can cast many of your Druid spells in any shape you assume using Wild Shape. You can perform the somatic and verbal components of a Druid spell while in a Wild Shape form, but you cannot provide material components.', auto: true }],
+    }
+  },
+  Fighter: {
+    Champion: {
+      3:  [
+        { name: 'Improved Critical', desc: 'Your attack rolls with weapons and Unarmed Strikes can score a Critical Hit on a roll of 19 or 20 on the d20.', auto: true },
+        { name: 'Remarkable Athlete', desc: "You can add half your proficiency bonus (rounded up) to any Strength, Dexterity, or Constitution check that doesn't already use your proficiency bonus. Additionally, when you make a running long jump, the distance increases by a number of feet equal to your Strength modifier.", auto: true },
+      ],
+      7:  [{ name: 'Additional Fighting Style', desc: 'You gain another Fighting Style feat of your choice.', auto: true }],
+      10: [{ name: 'Heroic Warrior', desc: 'The thrill of battle drives you toward victory. During combat, you can give yourself Heroic Inspiration whenever you start your turn without it.', auto: true }],
+      15: [{ name: 'Superior Critical', desc: 'Your attack rolls with weapons and Unarmed Strikes can now score a Critical Hit on a roll of 18–20 on the d20.', auto: true }],
+      18: [{ name: 'Survivor', desc: 'You attain the pinnacle of resilience in battle. At the start of each of your turns in combat, you regain hit points equal to 5 + your Constitution modifier if you have no more than half your hit points remaining and you don\'t have the Incapacitated condition.', auto: true }],
+    }
+  },
+  Monk: {
+    'Warrior of the Open Hand': {
+      3:  [{ name: 'Open Hand Technique', desc: 'Whenever you hit a creature with one of the attacks granted by your Flurry of Blows, you can impose one of the following effects on that target: Addle (Concentration checks at Disadvantage), Push (10 ft. push), or Topple (Strength save or knocked Prone).', auto: true }],
+      6:  [{ name: 'Wholeness of Body', desc: 'You gain the ability to heal yourself. As a Bonus Action, you can roll your Martial Arts die and regain a number of hit points equal to the number rolled plus your Wisdom modifier (minimum of 1 hit point). You can use this feature a number of times equal to your Wisdom modifier (minimum of once), and you regain all expended uses when you finish a Long Rest.', auto: true }],
+      11: [{ name: 'Fleet Step', desc: 'When you take a Bonus Action other than Step of the Wind, you can also use Step of the Wind as part of that Bonus Action.', auto: true }],
+      17: [{ name: 'Quivering Palm', desc: "You can set up lethal vibrations in someone's body. When you hit a creature with an Unarmed Strike, you can spend 4 Focus Points to start these imperceptible vibrations for 1 day. The vibrations end early if you use this feature on another creature. You can use an action to end the vibrations harmlessly or cause the creature to make a Constitution save (DC = 8 + proficiency + WIS mod); on a failure, the creature drops to 0 HP. On a success, the creature takes 10d10 Necrotic damage.", auto: true }],
+    }
+  },
+  Paladin: {
+    'Oath of Devotion': {
+      3:  [
+        { name: 'Sacred Weapon (Channel Divinity)', desc: "As a Bonus Action, expend one use of Channel Divinity to imbue one weapon you hold with positive energy. For 1 minute, you add your Charisma modifier to attack rolls with that weapon (min +1), the weapon emits Bright Light in a 20-foot radius, and the weapon becomes magical if it isn't already.", auto: true },
+        { name: 'Oath of Devotion Spells', desc: 'You always have Protection from Evil and Good, Sanctuary, Lesser Restoration, Zone of Truth, Beacon of Hope, Dispel Magic, Freedom of Movement, Guardian of Faith, Commune, and Flame Strike prepared.', auto: true },
+      ],
+      7:  [{ name: 'Aura of Devotion', desc: "You and friendly creatures within 10 feet of you can't be Charmed while you are conscious. At 18th level, the range increases to 30 feet.", auto: true }],
+      13: [{ name: 'Smite of Protection', desc: 'Your Divine Smite now also creates a barrier of holy energy. When you use Divine Smite, you gain Temporary Hit Points equal to the total damage dealt by the smite.', auto: true }],
+      15: [{ name: 'Sacred Weapon Mastery', desc: 'Your Sacred Weapon lasts until you dismiss it (no action required). Additionally, whenever a creature succeeds on a saving throw against one of your Paladin spells, you can use your Reaction to allow that creature to reroll the saving throw.', auto: true }],
+      18: [{ name: 'Holy Nimbus', desc: 'As a Bonus Action, you can emanate an aura of sunlight for 1 minute. For the duration, Bright Light shines from you in a 30-foot radius, and dim light shines an additional 30 feet. Hostile creatures in the bright light when they start their turn must make a Constitution save (DC = spell save DC) or take 10 Radiant damage. Once used, you can\'t use this feature again until you finish a Long Rest.', auto: true }],
+    }
+  },
+  Ranger: {
+    Hunter: {
+      3:  [
+        { name: "Hunter's Prey", desc: "You gain one of the following features of your choice: Colossus Slayer (extra 1d8 damage to injured targets once per turn), Giant Killer (Reaction attack when Large+ creature misses you), or Horde Breaker (one extra attack per turn against second adjacent foe).", auto: false, choices: ["Colossus Slayer", "Giant Killer", "Horde Breaker"] },
+      ],
+      6:  [{ name: "Hunter's Lore", desc: 'You can call on the forces of nature to reveal certain strengths and weaknesses of your foe. As a Bonus Action, choose one creature you can see within 60 feet. You learn any Immunities, Resistances, and Vulnerabilities that creature has.', auto: true }],
+      7:  [
+        { name: 'Defensive Tactics', desc: "You gain one of the following features of your choice: Escape the Horde (opportunity attacks against you have Disadvantage), Multiattack Defense (+4 AC bonus after being hit until start of your next turn), or Steel Will (advantage on saves against Frightened).", auto: false, choices: ['Escape the Horde', 'Multiattack Defense', 'Steel Will'] },
+      ],
+      9:  [{ name: "Superior Hunter's Prey", desc: 'Once per turn when you deal damage to a creature with a weapon or spell, you can cause one creature within 5 feet of the target to take the same amount of damage.', auto: true }],
+      11: [
+        { name: 'Multiattack (Hunter)', desc: 'You gain one of the following features: Volley (ranged attack against every creature in a 10-ft radius) or Whirlwind Attack (melee attack against every creature within 5 feet).', auto: false, choices: ['Volley', 'Whirlwind Attack'] },
+      ],
+      13: [{ name: "Superior Hunter's Defense", desc: "You gain one of the following features: Evasion (take no damage on successful DEX saves, half on failure) or Stand Against the Tide (when a hostile creature misses you, redirect the attack to another creature of your choice within reach) or Uncanny Dodge (Reaction to halve incoming damage).", auto: false, choices: ['Evasion', 'Stand Against the Tide', 'Uncanny Dodge'] }],
+      15: [{ name: 'Studied Hunter', desc: 'Your knowledge of your enemies reaches its apex. As a Bonus Action, you can target one creature you can see and learn all of its Immunities, Resistances, and Vulnerabilities, as well as how many hit points it currently has.', auto: true }],
+      17: [{ name: 'Superior Multiattack', desc: 'Your volley and whirlwind attacks become more powerful. When you use Volley or Whirlwind Attack, you can attack each creature twice instead of once.', auto: true }],
+    }
+  },
+  Rogue: {
+    Thief: {
+      3:  [
+        { name: "Fast Hands", desc: "You can use the Bonus Action granted by Cunning Action to make a Dexterity (Sleight of Hand) check, use your thieves' tools to disarm a trap or open a lock, or take the Use an Object action.", auto: true },
+        { name: "Second-Story Work", desc: "You can climb at your normal Speed. When you make a running jump, the distance you cover increases by a number of feet equal to your Dexterity modifier.", auto: true },
+      ],
+      9:  [{ name: 'Supreme Sneak', desc: 'You have Advantage on Dexterity (Stealth) checks if you move no more than half your Speed on the same turn.', auto: true }],
+      13: [{ name: "Use Magic Device", desc: "You have learned enough about the workings of magic that you can improvise the use of items even when they are not intended for you. You ignore all class, race, and level requirements on the use of magic items.", auto: true }],
+      17: [{ name: "Thief's Reflexes", desc: "You can take two turns during the first round of any combat. You take your first turn at your normal Initiative and your second turn at your Initiative minus 10. You can't use this feature when you are Surprised.", auto: true }],
+    }
+  },
+  Sorcerer: {
+    'Draconic Sorcerer': {
+      3:  [
+        { name: 'Draconic Resilience', desc: "As magic flows through your body, it leaves a faint shimmer on your skin. While you aren't wearing armor, your base AC equals 13 + your Dexterity modifier. Also, your hit point maximum increases by 1, and it increases by 1 again whenever you gain a Sorcerer level.", auto: true },
+        { name: 'Dragon Ancestor', desc: 'You choose one type of dragon as your ancestor (Black, Blue, Brass, Bronze, Copper, Gold, Green, Red, Silver, or White). The damage type associated with your dragon is used by features you gain later.', auto: true },
+        { name: 'Draconic Spells', desc: "Your draconic bloodline grants bonus spells. These are always prepared and don't count against your Spells Known.", auto: true },
+      ],
+      6:  [{ name: 'Elemental Affinity', desc: 'When you cast a spell that deals damage of the type associated with your draconic ancestry, you can add your Charisma modifier to one damage roll of that spell. At the same time, you can spend 1 Sorcery Point to gain Resistance to that damage type for 1 hour.', auto: true }],
+      14: [{ name: 'Dragon Wings', desc: 'You can use a Bonus Action to cause draconic wings to sprout from your back, gaining a Fly Speed equal to your walking speed. The wings last until you dismiss them as a Bonus Action or you become Incapacitated.', auto: true }],
+      18: [{ name: 'Draconic Presence', desc: 'You can channel the dread presence of your dragon ancestor, causing creatures nearby to be awestruck or frightened. As a Bonus Action, spend 5 Sorcery Points; for 1 minute, each hostile creature within 60 feet must make a Wisdom save (DC = spell save DC) or be Charmed (awe) or Frightened (fear) until the aura ends.', auto: true }],
+    },
+    'Wild Magic Surge': {
+      3:  [
+        { name: 'Wild Magic Surge', desc: 'Your spellcasting can unleash surges of wild magic. Immediately after you cast a Sorcerer spell of 1st level or higher, the DM can have you roll a d20. On a 1, roll on the Wild Magic Surge table.', auto: true },
+        { name: 'Tides of Chaos', desc: 'You can manipulate the forces of chance and chaos to gain Advantage on one attack roll, ability check, or saving throw. Once you do so, you must finish a Long Rest before you can use this feature again (unless a Wild Magic Surge occurs, which recharges it).', auto: true },
+      ],
+      6:  [{ name: 'Bend Luck', desc: "You have the ability to twist fate. When another creature you can see makes an attack roll, ability check, or saving throw, you can use your Reaction and spend 2 Sorcery Points to roll 1d4 and apply the result as a bonus or penalty (your choice) to the creature's roll.", auto: true }],
+      14: [{ name: 'Controlled Chaos', desc: 'You gain a modicum of control over the surges of your wild magic. Whenever you roll on the Wild Magic Surge table, you can roll twice and use either number.', auto: true }],
+      18: [{ name: 'Spell Bombardment', desc: 'The harmful energy of your spells intensifies. When you roll damage for a spell and roll the highest number possible on any of the dice, choose one of those dice, roll it again, and add that roll to the damage total. You can use this feature only once per turn.', auto: true }],
+    }
+  },
+  Warlock: {
+    'Archfey Patron': {
+      3:  [
+        { name: 'Steps of the Fey', desc: "Your patron grants you the ability to move in long strides. As a Bonus Action, you can teleport up to 30 feet to an unoccupied space you can see. You can also cast this ability to impose either the Charmed or Frightened condition on one creature within 10 feet of you when you arrive. The number of times you can use this feature equals your Charisma modifier (minimum once), and you regain all uses on a Long Rest.", auto: true },
+        { name: 'Archfey Spells', desc: "Your patron grants you access to additional spells. These spells are always prepared for you and don't count against the number of spells you can prepare.", auto: true },
+      ],
+      6:  [{ name: 'Misty Escape', desc: 'You can vanish in a puff of mist in response to harm. When you take damage, you can use your Reaction to turn Invisible and teleport up to 60 feet to an unoccupied space you can see. You remain Invisible until the start of your next turn or until you attack or cast a spell. Once you use this feature, you can\'t use it again until you finish a Short or Long Rest.', auto: true }],
+      10: [{ name: 'Beguiling Defenses', desc: 'Your patron teaches you how to turn the mind-affecting magic of your enemies against them. You are immune to the Charmed condition. When another creature attempts to charm you, you can use your Reaction to attempt to turn the charm back on that creature; the creature makes a Wisdom save (DC = spell save DC) or is Charmed by you for 1 minute.', auto: true }],
+      14: [{ name: 'Dark Delirium', desc: 'As an action, choose one creature you can see within 60 feet. That creature must succeed on a Wisdom saving throw (DC = spell save DC) or be Charmed or Frightened by you (your choice) for 1 minute or until your Concentration is broken. The condition ends early if the target takes damage. Once used, this feature can\'t be used again until you finish a Long Rest.', auto: true }],
+    },
+    'Fiend Patron': {
+      3:  [
+        { name: "Dark One's Blessing", desc: "When you reduce a hostile creature to 0 hit points, you gain Temporary Hit Points equal to your Charisma modifier + your Warlock level (minimum 1).", auto: true },
+        { name: 'Fiend Spells', desc: "Your patron grants access to additional spells. Burning Hands, Command, Blindness/Deafness, Scorching Ray, Fireball, Stinking Cloud, Fire Shield, Wall of Fire, Flame Strike, and Hallow are always prepared and don't count against your spell limit.", auto: true },
+      ],
+      6:  [{ name: "Dark One's Own Luck", desc: "You can call on your patron to alter fate in your favor. When you make an ability check or saving throw, you can use this feature to add a d10 to your roll. You can do so after seeing the initial roll but before any of the roll's effects occur. Once you use this feature, you can't use it again until you finish a Short or Long Rest.", auto: true }],
+      10: [{ name: 'Fiendish Resilience', desc: 'You can choose one damage type when you finish a Short or Long Rest. You gain Resistance to that damage type until you choose a different one with this feature. Damage from magical weapons or Silver weapons ignores this resistance.', auto: true }],
+      14: [{ name: 'Hurl Through Hell', desc: "When you hit a creature with an attack, you can use this feature to instantly transport the target through the lower planes. The creature disappears and hurtles through a nightmare landscape. At the end of your next turn, the target returns to the space it previously occupied or the nearest unoccupied space, taking 10d10 Psychic damage if it isn't a Fiend. Once you use this feature, you can't use it again until you finish a Long Rest.", auto: true }],
+    }
+  },
+  Wizard: {
+    Evoker: {
+      3:  [
+        { name: 'Evocation Savant', desc: "Choose two Evocation spells from the Wizard spell list; each must be of a level for which you have spell slots. You learn them, and they don't count against the number of Wizard spells you know.", auto: true },
+        { name: 'Sculpt Spells', desc: 'You can create pockets of relative safety within the effects of your Evocation spells. When you cast an Evocation spell that affects other creatures you can see, you can choose a number of them equal to 1 + the spell\'s level. The chosen creatures automatically succeed on their saving throws against the spell, and they take no damage if they would normally take half damage on a successful save.', auto: true },
+      ],
+      6:  [{ name: 'Potent Cantrip', desc: "Your damaging cantrips affect even creatures that avoid the brunt of the effect. When a creature succeeds on a saving throw against your cantrip, the creature takes half the cantrip's damage (if any) but suffers no additional effect from the cantrip.", auto: true }],
+      10: [{ name: 'Empowered Evocation', desc: 'You can add your Intelligence modifier to the damage rolls of your Wizard Evocation spells.', auto: true }],
+      14: [{ name: 'Overchannel', desc: "You can increase the power of your simpler spells. When you cast a Wizard spell of level 1–5 that deals damage, you can deal maximum damage with that spell. If you use Overchannel again before finishing a Long Rest, you take 2d12 Necrotic damage per level of the spell (no saves or resistances apply), increasing by 1d12 for each subsequent use.", auto: true }],
+    },
+    Illusionist: {
+      3:  [
+        { name: 'Illusion Savant', desc: "Choose two Illusion spells from the Wizard spell list; each must be of a level you can cast. You learn them without counting against your spell limit.", auto: true },
+        { name: 'Improved Minor Illusion', desc: 'You learn the Minor Illusion cantrip (if you already know it, learn another Wizard cantrip). When you cast Minor Illusion, you can create both a sound and an image with a single casting of the spell.', auto: true },
+      ],
+      6:  [{ name: 'Malleable Illusions', desc: "When you cast an Illusion spell that has a duration of 1 minute or longer, you can use your action to change the nature of that illusion (using the spell's normal parameters for the illusion), provided you can see the illusion.", auto: true }],
+      10: [{ name: 'Illusory Self', desc: 'You can create an illusory duplicate of yourself as an instant, almost instinctual reaction to danger. When a creature makes an attack roll against you, you can use your Reaction to interpose the illusory duplicate between the attacker and yourself. The attack automatically misses you, then the illusion dissipates. Once used, you can\'t use this feature again until you finish a Short or Long Rest.', auto: true }],
+      14: [{ name: 'Illusory Reality', desc: 'You have learned the secret of weaving shadow magic into your illusions to give them a semi-reality. When you cast an Illusion spell of 1st level or higher, you can choose one inanimate, nonmagical object that is part of the illusion and make that object real. The object remains real for 1 minute. The object can\'t deal damage or directly harm anyone.', auto: true }],
+    }
+  },
+};
+
+export function getSubclassesForClass(className) {
+  const levelData = CLASS_LEVEL_DATA[className];
+  if (!levelData) return [];
+  for (const level of Object.values(levelData)) {
+    for (const feature of level.features || []) {
+      if (feature.name?.toLowerCase().includes('subclass') && feature.choices?.length) {
+        return feature.choices;
+      }
+    }
+  }
+  return [];
+}

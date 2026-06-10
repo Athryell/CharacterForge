@@ -109,6 +109,7 @@ export default function NotationTextarea({ value, onChange, className, style, ..
         style={style}
         {...props}
       />
+      <p className="notation-slash-hint">💡 {t('notation.slashHint')}</p>
       {menu && (
         <div className="notation-slash-menu" style={{
           position: 'fixed',

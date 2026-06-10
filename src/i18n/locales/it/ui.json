@@ -133,6 +133,8 @@
     "name": "Nome",
     "class": "Classe",
     "classPlaceholder": "— Scegli classe —",
+    "classCustom": "Personalizzata...",
+    "classCustomPlaceholder": "Scrivi il nome della classe...",
     "species": "Specie",
     "speciesPlaceholder": "— Scegli specie —",
     "speciesCustom": "Personalizzata...",
@@ -149,6 +151,8 @@
     "imageUrl": "🖼 Immagine personaggio (URL)",
     "subclass": "Sottoclasse",
     "subclassPlaceholder": "Es. Via del Berserker",
+    "subclassCustom": "Personalizzata...",
+    "subclassCustomPlaceholder": "Nome sottoclasse personalizzata...",
     "subclassFeatures": "Feature di Sottoclasse",
     "subclassFeatureName": "Nome feature",
     "subclassFeatureDesc": "Descrizione",
@@ -326,11 +330,12 @@
   "notation": {
     "dynamicTitle": "Valore dinamico — originale:",
     "rollTitle": "Lancia",
-    "slashHint": "Digita / per inserire notazione",
-    "attrHelp": "→ mod caratteristica",
-    "lvlHelp": "→ scala col livello",
-    "bonusHelp": "→ bonus equipaggiamento",
-    "counterHelp": "→ counter cliccabile",
+    "slashHint": "Digita / (barra) per accedere alle notazioni",
+    "attrHelp": "usa il modificatore",
+    "lvlHelp": "scala col livello",
+    "bonusHelp": "aggiunge un bonus",
+    "counterHelp": "crea un counter cliccabile",
+    "dynamicHint": "Passa su ≈ per vedere la formula originale",
     "group": {
       "dice": "Dado",
       "abilities": "Modificatori caratteristica",
@@ -445,7 +450,9 @@
     "iconAccent": "Colore tema",
     "units": "Unità di misura",
     "weightUnit": "Peso",
-    "speedUnit": "Velocità"
+    "speedUnit": "Velocità",
+    "groupStyle": "Stile",
+    "groupLangUnits": "Lingua e unità"
   },
   "units": {
     "sq": "cas."
@@ -462,6 +469,20 @@
     "creatorDone": "Personaggio \"{{name}}\" creato!",
     "spellCast": "✨ {{name}} lanciato!",
     "noSlot": "Nessuno slot disponibile!"
+  },
+  "accessibility": {
+    "title": "Accessibilità",
+    "font": "Font",
+    "fontDefault": "Predefinito",
+    "textSize": "Dimensione testo",
+    "sizeNormal": "Normale",
+    "sizeLarge": "Grande",
+    "sizeXLarge": "Extra grande",
+    "contrast": "Contrasto",
+    "contrastDefault": "Predefinito",
+    "contrastHigh": "Alto contrasto",
+    "largeTargets": "Bersagli touch più grandi",
+    "onboardingNote": "Opzioni di accessibilità disponibili nel menu ☰ — font, dimensione testo, contrasto e altro."
   },
   "settings": {
     "uiLanguage": "Lingua interfaccia",
@@ -845,45 +866,46 @@
     "removeFromActions": "Rimuovi dalle azioni"
   },
   "onboarding": {
-    "welcomeTitle": "Welcome to CharacterForge",
-    "welcomeDesc": "CharacterForge is a free app to manage RPG character sheets directly in your browser, with no installation needed. The project is in active development — coming soon: templates for other RPG systems (Daggerheart, Pathfinder and more), homebrew content import, and much more.",
-    "welcomeFeedback": "You have suggestions, ideas, or found a bug? Every piece of feedback is valuable.",
-    "feedbackBtn": "📝 Leave feedback",
-    "kofiBtn": "☕ Buy me a coffee",
-    "kofiDesc": "CharacterForge is free and will stay free. Your support helps development.",
-    "startTutorial": "Start the tutorial →",
-    "skip": "Skip, start now",
-    "tutorialTitle": "Quick Guide",
-    "close": "Close",
-    "prev": "← Back",
-    "next": "Next →",
-    "startPlaying": "Start playing →",
+    "welcomeTitle": "Benvenuto in CharacterForge",
+    "welcomeDesc": "CharacterForge è un'app gratuita per gestire le schede personaggio GdR direttamente nel browser, senza installazioni. Il progetto è in sviluppo attivo — in arrivo: template per altri sistemi (Daggerheart, Pathfinder e altro), import di contenuti homebrew e molto altro.",
+    "welcomeFeedback": "Hai suggerimenti, idee o hai trovato un bug? Ogni feedback è prezioso.",
+    "feedbackBtn": "📝 Lascia un feedback",
+    "kofiBtn": "☕ Offrimi un caffè",
+    "kofiDesc": "CharacterForge è gratuito e lo resterà. Il tuo supporto aiuta lo sviluppo.",
+    "startTutorial": "Inizia il tutorial →",
+    "skip": "Salta, inizia subito",
+    "skipHint": "Puoi riaprire questa guida in qualsiasi momento dal pulsante ?.",
+    "tutorialTitle": "Guida Rapida",
+    "close": "Chiudi",
+    "prev": "← Indietro",
+    "next": "Avanti →",
+    "startPlaying": "Inizia a giocare →",
     "stepOf": "{{current}} / {{total}}",
     "helpBtn": "?",
     "community": {
-      "title": "Available in multiple languages",
-      "body": "CharacterForge is available in Italian, English, French, German, Spanish and more languages added by the community. You can switch language anytime from the top bar.",
-      "translateBtn": "Help translate →",
-      "contributBtn": "Contribute on GitHub →",
-      "note": "No coding skills required to translate — just visit Crowdin and start contributing!"
+      "title": "Disponibile in più lingue",
+      "body": "CharacterForge è disponibile in italiano, inglese, francese, tedesco, spagnolo e altre lingue aggiunte dalla community. Puoi cambiare lingua in qualsiasi momento dalla barra in alto.",
+      "translateBtn": "Aiuta a tradurre →",
+      "contributBtn": "Contribuisci su GitHub →",
+      "note": "Non servono competenze di programmazione per tradurre — visita Crowdin e inizia a contribuire!"
     },
     "welcome": {
-      "translateLink": "🌍 Help us translate CharacterForge into your language"
+      "translateLink": "🌍 Aiutaci a tradurre CharacterForge nella tua lingua"
     },
-    "demoLabel": "Try it →",
-    "diceNote": "Click the dice to roll — the [STR] modifier is calculated automatically from your character.",
-    "keywordNote": "Hover over underlined words to see the rule explanation.",
-    "tagNote": "Tags you create become available as quick filters above the action list.",
+    "demoLabel": "Prova →",
+    "diceNote": "Clicca il dado per tirare — il modificatore [FOR] viene calcolato automaticamente dal personaggio.",
+    "keywordNote": "Passa il mouse sulle parole sottolineate per vedere la spiegazione della regola.",
+    "tagNote": "Usa ⚡ su qualsiasi arma, incantesimo o feature per aggiungerlo alla lista azioni e tenere tutto in un posto.",
     "notation": {
-      "syntax": "Syntax",
-      "effect": "Effect",
-      "attrRow": "Ability modifier",
-      "proRow": "Proficiency bonus",
-      "lvlRow": "Scales with level (1d6 up to lvl 4, 1d8 from lvl 5)",
-      "acRow": "Equipment bonus to AC",
-      "initRow": "Bonus to Initiative",
-      "tsStrRow": "Bonus to STR Saving Throw",
-      "counterRow": "Clickable counter (e.g. charges)"
+      "syntax": "Sintassi",
+      "effect": "Effetto",
+      "attrRow": "Modificatore caratteristica",
+      "proRow": "Bonus competenza",
+      "lvlRow": "Scala con il livello (1d6 fino al 4°, 1d8 dal 5°)",
+      "acRow": "Bonus equipaggiamento alla CA",
+      "initRow": "Bonus all'Iniziativa",
+      "tsStrRow": "Bonus al TS su Forza",
+      "counterRow": "Contatore cliccabile (es. cariche)"
     },
     "step1Title": "La tua scheda, a modo tuo",
     "step1Text": "Attiva la modalità Layout con il pulsante ⠿ Modifica Layout nel menu per personalizzare tutto:",
@@ -904,21 +926,19 @@
     "step5Text": "Gestisci tutti i tuoi strumenti da combattimento e l'equipaggiamento:",
     "step5Points": [
       "Tab Combattimento: aggiungi azioni personalizzate con tipo (Azione / Azione Bonus / Reazione / Libera) e dadi",
-      "Tab Incantesimi: sfoglia il catalogo SRD filtrato per classe, livello e scuola, o aggiungi incantesimi personalizzati",
-      "Inventario: gli oggetti con lo stesso nome si raggruppano automaticamente"
+      "Tab Incantesimi: sfoglia il catalogo SRD filtrato per classe, livello e scuola, o aggiungi incantesimi personalizzati"
     ],
     "step6Title": "Organizza con i tag",
-    "step6Text": "Puoi aggiungere tag personalizzati a qualsiasi azione o incantesimo — espandi la voce e clicca 🏷. I tag che crei diventano filtri rapidi in cima alla lista. Esempi utili: 'attacco', 'utilità', 'cura', 'azione bonus'.",
+    "step6Text": "Puoi aggiungere tag personalizzati a qualsiasi azione o incantesimo — espandi la voce e clicca 🏷. I tag che crei diventano filtri rapidi in cima alla lista.",
     "step7Title": "Riposi e recupero",
     "step7Text": "Gestisci il recupero dalla tab Incantesimi:",
     "step7Points": [
       "Riposo lungo: ripristina tutti gli slot incantesimo e gli HP al massimo",
       "Riposo breve: usa i dadi vita per recuperare HP",
-      "I tiri salvezza morte si azzerano automaticamente dopo un riposo lungo",
-      "HP temporanei: gestisci dalla tab Combattimento con il pulsante 🛡"
+      "I tiri salvezza morte si azzerano automaticamente dopo un riposo lungo"
     ],
     "step8Title": "Aiutaci a migliorare",
-    "step8Text": "CharacterForge è un progetto gratuito in continua evoluzione. Se trovi un bug, hai un'idea di funzionalità, o vuoi richiedere supporto per un sistema GdR specifico, usa il modulo di feedback — ogni segnalazione viene letta."
+    "step8Text": "CharacterForge è un progetto gratuito in continua evoluzione. Se trovi un bug, hai un'idea di funzionalità, o vuoi richiedere supporto per un sistema GdR specifico, usa il modulo di feedback — ogni segnalazione viene letta. Puoi riaprire questa guida in qualsiasi momento dal pulsante ? nel menu."
   },
   "levelUp": {
     "title": "Avanza al livello {{level}}",

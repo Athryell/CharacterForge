@@ -763,6 +763,7 @@
     "kofiDesc": "CharacterForge is free and will stay free. Your support helps development.",
     "startTutorial": "Start the tutorial →",
     "skip": "Skip, start now",
+    "skipHint": "Vous pouvez rouvrir ce guide à tout moment via le bouton ?.",
     "tutorialTitle": "Quick Guide",
     "close": "Close",
     "prev": "← Back",
@@ -778,12 +779,12 @@
       "note": "No coding skills required to translate — just visit Crowdin and start contributing!"
     },
     "welcome": {
-      "translateLink": "🌍 Help us translate CharacterForge into your language"
+      "translateLink": "🌍 Aidez-nous à traduire CharacterForge dans votre langue"
     },
     "demoLabel": "Try it →",
     "diceNote": "Click the dice to roll — the [STR] modifier is calculated automatically from your character.",
     "keywordNote": "Hover over underlined words to see the rule explanation.",
-    "tagNote": "Tags you create become available as quick filters above the action list.",
+    "tagNote": "Use ⚡ on any weapon, spell, or feature to pin it to your action list and keep everything in one place.",
     "notation": {
       "syntax": "Syntax",
       "effect": "Effect",

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CharContext } from './CharContext';
-import { KeywordText, NotationHelpBar } from './Tooltip';
+import { KeywordText } from './Tooltip';
 import { TagPill } from './Tags';
 
 export const NOTION_FEEDBACK_URL = 'https://athryell.notion.site/3725e8a752d38094a5bac638b19360e7?pvs=105';
@@ -26,17 +26,7 @@ const DEMO_CHAR = {
   profBonus: 3,
 };
 
-const DEMO_ALL_TAGS = ['attack', 'utility', 'heal', 'bonus action'];
-
-const NOTATION_ROWS = [
-  { syntax: '[STR] [DEX] [CON] [INT] [WIS] [CHA]', effectKey: 'attrRow' },
-  { syntax: '[PRO]',                                effectKey: 'proRow' },
-  { syntax: '[LVL:1d6,5:1d8]',                     effectKey: 'lvlRow' },
-  { syntax: '+2@[AC]',                              effectKey: 'acRow' },
-  { syntax: '+1@[INIT]',                            effectKey: 'initRow' },
-  { syntax: '+2@[TS-STR]',                          effectKey: 'tsStrRow' },
-  { syntax: '[3]',                                  effectKey: 'counterRow' },
-];
+const DEMO_ALL_TAGS = ['utility', 'social', 'super combo'];
 
 export function loadOnboardingSeen() {
   try { return !!JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch { return false; }
@@ -116,6 +106,7 @@ export default function Onboarding({ onClose, onRoll: externalOnRoll }) {
   const [mode, setMode] = useState('welcome');
   const [step, setStep] = useState(0);
   const [demoMsg, setDemoMsg] = useState('');
+  const [demoCounters, setDemoCounters] = useState({});
   const overlayRef = useRef();
   const closeRef = useRef();
   const demoMsgTimer = useRef();
@@ -129,8 +120,7 @@ export default function Onboarding({ onClose, onRoll: externalOnRoll }) {
     return () => document.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  // Reset demoMsg when step changes
-  useEffect(() => { setDemoMsg(''); }, [step]);
+  useEffect(() => { setDemoMsg(''); setDemoCounters({}); }, [step]);
 
   function close() { markSeen(); onClose(); }
 
@@ -145,6 +135,10 @@ export default function Onboarding({ onClose, onRoll: externalOnRoll }) {
     setDemoMsg(`${name}: ${total}`);
     clearTimeout(demoMsgTimer.current);
     demoMsgTimer.current = setTimeout(() => setDemoMsg(''), 2500);
+  }
+
+  function handleDemoCounterChange(idx, values) {
+    setDemoCounters(prev => ({ ...prev, [idx]: values }));
   }
 
   function renderStepText(stepIdx) {
@@ -202,36 +196,31 @@ export default function Onboarding({ onClose, onRoll: externalOnRoll }) {
 
     if (step === 3) {
       return (
-        <>
-          <NotationHelpBar />
+        <div className="onboarding-notation-layout">
           <CharContext.Provider value={DEMO_CHAR}>
             <DemoBox label={t('onboarding.demoLabel')}>
               <p className="onboarding-demo-text">
                 <KeywordText
-                  text={"Attack: 1d20+[PRO]+[STR]\nDamage: [LVL:1d6,5:1d8]+[STR]\nCharges: [3]\nArmor bonus: +2@[AC]"}
+                  text={"Attack: 1d20+[PRO]+[STR]\nBardic Inspiration: [CAR][LVL:d6,5:d8]\nCharges: [3]\nArmor bonus: +2@[AC]"}
                   onRoll={handleDemoRoll}
                   label="Demo"
+                  counters={demoCounters}
+                  onCounterChange={handleDemoCounterChange}
                 />
               </p>
             </DemoBox>
           </CharContext.Provider>
-          <table className="onboarding-notation-table">
-            <thead>
-              <tr>
-                <th>{t('onboarding.notation.syntax')}</th>
-                <th>{t('onboarding.notation.effect')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {NOTATION_ROWS.map(({ syntax, effectKey }) => (
-                <tr key={effectKey}>
-                  <td><code>{syntax}</code></td>
-                  <td>{t(`onboarding.notation.${effectKey}`)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </>
+          <div className="onboarding-notation-sidebar">
+            <p className="onboarding-notation-sidebar-hint">💡 {t('notation.slashHint')}</p>
+            <ul className="onboarding-notation-sidebar-list">
+              <li><code>[STR] [DEX]… [PRO]</code> → {t('notation.attrHelp')}</li>
+              <li><code>[LVL:1d6,5:1d8]</code> → {t('notation.lvlHelp')}</li>
+              <li><code>[3]</code> → {t('notation.counterHelp')}</li>
+              <li><code>+2@[AC]</code> → {t('notation.bonusHelp')}</li>
+            </ul>
+            <p className="onboarding-notation-sidebar-dynamic">{t('notation.dynamicHint')}</p>
+          </div>
+        </div>
       );
     }
 
@@ -242,7 +231,7 @@ export default function Onboarding({ onClose, onRoll: externalOnRoll }) {
             <DemoBox label={t('onboarding.demoLabel')}>
               <p className="onboarding-demo-text">
                 <KeywordText
-                  text={"If you are poisoned you have disadvantage on attack rolls.\nIf you have advantage roll 2d20 and take the highest."}
+                  text={"If you are poisoned you have disadvantage on attack rolls."}
                   onRoll={handleDemoRoll}
                   label="Demo"
                 />
@@ -258,9 +247,9 @@ export default function Onboarding({ onClose, onRoll: externalOnRoll }) {
       return (
         <>
           <div className="onboarding-tags-demo">
-            <TagPill tag="attack"       allTags={DEMO_ALL_TAGS} small />
-            <TagPill tag="bonus action" allTags={DEMO_ALL_TAGS} small />
-            <TagPill tag="heal"         allTags={DEMO_ALL_TAGS} small />
+            <TagPill tag="utility"    allTags={DEMO_ALL_TAGS} small />
+            <TagPill tag="social"     allTags={DEMO_ALL_TAGS} small />
+            <TagPill tag="super combo" allTags={DEMO_ALL_TAGS} small />
           </div>
           <p className="onboarding-demo-note">{t('onboarding.tagNote')}</p>
         </>
@@ -289,14 +278,18 @@ export default function Onboarding({ onClose, onRoll: externalOnRoll }) {
             <div className="onboarding-header">
               <h2 className="onboarding-title">{t('onboarding.welcomeTitle')}</h2>
               <LanguagePicker i18n={i18n} />
+              <a href={CROWDIN_URL} target="_blank" rel="noopener noreferrer" className="onboarding-translate-link">
+                {t('onboarding.welcome.translateLink')}
+              </a>
             </div>
             <div className="onboarding-body">
               <p>{t('onboarding.welcomeDesc')}</p>
               <p className="onboarding-hint-text">{t('onboarding.welcomeFeedback')}</p>
               <SupportGroup t={t} />
-              <a href={CROWDIN_URL} target="_blank" rel="noopener noreferrer" className="onboarding-translate-link">
-                {t('onboarding.welcome.translateLink')}
-              </a>
+              <div className="onboarding-a11y-note">
+                <span>♿</span>
+                <span>{t('accessibility.onboardingNote')}</span>
+              </div>
             </div>
             <div className="onboarding-footer">
               <button
@@ -305,9 +298,12 @@ export default function Onboarding({ onClose, onRoll: externalOnRoll }) {
               >
                 {t('onboarding.startTutorial')}
               </button>
-              <button className="onboarding-btn-ghost" onClick={close}>
-                {t('onboarding.skip')}
-              </button>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <button className="onboarding-btn-ghost" onClick={close}>
+                  {t('onboarding.skip')}
+                </button>
+                <p className="onboarding-skip-hint">{t('onboarding.skipHint')}</p>
+              </div>
             </div>
           </div>
         ) : (

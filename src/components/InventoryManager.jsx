@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { KeywordText, NotationHelpBar } from './Tooltip';
+import { KeywordText } from './Tooltip';
 import NotationTextarea from './NotationTextarea';
 import { TagPill, TagSelector } from './Tags';
 
@@ -109,7 +109,6 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
             <label>{t('inventory.descLabel')}</label>
             <NotationTextarea className="notes-area" style={{ minHeight: 56 }} value={addForm.desc}
               onChange={e => patchAdd({ desc: e.target.value })} placeholder={t('inventory.descAddPlaceholder')} />
-            <NotationHelpBar />
           </div>
           <div style={{ display: 'flex', gap: 8, marginTop: 8, justifyContent: 'flex-end' }}>
             <button className="io-btn" onClick={() => { onAddClose && onAddClose(); setAddForm(EMPTY_FORM); }}>{t('common.cancel')}</button>
@@ -183,7 +182,6 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
                     <label>{t('inventory.descEditLabel')}</label>
                     <NotationTextarea className="notes-area" style={{ minHeight: 56 }}
                       value={editForm.desc || ''} onChange={e => patchEdit({ desc: e.target.value })} />
-                    <NotationHelpBar />
                   </div>
                   <div style={{ marginTop: 6 }}>
                     {editingTagsFor === item.id ? (

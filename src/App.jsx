@@ -30,7 +30,7 @@ import FeatureManager from './components/FeatureManager';
 import AlignmentPicker from './components/AlignmentPicker';
 import DHWeaponManager from './components/DHWeaponManager';
 import DHArmorManager from './components/DHArmorManager';
-import { CLASS_FEATURES } from './data/systems/dnd5e/classes';
+import { CLASS_FEATURES, getSubclassesForClass } from './data/systems/dnd5e/classes';
 import { SPECIES_FEATURES, getAutoFeatures } from './data/systems/dnd5e/species';
 import { BACKGROUND_FEATURES } from './data/systems/dnd5e/backgrounds';
 import { getDefaultLayoutForSystem, getWidgetsForTab, loadLayoutForSystem, saveLayoutForSystem, loadTabsForSystem, saveTabsForSystem, getDefaultTabsForSystem, getWidgetLabel } from './layout';
@@ -39,6 +39,7 @@ import { getDHClasses, getDHDomains, getDHAncestries, getDHCommunities, getDHCon
 import { SYSTEMS, DEFAULT_SYSTEM, getSystem } from './data/systems';
 import { useTheme, ACCENT_PRESETS } from './hooks/useTheme';
 import { useUnits, parseSpeedFt } from './hooks/useUnits';
+import { useAccessibility } from './hooks/useAccessibility';
 import { Icon, useIconMode } from './config/icons';
 import './App.css';
 
@@ -205,11 +206,11 @@ function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag, o
         </div>
         <div className="action-content" style={{ flex:1 }}>
           <input value={form.name} onChange={e => setForm(f => ({...f, name: e.target.value}))}
-            style={{ width:'100%', marginBottom:4, fontSize:13, fontWeight:600 }} placeholder={t('actions.addFormNamePlaceholder')} autoFocus />
+            style={{ width:'100%', marginBottom:4, fontSize:13, fontWeight:600, background:'var(--c-bg)', color:'var(--c-ink)', border:'0.5px solid var(--c-border-mid)', borderRadius:'var(--r)', padding:'5px 8px' }} placeholder={t('actions.addFormNamePlaceholder')} autoFocus />
           <textarea value={form.desc} onChange={e => setForm(f => ({...f, desc: e.target.value}))}
             className="notes-area" style={{ minHeight:48, marginBottom:4 }} placeholder={t('actions.addFormDescPlaceholder')} />
           <input value={form.dice} onChange={e => setForm(f => ({...f, dice: e.target.value}))}
-            style={{ width:'100%', fontSize:11 }} placeholder={t('actions.addFormDicePlaceholder')} />
+            style={{ width:'100%', fontSize:11, background:'var(--c-bg)', color:'var(--c-ink)', border:'0.5px solid var(--c-border-mid)', borderRadius:'var(--r)', padding:'5px 8px' }} placeholder={t('actions.addFormDicePlaceholder')} />
           <div style={{ display:'flex', gap:6, marginTop:8, justifyContent:'space-between', alignItems:'center' }}>
             <div style={{ display:'flex', gap:6 }}>
               {onToggleHide && (
@@ -333,18 +334,18 @@ function SubclassFeaturesEditor({ features, currentLevel, onChange }) {
     <div>
       {sorted.map(f => (
         <div key={f.id} style={{ display: 'flex', gap: 6, marginBottom: 8, alignItems: 'flex-start' }}>
-          <div style={{ flex: '0 0 58px' }}>
-            <label style={{ fontSize: 11, color: 'var(--c-muted)' }}>Lv.</label>
+          <div className="field" style={{ flex: '0 0 58px' }}>
+            <label>Lv.</label>
             <input type="number" min="1" max="20" value={f.level}
               onChange={e => patch(f.id, { level: Math.max(1, Math.min(20, parseInt(e.target.value) || 1)) })}
-              style={{ width: 50, marginTop: 2 }} />
+              style={{ width: 50 }} />
           </div>
-          <div style={{ flex: 1 }}>
+          <div className="field" style={{ flex: 1 }}>
             <input value={f.name} placeholder={t('identity.subclassFeatureName')}
               onChange={e => patch(f.id, { name: e.target.value })} />
             <textarea value={f.desc} placeholder={t('identity.subclassFeatureDesc')}
               onChange={e => patch(f.id, { desc: e.target.value })}
-              className="notes-area" style={{ marginTop: 4, minHeight: 44 }} />
+              className="notes-area" style={{ minHeight: 44 }} />
           </div>
           <button onClick={() => remove(f.id)} className="mod-btn"
             style={{ marginTop: 20, color: 'var(--c-warn)', fontSize: 16, lineHeight: 1 }}>×</button>
@@ -353,6 +354,70 @@ function SubclassFeaturesEditor({ features, currentLevel, onChange }) {
       <button className="io-btn" style={{ fontSize: 12, marginTop: 2 }} onClick={add}>
         + {t('identity.addSubclassFeature')}
       </button>
+    </div>
+  );
+}
+
+function SubclassSection({ state, update, t }) {
+  const knownSubs = getSubclassesForClass(
+    !state.charClass || state.charClass === '__custom__' ? '' : state.charClass
+  );
+  const isAlreadyCustom = Boolean(state.charSubclass) && !knownSubs.includes(state.charSubclass);
+  const [customMode, setCustomMode] = React.useState(isAlreadyCustom);
+  const isCustom = customMode || isAlreadyCustom;
+  const selectVal = isCustom ? '__custom__' : (state.charSubclass || '');
+
+  return (
+    <>
+      <Field label={t('identity.subclass')}>
+        <select
+          value={selectVal}
+          onChange={e => {
+            const sub = e.target.value;
+            if (sub === '__custom__') {
+              setCustomMode(true);
+              if (knownSubs.includes(state.charSubclass)) update({ charSubclass: '', subclassFeatures: [] });
+            } else {
+              setCustomMode(false);
+              update({ charSubclass: sub, subclassFeatures: [] });
+            }
+          }}
+          disabled={!state.charClass || state.charClass === '__custom__'}
+        >
+          <option value="">—</option>
+          {knownSubs.map(s => <option key={s} value={s}>{s}</option>)}
+          <option value="__custom__">{t('identity.subclassCustom')}</option>
+        </select>
+        {isCustom && (
+          <input style={{ marginTop: 4 }}
+            value={state.charSubclass}
+            onChange={e => update({ charSubclass: e.target.value })}
+            placeholder={t('identity.subclassCustomPlaceholder')} />
+        )}
+      </Field>
+      {isCustom && (
+        <div style={{ gridColumn: '1 / -1', marginTop: 4 }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--c-muted)', marginBottom: 6 }}>{t('identity.subclassFeatures')}</div>
+          <SubclassFeaturesEditor
+            features={state.subclassFeatures || []}
+            currentLevel={state.charLevel}
+            onChange={feats => update({ subclassFeatures: feats })}
+          />
+        </div>
+      )}
+    </>
+  );
+}
+
+function HMenuGroup({ label, children }) {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <div className="hmenu-group">
+      <button className="hmenu-group-btn" onClick={() => setOpen(v => !v)}>
+        <span>{label}</span>
+        <span className="hmenu-group-caret">{open ? '▾' : '›'}</span>
+      </button>
+      {open && <div className="hmenu-group-body">{children}</div>}
     </div>
   );
 }
@@ -423,6 +488,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
   const { mode: themeMode, accentId, setThemeMode, setAccent } = useTheme();
   const { iconMode, setIconMode, iconAccent, setIconAccent } = useIconMode();
   const { weightUnit, speedUnit, setPref: setUnitPref, toDisplayWeight, toDisplaySpeed, fromDisplaySpeed } = useUnits();
+  const { prefs: a11y, setPref: setA11y } = useAccessibility();
   const fileInputRef = useRef();
   const toastTimer = useRef();
 
@@ -612,101 +678,100 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
               <img src={state.charImage} alt={t('widgets.identity')} className="char-thumbnail"
                 onError={e => { e.target.style.display='none'; }} />
             )}
-            {editingIdentity ? (
-              <div className="grid-2" style={{ flex:1 }}>
-                <Field label={t('identity.name')}><input value={state.charName} onChange={e => update({ charName: e.target.value })} placeholder="Es. Aldric Voss" /></Field>
-                <Field label={t('identity.class')}>
-                  {(() => {
-                    const knownClasses = dataManager.getClasses();
-                    const isCustomClass = state.charClass && !knownClasses.includes(state.charClass);
-                    return (
-                      <select value={state.charClass} onChange={e => {
+            {editingIdentity ? (() => {
+                const knownClasses = dataManager.getClasses();
+                const isCustomClass = !state.charClass ? false : !knownClasses.includes(state.charClass);
+                const classSelectVal = isCustomClass ? '__custom__' : (state.charClass || '');
+                return (
+                  <div className="grid-2" style={{ flex:1 }}>
+                    <Field label={t('identity.name')}>
+                      <input value={state.charName} onChange={e => update({ charName: e.target.value })} placeholder="Es. Aldric Voss" />
+                    </Field>
+                    <Field label={t('identity.class')}>
+                      <select value={classSelectVal} onChange={e => {
                         const cls = e.target.value;
-                        char.onClassOrLevelChange({ charClass: cls });
-                        const kept = (state.features||[]).filter(f => f.sourceType !== 'class');
-                        update({ features: [...kept, ...getAutoFeatures('class', cls, CLASS_FEATURES)] });
+                        if (cls === '__custom__') {
+                          update({ charClass: '__custom__', charClassCustom: isCustomClass ? state.charClass : '' });
+                        } else {
+                          char.onClassOrLevelChange({ charClass: cls });
+                          const kept = (state.features||[]).filter(f => f.sourceType !== 'class');
+                          update({ features: [...kept, ...getAutoFeatures('class', cls, CLASS_FEATURES)] });
+                        }
                       }}>
                         <option value="">{t('identity.classPlaceholder')}</option>
-                        {isCustomClass && <option value={state.charClass}>{state.charClass}</option>}
                         {knownClasses.map(c => <option key={c} value={c}>{t(`data.classes.${c}`, c)}</option>)}
+                        <option value="__custom__">{t('identity.classCustom')}</option>
                       </select>
-                    );
-                  })()}
-                </Field>
-                <Field label={t('identity.subclass')}>
-                  <input value={state.charSubclass||''} onChange={e => update({ charSubclass: e.target.value })} placeholder={t('identity.subclassPlaceholder')} />
-                </Field>
-                <Field label={t('identity.species')}>
-                  <select value={state.charRace} onChange={e => {
-                    const race = e.target.value;
-                    update({ charRace: race });
-                    if (race && race !== '__custom__') {
-                      const kept = (state.features||[]).filter(f => f.sourceType !== 'species');
-                      update({ charRace: race, features: [...kept, ...getAutoFeatures('species', race, SPECIES_FEATURES)] });
-                    } else {
-                      update({ charRace: race });
-                    }
-                  }}>
-                    <option value="">{t('identity.speciesPlaceholder')}</option>
-                    {dataManager.getSpecies().map(r => <option key={r.id} value={r.id}>{t(`data.species.${r.id}`, r.name)}</option>)}
-                    <option value="__custom__">
-                      {state.charRace === '__custom__' && state.charRaceCustom ? state.charRaceCustom : t('identity.speciesCustom')}
-                    </option>
-                  </select>
-                  {state.charRace === '__custom__' && (
-                    <input style={{ marginTop:4 }} value={state.charRaceCustom||''} onChange={e => update({ charRaceCustom: e.target.value })} placeholder={t('identity.speciesCustomPlaceholder')} />
-                  )}
-                </Field>
-                <Field label={t('identity.background')}>
-                  <select value={state.charBackground} onChange={e => {
-                    const bg = e.target.value;
-                    if (bg && bg !== '__custom__') {
-                      const kept = (state.features||[]).filter(f => f.sourceType !== 'background');
-                      update({ charBackground: bg, features: [...kept, ...getAutoFeatures('background', bg, BACKGROUND_FEATURES)] });
-                    } else {
-                      update({ charBackground: bg });
-                    }
-                  }}>
-                    <option value="">{t('identity.backgroundPlaceholder')}</option>
-                    {dataManager.getBackgrounds().map(b => <option key={b.id || b.name} value={b.id || b.name}>{t(`data.backgrounds.${b.id || b.name}`, b.name)}</option>)}
-                    <option value="__custom__">
-                      {state.charBackground === '__custom__' && state.charBackgroundCustom ? state.charBackgroundCustom : t('identity.backgroundCustom')}
-                    </option>
-                  </select>
-                  {state.charBackground === '__custom__' && (
-                    <input style={{ marginTop:4 }} value={state.charBackgroundCustom||''} onChange={e => update({ charBackgroundCustom: e.target.value })} placeholder={t('identity.backgroundCustomPlaceholder')} />
-                  )}
-                </Field>
-                <Field label={t('identity.level')}>
-                  <div className="hp-stepper" style={{ gap:4 }}>
-                    {activeSystem === 'dnd5e'
-                      ? <button className="mod-btn" style={{ color: state.charLevel > 1 ? 'var(--c-warn)' : undefined }} disabled={state.charLevel <= 1} onClick={() => setShowLevelDown(true)}>−</button>
-                      : <button className="mod-btn" onClick={() => char.onClassOrLevelChange({ charLevel: Math.max(1, state.charLevel-1) })}>−</button>
-                    }
-                    <input type="number" min="1" max="20" style={{ width:50, textAlign:'center' }} value={state.charLevel} onChange={e => char.onClassOrLevelChange({ charLevel: Math.max(1, parseInt(e.target.value)||1) })} />
-                    {activeSystem === 'dnd5e'
-                      ? <button className="mod-btn" style={{ color: state.charLevel < 20 ? 'var(--c-accent)' : undefined }} disabled={state.charLevel >= 20} onClick={() => setShowLevelUp(true)}>+</button>
-                      : <button className="mod-btn" onClick={() => char.onClassOrLevelChange({ charLevel: Math.min(20, state.charLevel+1) })}>+</button>
-                    }
+                      {isCustomClass && (
+                        <input style={{ marginTop:4 }}
+                          value={state.charClass === '__custom__' ? (state.charClassCustom||'') : state.charClass}
+                          onChange={e => {
+                            if (state.charClass === '__custom__') update({ charClassCustom: e.target.value });
+                            else update({ charClass: e.target.value });
+                          }}
+                          placeholder={t('identity.classCustomPlaceholder')} />
+                      )}
+                    </Field>
+                    <SubclassSection state={state} update={update} t={t} />
+                    <Field label={t('identity.species')}>
+                      <select value={state.charRace} onChange={e => {
+                        const race = e.target.value;
+                        if (race && race !== '__custom__') {
+                          const kept = (state.features||[]).filter(f => f.sourceType !== 'species');
+                          update({ charRace: race, features: [...kept, ...getAutoFeatures('species', race, SPECIES_FEATURES)] });
+                        } else {
+                          update({ charRace: race });
+                        }
+                      }}>
+                        <option value="">{t('identity.speciesPlaceholder')}</option>
+                        {dataManager.getSpecies().map(r => <option key={r.id} value={r.id}>{t(`data.species.${r.id}`, r.name)}</option>)}
+                        <option value="__custom__">{t('identity.speciesCustom')}</option>
+                      </select>
+                      {state.charRace === '__custom__' && (
+                        <input style={{ marginTop:4 }} value={state.charRaceCustom||''} onChange={e => update({ charRaceCustom: e.target.value })} placeholder={t('identity.speciesCustomPlaceholder')} />
+                      )}
+                    </Field>
+                    <Field label={t('identity.background')}>
+                      <select value={state.charBackground} onChange={e => {
+                        const bg = e.target.value;
+                        if (bg && bg !== '__custom__') {
+                          const kept = (state.features||[]).filter(f => f.sourceType !== 'background');
+                          update({ charBackground: bg, features: [...kept, ...getAutoFeatures('background', bg, BACKGROUND_FEATURES)] });
+                        } else {
+                          update({ charBackground: bg });
+                        }
+                      }}>
+                        <option value="">{t('identity.backgroundPlaceholder')}</option>
+                        {dataManager.getBackgrounds().map(b => <option key={b.id || b.name} value={b.id || b.name}>{t(`data.backgrounds.${b.id || b.name}`, b.name)}</option>)}
+                        <option value="__custom__">{t('identity.backgroundCustom')}</option>
+                      </select>
+                      {state.charBackground === '__custom__' && (
+                        <input style={{ marginTop:4 }} value={state.charBackgroundCustom||''} onChange={e => update({ charBackgroundCustom: e.target.value })} placeholder={t('identity.backgroundCustomPlaceholder')} />
+                      )}
+                    </Field>
+                    <Field label={t('identity.level')}>
+                      <div className="hp-stepper" style={{ gap:4 }}>
+                        {activeSystem === 'dnd5e'
+                          ? <button className="mod-btn" style={{ color: state.charLevel > 1 ? 'var(--c-warn)' : undefined }} disabled={state.charLevel <= 1} onClick={() => setShowLevelDown(true)}>−</button>
+                          : <button className="mod-btn" onClick={() => char.onClassOrLevelChange({ charLevel: Math.max(1, state.charLevel-1) })}>−</button>
+                        }
+                        <input type="number" min="1" max="20" style={{ width:50, textAlign:'center' }} value={state.charLevel} onChange={e => char.onClassOrLevelChange({ charLevel: Math.max(1, parseInt(e.target.value)||1) })} />
+                        {activeSystem === 'dnd5e'
+                          ? <button className="mod-btn" style={{ color: state.charLevel < 20 ? 'var(--c-accent)' : undefined }} disabled={state.charLevel >= 20} onClick={() => setShowLevelUp(true)}>+</button>
+                          : <button className="mod-btn" onClick={() => char.onClassOrLevelChange({ charLevel: Math.min(20, state.charLevel+1) })}>+</button>
+                        }
+                      </div>
+                    </Field>
+                    <Field label={t('identity.profBonus')}><input value={`+${char.profBonus}`} readOnly /></Field>
+                    <Field label={t('identity.alignment')}>
+                      <AlignmentPicker value={state.charAlignment} onChange={a => update({ charAlignment: a })} />
+                    </Field>
+                    <Field label={t('identity.xp')}>
+                      <input type="number" min="0" value={state.charXP} onChange={e => update({ charXP: parseInt(e.target.value)||0 })} />
+                    </Field>
                   </div>
-                </Field>
-                <Field label={t('identity.profBonus')}><input value={`+${char.profBonus}`} readOnly /></Field>
-                <Field label={t('identity.alignment')}>
-                  <AlignmentPicker value={state.charAlignment} onChange={a => update({ charAlignment: a })} />
-                </Field>
-                <Field label={t('identity.xp')}>
-                  <input type="number" min="0" value={state.charXP} onChange={e => update({ charXP: parseInt(e.target.value)||0 })} />
-                </Field>
-                <div style={{ gridColumn: '1 / -1', marginTop: 4 }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--c-muted)', marginBottom: 6 }}>{t('identity.subclassFeatures')}</div>
-                  <SubclassFeaturesEditor
-                    features={state.subclassFeatures||[]}
-                    currentLevel={state.charLevel}
-                    onChange={feats => update({ subclassFeatures: feats })}
-                  />
-                </div>
-              </div>
-            ) : (
+                );
+              })() : (
               <div className="identity-info-grid">
                 {[
                   [t('identity.name'), state.charName || '—'],
@@ -1867,80 +1932,141 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
               }}>{t('menu.resetLayout')}</button>
             </div>
             <div className="hmenu-divider" />
-            <div className="hmenu-section">
-              <div className="hmenu-label">{t('menu.theme')}</div>
-              <div className="hmenu-row">
-                {[['system', t('menu.themeSystem')],['light', t('menu.themeLight')],['dark', t('menu.themeDark')]].map(([m, label]) => (
-                  <button key={m} className={`hmenu-theme-btn ${themeMode === m ? 'active' : ''}`}
-                    title={label} onClick={() => setThemeMode(m)}>{label}</button>
-                ))}
-              </div>
-            </div>
-            <div className="hmenu-section">
-              <div className="hmenu-label">{t('menu.color')}</div>
-              <div className="hmenu-row">
-                {ACCENT_PRESETS.map(p => (
-                  <button key={p.id} className={`accent-swatch ${accentId === p.id ? 'active' : ''}`}
-                    title={p.label} onClick={() => setAccent(p.id)}
-                    style={{ '--swatch-color': p.light.accent }} />
-                ))}
-              </div>
-            </div>
-            <div className="hmenu-divider" />
-            <div className="hmenu-section">
-              <div className="hmenu-label">{t('menu.uiLang')}</div>
-              <div className="hmenu-row">
-                {[['it','🇮🇹 IT'],['en','🇬🇧 EN']].map(([lang, label]) => (
-                  <button key={lang} className={`hmenu-theme-btn ${i18n.language === lang ? 'active' : ''}`}
-                    onClick={() => { i18n.changeLanguage(lang); setShowMenu(false); }}>{label}</button>
-                ))}
-              </div>
-            </div>
-            <div className="hmenu-section">
-              <div className="hmenu-label">{t('menu.iconMode')}</div>
-              <div className="hmenu-row">
-                {[
-                  { value: 'emoji',  label: t('menu.iconEmoji'),  preview: '⚔ 🎲 ❤' },
-                  { value: 'lucide', label: t('menu.iconLucide'), preview: '◈' },
-                  { value: 'none',   label: t('menu.iconNone'),   preview: 'Aa' },
-                ].map(opt => (
-                  <button key={opt.value}
-                    className={`hmenu-theme-btn ${iconMode === opt.value ? 'active' : ''}`}
-                    onClick={() => setIconMode(opt.value)}
-                    title={opt.label}>
-                    {opt.preview}
-                  </button>
-                ))}
-              </div>
-              {iconMode === 'lucide' && (
-                <div style={{ marginTop: 6 }}>
-                  <button
-                    className={`hmenu-theme-btn ${iconAccent ? 'active' : ''}`}
-                    onClick={() => setIconAccent(!iconAccent)}
-                    style={{ width: '100%', justifyContent: 'center' }}>
-                    {t('menu.iconAccent')}
-                  </button>
+            <HMenuGroup label={t('menu.groupStyle')}>
+              <div className="hmenu-section">
+                <div className="hmenu-label">{t('menu.theme')}</div>
+                <div className="hmenu-row">
+                  {[['system', t('menu.themeSystem')],['light', t('menu.themeLight')],['dark', t('menu.themeDark')]].map(([m, label]) => (
+                    <button key={m} className={`hmenu-theme-btn ${themeMode === m ? 'active' : ''}`}
+                      title={label} onClick={() => setThemeMode(m)}>{label}</button>
+                  ))}
                 </div>
-              )}
-            </div>
+              </div>
+              <div className="hmenu-section">
+                <div className="hmenu-label">{t('menu.color')}</div>
+                <div className="hmenu-row">
+                  {ACCENT_PRESETS.map(p => (
+                    <button key={p.id} className={`accent-swatch ${accentId === p.id ? 'active' : ''}`}
+                      title={p.label} onClick={() => setAccent(p.id)}
+                      style={{ '--swatch-color': p.light.accent }} />
+                  ))}
+                </div>
+              </div>
+              <div className="hmenu-section">
+                <div className="hmenu-label">{t('menu.iconMode')}</div>
+                <div className="hmenu-row">
+                  {[
+                    { value: 'emoji',  label: t('menu.iconEmoji'),  preview: '⚔ 🎲 ❤' },
+                    { value: 'lucide', label: t('menu.iconLucide'), preview: '◈' },
+                    { value: 'none',   label: t('menu.iconNone'),   preview: 'Aa' },
+                  ].map(opt => (
+                    <button key={opt.value}
+                      className={`hmenu-theme-btn ${iconMode === opt.value ? 'active' : ''}`}
+                      onClick={() => setIconMode(opt.value)}
+                      title={opt.label}>
+                      {opt.preview}
+                    </button>
+                  ))}
+                </div>
+                {iconMode === 'lucide' && (
+                  <div style={{ marginTop: 6, padding: '0 14px' }}>
+                    <button
+                      className={`hmenu-theme-btn ${iconAccent ? 'active' : ''}`}
+                      onClick={() => setIconAccent(!iconAccent)}
+                      style={{ width: '100%', justifyContent: 'center' }}>
+                      {t('menu.iconAccent')}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </HMenuGroup>
             <div className="hmenu-divider" />
-            <div className="hmenu-section">
-              <div className="hmenu-label">{t('menu.units')}</div>
-              <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 4 }}>
-                <span style={{ fontSize: 11, color: 'var(--c-muted)', minWidth: 52 }}>{t('menu.weightUnit')}</span>
-                {[['kg','kg'],['lbs','lbs']].map(([val, label]) => (
-                  <button key={val} className={`hmenu-theme-btn ${weightUnit === val ? 'active' : ''}`}
-                    onClick={() => setUnitPref('weightUnit', val)}>{label}</button>
-                ))}
+            <HMenuGroup label={t('menu.groupLangUnits')}>
+              <div className="hmenu-section">
+                <div className="hmenu-label">{t('menu.uiLang')}</div>
+                <div className="hmenu-row">
+                  {[['it','🇮🇹 IT'],['en','🇬🇧 EN']].map(([lang, label]) => (
+                    <button key={lang} className={`hmenu-theme-btn ${i18n.language === lang ? 'active' : ''}`}
+                      onClick={() => { i18n.changeLanguage(lang); setShowMenu(false); }}>{label}</button>
+                  ))}
+                </div>
               </div>
-              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                <span style={{ fontSize: 11, color: 'var(--c-muted)', minWidth: 52 }}>{t('menu.speedUnit')}</span>
-                {[['ft','ft'],['m','m'],['sq','□']].map(([val, label]) => (
-                  <button key={val} className={`hmenu-theme-btn ${speedUnit === val ? 'active' : ''}`}
-                    onClick={() => setUnitPref('speedUnit', val)}>{label}</button>
-                ))}
+              <div className="hmenu-section">
+                <div className="hmenu-label">{t('menu.units')}</div>
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 4, padding: '0 14px' }}>
+                  <span style={{ fontSize: 11, color: 'var(--c-muted)', minWidth: 52 }}>{t('menu.weightUnit')}</span>
+                  {[['kg','kg'],['lbs','lbs']].map(([val, label]) => (
+                    <button key={val} className={`hmenu-theme-btn ${weightUnit === val ? 'active' : ''}`}
+                      onClick={() => setUnitPref('weightUnit', val)}>{label}</button>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center', padding: '0 14px' }}>
+                  <span style={{ fontSize: 11, color: 'var(--c-muted)', minWidth: 52 }}>{t('menu.speedUnit')}</span>
+                  {[['ft','ft'],['m','m'],['sq','□']].map(([val, label]) => (
+                    <button key={val} className={`hmenu-theme-btn ${speedUnit === val ? 'active' : ''}`}
+                      onClick={() => setUnitPref('speedUnit', val)}>{label}</button>
+                  ))}
+                </div>
               </div>
-            </div>
+            </HMenuGroup>
+            <div className="hmenu-divider" />
+            <HMenuGroup label={t('accessibility.title')}>
+              <div className="hmenu-section">
+                <div className="hmenu-label">{t('accessibility.font')}</div>
+                <div className="hmenu-row">
+                  {[
+                    { value: 'default',      label: t('accessibility.fontDefault') },
+                    { value: 'atkinson',     label: 'Atkinson Hyperlegible' },
+                    { value: 'opendyslexic', label: 'OpenDyslexic' },
+                  ].map(opt => (
+                    <button key={opt.value}
+                      className={`hmenu-item ${a11y.font === opt.value ? 'active' : ''}`}
+                      onClick={() => setA11y('font', opt.value)}>
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="hmenu-section">
+                <div className="hmenu-label">{t('accessibility.textSize')}</div>
+                <div className="hmenu-row">
+                  {[
+                    { value: 'normal', label: t('accessibility.sizeNormal') },
+                    { value: 'large',  label: t('accessibility.sizeLarge')  },
+                    { value: 'xlarge', label: t('accessibility.sizeXLarge') },
+                  ].map(opt => (
+                    <button key={opt.value}
+                      className={`hmenu-item ${a11y.textSize === opt.value ? 'active' : ''}`}
+                      onClick={() => setA11y('textSize', opt.value)}>
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="hmenu-section">
+                <div className="hmenu-label">{t('accessibility.contrast')}</div>
+                <div className="hmenu-row">
+                  {[
+                    { value: 'default', label: t('accessibility.contrastDefault') },
+                    { value: 'high',    label: t('accessibility.contrastHigh')    },
+                  ].map(opt => (
+                    <button key={opt.value}
+                      className={`hmenu-item ${a11y.contrast === opt.value ? 'active' : ''}`}
+                      onClick={() => setA11y('contrast', opt.value)}>
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div style={{ padding: '4px 0 8px' }}>
+                <label className="hmenu-toggle">
+                  <input type="checkbox"
+                    checked={a11y.largeTargets}
+                    onChange={e => setA11y('largeTargets', e.target.checked)} />
+                  <span>{t('accessibility.largeTargets')}</span>
+                </label>
+              </div>
+            </HMenuGroup>
             <div className="hmenu-divider" />
             <div className="hmenu-section">
               <div className="hmenu-label">{t('menu.data')}</div>

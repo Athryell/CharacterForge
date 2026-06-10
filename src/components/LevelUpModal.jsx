@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DND_CLASSES } from '../data/systems/dnd5e/classes';
+import { DND_CLASSES, SUBCLASS_DATA } from '../data/systems/dnd5e/classes';
 import { ABILITIES } from '../data/systems/dnd5e/mechanics';
 
 const ABILITY_LABELS = { STR: 'STR', DEX: 'DEX', CON: 'CON', INT: 'INT', WIS: 'WIS', CHA: 'CHA' };
@@ -25,10 +25,23 @@ export default function LevelUpModal({ currentLevel, charClass, charState, onCom
       .map(f => ({ name: f.name.trim(), desc: f.desc || '', auto: true, _subclass: true })),
     [charState.subclassFeatures, targetLevel]
   );
-  const autoFeatures = useMemo(
-    () => [...(ld.features || []).filter(f => f.auto), ...customSubclassFeatures],
-    [ld, customSubclassFeatures]
-  );
+  const subclassLevelFeatures = useMemo(() => {
+    const sub = charState.charSubclass;
+    if (!sub || !SUBCLASS_DATA[charClass]?.[sub]?.[targetLevel]) return [];
+    return SUBCLASS_DATA[charClass][sub][targetLevel].map(f => ({ ...f, _subclass: true }));
+  }, [charState.charSubclass, charClass, targetLevel]);
+  const autoFeatures = useMemo(() => {
+    const baseAuto = (ld.features || []).filter(f => f.auto);
+    if (subclassLevelFeatures.length === 0) {
+      return [...baseAuto, ...customSubclassFeatures];
+    }
+    const hadPlaceholder = baseAuto.some(f => f.name === 'Subclass Feature');
+    const merged = baseAuto.flatMap(f =>
+      f.name === 'Subclass Feature' ? subclassLevelFeatures : [f]
+    );
+    const withInitial = hadPlaceholder ? merged : [...merged, ...subclassLevelFeatures];
+    return [...withInitial, ...customSubclassFeatures];
+  }, [ld, subclassLevelFeatures, customSubclassFeatures]);
   const choiceFeatures = useMemo(() => (ld.features || []).filter(f => !f.auto), [ld]);
   const isSpellcaster = !!classData?.spellcasting;
   const spellsToLearn = ld.spellsToLearn || 0;
