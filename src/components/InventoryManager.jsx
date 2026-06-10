@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { KeywordText, NotationHelpBar } from './Tooltip';
-import BonusTextarea from './BonusTextarea';
+import NotationTextarea from './NotationTextarea';
 import { TagPill, TagSelector } from './Tags';
 
 const EMPTY_FORM = { name: '', qty: 1, desc: '', weight: '' };
@@ -107,7 +107,7 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
           </div>
           <div className="field" style={{ marginTop: 8 }}>
             <label>{t('inventory.descLabel')}</label>
-            <BonusTextarea className="notes-area" style={{ minHeight: 56 }} value={addForm.desc}
+            <NotationTextarea className="notes-area" style={{ minHeight: 56 }} value={addForm.desc}
               onChange={e => patchAdd({ desc: e.target.value })} placeholder={t('inventory.descAddPlaceholder')} />
             <NotationHelpBar />
           </div>
@@ -181,7 +181,7 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
                   </div>
                   <div className="field" style={{ marginTop: 6 }}>
                     <label>{t('inventory.descEditLabel')}</label>
-                    <BonusTextarea className="notes-area" style={{ minHeight: 56 }}
+                    <NotationTextarea className="notes-area" style={{ minHeight: 56 }}
                       value={editForm.desc || ''} onChange={e => patchEdit({ desc: e.target.value })} />
                     <NotationHelpBar />
                   </div>

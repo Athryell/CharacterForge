@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { KeywordText, NotationHelpBar } from './Tooltip';
+import NotationTextarea from './NotationTextarea';
 import { TagPill, TagSelector } from './Tags';
 
 const SOURCE_BADGE = {
@@ -76,7 +77,7 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
           </div>
           <div className="field" style={{ marginTop: 6 }}>
             <label>{t('features.formDesc', 'Description')}</label>
-            <textarea className="notes-area" style={{ minHeight: 60 }}
+            <NotationTextarea className="notes-area" style={{ minHeight: 60 }}
               value={addForm.desc} onChange={e => setAddForm(f => ({ ...f, desc: e.target.value }))}
               placeholder={t('features.descPlaceholder', 'Feature description...')} />
             <NotationHelpBar />
@@ -134,7 +135,7 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
                           </div>
                           <div className="field" style={{ marginTop: 6 }}>
                             <label>{t('features.formDesc', 'Description')}</label>
-                            <textarea className="notes-area" style={{ minHeight: 72 }}
+                            <NotationTextarea className="notes-area" style={{ minHeight: 72 }}
                               value={editForm.desc} onChange={e => setEditForm(f => ({ ...f, desc: e.target.value }))} />
                             <NotationHelpBar />
                           </div>

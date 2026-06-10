@@ -60,15 +60,28 @@ export function resolveNotations(text, abilities, charLevel, profBonus, traitMap
 // Small hint bar for description textareas — shows notation syntax
 export function NotationHelpBar() {
   const { t } = useTranslation();
+  const { systemId } = useCharContext();
+  const isDH = systemId === 'daggerheart';
   return (
     <div className="notation-help-bar">
       <span className="notation-help-icon">💡</span>
-      <span><strong>[STR]</strong> <strong>[DEX]</strong>… <strong>[PRO]</strong> {t('notation.attrHelp')}</span>
+      <span>{t('notation.slashHint')}</span>
       <span className="notation-help-sep">·</span>
-      <span><strong>[LVL:1d6,5:1d8]</strong> {t('notation.lvlHelp')}</span>
-      <span className="notation-help-sep">·</span>
-      <span><strong>+1@[CA]</strong> {t('notation.bonusHelp')}</span>
-      <span className="notation-help-sep">·</span>
+      {isDH ? (
+        <>
+          <span><strong>[AGI]</strong> <strong>[FIN]</strong>… {t('notation.attrHelp')}</span>
+          <span className="notation-help-sep">·</span>
+        </>
+      ) : (
+        <>
+          <span><strong>[STR]</strong> <strong>[DEX]</strong>… <strong>[PRO]</strong> {t('notation.attrHelp')}</span>
+          <span className="notation-help-sep">·</span>
+          <span><strong>[LVL:1d6,5:1d8]</strong> {t('notation.lvlHelp')}</span>
+          <span className="notation-help-sep">·</span>
+          <span><strong>+1@[AC]</strong> {t('notation.bonusHelp')}</span>
+          <span className="notation-help-sep">·</span>
+        </>
+      )}
       <span><strong>[3]</strong> {t('notation.counterHelp')}</span>
     </div>
   );

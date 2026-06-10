@@ -4,7 +4,7 @@ import { WEAPON_PROPERTIES, WEAPON_MASTERIES } from '../data/systems/dnd5e/weapo
 import dataManager from '../data/dataManager';
 import { TagPill, TagSelector } from './Tags';
 import { NotationHelpBar, KeywordText } from './Tooltip';
-import BonusTextarea from './BonusTextarea';
+import NotationTextarea from './NotationTextarea';
 
 const BLANK_FORM = {
   name: '', isProficient: true, desc: '', properties: [], mastery: 'none', weight: '',
@@ -123,7 +123,7 @@ function WeaponEditForm({ form, onChange, onSave, onCancel, onDelete, added, onT
       </div>
       <div className="field" style={{ marginTop: 6 }}>
         <label>{t('weapons.descLabel')}</label>
-        <BonusTextarea className="notes-area" style={{ minHeight: 48 }}
+        <NotationTextarea className="notes-area" style={{ minHeight: 48 }}
           value={form.desc || ''} onChange={e => patch({ desc: e.target.value })}
           placeholder={t('weapons.descPlaceholder')} />
         <NotationHelpBar />

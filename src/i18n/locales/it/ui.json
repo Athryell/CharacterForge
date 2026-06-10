@@ -326,10 +326,63 @@
   "notation": {
     "dynamicTitle": "Valore dinamico — originale:",
     "rollTitle": "Lancia",
+    "slashHint": "Digita / per inserire notazione",
     "attrHelp": "→ mod caratteristica",
     "lvlHelp": "→ scala col livello",
-    "bonusHelp": "→ bonus equipaggiamento (digita @ per lista)",
-    "counterHelp": "→ counter cliccabile (es. cariche)"
+    "bonusHelp": "→ bonus equipaggiamento",
+    "counterHelp": "→ counter cliccabile",
+    "group": {
+      "dice": "Dado",
+      "abilities": "Modificatori caratteristica",
+      "traits": "Modificatori tratto",
+      "scaling": "Scalatura",
+      "counters": "Counter",
+      "bonuses": "Bonus equipaggiamento"
+    },
+    "item": {
+      "diceRoll": "Tiro dado",
+      "str": "Forza (FOR)",
+      "dex": "Destrezza (DES)",
+      "con": "Costituzione (COS)",
+      "int": "Intelligenza (INT)",
+      "wis": "Saggezza (SAG)",
+      "cha": "Carisma (CAR)",
+      "pro": "Bonus competenza",
+      "lvl": "Scala col livello",
+      "counter": "Counter / cariche",
+      "bonusAC": "Bonus CA",
+      "bonusINIT": "Bonus Iniziativa",
+      "bonusSPD": "Bonus Velocità",
+      "bonusHP": "Bonus HP massimi",
+      "bonusSTR": "Bonus FOR",
+      "bonusDEX": "Bonus DES",
+      "bonusCON": "Bonus COS",
+      "bonusINT": "Bonus INT",
+      "bonusWIS": "Bonus SAG",
+      "bonusCHA": "Bonus CAR",
+      "bonusTSSTR": "Bonus TS-FOR",
+      "bonusTSDEX": "Bonus TS-DES",
+      "bonusTSCON": "Bonus TS-COS",
+      "bonusTSINT": "Bonus TS-INT",
+      "bonusTSWIS": "Bonus TS-SAG",
+      "bonusTSCHA": "Bonus TS-CAR"
+    },
+    "dh": {
+      "agi": "Agilità (AGI)",
+      "str": "Forza (STR)",
+      "fin": "Astuzia (FIN)",
+      "ins": "Istinto (INS)",
+      "pre": "Presenza (PRE)",
+      "kno": "Conoscenza (KNO)"
+    },
+    "desc": {
+      "diceRoll": "Dado cliccabile — si lancia in automatico",
+      "modifier": "Modificatore caratteristica del personaggio",
+      "proficiency": "Bonus competenza",
+      "lvl": "Cambia valore in base al livello del personaggio",
+      "counter": "Puntini attivabili (es. cariche incantesimo)",
+      "bonus": "Bonus passivo applicato a questa statistica"
+    }
   },
   "weapons": {
     "noWeapons": "Nessuna arma aggiunta. Clicca \"+\" per aggiungerne una.",

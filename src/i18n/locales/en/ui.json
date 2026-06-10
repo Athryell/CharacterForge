@@ -289,10 +289,63 @@
   "notation": {
     "dynamicTitle": "Dynamic value — original:",
     "rollTitle": "Roll",
+    "slashHint": "Type / to insert notation",
     "attrHelp": "→ ability modifier",
     "lvlHelp": "→ scales with level",
-    "bonusHelp": "→ equipment bonus (type @ for list)",
-    "counterHelp": "→ clickable counter (e.g. charges)"
+    "bonusHelp": "→ equipment bonus",
+    "counterHelp": "→ clickable counter",
+    "group": {
+      "dice": "Dice",
+      "abilities": "Ability modifiers",
+      "traits": "Trait modifiers",
+      "scaling": "Scaling",
+      "counters": "Counters",
+      "bonuses": "Equipment bonuses"
+    },
+    "item": {
+      "diceRoll": "Dice roll",
+      "str": "Strength (STR)",
+      "dex": "Dexterity (DEX)",
+      "con": "Constitution (CON)",
+      "int": "Intelligence (INT)",
+      "wis": "Wisdom (WIS)",
+      "cha": "Charisma (CHA)",
+      "pro": "Proficiency bonus",
+      "lvl": "Scales with level",
+      "counter": "Counter / charges",
+      "bonusAC": "Armor Class bonus",
+      "bonusINIT": "Initiative bonus",
+      "bonusSPD": "Speed bonus",
+      "bonusHP": "Max HP bonus",
+      "bonusSTR": "STR bonus",
+      "bonusDEX": "DEX bonus",
+      "bonusCON": "CON bonus",
+      "bonusINT": "INT bonus",
+      "bonusWIS": "WIS bonus",
+      "bonusCHA": "CHA bonus",
+      "bonusTSSTR": "STR save bonus",
+      "bonusTSDEX": "DEX save bonus",
+      "bonusTSCON": "CON save bonus",
+      "bonusTSINT": "INT save bonus",
+      "bonusTSWIS": "WIS save bonus",
+      "bonusTSCHA": "CHA save bonus"
+    },
+    "dh": {
+      "agi": "Agility (AGI)",
+      "str": "Strength (STR)",
+      "fin": "Finesse (FIN)",
+      "ins": "Instinct (INS)",
+      "pre": "Presence (PRE)",
+      "kno": "Knowledge (KNO)"
+    },
+    "desc": {
+      "diceRoll": "Clickable die — rolls automatically",
+      "modifier": "Character ability modifier",
+      "proficiency": "Proficiency bonus",
+      "lvl": "Changes value based on character level",
+      "counter": "Toggleable pips (e.g. spell charges)",
+      "bonus": "Passive bonus applied to this stat"
+    }
   },
   "weapons": {
     "noWeapons": "No weapons added. Click \"+\" to add one.",
