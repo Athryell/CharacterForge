@@ -188,7 +188,7 @@ export default function Onboarding({ onClose, onRoll: externalOnRoll }) {
             <DemoBox label={t('onboarding.demoLabel')}>
               <p className="onboarding-demo-text">
                 <KeywordText
-                  text={"Longsword: 1d8+[STR] slashing\nWith advantage: roll 2d20 and take the highest"}
+                  text={"Longsword: 1d8+3 slashing"}
                   onRoll={handleDemoRoll}
                   label="Demo"
                 />
@@ -208,7 +208,7 @@ export default function Onboarding({ onClose, onRoll: externalOnRoll }) {
             <DemoBox label={t('onboarding.demoLabel')}>
               <p className="onboarding-demo-text">
                 <KeywordText
-                  text={"Attack: 1d20+[PRO]+[STR]\nDamage: [LVL:1d6,5:1d8,11:1d10]+[DEX]\nCharges: [3]\nArmor bonus: +2@[AC]"}
+                  text={"Attack: 1d20+[PRO]+[STR]\nDamage: [LVL:1d6,5:1d8]+[STR]\nCharges: [3]\nArmor bonus: +2@[AC]"}
                   onRoll={handleDemoRoll}
                   label="Demo"
                 />

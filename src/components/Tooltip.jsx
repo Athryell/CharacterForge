@@ -158,7 +158,7 @@ export function KeywordText({ text, onRoll, label, counters, onCounterChange }) 
   const resolved = resolveNotations(text, abilities, charLevel, profBonus, traitMap);
   if (!resolved) return null;
 
-  const DICE_REGEX = /(\d*d\d+(?:\s*[+-]\s*\d+)?)/gi;
+  const DICE_REGEX = /(\d*d\d+(?:\s*[+-]\s*\d+)*)/gi;
   let counterIdx = 0;
 
   function renderSegments(lineText, keyPrefix) {
