@@ -2465,6 +2465,15 @@ input[type=number] {
 }
 .onboarding-body p { margin: 0 0 10px; }
 .onboarding-body p:last-child { margin-bottom: 0; }
+.onboarding-points {
+  margin: 4px 0 10px 0;
+  padding-left: 18px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--c-ink);
+}
+.onboarding-points li { margin-bottom: 2px; }
+.onboarding-points-footer { font-size: 13px; color: var(--c-muted); font-style: italic; margin-top: 4px; }
 
 .onboarding-hint-text { font-style: italic; color: var(--c-muted); }
 

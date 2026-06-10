@@ -147,6 +147,24 @@ export default function Onboarding({ onClose, onRoll: externalOnRoll }) {
     demoMsgTimer.current = setTimeout(() => setDemoMsg(''), 2500);
   }
 
+  function renderStepText(stepIdx) {
+    if (stepIdx === 0) return <p>{t('onboarding.community.body')}</p>;
+    const text = t(`onboarding.step${stepIdx}Text`);
+    const points = t(`onboarding.step${stepIdx}Points`, { returnObjects: true });
+    const footer = t(`onboarding.step${stepIdx}Footer`, { defaultValue: '' });
+    return (
+      <>
+        {text && <p>{text}</p>}
+        {Array.isArray(points) && points.length > 0 && (
+          <ul className="onboarding-points">
+            {points.map((pt, i) => <li key={i}>{pt}</li>)}
+          </ul>
+        )}
+        {footer && <p className="onboarding-points-footer">{footer}</p>}
+      </>
+    );
+  }
+
   function renderStepDemo() {
     // step index: 0=Community, 2=Dice, 3=Notation, 4=Keywords, 6=Tags
     if (step === 0) {
@@ -303,7 +321,7 @@ export default function Onboarding({ onClose, onRoll: externalOnRoll }) {
               </h2>
             </div>
             <div className="onboarding-body">
-              <p>{step === 0 ? t('onboarding.community.body') : t(`onboarding.step${step}Text`)}</p>
+              {renderStepText(step)}
               {renderStepDemo()}
               {demoMsg && <div className="onboarding-demo-toast">{demoMsg}</div>}
               {isLast && <SupportGroup t={t} />}

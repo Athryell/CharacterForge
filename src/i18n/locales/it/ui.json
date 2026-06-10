@@ -885,22 +885,40 @@
       "tsStrRow": "Bonus to STR Saving Throw",
       "counterRow": "Clickable counter (e.g. charges)"
     },
-    "step1Title": "Your sheet, your way",
-    "step1Text": "Activate Layout mode with the ⠿ button at the top to customize everything: drag widgets to reorder them, expand them to full width or reduce to half column, move them to different tabs or hide them. Tabs themselves are reorderable and hideable. The layout is saved automatically.",
-    "step2Title": "Clickable dice everywhere",
-    "step2Text": "In any description field — items, spells, actions, weapons — you can write dice notations like 2d6+3 or 1d8 and they become clickable buttons that roll automatically. The result appears in a toast notification at the top right.",
-    "step3Title": "Smart Notation",
-    "step3Text": "Use [STR], [PRO], [LVL:...] and +N@[STAT] notation directly in any description field. Values resolve automatically from your character's current stats.",
-    "step4Title": "Keyword Glossary",
-    "step4Text": "In action and spell descriptions, game terms like blinded, advantage, disadvantage, finesse, concentration and many others are underlined. Hover over them with your mouse (or long-press on mobile) to see a quick explanation.",
-    "step5Title": "Build your arsenal",
-    "step5Text": "In the Combat tab you can add custom actions with type (Action / Bonus Action / Reaction / Free) and associated dice. In the Spells tab browse the SRD catalog with filters by class, level and school, or add custom spells. In Inventory, items with the same name automatically stack together.",
-    "step6Title": "Organize with tags",
-    "step6Text": "You can add custom tags to any action or spell — expand the entry and click 🏷. Tags you create become available as quick filters at the top of the list. Useful examples: 'attack', 'utility', 'heal', 'bonus action'.",
-    "step7Title": "Rests and recovery",
-    "step7Text": "In the Spells tab use the Short Rest and Long Rest buttons to manage recovery. Long rest restores all spell slots and HP to maximum. Death saves reset automatically. Temporary HP are managed from the Combat tab with the 🛡 button.",
-    "step8Title": "Help us improve",
-    "step8Text": "CharacterForge is a free project in continuous evolution. If you find a bug, have a feature idea, or want to request support for a specific RPG system, use the feedback form — every report is read."
+    "step1Title": "La tua scheda, a modo tuo",
+    "step1Text": "Attiva la modalità Layout con il pulsante ⠿ Modifica Layout nel menu per personalizzare tutto:",
+    "step1Points": [
+      "Trascina i widget per riordinarli",
+      "Espandi a piena larghezza o riduci a mezza colonna",
+      "Sposta i widget in altre tab o nascondili",
+      "Le tab stesse sono riordinabili e nascondibili"
+    ],
+    "step1Footer": "Il layout viene salvato automaticamente.",
+    "step2Title": "Dadi cliccabili ovunque",
+    "step2Text": "In qualsiasi campo descrizione — oggetti, incantesimi, azioni, armi — puoi scrivere notazioni dado come 2d6+3 o 1d8 e diventano pulsanti cliccabili che tirano automaticamente. Il risultato compare in una notifica in alto a destra.",
+    "step3Title": "Notazione Smart",
+    "step3Text": "Digita / in qualsiasi campo descrizione per aprire il menu notazione. I valori si risolvono automaticamente dalle statistiche attuali del personaggio.",
+    "step4Title": "Glossario Parole Chiave",
+    "step4Text": "Nelle descrizioni di azioni e incantesimi, termini di gioco come accecato, vantaggio, svantaggio, destrezza fine, concentrazione e molti altri sono sottolineati. Passa il mouse (o tieni premuto su mobile) per vedere una spiegazione rapida.",
+    "step5Title": "Costruisci il tuo arsenale",
+    "step5Text": "Gestisci tutti i tuoi strumenti da combattimento e l'equipaggiamento:",
+    "step5Points": [
+      "Tab Combattimento: aggiungi azioni personalizzate con tipo (Azione / Azione Bonus / Reazione / Libera) e dadi",
+      "Tab Incantesimi: sfoglia il catalogo SRD filtrato per classe, livello e scuola, o aggiungi incantesimi personalizzati",
+      "Inventario: gli oggetti con lo stesso nome si raggruppano automaticamente"
+    ],
+    "step6Title": "Organizza con i tag",
+    "step6Text": "Puoi aggiungere tag personalizzati a qualsiasi azione o incantesimo — espandi la voce e clicca 🏷. I tag che crei diventano filtri rapidi in cima alla lista. Esempi utili: 'attacco', 'utilità', 'cura', 'azione bonus'.",
+    "step7Title": "Riposi e recupero",
+    "step7Text": "Gestisci il recupero dalla tab Incantesimi:",
+    "step7Points": [
+      "Riposo lungo: ripristina tutti gli slot incantesimo e gli HP al massimo",
+      "Riposo breve: usa i dadi vita per recuperare HP",
+      "I tiri salvezza morte si azzerano automaticamente dopo un riposo lungo",
+      "HP temporanei: gestisci dalla tab Combattimento con il pulsante 🛡"
+    ],
+    "step8Title": "Aiutaci a migliorare",
+    "step8Text": "CharacterForge è un progetto gratuito in continua evoluzione. Se trovi un bug, hai un'idea di funzionalità, o vuoi richiedere supporto per un sistema GdR specifico, usa il modulo di feedback — ogni segnalazione viene letta."
   },
   "levelUp": {
     "title": "Avanza al livello {{level}}",
