@@ -133,6 +133,8 @@
     "name": "Name",
     "class": "Class",
     "classPlaceholder": "— Choose class —",
+    "classCustom": "Custom...",
+    "classCustomPlaceholder": "Type the class name...",
     "species": "Species",
     "speciesPlaceholder": "— Choose species —",
     "speciesCustom": "Custom...",
@@ -146,7 +148,15 @@
     "alignment": "Alignment",
     "xp": "Experience (XP)",
     "experienceShort": "Experience",
-    "imageUrl": "🖼 Character image (URL)"
+    "imageUrl": "🖼 Character image (URL)",
+    "subclass": "Subclass",
+    "subclassPlaceholder": "E.g. Path of the Berserker",
+    "subclassCustom": "Custom...",
+    "subclassCustomPlaceholder": "Custom subclass name...",
+    "subclassFeatures": "Subclass Features",
+    "subclassFeatureName": "Feature name",
+    "subclassFeatureDesc": "Description",
+    "addSubclassFeature": "Add subclass feature"
   },
   "abilities": {
     "editBtn": "✏ Edit",
@@ -159,11 +169,14 @@
     "maxBase": " (base)",
     "temp": "Temp",
     "tempFull": "Temporary HP",
-    "tempBtn": "🛡 Temp",
-    "damage": "💔 Damage",
-    "heal": "💚 Heal",
+    "tempBtn": "Temp",
+    "damage": "Damage",
+    "heal": "Heal",
     "editBtn": "✏ Edit",
-    "editDoneBtn": "✓ Done"
+    "editDoneBtn": "✓ Done",
+    "hitDiceLabel": "Hit Dice",
+    "hitDiceRollBtn": "Roll & heal",
+    "hitDiceResult": "Hit die {{die}}: {{roll}}{{mod}} = {{total}} HP healed"
   },
   "combat": {
     "ac": "AC",
@@ -176,6 +189,28 @@
     "deathSuccess": "Successes",
     "deathFail": "Failures"
   },
+  "deathSave": {
+    "rollBtn": "Roll d20",
+    "result": "Death Save: {{roll}}",
+    "nat20": "Natural 20! — Regain 1 HP",
+    "nat1": "Natural 1! — Two failures",
+    "successMark": "1 success",
+    "failMark": "1 failure",
+    "undo": "Undo"
+  },
+  "concentration": {
+    "checkRequired": "Concentration check! DC {{dc}} (half damage, min 10)",
+    "rollBtn": "Roll CON save",
+    "passBtn": "Pass",
+    "failBtn": "Fail — Lose concentration",
+    "rollLabel": "CON save:",
+    "passed": "Passed",
+    "failed": "Failed — concentration lost"
+  },
+  "rest": {
+    "short": "Short Rest",
+    "long": "Long Rest"
+  },
   "actions": {
     "filterAll": "All",
     "filterAction": "Action",
@@ -185,9 +220,9 @@
     "hideBase": "🙈 Hide basic",
     "showBase": "👁 Show basic",
     "add": "+ Add action",
-    "addTagBtn": "🏷 Add tag",
-    "editTagBtn": "🏷 Edit tags",
-    "tagDone": "✓ Done",
+    "addTagBtn": "Add tag",
+    "editTagBtn": "Edit tags",
+    "tagDone": "Done",
     "typeAction": "Action",
     "typeBonus": "Bonus Action",
     "typeReaction": "Reaction",
@@ -228,9 +263,9 @@
     "noSlots": "No slots available.",
     "shortRest": "🌙 Short Rest",
     "longRest": "🛏 Long Rest",
-    "addTagBtn": "🏷 Add tag",
-    "editTagBtn": "🏷 Edit tags",
-    "tagDone": "✓ Done",
+    "addTagBtn": "Add tag",
+    "editTagBtn": "Edit tags",
+    "tagDone": "Done",
     "customName": "Name *",
     "customLevel": "Level",
     "customSchool": "School",
@@ -320,10 +355,64 @@
   "notation": {
     "dynamicTitle": "Dynamic value — original:",
     "rollTitle": "Roll",
-    "attrHelp": "→ ability modifier",
-    "lvlHelp": "→ scales with level",
-    "bonusHelp": "→ equipment bonus (type @ for list)",
-    "counterHelp": "→ clickable counter (e.g. charges)"
+    "slashHint": "Type / (forward slash) to access notation",
+    "attrHelp": "use the ability modifier",
+    "lvlHelp": "scales with level",
+    "bonusHelp": "to add bonus",
+    "counterHelp": "creates clickable counter",
+    "dynamicHint": "Hover ≈ to see the original formula",
+    "group": {
+      "dice": "Dice",
+      "abilities": "Ability modifiers",
+      "traits": "Trait modifiers",
+      "scaling": "Scaling",
+      "counters": "Counters",
+      "bonuses": "Equipment bonuses"
+    },
+    "item": {
+      "diceRoll": "Dice roll",
+      "str": "Strength (STR)",
+      "dex": "Dexterity (DEX)",
+      "con": "Constitution (CON)",
+      "int": "Intelligence (INT)",
+      "wis": "Wisdom (WIS)",
+      "cha": "Charisma (CHA)",
+      "pro": "Proficiency bonus",
+      "lvl": "Scales with level",
+      "counter": "Counter / charges",
+      "bonusAC": "Armor Class bonus",
+      "bonusINIT": "Initiative bonus",
+      "bonusSPD": "Speed bonus",
+      "bonusHP": "Max HP bonus",
+      "bonusSTR": "STR bonus",
+      "bonusDEX": "DEX bonus",
+      "bonusCON": "CON bonus",
+      "bonusINT": "INT bonus",
+      "bonusWIS": "WIS bonus",
+      "bonusCHA": "CHA bonus",
+      "bonusTSSTR": "STR save bonus",
+      "bonusTSDEX": "DEX save bonus",
+      "bonusTSCON": "CON save bonus",
+      "bonusTSINT": "INT save bonus",
+      "bonusTSWIS": "WIS save bonus",
+      "bonusTSCHA": "CHA save bonus"
+    },
+    "dh": {
+      "agi": "Agility (AGI)",
+      "str": "Strength (STR)",
+      "fin": "Finesse (FIN)",
+      "ins": "Instinct (INS)",
+      "pre": "Presence (PRE)",
+      "kno": "Knowledge (KNO)"
+    },
+    "desc": {
+      "diceRoll": "Clickable die — rolls automatically",
+      "modifier": "Character ability modifier",
+      "proficiency": "Proficiency bonus",
+      "lvl": "Changes value based on character level",
+      "counter": "Toggleable pips (e.g. spell charges)",
+      "bonus": "Passive bonus applied to this stat"
+    }
   },
   "weapons": {
     "noWeapons": "No weapons added. Click \"+\" to add one.",
@@ -353,7 +442,17 @@
     "descPlaceholder": "Description, special properties, history... (@ for bonuses)",
     "proficiencyLabel": "Proficiency:",
     "proficiencyPlaceholder": "E.g. Simple weapons, short swords, bows...",
-    "equipBonusLabel": "Equipment bonuses"
+    "equipBonusLabel": "Equipment bonuses",
+    "presetAttackLine": "attack: 1d20+[STR]",
+    "presetAttackLineProf": "attack: 1d20+[STR]+[PRO]",
+    "confirmProficient": "Proficient with this weapon",
+    "confirmMastery": "Have mastery with this weapon",
+    "masteryActiveLabel": "Mastery",
+    "profWarning": "Remember to add +[PRO] to the attack line in the description.",
+    "presetDamageLine": "damage: {{dmg}}+[STR]",
+    "presetDmg1h": "damage (1 hand): {{dmg}}+[STR]",
+    "presetDmg2h": "damage (2 hands): {{dmg}}+[STR]",
+    "presetFinesseNote": "This weapon uses Strength by default. You can also use Dexterity (edit the weapon stat from STR to DEX)."
   },
   "conditions": {
     "title": "Conditions"
@@ -386,23 +485,42 @@
     "iconAccent": "Accent color",
     "units": "Units",
     "weightUnit": "Weight",
-    "speedUnit": "Speed"
+    "speedUnit": "Speed",
+    "groupStyle": "Style",
+    "groupLangUnits": "Language & Units"
   },
   "units": {
     "sq": "sq."
   },
   "dice": {
     "natural20": "Natural 20!",
-    "natural1": "Natural 1!"
+    "natural1": "Natural 1!",
+    "exhaustionPenalty": "(Exh. −{{penalty}})"
   },
   "toast": {
-    "longRest": "Long rest: HP and spell slots restored!",
+    "longRest": "Long rest: HP, Hit Dice and spell slots restored!",
     "shortRest": "Short rest complete. Use hit dice to recover HP.",
+    "shortRestMain": "Short rest complete.",
+    "shortRestHint": "Use hit dice to recover HP.",
     "imported": "Character imported!",
     "importError": "Error: invalid JSON file.",
     "creatorDone": "Character \"{{name}}\" created!",
     "spellCast": "✨ {{name}} cast!",
     "noSlot": "No slots available!"
+  },
+  "accessibility": {
+    "title": "Accessibility",
+    "font": "Font",
+    "fontDefault": "Default",
+    "textSize": "Text size",
+    "sizeNormal": "Normal",
+    "sizeLarge": "Large",
+    "sizeXLarge": "Extra large",
+    "contrast": "Contrast",
+    "contrastDefault": "Default",
+    "contrastHigh": "High contrast",
+    "largeTargets": "Larger touch targets",
+    "onboardingNote": "Accessibility options available in the ☰ menu — font, text size, contrast and more."
   },
   "settings": {
     "uiLanguage": "Interface language",
@@ -455,10 +573,41 @@
     "summaryTool": "Tool",
     "summaryBgBonus": "Background bonus",
     "summarySpellcaster": "Spellcaster",
-    "spellcaster": "Spellcaster"
+    "spellcaster": "Spellcaster",
+    "bgEquipTitle": "Starting Equipment",
+    "bgEquipOption": "Option {{opt}}:",
+    "summaryEquipment": "Starting equipment",
+    "customClsName": "Class name",
+    "customClsHitDie": "Hit Die",
+    "customClsSpellStat": "Spellcasting ability",
+    "customClsSpellNone": "None",
+    "customClsSaveProfs": "Saving Throw Proficiencies",
+    "customClsSkillCount": "Number of class skills",
+    "customClsSkillOptions": "Available skills",
+    "customClsSkillAllAvail": "(all skills)",
+    "customBgName": "Background name",
+    "customBgAsiLabel": "Ability Score Improvements",
+    "customBgAsiOptionA": "+2 / +1",
+    "customBgAsiOptionB": "+1 / +1 / +1",
+    "customBgAsiPlus2": "+2 ability",
+    "customBgAsiPlus1": "+1 ability",
+    "customBgSkillsLabel": "Skill Proficiencies",
+    "customBgTool": "Tool Proficiency",
+    "customBgLanguage": "Language",
+    "customBgFeat": "Origin Feat",
+    "customBgEquipLabel": "Equipment",
+    "customBgEquipGold": "50 GP to spend on starting equipment",
+    "customBgEquipItems": "List specific items",
+    "customSpeciesName": "Species name",
+    "customSpeciesSpeed": "Speed (ft)",
+    "customSpeciesDarkvision": "Darkvision",
+    "customSpeciesTraits": "Species traits",
+    "customSpeciesAddTrait": "+ Add trait",
+    "customSpeciesTraitName": "Trait name",
+    "customSpeciesTraitDesc": "Description"
   },
   "common": {
-    "edit": "✏ Edit",
+    "edit": "Edit",
     "editDone": "✓ Done",
     "cancel": "Cancel",
     "save": "✓ Save",
@@ -467,9 +616,9 @@
     "deleteBtn": "✕ Delete",
     "noData": "No data available.",
     "loading": "Loading...",
-    "addTag": "🏷 Add tag",
-    "editTags": "🏷 Edit tags",
-    "tagDone": "✓ Done",
+    "addTag": "Add tag",
+    "editTags": "Edit tags",
+    "tagDone": "Done",
     "addToAction": "Add to actions",
     "removeFromAction": "Remove from actions",
     "inAction": "In actions",
@@ -601,7 +750,10 @@
       },
       "exhaustion": {
         "name": "Exhaustion",
-        "desc": "Each level subtracts 2 from d20 rolls and reduces speed by 5 ft. Lv. 5: speed 0. Lv. 6: instant death."
+        "desc": "Each level subtracts 2 from d20 rolls and reduces speed by {{speedPerLevel}} {{unit}}. Lv. 5: speed 0. Lv. 6: instant death.",
+        "levelFmt": "Lv. {{level}}: −{{penalty}} to all d20 rolls · Speed −{{speed}} {{unit}}",
+        "level5": "Lv. 5: −10 to all d20 rolls · Speed 0",
+        "level6": "Lv. 6: Death"
       }
     },
     "species": {
@@ -728,6 +880,7 @@
     "exhaustionShort": "Exh.",
     "noExhaustion": "No exhaustion",
     "exhaustionLevel": "Exhaustion level",
+    "exhaustionDeath": "Death",
     "dhArmor": "Armor",
     "dhHope": "Hope",
     "dhFear": "Fear"
@@ -755,15 +908,9 @@
     "removeFromActions": "Remove from actions"
   },
   "onboarding": {
-    "welcomeTitle": "Welcome to CharacterForge",
-    "welcomeDesc": "CharacterForge is a free app to manage RPG character sheets directly in your browser, with no installation needed. The project is in active development — coming soon: templates for other RPG systems (Daggerheart, Pathfinder and more), homebrew content import, and much more.",
-    "welcomeFeedback": "You have suggestions, ideas, or found a bug? Every piece of feedback is valuable.",
     "feedbackBtn": "📝 Leave feedback",
     "kofiBtn": "☕ Buy me a coffee",
     "kofiDesc": "CharacterForge is free and will stay free. Your support helps development.",
-    "startTutorial": "Start the tutorial →",
-    "skip": "Skip, start now",
-    "skipHint": "Puedes volver a abrir esta guía en cualquier momento desde el botón ?.",
     "tutorialTitle": "Quick Guide",
     "close": "Close",
     "prev": "← Back",
@@ -773,13 +920,38 @@
     "helpBtn": "?",
     "community": {
       "title": "Available in multiple languages",
-      "body": "CharacterForge is available in Italian, English, French, German, Spanish and more languages added by the community. You can switch language anytime from the top bar.",
+      "body": "CharacterForge is available in Italian, English, French, German, Spanish and more languages added by the community (Just send me a request and we'll add the translation file!). You can switch language anytime from the settings menu.",
       "translateBtn": "Help translate →",
       "contributBtn": "Contribute on GitHub →",
       "note": "No coding skills required to translate — just visit Crowdin and start contributing!"
     },
     "welcome": {
-      "translateLink": "🌍 Ayúdanos a traducir CharacterForge a tu idioma"
+      "title": "Welcome to CharacterForge",
+      "intro": "CharacterForge is a free, open-source character sheet app for tabletop RPGs — built to be fast, flexible, and accessible to everyone.",
+      "features": [
+        {
+          "icon": "🎲",
+          "title": "Multi-system",
+          "desc": "D&D 5.5e 2024 today, Daggerheart and more coming soon. One app for all your characters."
+        },
+        {
+          "icon": "⚙",
+          "title": "Fully customizable",
+          "desc": "Drag widgets, change layouts, import homebrew — tailor everything to your playstyle."
+        },
+        {
+          "icon": "✨",
+          "title": "Easy to use",
+          "desc": "Create a character in minutes, consult it at the table without friction. Available in multiple languages, with accessibility options built in."
+        }
+      ],
+      "feedbackNote": "Found a bug or have an idea? Every submission is read.",
+      "feedbackBtn": "📝 Leave feedback",
+      "tutorialBtn": "Start the tutorial →",
+      "skipBtn": "Skip, start now",
+      "skipHint": "You can reopen this guide anytime with the ? button.",
+      "translateLink": "🌍 Help us translate CharacterForge into your language",
+      "a11yNote": "Accessibility options available in the ☰ menu — font, text size, contrast and more."
     },
     "demoLabel": "Try it →",
     "diceNote": "Click the dice to roll — the [STR] modifier is calculated automatically from your character.",
@@ -797,20 +969,72 @@
       "counterRow": "Clickable counter (e.g. charges)"
     },
     "step1Title": "Your sheet, your way",
-    "step1Text": "Activate Layout mode with the ⠿ button at the top to customize everything: drag widgets to reorder them, expand them to full width or reduce to half column, move them to different tabs or hide them. Tabs themselves are reorderable and hideable. The layout is saved automatically.",
+    "step1Text": "Activate Layout mode with the ⠿ Edit Layout button in the menu to customize everything:",
+    "step1Points": [
+      "Drag widgets to reorder them",
+      "Expand to full width or reduce to half column",
+      "Move widgets to different tabs or hide them",
+      "Tabs are reorderable and hideable too",
+      "Pin HP, concentration, conditions and more to the top bar for quick access",
+      "Change the icon style (emoji, Lucide, or none) from the accessibility menu",
+      "Change the primary accent color from the accessibility menu"
+    ],
+    "step1Footer": "The layout is saved automatically.",
     "step2Title": "Clickable dice everywhere",
     "step2Text": "In any description field — items, spells, actions, weapons — you can write dice notations like 2d6+3 or 1d8 and they become clickable buttons that roll automatically. The result appears in a toast notification at the top right.",
     "step3Title": "Smart Notation",
-    "step3Text": "Use [STR], [PRO], [LVL:...] and +N@[STAT] notation directly in any description field. Values resolve automatically from your character's current stats.",
+    "step3Text": "Just type / in any description field to open the notation menu. Values resolve automatically from your character's current stats.",
+    "step3Footer": "Hover ≈ to see the original formula.",
     "step4Title": "Keyword Glossary",
     "step4Text": "In action and spell descriptions, game terms like blinded, advantage, disadvantage, finesse, concentration and many others are underlined. Hover over them with your mouse (or long-press on mobile) to see a quick explanation.",
     "step5Title": "Build your arsenal",
-    "step5Text": "In the Combat tab you can add custom actions with type (Action / Bonus Action / Reaction / Free) and associated dice. In the Spells tab browse the SRD catalog with filters by class, level and school, or add custom spells. In Inventory, items with the same name automatically stack together.",
+    "step5Text": "Manage all your combat tools and gear:",
+    "step5Points": [
+      "Combat tab: add custom actions with type (Action / Bonus Action / Reaction / Free) and dice",
+      "Spells tab: browse the SRD catalog filtered by class, level and school, or add custom spells"
+    ],
     "step6Title": "Organize with tags",
-    "step6Text": "You can add custom tags to any action or spell — expand the entry and click 🏷. Tags you create become available as quick filters at the top of the list. Useful examples: 'attack', 'utility', 'heal', 'bonus action'.",
+    "step6Text": "You can add custom tags to any action or spell — expand the entry and click 🏷. Tags you create become available as quick filters at the top of the list.",
     "step7Title": "Rests and recovery",
-    "step7Text": "In the Spells tab use the Short Rest and Long Rest buttons to manage recovery. Long rest restores all spell slots and HP to maximum. Death saves reset automatically. Temporary HP are managed from the Combat tab with the 🛡 button.",
+    "step7Text": "Manage recovery from the Spells tab:",
+    "step7Points": [
+      "Long rest: restores all spell slots and HP to maximum",
+      "Short rest: use hit dice to recover HP",
+      "Death saves reset automatically after a long rest"
+    ],
     "step8Title": "Help us improve",
-    "step8Text": "CharacterForge is a free project in continuous evolution. If you find a bug, have a feature idea, or want to request support for a specific RPG system, use the feedback form — every report is read."
+    "step8Text": "CharacterForge is a free project in continuous evolution. If you find a bug, have a feature idea, or want to request support for a specific RPG system, use the feedback form — every report is read. You can reopen this guide anytime from the ? button in the menu."
+  },
+  "levelUp": {
+    "title": "Level Up to {{level}}",
+    "stepHp": "Hit Points",
+    "stepFeatures": "New Features",
+    "stepChoices": "Choices",
+    "stepAsi": "Ability Score Improvement",
+    "stepSpells": "New Spells",
+    "stepSummary": "Summary",
+    "rollDie": "Roll {{die}}",
+    "takeAverage": "Take average ({{val}})",
+    "newHp": "New max HP: {{current}} + {{gain}} = {{total}}",
+    "confirm": "Confirm Level Up",
+    "noted": "✓ Noted",
+    "customChoice": "Custom (write below)",
+    "asiOption": "Ability Score Improvement",
+    "featOption": "Feat",
+    "featPlaceholder": "Feat name",
+    "featCategories": "Categories: Origin / General / Fighting Style / Epic Boon",
+    "epicBoonPlaceholder": "Epic Boon name",
+    "epicBoonRecommended": "Boon of Combat Prowess recommended",
+    "asiPlus2": "+2 to one ability",
+    "asiPlus1": "+1 to two abilities",
+    "spellsToLearn": "Choose {{count}} spell(s) to learn"
+  },
+  "levelDown": {
+    "title": "Go back to level {{level}}?",
+    "willRemove": "Will be removed:",
+    "keepItem": "Keep",
+    "noHistory": "No level data recorded — only spell slots and level will be adjusted.",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
   }
 }
