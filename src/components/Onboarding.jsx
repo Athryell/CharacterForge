@@ -13,11 +13,11 @@ const STORAGE_KEY = 'characterforge_onboarding_seen';
 const TOTAL_STEPS = 9;
 
 const LANGUAGES = [
-  { code: 'en', flag: '🇬🇧', label: 'English' },
-  { code: 'it', flag: '🇮🇹', label: 'Italiano' },
-  { code: 'de', flag: '🇩🇪', label: 'Deutsch' },
-  { code: 'fr', flag: '🇫🇷', label: 'Français' },
-  { code: 'es', flag: '🇪🇸', label: 'Español' },
+  { code: 'en', flagCode: 'gb', label: 'English' },
+  { code: 'it', flagCode: 'it', label: 'Italiano' },
+  { code: 'de', flagCode: 'de', label: 'Deutsch' },
+  { code: 'fr', flagCode: 'fr', label: 'Français' },
+  { code: 'es', flagCode: 'es', label: 'Español' },
 ];
 
 const DEMO_CHAR = {
@@ -77,14 +77,14 @@ function SupportGroup({ t }) {
 function LanguagePicker({ i18n }) {
   return (
     <div className="onboarding-lang-picker">
-      {LANGUAGES.map(({ code, flag, label }) => (
+      {LANGUAGES.map(({ code, flagCode, label }) => (
         <button
           key={code}
           className={`onboarding-lang-btn${i18n.language === code ? ' active' : ''}`}
           onClick={() => i18n.changeLanguage(code)}
           title={label}
         >
-          <span className="onboarding-lang-flag">{flag}</span>
+          <img src={`https://flagcdn.com/24x18/${flagCode}.png`} alt={label} style={{ borderRadius: '2px', verticalAlign: 'middle' }} />
           <span className="onboarding-lang-name">{label}</span>
         </button>
       ))}

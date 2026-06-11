@@ -2118,9 +2118,12 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
               <div className="hmenu-section">
                 <div className="hmenu-label">{t('menu.uiLang')}</div>
                 <div className="hmenu-row">
-                  {[['it','🇮🇹 IT'],['en','🇬🇧 EN']].map(([lang, label]) => (
+                  {[['it','it','IT'],['en','gb','EN']].map(([lang, flagCode, short]) => (
                     <button key={lang} className={`hmenu-theme-btn ${i18n.language === lang ? 'active' : ''}`}
-                      onClick={() => { i18n.changeLanguage(lang); setShowMenu(false); }}>{label}</button>
+                      onClick={() => { i18n.changeLanguage(lang); setShowMenu(false); }}>
+                      <img src={`https://flagcdn.com/24x18/${flagCode}.png`} alt={short} style={{ borderRadius: '2px', verticalAlign: 'middle', marginRight: 4 }} />
+                      {short}
+                    </button>
                   ))}
                 </div>
               </div>
