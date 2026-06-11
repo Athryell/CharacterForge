@@ -35,6 +35,10 @@
   --c-warn-text: #FBBF24;
   --c-text: #F0F2F8;
   --c-warn: #FBBF24;
+  /* accent defaults (green) — overridden at runtime by useTheme.js via inline style */
+  --c-accent: #6BBF45;
+  --c-accent-light: #182A0A;
+  --c-accent-text: #8FD460;
   --shadow-card: 0 1px 4px rgba(0,0,0,.4), 0 0 0 0.5px rgba(240,242,248,.07);
 }
 
@@ -51,6 +55,10 @@
     --c-warn-text: #FBBF24;
     --c-text: #F0F2F8;
     --c-warn: #FBBF24;
+    /* accent defaults (green) — overridden at runtime by useTheme.js via inline style */
+    --c-accent: #6BBF45;
+    --c-accent-light: #182A0A;
+    --c-accent-text: #8FD460;
     --shadow-card: 0 1px 4px rgba(0,0,0,.4), 0 0 0 0.5px rgba(240,242,248,.07);
   }
 }
