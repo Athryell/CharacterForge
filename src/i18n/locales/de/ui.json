@@ -169,11 +169,14 @@
     "maxBase": " (base)",
     "temp": "Temp",
     "tempFull": "Temporary HP",
-    "tempBtn": "🛡 Temp",
-    "damage": "💔 Damage",
-    "heal": "💚 Heal",
+    "tempBtn": "Temp",
+    "damage": "Damage",
+    "heal": "Heal",
     "editBtn": "✏ Edit",
-    "editDoneBtn": "✓ Done"
+    "editDoneBtn": "✓ Done",
+    "hitDiceLabel": "Hit Dice",
+    "hitDiceRollBtn": "Roll & heal",
+    "hitDiceResult": "Hit die {{die}}: {{roll}}{{mod}} = {{total}} HP healed"
   },
   "combat": {
     "ac": "AC",
@@ -186,6 +189,28 @@
     "deathSuccess": "Successes",
     "deathFail": "Failures"
   },
+  "deathSave": {
+    "rollBtn": "Roll d20",
+    "result": "Death Save: {{roll}}",
+    "nat20": "Natural 20! — Regain 1 HP",
+    "nat1": "Natural 1! — Two failures",
+    "successMark": "1 success",
+    "failMark": "1 failure",
+    "undo": "Undo"
+  },
+  "concentration": {
+    "checkRequired": "Concentration check! DC {{dc}} (half damage, min 10)",
+    "rollBtn": "Roll CON save",
+    "passBtn": "Pass",
+    "failBtn": "Fail — Lose concentration",
+    "rollLabel": "CON save:",
+    "passed": "Passed",
+    "failed": "Failed — concentration lost"
+  },
+  "rest": {
+    "short": "Short Rest",
+    "long": "Long Rest"
+  },
   "actions": {
     "filterAll": "All",
     "filterAction": "Action",
@@ -195,9 +220,9 @@
     "hideBase": "🙈 Hide basic",
     "showBase": "👁 Show basic",
     "add": "+ Add action",
-    "addTagBtn": "🏷 Add tag",
-    "editTagBtn": "🏷 Edit tags",
-    "tagDone": "✓ Done",
+    "addTagBtn": "Add tag",
+    "editTagBtn": "Edit tags",
+    "tagDone": "Done",
     "typeAction": "Action",
     "typeBonus": "Bonus Action",
     "typeReaction": "Reaction",
@@ -238,9 +263,9 @@
     "noSlots": "No slots available.",
     "shortRest": "🌙 Short Rest",
     "longRest": "🛏 Long Rest",
-    "addTagBtn": "🏷 Add tag",
-    "editTagBtn": "🏷 Edit tags",
-    "tagDone": "✓ Done",
+    "addTagBtn": "Add tag",
+    "editTagBtn": "Edit tags",
+    "tagDone": "Done",
     "customName": "Name *",
     "customLevel": "Level",
     "customSchool": "School",
@@ -417,7 +442,17 @@
     "descPlaceholder": "Description, special properties, history... (@ for bonuses)",
     "proficiencyLabel": "Proficiency:",
     "proficiencyPlaceholder": "E.g. Simple weapons, short swords, bows...",
-    "equipBonusLabel": "Equipment bonuses"
+    "equipBonusLabel": "Equipment bonuses",
+    "presetAttackLine": "attack: 1d20+[STR]",
+    "presetAttackLineProf": "attack: 1d20+[STR]+[PRO]",
+    "confirmProficient": "Proficient with this weapon",
+    "confirmMastery": "Have mastery with this weapon",
+    "masteryActiveLabel": "Mastery",
+    "profWarning": "Remember to add +[PRO] to the attack line in the description.",
+    "presetDamageLine": "damage: {{dmg}}+[STR]",
+    "presetDmg1h": "damage (1 hand): {{dmg}}+[STR]",
+    "presetDmg2h": "damage (2 hands): {{dmg}}+[STR]",
+    "presetFinesseNote": "This weapon uses Strength by default. You can also use Dexterity (edit the weapon stat from STR to DEX)."
   },
   "conditions": {
     "title": "Conditions"
@@ -459,11 +494,14 @@
   },
   "dice": {
     "natural20": "Natural 20!",
-    "natural1": "Natural 1!"
+    "natural1": "Natural 1!",
+    "exhaustionPenalty": "(Exh. −{{penalty}})"
   },
   "toast": {
-    "longRest": "Long rest: HP and spell slots restored!",
+    "longRest": "Long rest: HP, Hit Dice and spell slots restored!",
     "shortRest": "Short rest complete. Use hit dice to recover HP.",
+    "shortRestMain": "Short rest complete.",
+    "shortRestHint": "Use hit dice to recover HP.",
     "imported": "Character imported!",
     "importError": "Error: invalid JSON file.",
     "creatorDone": "Character \"{{name}}\" created!",
@@ -569,7 +607,7 @@
     "customSpeciesTraitDesc": "Description"
   },
   "common": {
-    "edit": "✏ Edit",
+    "edit": "Edit",
     "editDone": "✓ Done",
     "cancel": "Cancel",
     "save": "✓ Save",
@@ -578,9 +616,9 @@
     "deleteBtn": "✕ Delete",
     "noData": "No data available.",
     "loading": "Loading...",
-    "addTag": "🏷 Add tag",
-    "editTags": "🏷 Edit tags",
-    "tagDone": "✓ Done",
+    "addTag": "Add tag",
+    "editTags": "Edit tags",
+    "tagDone": "Done",
     "addToAction": "Add to actions",
     "removeFromAction": "Remove from actions",
     "inAction": "In actions",
@@ -712,7 +750,10 @@
       },
       "exhaustion": {
         "name": "Exhaustion",
-        "desc": "Each level subtracts 2 from d20 rolls and reduces speed by 5 ft. Lv. 5: speed 0. Lv. 6: instant death."
+        "desc": "Each level subtracts 2 from d20 rolls and reduces speed by {{speedPerLevel}} {{unit}}. Lv. 5: speed 0. Lv. 6: instant death.",
+        "levelFmt": "Lv. {{level}}: −{{penalty}} to all d20 rolls · Speed −{{speed}} {{unit}}",
+        "level5": "Lv. 5: −10 to all d20 rolls · Speed 0",
+        "level6": "Lv. 6: Death"
       }
     },
     "species": {
@@ -839,6 +880,7 @@
     "exhaustionShort": "Exh.",
     "noExhaustion": "No exhaustion",
     "exhaustionLevel": "Exhaustion level",
+    "exhaustionDeath": "Death",
     "dhArmor": "Armor",
     "dhHope": "Hope",
     "dhFear": "Fear"
@@ -866,15 +908,9 @@
     "removeFromActions": "Remove from actions"
   },
   "onboarding": {
-    "welcomeTitle": "Welcome to CharacterForge",
-    "welcomeDesc": "CharacterForge is a free app to manage RPG character sheets directly in your browser, with no installation needed. The project is in active development — coming soon: templates for other RPG systems (Daggerheart, Pathfinder and more), homebrew content import, and much more.",
-    "welcomeFeedback": "You have suggestions, ideas, or found a bug? Every piece of feedback is valuable.",
     "feedbackBtn": "📝 Leave feedback",
     "kofiBtn": "☕ Buy me a coffee",
     "kofiDesc": "CharacterForge is free and will stay free. Your support helps development.",
-    "startTutorial": "Start the tutorial →",
-    "skip": "Skip, start now",
-    "skipHint": "You can reopen this guide anytime from the ? button.",
     "tutorialTitle": "Quick Guide",
     "close": "Close",
     "prev": "← Back",
@@ -890,7 +926,32 @@
       "note": "No coding skills required to translate — just visit Crowdin and start contributing!"
     },
     "welcome": {
-      "translateLink": "🌍 Help us translate CharacterForge into your language"
+      "title": "Welcome to CharacterForge",
+      "intro": "CharacterForge is a free, open-source character sheet app for tabletop RPGs — built to be fast, flexible, and accessible to everyone.",
+      "features": [
+        {
+          "icon": "🎲",
+          "title": "Multi-system",
+          "desc": "D&D 5.5e 2024 today, Daggerheart and more coming soon. One app for all your characters."
+        },
+        {
+          "icon": "⚙",
+          "title": "Fully customizable",
+          "desc": "Drag widgets, change layouts, import homebrew — tailor everything to your playstyle."
+        },
+        {
+          "icon": "✨",
+          "title": "Easy to use",
+          "desc": "Create a character in minutes, consult it at the table without friction. Available in multiple languages, with accessibility options built in."
+        }
+      ],
+      "feedbackNote": "Found a bug or have an idea? Every submission is read.",
+      "feedbackBtn": "📝 Leave feedback",
+      "tutorialBtn": "Start the tutorial →",
+      "skipBtn": "Skip, start now",
+      "skipHint": "You can reopen this guide anytime with the ? button.",
+      "translateLink": "🌍 Help us translate CharacterForge into your language",
+      "a11yNote": "Accessibility options available in the ☰ menu — font, text size, contrast and more."
     },
     "demoLabel": "Try it →",
     "diceNote": "Click the dice to roll — the [STR] modifier is calculated automatically from your character.",
@@ -913,13 +974,17 @@
       "Drag widgets to reorder them",
       "Expand to full width or reduce to half column",
       "Move widgets to different tabs or hide them",
-      "Tabs are reorderable and hideable too"
+      "Tabs are reorderable and hideable too",
+      "Pin HP, concentration, conditions and more to the top bar for quick access",
+      "Change the icon style (emoji, Lucide, or none) from the accessibility menu",
+      "Change the primary accent color from the accessibility menu"
     ],
     "step1Footer": "The layout is saved automatically.",
     "step2Title": "Clickable dice everywhere",
     "step2Text": "In any description field — items, spells, actions, weapons — you can write dice notations like 2d6+3 or 1d8 and they become clickable buttons that roll automatically. The result appears in a toast notification at the top right.",
     "step3Title": "Smart Notation",
     "step3Text": "Just type / in any description field to open the notation menu. Values resolve automatically from your character's current stats.",
+    "step3Footer": "Hover ≈ to see the original formula.",
     "step4Title": "Keyword Glossary",
     "step4Text": "In action and spell descriptions, game terms like blinded, advantage, disadvantage, finesse, concentration and many others are underlined. Hover over them with your mouse (or long-press on mobile) to see a quick explanation.",
     "step5Title": "Build your arsenal",
