@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import dataManager from '../data/dataManager';
+import { Icon } from '../config/icons';
 
 function countLabel(counts) {
   const parts = [];
@@ -84,12 +85,12 @@ export default function SourceManager({ onHomebrewChange }) {
       {/* Bottoni azione */}
       <div className="source-actions">
         <button className="io-btn primary" onClick={() => fileRef.current?.click()}>
-          ⬆ Importa pacchetto
+          <Icon id="action.upload" size={14} /> Importa pacchetto
         </button>
         <input ref={fileRef} type="file" accept=".json" style={{ display: 'none' }} onChange={handleFileChange} />
-        <button className="io-btn" onClick={exportSchema}>⬇ Schema vuoto</button>
+        <button className="io-btn" onClick={exportSchema}><Icon id="action.download" size={14} /> Schema vuoto</button>
         {sources.filter(s => s.type === 'homebrew').length > 0 && (
-          <button className="io-btn" onClick={exportAllHomebrew}>⬇ Esporta homebrew</button>
+          <button className="io-btn" onClick={exportAllHomebrew}><Icon id="action.download" size={14} /> Esporta homebrew</button>
         )}
       </div>
 
@@ -116,7 +117,7 @@ export default function SourceManager({ onHomebrewChange }) {
             })}
           </div>
           <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-            <button className="io-btn primary" onClick={confirmImport}>✓ Importa</button>
+            <button className="io-btn primary" onClick={confirmImport}><Icon id="action.done" size={13} /> Importa</button>
             <button className="io-btn" onClick={() => setPending(null)}>Annulla</button>
           </div>
         </div>
@@ -127,7 +128,7 @@ export default function SourceManager({ onHomebrewChange }) {
         <div className={`source-status ${importStatus.ok ? 'ok' : 'err'}`}>
           {importStatus.ok
             ? `✓ "${importStatus.name}" importato — ${countLabel(importStatus.counts || {})}.`
-            : importStatus.errors.map((e, i) => <div key={i}>✕ {e}</div>)
+            : importStatus.errors.map((e, i) => <div key={i}><Icon id="action.remove" size={13} /> {e}</div>)
           }
         </div>
       )}
@@ -148,7 +149,7 @@ export default function SourceManager({ onHomebrewChange }) {
                   style={{ marginLeft: 'auto', padding: '2px 8px', fontSize: 11 }}
                   onClick={() => removeSource(src.id)}
                 >
-                  ✕ Rimuovi
+                  <Icon id="action.remove" size={13} /> Rimuovi
                 </button>
               )}
             </div>

@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const STORAGE_KEY = 'characterforge_units';
+const UNITS_EVENT = 'characterforge:units-changed';
 
 function load() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }
@@ -23,12 +24,19 @@ export function useUnits() {
   const weightUnit = prefs.weightUnit || 'kg';
   const speedUnit = prefs.speedUnit || 'ft';
 
+  useEffect(() => {
+    function handleChange() { setPrefs(load()); }
+    window.addEventListener(UNITS_EVENT, handleChange);
+    return () => window.removeEventListener(UNITS_EVENT, handleChange);
+  }, []);
+
   function setPref(key, val) {
     setPrefs(p => {
       const next = { ...p, [key]: val };
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch {}
       return next;
     });
+    window.dispatchEvent(new CustomEvent(UNITS_EVENT));
   }
 
   // No numeric conversion — unit is cosmetic, just round the value

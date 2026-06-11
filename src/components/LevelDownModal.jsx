@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Icon } from '../config/icons';
 
 export default function LevelDownModal({ currentLevel, charState, onConfirm, onCancel }) {
   const { t } = useTranslation();
@@ -31,7 +32,7 @@ export default function LevelDownModal({ currentLevel, charState, onConfirm, onC
       <div className="creator-modal" style={{ maxWidth: 480 }}>
         <div className="creator-header">
           <div className="creator-title">{t('levelDown.title', { level: targetLevel })}</div>
-          <button className="creator-close" onClick={onCancel}>✕</button>
+          <button className="creator-close" onClick={onCancel}><Icon id="action.remove" size={14} /></button>
         </div>
 
         <div className="creator-body">

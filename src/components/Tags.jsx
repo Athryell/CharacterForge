@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Icon } from '../config/icons';
 
 // Default tag colors cycling
 const TAG_COLORS = [
@@ -30,7 +31,7 @@ export function TagPill({ tag, allTags, onRemove, small }) {
         <button
           className="tag-remove"
           onClick={e => { e.stopPropagation(); onRemove(tag); }}
-        >✕</button>
+        ><Icon id="action.remove" size={11} /></button>
       )}
     </span>
   );

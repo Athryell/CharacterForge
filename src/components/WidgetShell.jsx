@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getWidgetLabel, ALL_TABS } from '../layout';
+import { Icon } from '../config/icons';
 
 export default function WidgetShell({
   id, children, editMode, fullWidth, bottomFull,
@@ -23,7 +24,7 @@ export default function WidgetShell({
     >
       {editMode && (
         <div className="widget-edit-bar">
-          <span className="widget-drag-handle">⠿⠿</span>
+          <span className="widget-drag-handle"><Icon id="action.layout" size={16} /></span>
           <span className="widget-label">{label}</span>
           <div style={{ flex:1 }} />
 

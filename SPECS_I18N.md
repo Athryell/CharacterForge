@@ -172,8 +172,8 @@ Il sistema ha DUE impostazioni lingua separate:
     "max": "Massimi",
     "temp": "Temp HP",
     "tempFull": "HP Temporanei",
-    "damage": "💔 Danno",
-    "heal": "💚 Cura",
+    "damage": "Danno",
+    "heal": "Cura",
     "editBtn": "✏ Modifica",
     "editDoneBtn": "✓ Fine"
   },
@@ -404,8 +404,8 @@ Esempi chiave:
     "current": "Current",
     "max": "Maximum",
     "temp": "Temp HP",
-    "damage": "💔 Damage",
-    "heal": "💚 Heal"
+    "damage": "Damage",
+    "heal": "Heal"
   }
 }
 ```

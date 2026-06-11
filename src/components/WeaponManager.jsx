@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { WEAPON_PROPERTIES, WEAPON_MASTERIES } from '../data/systems/dnd5e/weapons';
+import { WEAPON_PROPERTIES, WEAPON_PROPERTY_DESCS, WEAPON_MASTERIES } from '../data/systems/dnd5e/weapons';
 import dataManager from '../data/dataManager';
 import { TagPill, TagSelector } from './Tags';
 import { KeywordText } from './Tooltip';
 import NotationTextarea from './NotationTextarea';
+import { Icon } from '../config/icons';
 
 const BLANK_FORM = {
-  name: '', isProficient: true, desc: '', properties: [], mastery: 'none', weight: '',
+  name: '', isProficient: true, desc: '', properties: [], mastery: 'none', isMasteryActive: false, weight: '',
 };
 
 function PropertyMasteryPicker({ properties, mastery, onChangeProperties, onChangeMastery }) {
@@ -35,7 +36,8 @@ function PropertyMasteryPicker({ properties, mastery, onChangeProperties, onChan
         <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
           {predefinedKeys.map(key => (
             <button key={key} className={`filter-chip ${properties.includes(key) ? 'active' : ''}`}
-              style={{ fontSize: 11 }} onClick={() => toggleProp(key)}>
+              style={{ fontSize: 11 }} title={WEAPON_PROPERTY_DESCS[key]}
+              onClick={() => toggleProp(key)}>
               {t('data.weaponProps.' + key, WEAPON_PROPERTIES[key])}
             </button>
           ))}
@@ -88,9 +90,10 @@ function PropertyMasteryPicker({ properties, mastery, onChangeProperties, onChan
   );
 }
 
-function WeaponEditForm({ form, onChange, onSave, onCancel, onDelete, added, onToggleAction, allTags, onUpdateTags, onCreateTag, weaponId }) {
+function WeaponEditForm({ form, onChange, onSave, onCancel, onDelete, added, onToggleAction, allTags, onUpdateTags, onCreateTag, weaponId, wasNotProficient }) {
   const { t } = useTranslation();
   function patch(obj) { onChange(f => ({ ...f, ...obj })); }
+  const hasMastery = form.mastery && form.mastery !== 'none';
 
   return (
     <div className="weapon-edit-form" onClick={e => e.stopPropagation()}>
@@ -112,7 +115,20 @@ function WeaponEditForm({ form, onChange, onSave, onCancel, onDelete, added, onT
             <span className="toggle-label">{t('weapons.customProf')}</span>
           </label>
         </div>
+        {hasMastery && (
+          <div className="field" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+            <label>{t('weapons.masteryLabel')}</label>
+            <label className="toggle-box" style={{ marginTop: 6 }}>
+              <input type="checkbox" checked={form.isMasteryActive || false}
+                onChange={e => patch({ isMasteryActive: e.target.checked })} />
+              <span className="toggle-label">{t('weapons.masteryActiveLabel')}</span>
+            </label>
+          </div>
+        )}
       </div>
+      {wasNotProficient && form.isProficient && (
+        <div className="prof-change-warning">⚠ {t('weapons.profWarning')}</div>
+      )}
       <div className="field" style={{ marginTop: 6 }}>
         <label>{t('weapons.propsAndMasteryLabel')}</label>
         <PropertyMasteryPicker
@@ -139,7 +155,7 @@ function WeaponEditForm({ form, onChange, onSave, onCancel, onDelete, added, onT
             <button className={`icon-btn add-to-action-btn ${added ? 'added' : ''}`}
               title={added ? t('common.removeFromAction') : t('common.addToAction')}
               onClick={e => { e.stopPropagation(); onToggleAction(); }}>
-              {added ? '✓' : '⚡'}
+              {added ? <Icon id="action.done" size={13} /> : <Icon id="widget.actions" size={13} />}
             </button>
           )}
           {onDelete && (
@@ -162,6 +178,9 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState(null);
   const [expandedId, setExpandedId] = useState(null);
+  const [selectedPreset, setSelectedPreset] = useState(null);
+  const [pendingProf, setPendingProf] = useState(true);
+  const [pendingMastery, setPendingMastery] = useState(true);
 
   function startEdit(w) {
     setEditingId(w.id);
@@ -174,15 +193,39 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
   }
   function cancelEdit() { setEditingId(null); setEditForm(null); }
 
-  function addPreset(preset) {
+  function selectPreset(preset) {
+    setSelectedPreset(preset);
+    setPendingProf(preset.prof !== false);
+    setPendingMastery(!!(preset.mastery && preset.mastery !== 'none'));
+  }
+
+  function addPreset() {
+    const preset = selectedPreset;
+    const props = preset.properties || [];
+    const isFinesse = props.includes('finesse');
+    const isVersatile = props.includes('versatile');
+    const lines = [];
+    if (preset.dmg) {
+      lines.push(pendingProf ? t('weapons.presetAttackLineProf') : t('weapons.presetAttackLine'));
+      if (isVersatile && preset.versatileDmg) {
+        lines.push(t('weapons.presetDmg1h', { dmg: preset.dmg }));
+        lines.push(t('weapons.presetDmg2h', { dmg: preset.versatileDmg }));
+      } else {
+        lines.push(t('weapons.presetDamageLine', { dmg: preset.dmg }));
+      }
+    }
+    if (isFinesse) lines.push(t('weapons.presetFinesseNote'));
     onUpdate([...weapons, {
       ...BLANK_FORM,
       name: preset.name,
-      isProficient: preset.prof,
+      isProficient: pendingProf,
       properties: preset.properties || [],
       mastery: preset.mastery || 'none',
+      isMasteryActive: pendingMastery,
+      desc: lines.join('\n'),
       id: Date.now().toString(),
     }]);
+    setSelectedPreset(null);
     onAddClose && onAddClose();
   }
   function addCustom() {
@@ -217,27 +260,47 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
             <button className={`filter-chip ${addMode === 'custom' ? 'active' : ''}`} onClick={() => setAddMode('custom')}>{t('weapons.custom')}</button>
           </div>
           {addMode === 'preset' ? (
-            <div className="weapon-preset-list">
-              {dataManager.getWeapons().map(p => (
-                <div key={p.name} className="weapon-preset-item" onClick={() => addPreset(p)}>
-                  <div className="weapon-name">{p.name}</div>
-                  <div className="weapon-meta">
-                    {(p.properties || []).map(prop => (
-                      <span key={prop} className="weapon-prop">{t("data.weaponProps." + prop, WEAPON_PROPERTIES[prop] || prop)}</span>
-                    ))}
-                    {p.mastery && p.mastery !== 'none' && (
-                      <span className="weapon-prop">{t("data.masteries." + p.mastery, WEAPON_MASTERIES[p.mastery]?.label || p.mastery)}</span>
-                    )}
-                  </div>
+            selectedPreset ? (
+              <div className="weapon-preset-confirm">
+                <div className="weapon-preset-confirm-name">{selectedPreset.name}</div>
+                <label className="weapon-preset-confirm-row">
+                  <input type="checkbox" checked={pendingProf} onChange={e => setPendingProf(e.target.checked)} />
+                  {t('weapons.confirmProficient')}
+                </label>
+                {selectedPreset.mastery && selectedPreset.mastery !== 'none' && (
+                  <label className="weapon-preset-confirm-row">
+                    <input type="checkbox" checked={pendingMastery} onChange={e => setPendingMastery(e.target.checked)} />
+                    {t('weapons.confirmMastery')} <em style={{ color: 'var(--c-muted)', marginLeft: 4 }}>— {t('data.masteries.' + selectedPreset.mastery, WEAPON_MASTERIES[selectedPreset.mastery]?.label || selectedPreset.mastery)}</em>
+                  </label>
+                )}
+                <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                  <button className="io-btn" onClick={() => setSelectedPreset(null)}>{t('common.back')}</button>
+                  <button className="io-btn primary" onClick={addPreset}>{t('weapons.addBtn')}</button>
                 </div>
-              ))}
-            </div>
+              </div>
+            ) : (
+              <>
+                <div className="weapon-preset-list">
+                  {[...dataManager.getWeapons()].sort((a, b) => a.name.localeCompare(b.name)).map(p => (
+                    <div key={p.name} className="weapon-preset-item" onClick={() => selectPreset(p)}>
+                      <div className="weapon-name">{p.name}</div>
+                      <div className="weapon-meta">
+                        {(p.properties || []).map(prop => (
+                          <span key={prop} className="weapon-prop">{t("data.weaponProps." + prop, WEAPON_PROPERTIES[prop] || prop)}</span>
+                        ))}
+                        {p.mastery && p.mastery !== 'none' && (
+                          <span className="weapon-prop">{t("data.masteries." + p.mastery, WEAPON_MASTERIES[p.mastery]?.label || p.mastery)}</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <button className="io-btn" style={{ marginTop: 8 }} onClick={onAddClose}>{t('common.cancel')}</button>
+              </>
+            )
           ) : (
             <WeaponEditForm form={addForm} onChange={setAddForm} onSave={addCustom}
               onCancel={onAddClose} />
-          )}
-          {addMode === 'preset' && (
-            <button className="io-btn" style={{ marginTop: 8 }} onClick={onAddClose}>{t('common.cancel')}</button>
           )}
         </div>
       )}
@@ -259,26 +322,27 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
             <div className="weapon-main" onClick={() => handleRowClick(w)} style={{ cursor: 'pointer' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                 <div className="weapon-name">{w.name}</div>
-                {added && <span className="action-added-badge" title={t('common.inAction', 'In azioni')}>⚡</span>}
+                {added && <span className="action-added-badge" title={t('common.inAction', 'In azioni')}><Icon id="widget.actions" size={12} /></span>}
                 {w.acquiredAtLevel && <span className="level-badge">Lv. {w.acquiredAtLevel}</span>}
                 {(w.tags || []).map(tag => <TagPill key={tag} tag={tag} allTags={allTags} small />)}
+                {!w.isProficient && <span className="weapon-prop" style={{ color: 'var(--c-warn-text)' }}>{t('weapons.noProf')}</span>}
+              </div>
+              <div className="weapon-meta">
                 {w.mastery && w.mastery !== 'none' && (
-                  <span className="weapon-prop" style={{ fontSize: 10, color: 'var(--c-accent-text)', background: 'var(--c-accent-light)' }}
+                  <span className={`weapon-prop weapon-mastery-chip ${w.isMasteryActive ? 'weapon-mastery-active' : 'weapon-mastery-inactive'}`}
                     title={WEAPON_MASTERIES[w.mastery]?.desc}>
                     {WEAPON_MASTERIES[w.mastery] ? t("data.masteries." + w.mastery, WEAPON_MASTERIES[w.mastery].label) : w.mastery}
                   </span>
                 )}
-              </div>
-              <div className="weapon-meta">
-                {predefinedProps.map(p => <span key={p} className="weapon-prop">{t("data.weaponProps." + p, WEAPON_PROPERTIES[p])}</span>)}
+                {predefinedProps.map(p => <span key={p} className="weapon-prop" title={WEAPON_PROPERTY_DESCS[p]}>{t("data.weaponProps." + p, WEAPON_PROPERTIES[p])}</span>)}
                 {customProps.map(p => <span key={p} className="weapon-prop">{p}</span>)}
                 {w.weight && <span className="weapon-prop" style={{ fontSize: 10 }}>{w.weight} {weightUnit || 'kg'}</span>}
-                {!w.isProficient && <span className="weapon-prop" style={{ color: 'var(--c-warn-text)' }}>{t('weapons.noProf')}</span>}
               </div>
             </div>
 
             {isEditing && editForm && (
               <WeaponEditForm form={editForm} onChange={setEditForm} onSave={saveEdit} onCancel={cancelEdit}
+                wasNotProficient={!w.isProficient}
                 allTags={allTags} weaponId={w.id}
                 onUpdateTags={(id, tags) => {
                   onUpdateTags && onUpdateTags(id, tags);
@@ -298,9 +362,16 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
               <div className="weapon-expanded-section" onClick={e => e.stopPropagation()}>
                 {w.desc && <div style={{ fontSize: 12, color: 'var(--c-muted)', marginBottom: 4 }}>
                   <KeywordText text={w.desc}
+                    onRoll={onRoll}
+                    label={w.name}
                     counters={w.counters}
                     onCounterChange={(idx, vals) => onUpdate(weapons.map(w2 => w2.id === w.id ? { ...w2, counters: { ...(w2.counters || {}), [idx]: vals } } : w2))} />
                 </div>}
+                {predefinedProps.filter(p => WEAPON_PROPERTY_DESCS[p]).map(p => (
+                  <div key={p} style={{ fontSize: 11, color: 'var(--c-muted)', marginBottom: 4 }}>
+                    <strong>{t("data.weaponProps." + p, WEAPON_PROPERTIES[p] || p)}:</strong> {WEAPON_PROPERTY_DESCS[p]}
+                  </div>
+                ))}
                 {w.mastery && w.mastery !== 'none' && (
                   <div style={{ fontSize: 11, color: 'var(--c-muted)', marginBottom: 4 }}>
                     <strong>{WEAPON_MASTERIES[w.mastery] ? t("data.masteries." + w.mastery, WEAPON_MASTERIES[w.mastery].label) : w.mastery}:</strong>
@@ -315,7 +386,7 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
                   </div>
                 )}
                 <div className="item-edit-actions">
-                  <button className="io-btn" onClick={e => { e.stopPropagation(); startEdit(w); }}>{t('common.edit')}</button>
+                  <button className="io-btn" onClick={e => { e.stopPropagation(); startEdit(w); }}><Icon id="action.editItem" size={13} /> {t('common.edit')}</button>
                 </div>
               </div>
             )}

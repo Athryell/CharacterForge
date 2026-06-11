@@ -119,6 +119,8 @@ export function createDefaultState() {
     equippedArmor: null,
     hasShield: false,
     concentratingSpell: null,
+    concentrationProficiency: false,
+    hitDiceUsed: 0,
     features: [],
     weaponProficiency: '',
     armorProficiency: '',

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { KeywordText } from './Tooltip';
 import NotationTextarea from './NotationTextarea';
 import { TagPill, TagSelector } from './Tags';
+import { Icon } from '../config/icons';
 
 const SOURCE_BADGE = {
   class:      { labelKey: 'features.sourceClass',      color: '#3B6D11', bg: '#EAF3DE' },
@@ -142,11 +143,11 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
                               <>
                                 <TagSelector selected={feature.tags || []} allTags={allTags}
                                   onChange={tags => onUpdateTags && onUpdateTags(feature.id, tags)} onCreateTag={onCreateTag} />
-                                <button className="tag-edit-btn" style={{ marginTop: 4 }} onClick={() => setEditingTagsFor(null)}>✓ {t('common.done', 'Done')}</button>
+                                <button className="tag-edit-btn" style={{ marginTop: 4 }} onClick={() => setEditingTagsFor(null)}><Icon id="action.done" size={13} /> {t('common.done', 'Done')}</button>
                               </>
                             ) : (
                               <button className="tag-edit-btn" onClick={() => setEditingTagsFor(feature.id)}>
-                                🏷 {(feature.tags||[]).length === 0 ? t('tags.add', 'Add tag') : t('tags.edit', 'Edit tags')}
+                                <Icon id="action.tag" size={13} /> {(feature.tags||[]).length === 0 ? t('tags.add', 'Add tag') : t('tags.edit', 'Edit tags')}
                               </button>
                             )}
                           </div>
@@ -159,9 +160,9 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
                                     e.stopPropagation();
                                     if (added) { onRemoveAction && onRemoveAction(feature.name); }
                                     else { onAddAction({ id: `feature_${feature.id}_${Date.now()}`, name: feature.name, type: feature.actionType || detectActionType(feature.desc), desc: feature.desc || '', dice: '' }); }
-                                  }}>{added ? '✓' : '⚡'}</button>
+                                  }}>{added ? <Icon id="action.done" size={13} /> : '⚡'}</button>
                               )}
-                              <button className="io-btn danger" onClick={e => { e.stopPropagation(); removeFeature(feature.id); }}>✕ {t('common.delete', 'Delete')}</button>
+                              <button className="io-btn danger" onClick={e => { e.stopPropagation(); removeFeature(feature.id); }}><Icon id="action.remove" size={13} /> {t('common.delete', 'Delete')}</button>
                             </div>
                             <div style={{ display: 'flex', gap: 8 }}>
                               <button className="io-btn" onClick={e => { e.stopPropagation(); cancelEdit(); }}>{t('common.cancel', 'Cancel')}</button>
@@ -183,16 +184,16 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
                               <>
                                 <TagSelector selected={feature.tags || []} allTags={allTags}
                                   onChange={tags => onUpdateTags && onUpdateTags(feature.id, tags)} onCreateTag={onCreateTag} />
-                                <button className="tag-edit-btn" style={{ marginTop: 4 }} onClick={() => setEditingTagsFor(null)}>✓ {t('common.done', 'Done')}</button>
+                                <button className="tag-edit-btn" style={{ marginTop: 4 }} onClick={() => setEditingTagsFor(null)}><Icon id="action.done" size={13} /> {t('common.done', 'Done')}</button>
                               </>
                             ) : (
                               <button className="tag-edit-btn" onClick={() => setEditingTagsFor(feature.id)}>
-                                🏷 {(feature.tags||[]).length === 0 ? t('tags.add', 'Add tag') : t('tags.edit', 'Edit tags')}
+                                <Icon id="action.tag" size={13} /> {(feature.tags||[]).length === 0 ? t('tags.add', 'Add tag') : t('tags.edit', 'Edit tags')}
                               </button>
                             )}
                           </div>
                           <div className="item-edit-actions">
-                            <button className="io-btn" onClick={e => { e.stopPropagation(); startEdit(feature); }}>{t('common.edit', 'Edit')}</button>
+                            <button className="io-btn" onClick={e => { e.stopPropagation(); startEdit(feature); }}><Icon id="action.editItem" size={13} /> {t('common.edit', 'Edit')}</button>
                           </div>
                         </div>
                       )}

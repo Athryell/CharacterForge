@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DND_CLASSES, SUBCLASS_DATA } from '../data/systems/dnd5e/classes';
 import { ABILITIES } from '../data/systems/dnd5e/mechanics';
+import { Icon } from '../config/icons';
 
 const ABILITY_LABELS = { STR: 'STR', DEX: 'DEX', CON: 'CON', INT: 'INT', WIS: 'WIS', CHA: 'CHA' };
 
@@ -153,13 +154,13 @@ export default function LevelUpModal({ currentLevel, charClass, charState, onCom
       <div className="creator-modal">
         <div className="creator-header">
           <div className="creator-title">{t('levelUp.title', { level: targetLevel })}</div>
-          <button className="creator-close" onClick={onCancel}>✕</button>
+          <button className="creator-close" onClick={onCancel}><Icon id="action.remove" size={14} /></button>
         </div>
 
         <div className="creator-steps">
           {STEPS.map((s, i) => (
             <div key={s} className={`creator-step ${i === stepIdx ? 'active' : ''} ${i < stepIdx ? 'done' : ''}`}>
-              <div className="creator-step-dot">{i < stepIdx ? '✓' : i + 1}</div>
+              <div className="creator-step-dot">{i < stepIdx ? <Icon id="action.done" size={12} /> : i + 1}</div>
               <div className="creator-step-label">{STEP_LABELS[s]}</div>
             </div>
           ))}

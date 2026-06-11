@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { KeywordText } from './Tooltip';
 import NotationTextarea from './NotationTextarea';
 import { TagPill, TagSelector } from './Tags';
+import { Icon } from '../config/icons';
 
 const EMPTY_FORM = { name: '', qty: 1, desc: '', weight: '' };
 
@@ -188,11 +189,11 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
                       <>
                         <TagSelector selected={item.tags || []} allTags={allTags}
                           onChange={tags => onUpdateTags && onUpdateTags(item.id, tags)} onCreateTag={onCreateTag} />
-                        <button className="tag-edit-btn" style={{ marginTop: 4 }} onClick={() => setEditingTagsFor(null)}>{t('common.tagDone')}</button>
+                        <button className="tag-edit-btn" style={{ marginTop: 4 }} onClick={() => setEditingTagsFor(null)}><Icon id="action.done" size={13} /> {t('common.tagDone')}</button>
                       </>
                     ) : (
                       <button className="tag-edit-btn" onClick={() => setEditingTagsFor(item.id)}>
-                        {(item.tags||[]).length === 0 ? t('common.addTag') : t('common.editTags')}
+                        <Icon id="action.tag" size={13} /> {(item.tags||[]).length === 0 ? t('common.addTag') : t('common.editTags')}
                       </button>
                     )}
                   </div>
@@ -204,7 +205,7 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
                           onClick={() => {
                             if (added) { onRemoveAction && onRemoveAction(item.name); }
                             else { onAddAction({ id: `item_${item.id}_${Date.now()}`, name: item.name, type: 'action', desc: item.desc || '', dice: '' }); }
-                          }}>{added ? '✓' : '⚡'}</button>
+                          }}>{added ? <Icon id="action.done" size={13} /> : '⚡'}</button>
                       )}
                       <button className="io-btn danger" onClick={() => removeItem(item.id)}>{t('common.deleteBtn')}</button>
                     </div>
@@ -229,7 +230,7 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
                     </div>
                   )}
                   <div className="item-edit-actions">
-                    <button className="io-btn" onClick={() => startEdit(item)}>{t('common.edit')}</button>
+                    <button className="io-btn" onClick={() => startEdit(item)}><Icon id="action.editItem" size={13} /> {t('common.edit')}</button>
                   </div>
                 </div>
               )}

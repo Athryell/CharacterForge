@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Icon } from '../../config/icons';
 import { DH_ANCESTRIES, DH_COMMUNITIES, DH_TRAIT_ARRAY, createDHDefaultState, getDHProficiency } from '../../data/systems/daggerheart/mechanics';
 import { DH_CLASSES } from '../../data/systems/daggerheart/classes';
 
@@ -69,13 +70,13 @@ export default function DHCharacterCreator({ onComplete, onCancel }) {
       <div className="creator-modal">
         <div className="creator-header">
           <div className="creator-title">🗡 Create Character</div>
-          <button className="creator-close" onClick={onCancel}>✕</button>
+          <button className="creator-close" onClick={onCancel}><Icon id="action.remove" size={14} /></button>
         </div>
 
         <div className="creator-steps">
           {DH_STEPS.map((s, i) => (
             <div key={i} className={`creator-step ${i===step?'active':''} ${i<step?'done':''}`}>
-              <div className="creator-step-dot">{i < step ? '✓' : i+1}</div>
+              <div className="creator-step-dot">{i < step ? <Icon id="action.done" size={12} /> : i + 1}</div>
               <div className="creator-step-label">{s}</div>
             </div>
           ))}

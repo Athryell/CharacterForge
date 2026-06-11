@@ -69,6 +69,21 @@ export const WEAPON_PROPERTIES = {
   ammunition: 'ammunition',
 };
 
+export const WEAPON_PROPERTY_DESCS = {
+  finesse:      'Can use STR or DEX for attack and damage rolls, using whichever modifier is higher.',
+  thrown:       'Can be thrown to make a ranged attack. Uses STR for the throw (DEX if Finesse).',
+  ranged:       'Uses DEX for attack and damage rolls.',
+  versatile:    'Can be wielded with one or two hands; dealing more damage when using two.',
+  light:        'Small and easy to handle; ideal for two-weapon fighting.',
+  heavy:        'Small and Tiny creatures have disadvantage on attack rolls with this weapon.',
+  reach:        'Adds 5 ft to melee attack range.',
+  loading:      'Only one piece of ammunition can be fired per action, bonus action, or reaction.',
+  ammunition:   'Requires ammunition (arrows, bolts, etc.) to make ranged attacks.',
+  'two-handed': 'Requires both hands to attack.',
+  twoHanded:    'Requires both hands to attack.',
+  special:      'Has unique rules described in the item description.',
+};
+
 export const WEAPON_MASTERIES = {
   none:   { label: 'none',   desc: '' },
   cleave: { label: 'cleave', desc: 'On a hit, attack one adjacent creature within reach using the same action.' },

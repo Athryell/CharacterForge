@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Icon } from '../../config/icons';
 import { ABILITIES, SKILLS, HIT_DICE, SPELLCASTING_CLASS } from '../../data/systems/dnd5e/mechanics';
 import AlignmentPicker from '../AlignmentPicker';
 import { CLASS_FEATURES, CLASS_SAVE_PROFS, CLASS_SKILL_COUNT, CLASS_SKILL_OPTIONS } from '../../data/systems/dnd5e/classes';
@@ -260,13 +261,13 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
       <div className="creator-modal">
         <div className="creator-header">
           <div className="creator-title">{t('creator.title')}</div>
-          <button className="creator-close" onClick={onCancel}>✕</button>
+          <button className="creator-close" onClick={onCancel}><Icon id="action.remove" size={14} /></button>
         </div>
 
         <div className="creator-steps">
           {STEPS.map((s, i) => (
             <div key={i} className={`creator-step ${i === step ? 'active' : ''} ${i < step ? 'done' : ''}`}>
-              <div className="creator-step-dot">{i < step ? '✓' : i + 1}</div>
+              <div className="creator-step-dot">{i < step ? <Icon id="action.done" size={12} /> : i + 1}</div>
               <div className="creator-step-label">{s}</div>
             </div>
           ))}
@@ -337,7 +338,7 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
                                   </div>
                                   <button className="dh-wm-remove-btn" style={{ marginTop: 18, flexShrink: 0 }}
                                     onClick={() => patch({ customSpeciesTraits: data.customSpeciesTraits.filter((_, j) => j !== ti) })}>
-                                    ✕
+                                    <Icon id="action.remove" size={13} />
                                   </button>
                                 </div>
                                 <div className="field" style={{ marginTop: 4, marginBottom: 0 }}>

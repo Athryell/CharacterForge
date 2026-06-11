@@ -1,10 +1,11 @@
 import React, { createContext, useContext, useState } from 'react';
 import {
   Sword, Shield, Heart, Star, Zap, BookOpen, Scroll,
-  Package, StickyNote, User, Dices, Flame, Skull,
-  Settings, Plus, X, Edit, Check,
+  Package, StickyNote, User, Users, Dices, Flame, Skull,
+  Link, ArrowDownToLine, EarOff, PersonStanding, Handshake, Shell, Stone,
+  Settings, Plus, X, Pencil, SquarePen, Check,
   Moon, Sun, RefreshCw, Download, Upload, HelpCircle,
-  Coffee, MessageSquare, Tag, Eye, EyeOff, Grip,
+  Coffee, MessageSquare, Tag, Eye, EyeClosed, Grip,
   AlertTriangle, Sparkles,
   Target, Crosshair, Activity, ShoppingBag,
 } from 'lucide-react';
@@ -77,7 +78,8 @@ export const ICON_MAP = {
   'widget.activityLog': { emoji: '📋', lucide: Activity,     label: 'Activity'     },
 
   // ── Actions ───────────────────────────────────────────────────────────────
-  'action.edit':     { emoji: '✏',  lucide: Edit,         label: 'Edit'         },
+  'action.edit':     { emoji: '✏',  lucide: SquarePen,    label: 'Edit'         },
+  'action.editItem': { emoji: '✏',  lucide: Pencil,       label: 'Edit item'    },
   'action.done':     { emoji: '✓',  lucide: Check,        label: 'Done'         },
   'action.add':      { emoji: '+',  lucide: Plus,         label: 'Add'          },
   'action.remove':   { emoji: '✕',  lucide: X,            label: 'Remove'       },
@@ -89,16 +91,37 @@ export const ICON_MAP = {
   'action.settings': { emoji: '⚙',  lucide: Settings,     label: 'Settings'     },
   'action.tag':      { emoji: '🏷',  lucide: Tag,          label: 'Tag'          },
   'action.show':     { emoji: '👁',  lucide: Eye,          label: 'Show'         },
-  'action.hide':     { emoji: '🚫', lucide: EyeOff,       label: 'Hide'         },
+  'action.hide':     { emoji: '🚫', lucide: EyeClosed,    label: 'Hide'         },
+  'action.allChars': { emoji: '👥', lucide: Users,        label: 'All characters' },
 
   // ── Game ──────────────────────────────────────────────────────────────────
   'game.longRest':      { emoji: '🛏',  lucide: Moon,        label: 'Long Rest'    },
-  'game.shortRest':     { emoji: '🌙', lucide: Sun,         label: 'Short Rest'   },
-  'game.roll':          { emoji: '🎲', lucide: Dices,       label: 'Roll'         },
-  'game.inspiration':   { emoji: '⭐', lucide: Star,        label: 'Inspiration'  },
-  'game.concentration': { emoji: '🎯', lucide: Target,      label: 'Concentration'},
-  'game.hope':          { emoji: '⭐', lucide: Star,        label: 'Hope'         },
-  'game.fear':          { emoji: '💀', lucide: Skull,       label: 'Fear'         },
+  'game.shortRest':     { emoji: '🌙',  lucide: Sun,         label: 'Short Rest'   },
+  'game.roll':          { emoji: '🎲',  lucide: Dices,       label: 'Roll'         },
+  'game.inspiration':   { emoji: '⭐',  lucide: Star,        label: 'Inspiration'  },
+  'game.concentration': { emoji: '🎯',  lucide: Target,      label: 'Concentration'},
+  'game.hope':          { emoji: '⭐',  lucide: Star,        label: 'Hope'         },
+  'game.fear':          { emoji: '💀',  lucide: Skull,       label: 'Fear'         },
+  'game.exhaustion':    { emoji: '😓',  lucide: Activity,    label: 'Exhaustion'   },
+  'game.damage':        { emoji: '⚔',   lucide: Sword,       label: 'Damage'       },
+  'game.heal':          { emoji: '❤',   lucide: Heart,       label: 'Heal'         },
+  'game.tempHp':        { emoji: '🛡',  lucide: Shield,      label: 'Temp HP'      },
+
+  // ── Conditions ────────────────────────────────────────────────────────────
+  'cond.blinded':       { emoji: '👁️',  lucide: EyeClosed,     label: 'Blinded'       },
+  'cond.charmed':       { emoji: '💫',  lucide: Sparkles,      label: 'Charmed'       },
+  'cond.deafened':      { emoji: '🔇',  lucide: EarOff,        label: 'Deafened'      },
+  'cond.frightened':    { emoji: '😨',  lucide: AlertTriangle, label: 'Frightened'    },
+  'cond.grappled':      { emoji: '🤼',  lucide: Handshake,          label: 'Grappled'      },
+  'cond.incapacitated': { emoji: '😵',  lucide: Shell,          label: 'Incapacitated' },
+  'cond.invisible':     { emoji: '👻',  lucide: EyeClosed,     label: 'Invisible'     },
+  'cond.paralyzed':     { emoji: '🧊',  lucide: PersonStanding,          label: 'Paralyzed'     },
+  'cond.petrified':     { emoji: '🗿',  lucide: Stone,         label: 'Petrified'     },
+  'cond.poisoned':      { emoji: '☠️',  lucide: Skull,         label: 'Poisoned'      },
+  'cond.prone':         { emoji: '⬇️',  lucide: ArrowDownToLine, label: 'Prone'         },
+  'cond.restrained':    { emoji: '⛓️',  lucide: Link,          label: 'Restrained'    },
+  'cond.stunned':       { emoji: '⭐',  lucide: Sparkles,      label: 'Stunned'       },
+  'cond.unconscious':   { emoji: '💤',  lucide: Moon,          label: 'Unconscious'   },
 
   // ── Misc ──────────────────────────────────────────────────────────────────
   'misc.kofi':     { emoji: '☕', lucide: Coffee,       label: 'Support'   },
@@ -126,10 +149,28 @@ export function Icon({ id, size = 16, className = '', fallback }) {
   const entry = ICON_MAP[id];
 
   if (!entry) return fallback != null ? <span>{fallback}</span> : null;
+
+  // action.* are UI controls — always visible; in 'none' mode show a small dot
+  if (id.startsWith('action.')) {
+    if (iconMode === 'none') {
+      return <span className={`icon-none-dot ${className}`} aria-label={entry.label} />;
+    }
+    const LucideIcon = entry.lucide;
+    if (LucideIcon) {
+      return (
+        <LucideIcon
+          size={size}
+          className={`icon-lucide ${className}`}
+          aria-label={entry.label}
+          style={iconAccent ? { color: 'var(--c-accent)' } : undefined}
+        />
+      );
+    }
+  }
+
   if (iconMode === 'none') return null;
 
   if (iconMode === 'lucide') {
-    // Prefer Lucide component; fall back to game-icons SVG only when no Lucide icon exists
     const LucideIcon = entry.lucide;
     if (LucideIcon) {
       return (
@@ -146,6 +187,6 @@ export function Icon({ id, size = 16, className = '', fallback }) {
     }
   }
 
-  // emoji mode
+  // emoji mode (default)
   return <span className={`icon-emoji ${className}`} aria-label={entry.label}>{entry.emoji}</span>;
 }

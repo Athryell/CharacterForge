@@ -4,6 +4,7 @@ import { SCHOOLS, SPELL_CLASSES, filterSpells } from '../data/systems/dnd5e/spel
 import dataManager from '../data/dataManager';
 import { TagPill, TagSelector, TagFilterBar } from './Tags';
 import { KeywordText } from './Tooltip';
+import { Icon } from '../config/icons';
 
 const LEVEL_LABELS = {
   0: 'Trucchetti', 1: '1°', 2: '2°', 3: '3°', 4: '4°',
@@ -118,7 +119,7 @@ function SpellEditForm({ spell, srd, onSave, onCancel, onDelete, added, onToggle
             <button className={`icon-btn add-to-action-btn ${added ? 'added' : ''}`}
               title={added ? t('common.removeFromAction') : t('common.addToAction')}
               onClick={e => { e.stopPropagation(); onToggleAction(); }}>
-              {added ? '✓' : '⚡'}
+              {added ? <Icon id="action.done" size={13} /> : '⚡'}
             </button>
           )}
           {onDelete && (
@@ -169,7 +170,7 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
     school: filterSchool || undefined,
     cls: filterClass || undefined,
     search: filterSearch || undefined,
-  }), [filterLevel, filterSchool, filterClass, filterSearch, homebrewKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  }).sort((a, b) => a.name.localeCompare(b.name)), [filterLevel, filterSchool, filterClass, filterSearch, homebrewKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function addSRDSpell(spell) {
     if (knownNames.has(spell.name)) return;
@@ -429,7 +430,7 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
                   </div>
                   <button className={`spell-add-btn ${already ? 'known' : ''}`}
                     onClick={e => { e.stopPropagation(); if (!already) addSRDSpell(spell); }}
-                    disabled={already}>{already ? '✓' : '+'}</button>
+                    disabled={already}>{already ? <Icon id="action.done" size={13} /> : <Icon id="action.add" size={13} />}</button>
                 </div>
               );
             })}

@@ -7,7 +7,7 @@ import CharacterSelect from './components/CharacterSelect';
 import Onboarding, { CornerButtons, loadOnboardingSeen } from './components/Onboarding';
 import {
   createDefaultState, ABILITIES, SKILLS,
-  SPELLCASTING_CLASS, getMod, fmtMod,
+  SPELLCASTING_CLASS, getMod, fmtMod, HIT_DICE,
 } from './data/systems/dnd5e/mechanics';
 import dataManager from './data/dataManager';
 import SourceManager from './components/SourceManager';
@@ -73,9 +73,15 @@ function Field({ label, children }) {
   );
 }
 
-function Toast({ message }) {
+function Toast({ message, action }) {
   if (!message) return null;
-  return createPortal(<div className="toast show">{message}</div>, document.body);
+  return createPortal(
+    <div className="toast show">
+      <span>{message}</span>
+      {action && <button className="toast-action-btn" onClick={action.onClick}>{action.label}</button>}
+    </div>,
+    document.body
+  );
 }
 
 function AbilityBox({ attr, score, effectiveScore, onAdjust, onInput, editing, onHover, onRoll, bonus, bonusSources = [] }) {
@@ -216,7 +222,7 @@ function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag, o
               {onToggleHide && (
                 <button className="icon-btn" title={isHidden ? 'Mostra' : 'Nascondi'}
                   onClick={e => { e.stopPropagation(); onToggleHide(action.id); }}>
-                  {isHidden ? '👁' : '🙈'}
+                  <Icon id={isHidden ? 'action.show' : 'action.hide'} size={14} />
                 </button>
               )}
               {onRemove && (
@@ -241,7 +247,7 @@ function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag, o
         <div style={{ display:'flex', alignItems:'center', gap:6 }}>
           <div className="action-name" style={{ flex:1 }}>{action.name}</div>
           {(action.tags||[]).map(t => <TagPill key={t} tag={t} allTags={allTags} small />)}
-          {isHidden && <span style={{ fontSize:12, opacity:0.5 }} title="Nascosta">🙈</span>}
+          {isHidden && <span style={{ opacity:0.5 }} title="Nascosta"><Icon id="action.hide" size={12} /></span>}
         </div>
         {expanded && (
           <div className="action-desc-full" onClick={e => e.stopPropagation()}>
@@ -257,16 +263,16 @@ function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag, o
                   <TagSelector selected={action.tags||[]} allTags={allTags}
                     onChange={tags => onUpdateTags && onUpdateTags(action.id, tags)}
                     onCreateTag={onCreateTag} />
-                  <button className="tag-edit-btn" style={{ marginLeft:6 }} onClick={e => { e.stopPropagation(); setEditingTags(false); }}>{t('actions.tagDone')}</button>
+                  <button className="tag-edit-btn" style={{ marginLeft:6 }} onClick={e => { e.stopPropagation(); setEditingTags(false); }}><Icon id="action.done" size={13} /> {t('actions.tagDone')}</button>
                 </>
               ) : (
                 <button className="tag-edit-btn" onClick={e => { e.stopPropagation(); setEditingTags(true); }}>
-                  {(action.tags||[]).length === 0 ? t('actions.addTagBtn') : t('actions.editTagBtn')}
+                  <Icon id="action.tag" size={13} /> {(action.tags||[]).length === 0 ? t('actions.addTagBtn') : t('actions.editTagBtn')}
                 </button>
               )}
             </div>
             <div className="item-edit-actions">
-              <button className="io-btn" onClick={startEdit}>{t('common.edit')}</button>
+              <button className="io-btn" onClick={startEdit}><Icon id="action.editItem" size={13} /> {t('common.edit')}</button>
             </div>
           </div>
         )}
@@ -468,6 +474,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
   const [activeTab, setActiveTab] = useState('main');
   const [actionFilter, setActionFilter] = useState('all');
   const [toast, setToast] = useState('');
+  const [toastAction, setToastAction] = useState(null);
   const [hpAmount, setHpAmount] = useState(0);
   const [showCreator, setShowCreator] = useState(false);
   const [editingAbilities, setEditingAbilities] = useState(false);
@@ -485,6 +492,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
   const [speedInputVal, setSpeedInputVal] = useState(null);
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [showLevelDown, setShowLevelDown] = useState(false);
+  const [concentrationCheck, setConcentrationCheck] = useState(null);
   const { mode: themeMode, accentId, setThemeMode, setAccent } = useTheme();
   const { iconMode, setIconMode, iconAccent, setIconAccent } = useIconMode();
   const { weightUnit, speedUnit, setPref: setUnitPref, toDisplayWeight, toDisplaySpeed, fromDisplaySpeed } = useUnits();
@@ -492,10 +500,69 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
   const fileInputRef = useRef();
   const toastTimer = useRef();
 
-  function showToast(msg) {
+  function showToast(msg, action = null, duration = null) {
     setToast(msg);
+    setToastAction(action);
     clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(''), 2500);
+    toastTimer.current = setTimeout(() => { setToast(''); setToastAction(null); }, duration ?? (action ? 3000 : 2500));
+  }
+
+  function handleConcentrationRoll(dc) {
+    const roll = Math.floor(Math.random() * 20) + 1;
+    const conMod = char.abilityMod('CON');
+    const prof = state.concentrationProficiency ? char.profBonus : 0;
+    const modifier = conMod + prof;
+    const total = roll + modifier;
+    const passed = total >= dc;
+    const modStr = modifier >= 0 ? `+${modifier}` : `${modifier}`;
+    const outcome = passed ? t('concentration.passed') : t('concentration.failed');
+    const msg = `${t('concentration.rollLabel')} ${total} (d20: ${roll}${modStr}) — ${outcome}`;
+    if (!passed) update({ concentrating: false, concentratingSpell: null });
+    addLog('game.roll', msg);
+    showToast(msg);
+    setConcentrationCheck(null);
+  }
+
+  function handleDeathSaveRoll() {
+    const roll = Math.floor(Math.random() * 20) + 1;
+    const prevSuccess = [...(state.deathSuccess || [false, false, false])];
+    const prevFail    = [...(state.deathFail    || [false, false, false])];
+    const undoState   = { deathSuccess: prevSuccess, deathFail: prevFail };
+
+    let updates = {};
+    let msg = '';
+
+    if (roll === 20) {
+      const succ = [...prevSuccess];
+      const idx = succ.indexOf(false); if (idx >= 0) succ[idx] = true;
+      const newHp = Math.min(state.hpMax || 0, (state.hpCurrent || 0) + 1);
+      updates = { deathSuccess: succ, hpCurrent: newHp };
+      undoState.hpCurrent = state.hpCurrent;
+      msg = t('deathSave.nat20');
+    } else if (roll === 1) {
+      const fail = [...prevFail];
+      let c = 0;
+      for (let i = 0; i < 3 && c < 2; i++) if (!fail[i]) { fail[i] = true; c++; }
+      updates = { deathFail: fail };
+      msg = t('deathSave.nat1');
+    } else if (roll >= 10) {
+      const succ = [...prevSuccess];
+      const idx = succ.indexOf(false); if (idx >= 0) succ[idx] = true;
+      updates = { deathSuccess: succ };
+      msg = `${t('deathSave.result', { roll })} — ${t('deathSave.successMark')}`;
+    } else {
+      const fail = [...prevFail];
+      const idx = fail.indexOf(false); if (idx >= 0) fail[idx] = true;
+      updates = { deathFail: fail };
+      msg = `${t('deathSave.result', { roll })} — ${t('deathSave.failMark')}`;
+    }
+
+    update(updates);
+    addLog('game.roll', msg);
+    showToast(msg, {
+      label: t('deathSave.undo'),
+      onClick: () => { update(undoState); setToast(''); setToastAction(null); },
+    });
   }
 
   const allTags = [...new Set([
@@ -567,20 +634,45 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
       let suffix = '';
       if (result.natural === 20 && result.sides === 20) suffix = ` — ⭐ ${t('dice.natural20')}`;
       else if (result.natural === 1 && result.sides === 20) suffix = ` — 💀 ${t('dice.natural1')}`;
-      showToast(`${name}: ${display} = ${result.total}${suffix}`);
-      addLog('🎲', `${name}: ${display} = ${result.total}${suffix}`);
+      const exhaustionLvl = activeSystem === 'dnd5e' ? (state.exhaustionLevel || 0) : 0;
+      const penalty = result.sides === 20 && exhaustionLvl > 0 ? exhaustionLvl * 2 : 0;
+      const finalTotal = result.total - penalty;
+      const exhNote = penalty > 0 ? ` ${t('dice.exhaustionPenalty', { penalty })}` : '';
+      showToast(`${name}: ${display} = ${finalTotal}${suffix}${exhNote}`);
+      addLog('game.roll', `${name}: ${display} = ${finalTotal}${suffix}${exhNote}`);
     }
   }
+  function handleHitDiceRoll() {
+    const available = state.charLevel - (state.hitDiceUsed || 0);
+    if (available <= 0) return;
+    const dieType = HIT_DICE[state.charClass] || 'd8';
+    const dieSize = parseInt(dieType.replace('d', ''));
+    const roll = Math.floor(Math.random() * dieSize) + 1;
+    const conMod = char.abilityMod('CON');
+    const healing = Math.max(1, roll + conMod);
+    const modStr = conMod >= 0 ? `+${conMod}` : `${conMod}`;
+    update({ hitDiceUsed: (state.hitDiceUsed || 0) + 1 });
+    char.modHP(healing);
+    const msg = t('hp.hitDiceResult', { die: dieType, roll, mod: modStr, total: healing });
+    showToast(msg);
+    addLog('game.heal', msg);
+  }
+
   function handleLongRest() {
     char.longRest();
+    update({ hitDiceUsed: 0, exhaustionLevel: Math.max(0, (state.exhaustionLevel || 0) - 1) });
     showToast(t('toast.longRest'));
-    addLog('🌙', t('toast.longRest'));
+    addLog('game.longRest', t('toast.longRest'));
     window.umami?.track('long-rest');
   }
   function handleShortRest() {
     char.shortRest();
-    showToast(t('toast.shortRest'));
-    addLog('☀', t('toast.shortRest'));
+    showToast(
+      <>{t('toast.shortRestMain')} <em className="toast-hint">{t('toast.shortRestHint')}</em></>,
+      { label: t('common.done'), onClick: () => { setToast(''); setToastAction(null); } },
+      10000
+    );
+    addLog('game.shortRest', t('toast.shortRest'));
   }
   function handleCastSpell(spell, level) {
     const updates = {};
@@ -599,7 +691,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
     }
     update(updates);
     const lvlNote = spell.level > 0 && level > spell.level ? ` (slot ${level}°)` : '';
-    addLog('✨', `${spell.name}${lvlNote}`);
+    addLog('tab.spells', `${spell.name}${lvlNote}`);
     showToast(t('toast.spellCast', { name: spell.name }));
   }
 
@@ -670,7 +762,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
           <div className="card-title" style={{ justifyContent:'space-between' }}>
             <span><Icon id="widget.identity" /> {t('widgets.identity')}</span>
             <button className={`icon-btn ${editingIdentity ? 'active' : ''}`} onClick={() => setEditingIdentity(v => !v)}>
-              {editingIdentity ? '✓' : '✏'}
+              {editingIdentity ? <Icon id="action.done" size={14} /> : <Icon id="action.edit" size={14} />}
             </button>
           </div>
           <div className="identity-layout">
@@ -699,7 +791,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                         }
                       }}>
                         <option value="">{t('identity.classPlaceholder')}</option>
-                        {knownClasses.map(c => <option key={c} value={c}>{t(`data.classes.${c}`, c)}</option>)}
+                        {[...knownClasses].sort((a, b) => t(`data.classes.${a}`, a).localeCompare(t(`data.classes.${b}`, b))).map(c => <option key={c} value={c}>{t(`data.classes.${c}`, c)}</option>)}
                         <option value="__custom__">{t('identity.classCustom')}</option>
                       </select>
                       {isCustomClass && (
@@ -724,7 +816,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                         }
                       }}>
                         <option value="">{t('identity.speciesPlaceholder')}</option>
-                        {dataManager.getSpecies().map(r => <option key={r.id} value={r.id}>{t(`data.species.${r.id}`, r.name)}</option>)}
+                        {dataManager.getSpecies().slice().sort((a, b) => t(`data.species.${a.id}`, a.name).localeCompare(t(`data.species.${b.id}`, b.name))).map(r => <option key={r.id} value={r.id}>{t(`data.species.${r.id}`, r.name)}</option>)}
                         <option value="__custom__">{t('identity.speciesCustom')}</option>
                       </select>
                       {state.charRace === '__custom__' && (
@@ -742,7 +834,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                         }
                       }}>
                         <option value="">{t('identity.backgroundPlaceholder')}</option>
-                        {dataManager.getBackgrounds().map(b => <option key={b.id || b.name} value={b.id || b.name}>{t(`data.backgrounds.${b.id || b.name}`, b.name)}</option>)}
+                        {dataManager.getBackgrounds().slice().sort((a, b) => t(`data.backgrounds.${a.id || a.name}`, a.name).localeCompare(t(`data.backgrounds.${b.id || b.name}`, b.name))).map(b => <option key={b.id || b.name} value={b.id || b.name}>{t(`data.backgrounds.${b.id || b.name}`, b.name)}</option>)}
                         <option value="__custom__">{t('identity.backgroundCustom')}</option>
                       </select>
                       {state.charBackground === '__custom__' && (
@@ -806,7 +898,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
           <div className="card-title" style={{ justifyContent:'space-between' }}>
             <span><Icon id="widget.abilities" /> {t('widgets.abilities')}</span>
             <button className={`icon-btn ${editingAbilities ? 'active' : ''}`} onClick={() => setEditingAbilities(e => !e)}>
-              {editingAbilities ? '✓' : '✏'}
+              {editingAbilities ? <Icon id="action.done" size={14} /> : <Icon id="action.edit" size={14} />}
             </button>
           </div>
           <div className="grid-6">
@@ -885,7 +977,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
           <div className="card-title" style={{ justifyContent:'space-between' }}>
             <span><Icon id="widget.hp" /> {t('widgets.hp')}</span>
             <button className={`icon-btn ${editingHP ? 'active' : ''}`} onClick={() => setEditingHP(e => !e)}>
-              {editingHP ? '✓' : '✏'}
+              {editingHP ? <Icon id="action.done" size={14} /> : <Icon id="action.edit" size={14} />}
             </button>
           </div>
           <div className="hp-labeled-row">
@@ -941,10 +1033,48 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
               const temp = state.hpTemp||0;
               if (temp > 0) { const r = temp-hpAmount; r >= 0 ? update({ hpTemp:r }) : update({ hpTemp:0, hpCurrent:Math.max(0,state.hpCurrent+r) }); }
               else char.modHP(-hpAmount);
-            }}>{t('hp.damage')}</button>
-            <button className="hp-action-btn success" onClick={() => char.modHP(hpAmount)}>{t('hp.heal')}</button>
-            <button className="hp-action-btn temp" onClick={() => update({ hpTemp: hpAmount })}>{t('hp.tempBtn')}</button>
+              if (hpAmount > 0 && (state.concentrating || state.concentratingSpell)) {
+                setConcentrationCheck({ dc: Math.max(10, Math.floor(hpAmount / 2)) });
+              }
+            }}><Icon id="game.damage" size={13} /> {t('hp.damage')}</button>
+            <button className="hp-action-btn success" onClick={() => char.modHP(hpAmount)}><Icon id="game.heal" size={13} /> {t('hp.heal')}</button>
+            <button className="hp-action-btn temp" onClick={() => update({ hpTemp: hpAmount })}><Icon id="game.tempHp" size={13} /> {t('hp.tempBtn')}</button>
           </div>
+          {activeSystem === 'dnd5e' && (
+            <div className="hit-dice-row">
+              <span className="hit-dice-label">{t('hp.hitDiceLabel')}</span>
+              <button className="mod-btn" onClick={() => update({ hitDiceUsed: Math.min(state.charLevel, (state.hitDiceUsed||0)+1) })} disabled={(state.hitDiceUsed||0) >= state.charLevel}>−</button>
+              <span className="hit-dice-count">
+                {state.charLevel - (state.hitDiceUsed||0)}<span style={{ color:'var(--c-muted)', fontWeight:400 }}>/{state.charLevel} {HIT_DICE[state.charClass] || 'd8'}</span>
+              </span>
+              <button className="mod-btn" onClick={() => update({ hitDiceUsed: Math.max(0, (state.hitDiceUsed||0)-1) })} disabled={(state.hitDiceUsed||0) <= 0}>+</button>
+              <button className="hit-dice-use-btn" onClick={handleHitDiceRoll} disabled={(state.hitDiceUsed||0) >= state.charLevel}>
+                <Icon id="game.roll" size={12} /> {t('hp.hitDiceRollBtn')}
+              </button>
+            </div>
+          )}
+          {concentrationCheck && (
+            <div className="concentration-banner">
+              <div className="concentration-banner-text">
+                <Icon id="game.concentration" size={14} />
+                {t('concentration.checkRequired', { dc: concentrationCheck.dc })}
+              </div>
+              <div className="concentration-banner-actions">
+                <button className="io-btn primary" onClick={() => handleConcentrationRoll(concentrationCheck.dc)}>
+                  🎲 {t('concentration.rollBtn')}
+                </button>
+                <button className="io-btn" onClick={() => setConcentrationCheck(null)}>
+                  {t('concentration.passBtn')}
+                </button>
+                <button className="io-btn danger" onClick={() => {
+                  update({ concentrating: false, concentratingSpell: null });
+                  setConcentrationCheck(null);
+                }}>
+                  {t('concentration.failBtn')}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       );
 
@@ -1004,7 +1134,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
         <div className="card">
           <div className="card-title" style={{ marginBottom:12 }}><Icon id="widget.inspiration" /> {t('widgets.inspiration')}</div>
           <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-            <button className={`inspiration-btn ${state.inspiration ? 'active' : ''}`} onClick={() => update({ inspiration:!state.inspiration })}>⭐</button>
+            <button className={`inspiration-btn ${state.inspiration ? 'active' : ''}`} onClick={() => update({ inspiration:!state.inspiration })}><Icon id="game.inspiration" size={20} /></button>
             <span className="toggle-label" style={{ color: state.inspiration ? '#856404' : 'var(--c-hint)' }}>
               {state.inspiration ? t('combat.inspiration') : t('combat.noInspiration')}
             </span>
@@ -1034,6 +1164,9 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                 </div>
               </div>
             ))}
+            <button className="death-save-roll-btn" onClick={handleDeathSaveRoll}>
+              <Icon id="game.roll" size={14} /> {t('deathSave.rollBtn')}
+            </button>
           </div>
         </div>
       );
@@ -1055,7 +1188,11 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
           <div className="card-title" style={{ justifyContent:'space-between' }}>
             <span><Icon id="widget.actions" /> {t('widgets.actions')}</span>
             <button className={`icon-btn ${addOpenFor === 'actions' ? 'active' : ''}`}
-              onClick={() => setAddOpenFor(v => v === 'actions' ? null : 'actions')}>+</button>
+              onClick={() => {
+                const defaultType = ACTION_TYPE_KEYS.includes(actionFilter) ? actionFilter : 'action';
+                setAddActionForm(f => ({ ...f, type: defaultType }));
+                setAddOpenFor(v => v === 'actions' ? null : 'actions');
+              }}>+</button>
           </div>
           <div className="filter-bar">
             {[['all', t('actions.filterAll')],['action', t('actions.filterAction')],['bonus', t('actions.filterBonus')],['reaction', t('actions.filterReaction')],['free', t('actions.filterFree')]].map(([v,l]) => (
@@ -1201,7 +1338,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
           <div style={{ display:'flex', alignItems:'center', gap:10, marginTop:10, paddingTop:8, borderTop:'0.5px solid var(--c-border)' }}>
             <button className={`inspiration-btn ${state.concentrating ? 'active' : ''}`}
               style={state.concentrating ? { borderColor:'#185FA5', background:'#E6F1FB', boxShadow:'0 0 12px rgba(24,95,165,.35)' } : {}}
-              onClick={() => update({ concentrating:!state.concentrating, concentratingSpell: state.concentrating ? null : state.concentratingSpell })}>🎯</button>
+              onClick={() => update({ concentrating:!state.concentrating, concentratingSpell: state.concentrating ? null : state.concentratingSpell })}><Icon id="game.concentration" size={20} /></button>
             <span className="toggle-label" style={{ color: state.concentrating ? '#185FA5' : 'var(--c-hint)' }}>
               {state.concentrating
                 ? (state.concentratingSpell ? `${t('combat.concentrating')} (${state.concentratingSpell})` : t('combat.concentrating'))
@@ -1213,12 +1350,8 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
 
       case 'spellSlots': return (
         <div className="card">
-          <div className="card-title" style={{ justifyContent:'space-between' }}>
-            <span><Icon id="widget.spellSlots" /> {t('widgets.spellSlots')}</span>
-            <div style={{ display:'flex', gap:6 }}>
-              <button className="rest-btn" onClick={handleShortRest}>{t('spells.shortRest')}</button>
-              <button className="rest-btn" onClick={handleLongRest}>{t('spells.longRest')}</button>
-            </div>
+          <div className="card-title">
+            <Icon id="widget.spellSlots" /> {t('widgets.spellSlots')}
           </div>
           {hasSpells && state.spellSlots.length > 0
             ? <SpellSlots slots={state.spellSlots} onToggle={char.toggleSpellSlot} />
@@ -1386,7 +1519,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
               <div className="activity-log-list">
                 {activityLog.map(e => (
                   <div key={e.id} className="activity-log-entry">
-                    <span className="activity-log-icon">{e.icon}</span>
+                    <span className="activity-log-icon"><Icon id={e.icon} size={13} fallback={e.icon} /></span>
                     <span className="activity-log-text">{e.text}</span>
                     <span className="activity-log-ts">{e.ts}</span>
                   </div>
@@ -1406,7 +1539,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
             <div className="card-title" style={{ justifyContent:'space-between' }}>
               <span><Icon id="widget.identity" /> {t('dh.widgets.identity','Identity')}</span>
               <button className={`icon-btn ${editingIdentity ? 'active' : ''}`} onClick={() => setEditingIdentity(v => !v)}>
-                {editingIdentity ? '✓' : '✏'}
+                {editingIdentity ? <Icon id="action.done" size={14} /> : <Icon id="action.edit" size={14} />}
               </button>
             </div>
             {editingIdentity ? (
@@ -1503,7 +1636,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
             <div className="card-title" style={{ justifyContent:'space-between' }}>
               <span><Icon id="widget.abilities" /> {t('dh.widgets.traits','Traits')}</span>
               <button className={`icon-btn ${editingAbilities ? 'active' : ''}`} onClick={() => setEditingAbilities(v => !v)}>
-                {editingAbilities ? '✓' : '✏'}
+                {editingAbilities ? <Icon id="action.done" size={14} /> : <Icon id="action.edit" size={14} />}
               </button>
             </div>
             <div className="grid-6">
@@ -1528,7 +1661,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                           else if (res.result==='hope') msg = `${trName}: Hope ${res.hopeRoll} + Fear ${res.fearRoll} = ${res.total} → Success with Hope! ⭐`;
                           else if (res.result==='fear') msg = `${trName}: Fear ${res.fearRoll} + Hope ${res.hopeRoll} = ${res.total} → Success with Fear!`;
                           else msg = `${trName}: ${res.total} → Failure`;
-                          showToast(msg); addLog('🎲', msg);
+                          showToast(msg); addLog('game.roll', msg);
                         }}>{mod>=0?`+${mod}`:mod}</div>
                         <div style={{ fontSize:9, color:'var(--c-muted)', textAlign:'center', padding:'0 2px 3px' }}>{dhTraitUses[tr]}</div>
                       </>
@@ -1563,7 +1696,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                   <span style={{ minWidth:24, textAlign:'center', fontWeight:700, fontSize:13 }}>{(exp.modifier||0)>=0?`+${exp.modifier||0}`:exp.modifier}</span>
                   <button className="mod-btn" onClick={() => update({ experiences: experiences.map((x,j) => j===i ? {...x, modifier:(x.modifier||2)+1} : x) })}>+</button>
                 </div>
-                <button className="mod-btn" style={{ color:'var(--c-muted)', marginLeft:4 }} onClick={() => update({ experiences: experiences.filter((_,j) => j!==i) })}>✕</button>
+                <button className="mod-btn" style={{ color:'var(--c-muted)', marginLeft:4 }} onClick={() => update({ experiences: experiences.filter((_,j) => j!==i) })}><Icon id="action.remove" size={13} /></button>
               </div>
             ))}
             {experiences.length === 0 && <p className="hint-text">No experiences yet. Click + to add one.</p>}
@@ -1606,7 +1739,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                   {card.domain && <span style={{ fontSize:11, color:'var(--c-muted)', marginLeft:6 }}>{card.domain}{card.level ? ` · Lv.${card.level}` : ''}</span>}
                   {card.desc && <div style={{ fontSize:12, color:'var(--c-muted)', marginTop:2 }}>{card.desc}</div>}
                 </div>
-                <button className="mod-btn" style={{ color:'var(--c-muted)' }} onClick={() => update({ domainCards: domainCards.filter(c => c.id!==card.id) })}>✕</button>
+                <button className="mod-btn" style={{ color:'var(--c-muted)' }} onClick={() => update({ domainCards: domainCards.filter(c => c.id!==card.id) })}><Icon id="action.remove" size={13} /></button>
               </div>
             ))}
           </div>
@@ -1651,14 +1784,14 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
             <div className="card-title" style={{ justifyContent:'space-between' }}>
               <span><Icon id="widget.hp" /> {t('dh.widgets.vitals','Vitals')}</span>
               <button className={`icon-btn ${editingHP?'active':''}`} onClick={() => setEditingHP(v => !v)}>
-                {editingHP ? '✓' : '✏'}
+                {editingHP ? <Icon id="action.done" size={14} /> : <Icon id="action.edit" size={14} />}
               </button>
             </div>
             <VitalRow label="Hit Points" cur={hpCur} max={hpMax} pipClass="dh-hp-pip"
               setCur={v => update({ hpCurrent:v })} setMax={v => update({ hpMax:v })} />
             <VitalRow label="Stress" cur={stressCur} max={stressMax} pipClass="dh-stress-pip"
               setCur={v => update({ stressCurrent:v })} setMax={v => update({ stressMax:v })} />
-            <VitalRow label="⭐ Hope" cur={hopeCur} max={hopeMax} pipClass="dh-hope-pip"
+            <VitalRow label={<><Icon id="game.hope" size={12} /> Hope</>} cur={hopeCur} max={hopeMax} pipClass="dh-hope-pip"
               setCur={v => update({ hope:v })} setMax={v => update({ hopeMax:v })} />
             {editingHP && (
               <label className="dh-counter-mode-toggle">
@@ -1678,7 +1811,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
             <div className="card-title" style={{ justifyContent:'space-between' }}>
               <span><Icon id="widget.saves" /> {t('dh.widgets.evasion','Evasion & Armor')}</span>
               <button className={`icon-btn ${editingDHEvasion?'active':''}`} onClick={() => setEditingDHEvasion(v => !v)}>
-                {editingDHEvasion ? '✓' : '✏'}
+                {editingDHEvasion ? <Icon id="action.done" size={14} /> : <Icon id="action.edit" size={14} />}
               </button>
             </div>
             <div className="dh-evasion-row" style={{ marginBottom: 10 }}>
@@ -1849,7 +1982,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
       systemId:    activeSystem || 'dnd5e',
     }}>
     <div className="sheet">
-      <Toast message={toast} />
+      <Toast message={toast} action={toastAction} />
       {showCreator && <CharacterCreator onComplete={handleCreatorComplete} onCancel={() => setShowCreator(false)} systemId={activeSystem || DEFAULT_SYSTEM} />}
       {showLevelUp && activeSystem === 'dnd5e' && (
         <LevelUpModal
@@ -1889,7 +2022,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
           {getSystem(activeSystem || DEFAULT_SYSTEM).icon} {t(`system.${(activeSystem || DEFAULT_SYSTEM)}`, getSystem(activeSystem || DEFAULT_SYSTEM).shortName)}
         </div>
         {onBackToSelect && (
-          <button className="icon-btn" onClick={onBackToSelect} title="Tutti i personaggi">👥</button>
+          <button className="icon-btn" onClick={onBackToSelect} title="Tutti i personaggi"><Icon id="action.allChars" size={16} /></button>
         )}
         {editMode && (
           <>
@@ -2094,6 +2227,8 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
         onTogglePin={handleTogglePin}
         onUpdate={update}
         system={activeSystem || DEFAULT_SYSTEM}
+        onShortRest={handleShortRest}
+        onLongRest={handleLongRest}
       />
 
       {editMode && (
