@@ -169,11 +169,14 @@
     "maxBase": " (base)",
     "temp": "Temp",
     "tempFull": "HP Temporanei",
-    "tempBtn": "🛡 Temp",
-    "damage": "💔 Danno",
-    "heal": "💚 Cura",
+    "tempBtn": "Temp",
+    "damage": "Danno",
+    "heal": "Cura",
     "editBtn": "✏ Modifica",
-    "editDoneBtn": "✓ Fine"
+    "editDoneBtn": "✓ Fine",
+    "hitDiceLabel": "Dadi vita",
+    "hitDiceRollBtn": "Lancia & cura",
+    "hitDiceResult": "Dado vita {{die}}: {{roll}}{{mod}} = {{total}} PF curati"
   },
   "combat": {
     "ac": "CA",
@@ -186,6 +189,28 @@
     "deathSuccess": "Successi",
     "deathFail": "Fallimenti"
   },
+  "deathSave": {
+    "rollBtn": "Lancia d20",
+    "result": "Tiro morte: {{roll}}",
+    "nat20": "Naturale 20! — Recuperi 1 PF",
+    "nat1": "Naturale 1! — Due fallimenti",
+    "successMark": "1 successo",
+    "failMark": "1 fallimento",
+    "undo": "Annulla"
+  },
+  "concentration": {
+    "checkRequired": "Tiro concentrazione! CD {{dc}} (metà danno, min 10)",
+    "rollBtn": "Lancia TS Costituzione",
+    "passBtn": "Superato",
+    "failBtn": "Fallito — Perdi concentrazione",
+    "rollLabel": "TS COS:",
+    "passed": "Superato",
+    "failed": "Fallito — concentrazione persa"
+  },
+  "rest": {
+    "short": "Riposo breve",
+    "long": "Riposo lungo"
+  },
   "actions": {
     "filterAll": "Tutte",
     "filterAction": "Azione",
@@ -195,9 +220,9 @@
     "hideBase": "🙈 Nascondi base",
     "showBase": "👁 Mostra base",
     "add": "+ Aggiungi azione",
-    "addTagBtn": "🏷 Aggiungi tag",
-    "editTagBtn": "🏷 Modifica tag",
-    "tagDone": "✓ Fine",
+    "addTagBtn": "Aggiungi tag",
+    "editTagBtn": "Modifica tag",
+    "tagDone": "Fine",
     "typeAction": "Azione",
     "typeBonus": "Bonus",
     "typeReaction": "Reazione",
@@ -238,9 +263,9 @@
     "noSlots": "Nessuno slot disponibile.",
     "shortRest": "🌙 Riposo breve",
     "longRest": "🛏 Riposo lungo",
-    "addTagBtn": "🏷 Aggiungi tag",
-    "editTagBtn": "🏷 Modifica tag",
-    "tagDone": "✓ Fine",
+    "addTagBtn": "Aggiungi tag",
+    "editTagBtn": "Modifica tag",
+    "tagDone": "Fine",
     "customName": "Nome *",
     "customLevel": "Livello",
     "customSchool": "Scuola",
@@ -417,7 +442,17 @@
     "descPlaceholder": "Descrizione, proprietà speciali, storia... (@ per bonus)",
     "proficiencyLabel": "Competenza:",
     "proficiencyPlaceholder": "Es. Armi semplici, spade corte, archi...",
-    "equipBonusLabel": "Bonus equipaggiamento"
+    "equipBonusLabel": "Bonus equipaggiamento",
+    "presetAttackLine": "attacco: 1d20+[STR]",
+    "presetAttackLineProf": "attacco: 1d20+[STR]+[PRO]",
+    "confirmProficient": "Hai competenza con quest'arma",
+    "confirmMastery": "Hai maestria con quest'arma",
+    "masteryActiveLabel": "Maestria",
+    "profWarning": "Ricordati di aggiungere +[PRO] alla riga dell'attacco nella descrizione.",
+    "presetDamageLine": "danno: {{dmg}}+[STR]",
+    "presetDmg1h": "danno (1 mano): {{dmg}}+[STR]",
+    "presetDmg2h": "danno (2 mani): {{dmg}}+[STR]",
+    "presetFinesseNote": "Quest'arma usa la Forza per impostazione predefinita. È possibile usare anche la Destrezza (modifica la caratteristica dell'arma da FOR a DES)."
   },
   "conditions": {
     "title": "Condizioni"
@@ -459,11 +494,14 @@
   },
   "dice": {
     "natural20": "Natural 20!",
-    "natural1": "Natural 1!"
+    "natural1": "Natural 1!",
+    "exhaustionPenalty": "(Aff. −{{penalty}})"
   },
   "toast": {
     "longRest": "Riposo lungo: HP e slot ripristinati!",
     "shortRest": "Riposo breve completato. Usa i dadi vita per recuperare HP.",
+    "shortRestMain": "Riposo breve completato.",
+    "shortRestHint": "Usa i dadi vita per recuperare HP.",
     "imported": "Personaggio importato!",
     "importError": "Errore: file JSON non valido.",
     "creatorDone": "Personaggio \"{{name}}\" creato!",
@@ -569,7 +607,7 @@
     "customSpeciesTraitDesc": "Descrizione"
   },
   "common": {
-    "edit": "✏ Modifica",
+    "edit": "Modifica",
     "editDone": "✓ Fine",
     "cancel": "Annulla",
     "save": "✓ Salva",
@@ -578,9 +616,9 @@
     "deleteBtn": "✕ Elimina",
     "noData": "Nessun dato disponibile.",
     "loading": "Caricamento...",
-    "addTag": "🏷 Aggiungi tag",
-    "editTags": "🏷 Modifica tag",
-    "tagDone": "✓ Fine",
+    "addTag": "Aggiungi tag",
+    "editTags": "Modifica tag",
+    "tagDone": "Fine",
     "addToAction": "Aggiungi alle azioni",
     "removeFromAction": "Rimuovi dalle azioni",
     "inAction": "In azioni",
@@ -712,7 +750,10 @@
       },
       "exhaustion": {
         "name": "Affaticamento",
-        "desc": "Ogni livello sottrae 2 ai tiri d20 e riduce la velocità di 1,5 m. Lv. 5: velocità 0. Lv. 6: morte istantanea."
+        "desc": "Ogni livello sottrae 2 ai tiri d20 e riduce la velocità di {{speedPerLevel}} {{unit}}. Lv. 5: velocità 0. Lv. 6: morte istantanea.",
+        "levelFmt": "Lv. {{level}}: −{{penalty}} a tutti i tiri d20 · Velocità −{{speed}} {{unit}}",
+        "level5": "Lv. 5: −10 a tutti i tiri d20 · Velocità 0",
+        "level6": "Lv. 6: Morte"
       }
     },
     "species": {
@@ -839,6 +880,7 @@
     "exhaustionShort": "Aff.",
     "noExhaustion": "Nessun aff.",
     "exhaustionLevel": "Affaticamento liv.",
+    "exhaustionDeath": "Morte",
     "dhArmor": "Armatura",
     "dhHope": "Speranza",
     "dhFear": "Paura"
@@ -866,15 +908,9 @@
     "removeFromActions": "Rimuovi dalle azioni"
   },
   "onboarding": {
-    "welcomeTitle": "Benvenuto in CharacterForge",
-    "welcomeDesc": "CharacterForge è un'app gratuita per gestire le schede personaggio GdR direttamente nel browser, senza installazioni. Il progetto è in sviluppo attivo — in arrivo: template per altri sistemi (Daggerheart, Pathfinder e altro), import di contenuti homebrew e molto altro.",
-    "welcomeFeedback": "Hai suggerimenti, idee o hai trovato un bug? Ogni feedback è prezioso.",
     "feedbackBtn": "📝 Lascia un feedback",
     "kofiBtn": "☕ Offrimi un caffè",
     "kofiDesc": "CharacterForge è gratuito e lo resterà. Il tuo supporto aiuta lo sviluppo.",
-    "startTutorial": "Inizia il tutorial →",
-    "skip": "Salta, inizia subito",
-    "skipHint": "Puoi riaprire questa guida in qualsiasi momento dal pulsante ?.",
     "tutorialTitle": "Guida Rapida",
     "close": "Chiudi",
     "prev": "← Indietro",
@@ -890,7 +926,20 @@
       "note": "Non servono competenze di programmazione per tradurre — visita Crowdin e inizia a contribuire!"
     },
     "welcome": {
-      "translateLink": "🌍 Aiutaci a tradurre CharacterForge nella tua lingua"
+      "title": "Benvenuto in CharacterForge",
+      "intro": "CharacterForge è un'app gratuita e open source per schede personaggio GdR — pensata per essere veloce, flessibile e accessibile a tutti.",
+      "features": [
+        { "icon": "🎲", "title": "Multi-sistema", "desc": "D&D 5.5e 2024 oggi, Daggerheart e altri in arrivo. Un'unica app per tutti i tuoi personaggi." },
+        { "icon": "⚙", "title": "Altamente customizzabile", "desc": "Trascina i widget, cambia il layout, importa homebrew — adatta tutto al tuo stile di gioco." },
+        { "icon": "✨", "title": "Facile da usare", "desc": "Crea un personaggio in pochi minuti, consultalo al tavolo senza friction. Disponibile in più lingue, con opzioni di accessibilità integrate." }
+      ],
+      "feedbackNote": "Hai trovato un bug o hai un'idea? Ogni segnalazione viene letta.",
+      "feedbackBtn": "📝 Lascia un feedback",
+      "tutorialBtn": "Inizia il tutorial →",
+      "skipBtn": "Salta, inizia subito",
+      "skipHint": "Puoi riaprire questa guida in qualsiasi momento con il pulsante ?.",
+      "translateLink": "🌍 Aiutaci a tradurre CharacterForge nella tua lingua",
+      "a11yNote": "Opzioni di accessibilità disponibili nel menu ☰ — font, dimensione testo, contrasto e altro."
     },
     "demoLabel": "Prova →",
     "diceNote": "Clicca il dado per tirare — il modificatore [FOR] viene calcolato automaticamente dal personaggio.",
@@ -913,13 +962,17 @@
       "Trascina i widget per riordinarli",
       "Espandi a piena larghezza o riduci a mezza colonna",
       "Sposta i widget in altre tab o nascondili",
-      "Le tab stesse sono riordinabili e nascondibili"
+      "Le tab stesse sono riordinabili e nascondibili",
+      "Fissa HP, concentrazione, condizioni e altro nella barra in alto per accesso rapido",
+      "Cambia lo stile delle icone (emoji, Lucide o nessuna) dal menu accessibilità",
+      "Cambia il colore primario dell'interfaccia dal menu accessibilità"
     ],
     "step1Footer": "Il layout viene salvato automaticamente.",
     "step2Title": "Dadi cliccabili ovunque",
     "step2Text": "In qualsiasi campo descrizione — oggetti, incantesimi, azioni, armi — puoi scrivere notazioni dado come 2d6+3 o 1d8 e diventano pulsanti cliccabili che tirano automaticamente. Il risultato compare in una notifica in alto a destra.",
     "step3Title": "Notazione Smart",
     "step3Text": "Digita / in qualsiasi campo descrizione per aprire il menu notazione. I valori si risolvono automaticamente dalle statistiche attuali del personaggio.",
+    "step3Footer": "Passa il mouse su ≈ per vedere la formula originale.",
     "step4Title": "Glossario Parole Chiave",
     "step4Text": "Nelle descrizioni di azioni e incantesimi, termini di gioco come accecato, vantaggio, svantaggio, destrezza fine, concentrazione e molti altri sono sottolineati. Passa il mouse (o tieni premuto su mobile) per vedere una spiegazione rapida.",
     "step5Title": "Costruisci il tuo arsenale",

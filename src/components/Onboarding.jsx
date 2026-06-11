@@ -218,7 +218,6 @@ export default function Onboarding({ onClose, onRoll: externalOnRoll }) {
               <li><code>[3]</code> → {t('notation.counterHelp')}</li>
               <li><code>+2@[AC]</code> → {t('notation.bonusHelp')}</li>
             </ul>
-            <p className="onboarding-notation-sidebar-dynamic">{t('notation.dynamicHint')}</p>
           </div>
         </div>
       );
@@ -276,19 +275,34 @@ export default function Onboarding({ onClose, onRoll: externalOnRoll }) {
         {mode === 'welcome' ? (
           <div className="onboarding-screen">
             <div className="onboarding-header">
-              <h2 className="onboarding-title">{t('onboarding.welcomeTitle')}</h2>
+              <h2 className="onboarding-title">{t('onboarding.welcome.title')}</h2>
               <LanguagePicker i18n={i18n} />
               <a href={CROWDIN_URL} target="_blank" rel="noopener noreferrer" className="onboarding-translate-link">
                 {t('onboarding.welcome.translateLink')}
               </a>
             </div>
             <div className="onboarding-body">
-              <p>{t('onboarding.welcomeDesc')}</p>
-              <p className="onboarding-hint-text">{t('onboarding.welcomeFeedback')}</p>
-              <SupportGroup t={t} />
+              <p className="onboarding-intro">{t('onboarding.welcome.intro')}</p>
+              <div className="onboarding-features">
+                {t('onboarding.welcome.features', { returnObjects: true }).map((f, i) => (
+                  <div key={i} className="onboarding-feature-row">
+                    <span className="onboarding-feature-icon">{f.icon}</span>
+                    <div>
+                      <strong>{f.title}</strong>
+                      <span> — {f.desc}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p className="onboarding-feedback-note">{t('onboarding.welcome.feedbackNote')}</p>
+              <div className="onboarding-support-group">
+                <a href={NOTION_FEEDBACK_URL} target="_blank" rel="noopener noreferrer" className="onboarding-btn onboarding-btn-accent" onClick={() => window.umami?.track('feedback-clicked')}>
+                  {t('onboarding.welcome.feedbackBtn')}
+                </a>
+              </div>
               <div className="onboarding-a11y-note">
                 <span>♿</span>
-                <span>{t('accessibility.onboardingNote')}</span>
+                <span>{t('onboarding.welcome.a11yNote')}</span>
               </div>
             </div>
             <div className="onboarding-footer">
@@ -296,13 +310,13 @@ export default function Onboarding({ onClose, onRoll: externalOnRoll }) {
                 className="onboarding-btn onboarding-btn-secondary"
                 onClick={() => { setMode('tutorial'); setStep(0); }}
               >
-                {t('onboarding.startTutorial')}
+                {t('onboarding.welcome.tutorialBtn')}
               </button>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <button className="onboarding-btn-ghost" onClick={close}>
-                  {t('onboarding.skip')}
+                  {t('onboarding.welcome.skipBtn')}
                 </button>
-                <p className="onboarding-skip-hint">{t('onboarding.skipHint')}</p>
+                <p className="onboarding-skip-hint">{t('onboarding.welcome.skipHint')}</p>
               </div>
             </div>
           </div>
