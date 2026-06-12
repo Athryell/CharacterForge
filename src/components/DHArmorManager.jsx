@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DH_ARMORS } from '../data/systems/daggerheart/armor';
 
@@ -76,7 +76,7 @@ export default function DHArmorManager({
         <span className="dh-arm-name">
           🛡 {hasArmor ? armorName : t('dh.armor.none', 'No Armor')}
         </span>
-        <button className="io-btn" style={{ fontSize: 11, padding: '2px 8px' }}
+        <button className="io-btn" style={{ fontSize: '0.733rem', padding: '2px 8px' }}
           onClick={() => { setChanging(v => !v); setCustomForm(BLANK_CUSTOM); }}>
           {changing ? t('common.cancel', 'Cancel') : t('dh.armor.select', 'Change')}
         </button>
@@ -182,7 +182,7 @@ export default function DHArmorManager({
                   <label>{t('dh.armor.minor', 'Minor')} (base)</label>
                   <input type="number" value={customForm.minor}
                     onChange={e => patchCustom({ minor: parseInt(e.target.value) || 0 })} />
-                  <span className="hint-text" style={{ fontSize: 10 }}>
+                  <span className="hint-text" style={{ fontSize: '0.667rem' }}>
                     +{charLevel} = {Number(customForm.minor) + charLevel}
                   </span>
                 </div>
@@ -190,7 +190,7 @@ export default function DHArmorManager({
                   <label>{t('dh.armor.major', 'Major')} (base)</label>
                   <input type="number" value={customForm.major}
                     onChange={e => patchCustom({ major: parseInt(e.target.value) || 0 })} />
-                  <span className="hint-text" style={{ fontSize: 10 }}>
+                  <span className="hint-text" style={{ fontSize: '0.667rem' }}>
                     +{charLevel} = {Number(customForm.major) + charLevel}
                   </span>
                 </div>
@@ -203,11 +203,11 @@ export default function DHArmorManager({
               <div className="field" style={{ marginTop: 6 }}>
                 <label>
                   {t('dh.armor.feature', 'Feature')}
-                  <span style={{ fontWeight: 400, fontSize: 11, marginLeft: 4, color: 'var(--c-muted)' }}>
+                  <span style={{ fontWeight: 400, fontSize: '0.733rem', marginLeft: 4, color: 'var(--c-muted)' }}>
                     ({t('common.optional', 'optional')})
                   </span>
                 </label>
-                <textarea className="notes-area" style={{ minHeight: 40, fontSize: 12 }}
+                <textarea className="notes-area" style={{ minHeight: 40, fontSize: '0.8rem' }}
                   value={customForm.feature}
                   onChange={e => patchCustom({ feature: e.target.value })}
                   placeholder="Flexible: +1 to Evasion…" />

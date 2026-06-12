@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Icon } from '../config/icons';
 
@@ -46,14 +46,14 @@ export default function LevelDownModal({ currentLevel, charState, onConfirm, onC
                 {history.hpGained > 0 && (
                   <div className="feature-item" style={{ pointerEvents: 'none' }}>
                     <div className="feature-source-dot" style={{ background: 'var(--c-warn)' }} />
-                    <div style={{ flex: 1, fontSize: 13 }}>HP Max −{history.hpGained}</div>
+                    <div style={{ flex: 1, fontSize: '0.867rem' }}>HP Max −{history.hpGained}</div>
                   </div>
                 )}
 
                 {history.asi && (
                   <div className="feature-item" style={{ pointerEvents: 'none' }}>
                     <div className="feature-source-dot" style={{ background: 'var(--c-warn)' }} />
-                    <div style={{ flex: 1, fontSize: 13 }}>
+                    <div style={{ flex: 1, fontSize: '0.867rem' }}>
                       ASI removed: {Object.entries(history.asi).map(([k, v]) => `${k} −${v}`).join(', ')}
                     </div>
                   </div>
@@ -62,7 +62,7 @@ export default function LevelDownModal({ currentLevel, charState, onConfirm, onC
                 {history.feat && (
                   <div className="feature-item" style={{ pointerEvents: 'none' }}>
                     <div className="feature-source-dot" style={{ background: 'var(--c-warn)' }} />
-                    <div style={{ flex: 1, fontSize: 13 }}>Feat/Boon: {history.feat}</div>
+                    <div style={{ flex: 1, fontSize: '0.867rem' }}>Feat/Boon: {history.feat}</div>
                   </div>
                 )}
 
@@ -73,7 +73,7 @@ export default function LevelDownModal({ currentLevel, charState, onConfirm, onC
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span className="feature-name">{f.name}</span>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, cursor: 'pointer' }}
+                        <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.8rem', cursor: 'pointer' }}
                           onClick={e => e.stopPropagation()}>
                           <input type="checkbox" checked={keptIds.has(f.id)} onChange={() => toggleKeep(f.id)} />
                           {t('levelDown.keepItem')}
@@ -83,7 +83,7 @@ export default function LevelDownModal({ currentLevel, charState, onConfirm, onC
                         <div className="feature-desc" style={{ marginTop: 4 }}>{f.desc}</div>
                       )}
                     </div>
-                    <button className="io-btn" style={{ marginLeft: 8, padding: '2px 6px', fontSize: 11 }}
+                    <button className="io-btn" style={{ marginLeft: 8, padding: '2px 6px', fontSize: '0.733rem' }}
                       onClick={e => { e.stopPropagation(); setExpandedId(expandedId === f.id ? null : f.id); }}>
                       {expandedId === f.id ? '▲' : '▼'}
                     </button>
@@ -97,7 +97,7 @@ export default function LevelDownModal({ currentLevel, charState, onConfirm, onC
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span className="feature-name">✨ {s.name}</span>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, cursor: 'pointer' }}
+                        <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.8rem', cursor: 'pointer' }}
                           onClick={e => e.stopPropagation()}>
                           <input type="checkbox" checked={keptIds.has(s.name)} onChange={() => toggleKeep(s.name)} />
                           {t('levelDown.keepItem')}

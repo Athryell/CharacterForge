@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Icon } from '../config/icons';
 
@@ -93,7 +93,7 @@ export function TagSelector({ selected = [], allTags = [], onChange, onCreateTag
               ))}
               {input.trim() && !allTags.includes(input.trim()) && (
                 <div className="tag-suggestion-item new" onMouseDown={() => addTag(input)}>
-                  <span style={{ fontSize: 11, color: 'var(--c-muted)' }}>{t('tags.create')}</span>
+                  <span style={{ fontSize: '0.733rem', color: 'var(--c-muted)' }}>{t('tags.create')}</span>
                   <TagPill tag={input.trim()} allTags={[...allTags, input.trim()]} small />
                 </div>
               )}

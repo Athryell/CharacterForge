@@ -8,6 +8,8 @@ import {
   Coffee, MessageSquare, Tag, Eye, EyeClosed, Grip,
   AlertTriangle, Sparkles,
   Target, Crosshair, Activity, ShoppingBag,
+  Snowflake, Droplets, Droplet, Wind, Frown, CircleDot,
+  Bandage, Cloud, Leaf, Circle,
 } from 'lucide-react';
 
 // ── Context ─────────────────────────────────────────────────────────────────
@@ -20,7 +22,7 @@ export function useIconMode() { return useContext(IconModeContext); }
 
 export function IconModeProvider({ children }) {
   const [iconMode, setIconMode] = useState(
-    () => localStorage.getItem('characterforge_icon_mode') || 'emoji'
+    () => localStorage.getItem('characterforge_icon_mode') || 'lucide'
   );
   const [iconAccent, setIconAccent] = useState(
     () => localStorage.getItem('characterforge_icon_accent') === 'true'
@@ -126,6 +128,34 @@ export const ICON_MAP = {
   // ── Misc ──────────────────────────────────────────────────────────────────
   'misc.kofi':     { emoji: '☕', lucide: Coffee,       label: 'Support'   },
   'misc.feedback': { emoji: '📝', lucide: MessageSquare,label: 'Feedback'  },
+};
+
+// ── Emoji → Lucide mapping (for custom condition icons) ─────────────────────
+export const EMOJI_TO_LUCIDE = {
+  '⚠️': AlertTriangle,
+  '💀': Skull,
+  '🔥': Flame,
+  '❄️': Snowflake,
+  '⚡': Zap,
+  '💧': Droplets,
+  '🌀': Wind,
+  '☠️': Skull,
+  '😵': Skull,
+  '😨': Frown,
+  '🤢': Frown,
+  '😴': Moon,
+  '🩸': Droplet,
+  '🔮': CircleDot,
+  '⛓️': Link,
+  '🛡️': Shield,
+  '👁️': Eye,
+  '🌑': Circle,
+  '💫': Sparkles,
+  '🤕': Bandage,
+  '🧊': Snowflake,
+  '☁️': Cloud,
+  '🌿': Leaf,
+  '⚔️': Sword,
 };
 
 // ── Components ───────────────────────────────────────────────────────────────

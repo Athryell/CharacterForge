@@ -109,6 +109,7 @@
     "level": "Level",
     "profBonus": "Proficiency Bonus",
     "alignment": "Alignment",
+    "alignmentInfo": "Alignment descriptions",
     "xp": "Experience (XP)",
     "experienceShort": "Experience",
     "imageUrl": "🖼 Character image (URL)",
@@ -150,7 +151,8 @@
     "concentrating": "Concentrating",
     "noConcentration": "Not concentrating",
     "deathSuccess": "Successes",
-    "deathFail": "Failures"
+    "deathFail": "Failures",
+    "exhaustionSpeedPenalty": "Base speed"
   },
   "deathSave": {
     "rollBtn": "Roll d20",
@@ -418,7 +420,19 @@
     "presetFinesseNote": "This weapon uses Strength by default. You can also use Dexterity (edit the weapon stat from STR to DEX)."
   },
   "conditions": {
-    "title": "Conditions"
+    "title": "Conditions",
+    "remove": "Remove condition",
+    "customBtn": "+ Custom condition",
+    "customForm": {
+      "nameLabel": "Name",
+      "namePlaceholder": "Condition name",
+      "iconLabel": "Icon",
+      "descLabel": "Description",
+      "descPlaceholder": "Optional description",
+      "cancel": "Cancel",
+      "add": "+ Add",
+      "nameRequired": "Name is required"
+    }
   },
   "activityLog": {
     "empty": "No activity recorded.",
@@ -476,6 +490,7 @@
     "font": "Font",
     "fontDefault": "Default",
     "textSize": "Text size",
+    "sizeSmall": "Small",
     "sizeNormal": "Normal",
     "sizeLarge": "Large",
     "sizeXLarge": "Extra large",
@@ -648,7 +663,18 @@
       "Chaotic Neutral": "Chaotic Neutral",
       "Lawful Evil": "Lawful Evil",
       "Neutral Evil": "Neutral Evil",
-      "Chaotic Evil": "Chaotic Evil"
+      "Chaotic Evil": "Chaotic Evil",
+      "desc": {
+        "Lawful Good": "The classic hero. Upholds the law, protects the innocent, and always does what is right.",
+        "Neutral Good": "Does the best they can. Wants to help others but feels no obligation to rules or tradition.",
+        "Chaotic Good": "The rebel with a cause. Does what is right but refuses to let rules or institutions stand in the way.",
+        "Lawful Neutral": "The adherent to the code. Follows strict laws or tradition without judging their moral weight.",
+        "True Neutral": "Balancer of scales. Feels no strong pull toward good, evil, law, or chaos — often acts in self-interest.",
+        "Chaotic Neutral": "The free spirit. Follows personal whims and prizes freedom above all else.",
+        "Lawful Evil": "The tyrant. Uses laws, rules, and hierarchies as tools to achieve selfish ends.",
+        "Neutral Evil": "The selfish pragmatist. Looks out for number one and will do whatever it takes to get what they want.",
+        "Chaotic Evil": "The force of destruction. Driven by greed, hatred, and the desire to cause suffering."
+      }
     },
     "conditions": {
       "blinded": {

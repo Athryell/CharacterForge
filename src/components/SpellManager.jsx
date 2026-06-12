@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+﻿import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SCHOOLS, SPELL_CLASSES, filterSpells } from '../data/systems/dnd5e/spells';
 import dataManager from '../data/dataManager';
@@ -108,7 +108,7 @@ function SpellEditForm({ spell, srd, onSave, onCancel, onDelete, added, onToggle
       </div>
       {onUpdateTags && (
         <div style={{ marginTop: 6 }}>
-          <label style={{ fontSize: 11, color: 'var(--c-muted)', display: 'block', marginBottom: 3 }}>Tag</label>
+          <label style={{ fontSize: '0.733rem', color: 'var(--c-muted)', display: 'block', marginBottom: 3 }}>Tag</label>
           <TagSelector selected={spell.tags || []} allTags={allTags}
             onChange={tags => onUpdateTags(spell.name, tags)} onCreateTag={onCreateTag} />
         </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { KeywordText } from './Tooltip';
 import NotationTextarea from './NotationTextarea';
@@ -68,7 +68,7 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
           <div className="weight-summary-text">
             <span>{t('inventory.carried')}: <strong>{displayW(currentWeightKg)} {weightUnit}</strong> / {displayW(maxWeightKg)} {weightUnit}</span>
             {coinWeightKg > 0 && (
-              <span style={{ fontSize: 10, color: 'var(--c-muted)' }}>
+              <span style={{ fontSize: '0.667rem', color: 'var(--c-muted)' }}>
                 ({t('inventory.coinWeight', { n: displayW(coinWeightKg), unit: weightUnit })})
               </span>
             )}

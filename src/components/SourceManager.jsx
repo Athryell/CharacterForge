@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+﻿import React, { useState, useRef } from 'react';
 import dataManager from '../data/dataManager';
 import { Icon } from '../config/icons';
 
@@ -146,7 +146,7 @@ export default function SourceManager({ onHomebrewChange }) {
               {src.type === 'homebrew' && (
                 <button
                   className="io-btn danger"
-                  style={{ marginLeft: 'auto', padding: '2px 8px', fontSize: 11 }}
+                  style={{ marginLeft: 'auto', padding: '2px 8px', fontSize: '0.733rem' }}
                   onClick={() => removeSource(src.id)}
                 >
                   <Icon id="action.remove" size={13} /> Rimuovi

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Icon } from '../../config/icons';
 import { ABILITIES, SKILLS, HIT_DICE, SPELLCASTING_CLASS } from '../../data/systems/dnd5e/mechanics';
@@ -317,14 +317,14 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
                                 {t('creator.customSpeciesDarkvision', 'Darkvision')}
                               </label>
                               {data.customSpeciesDarkvision && (
-                                <input style={{ width: 64, fontSize: 12 }} value={data.customSpeciesDarkvisionDist}
+                                <input style={{ width: 64, fontSize: '0.8rem' }} value={data.customSpeciesDarkvisionDist}
                                   onChange={e => patch({ customSpeciesDarkvisionDist: e.target.value })}
                                   placeholder="18 m" />
                               )}
                             </div>
                           </div>
                           <div style={{ marginTop: 10 }}>
-                            <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>
+                            <div style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: 4 }}>
                               {t('creator.customSpeciesTraits', 'Traits')}
                             </div>
                             {data.customSpeciesTraits.map((trait, ti) => (
@@ -343,14 +343,14 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
                                 </div>
                                 <div className="field" style={{ marginTop: 4, marginBottom: 0 }}>
                                   <label>{t('creator.customSpeciesTraitDesc', 'Description')}</label>
-                                  <textarea className="notes-area" style={{ minHeight: 44, fontSize: 12 }}
+                                  <textarea className="notes-area" style={{ minHeight: 44, fontSize: '0.8rem' }}
                                     value={trait.desc}
                                     onChange={e => patch({ customSpeciesTraits: data.customSpeciesTraits.map((tr, j) => j === ti ? { ...tr, desc: e.target.value } : tr) })}
                                     placeholder="Descrizione del tratto…" />
                                 </div>
                               </div>
                             ))}
-                            <button className="io-btn" style={{ fontSize: 11, marginTop: 2 }}
+                            <button className="io-btn" style={{ fontSize: '0.733rem', marginTop: 2 }}
                               onClick={() => patch({ customSpeciesTraits: [...data.customSpeciesTraits, { id: `cst_${Date.now()}`, name: '', desc: '' }] })}>
                               {t('creator.customSpeciesAddTrait', '+ Add trait')}
                             </button>
@@ -393,12 +393,12 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
 
                           {/* ASI */}
                           <div style={{ marginTop: 10 }}>
-                            <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 6 }}>
+                            <div style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: 6 }}>
                               {t('creator.customBgAsiLabel', 'Ability Score Improvements')}
                             </div>
                             <div style={{ display: 'flex', gap: 12, marginBottom: 8 }}>
                               {[['A', t('creator.customBgAsiOptionA', '+2 / +1')], ['B', t('creator.customBgAsiOptionB', '+1 / +1 / +1')]].map(([opt, lbl]) => (
-                                <label key={opt} style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', fontSize: 12 }}>
+                                <label key={opt} style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', fontSize: '0.8rem' }}>
                                   <input type="radio" name="bg-asi-opt" value={opt}
                                     checked={data.customBgAsiOption === opt}
                                     onChange={() => patch({
@@ -414,7 +414,7 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
                             {data.customBgAsiOption === 'A' ? (
                               <div className="field-row" style={{ gap: 8 }}>
                                 <div className="field">
-                                  <label style={{ fontSize: 11 }}>{t('creator.customBgAsiPlus2', '+2 ability')}</label>
+                                  <label style={{ fontSize: '0.733rem' }}>{t('creator.customBgAsiPlus2', '+2 ability')}</label>
                                   <select value={data.customBgAsiA2} onChange={e => {
                                     const a2 = e.target.value;
                                     const a1 = a2 === data.customBgAsiA1 ? '' : data.customBgAsiA1;
@@ -428,7 +428,7 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
                                   </select>
                                 </div>
                                 <div className="field">
-                                  <label style={{ fontSize: 11 }}>{t('creator.customBgAsiPlus1', '+1 ability')}</label>
+                                  <label style={{ fontSize: '0.733rem' }}>{t('creator.customBgAsiPlus1', '+1 ability')}</label>
                                   <select value={data.customBgAsiA1} onChange={e => {
                                     const a1 = e.target.value;
                                     const a2 = data.customBgAsiA2;
@@ -446,7 +446,7 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
                               <div className="field-row" style={{ gap: 8 }}>
                                 {[0, 1, 2].map(idx => (
                                   <div key={idx} className="field">
-                                    <label style={{ fontSize: 11 }}>+1 {t(`data.abilityAbbr.${['STR','DEX','CON'][idx]}`, '')} #{idx + 1}</label>
+                                    <label style={{ fontSize: '0.733rem' }}>+1 {t(`data.abilityAbbr.${['STR','DEX','CON'][idx]}`, '')} #{idx + 1}</label>
                                     <select value={data.customBgAsiB[idx] || ''} onChange={e => {
                                       const nextB = [...data.customBgAsiB];
                                       nextB[idx] = e.target.value;
@@ -469,13 +469,13 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
 
                           {/* Skill proficiencies */}
                           <div style={{ marginTop: 10 }}>
-                            <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>
+                            <div style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: 4 }}>
                               {t('creator.customBgSkillsLabel', 'Skill Proficiencies')}
                             </div>
                             <div className="field-row" style={{ gap: 8 }}>
                               {[0, 1].map(si => (
                                 <div key={si} className="field">
-                                  <label style={{ fontSize: 11 }}>Skill {si + 1}</label>
+                                  <label style={{ fontSize: '0.733rem' }}>Skill {si + 1}</label>
                                   <select value={data.customBgSkills[si] || ''} onChange={e => {
                                     const next = [data.customBgSkills[0] || '', data.customBgSkills[1] || ''];
                                     next[si] = e.target.value;
@@ -518,11 +518,11 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
 
                           {/* Equipment */}
                           <div style={{ marginTop: 10 }}>
-                            <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 6 }}>
+                            <div style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: 6 }}>
                               {t('creator.customBgEquipLabel', 'Equipment')}
                             </div>
                             {[['gold', t('creator.customBgEquipGold', '50 GP to spend')], ['items', t('creator.customBgEquipItems', 'List specific items')]].map(([opt, lbl]) => (
-                              <label key={opt} style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: 12, marginBottom: 4 }}>
+                              <label key={opt} style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: '0.8rem', marginBottom: 4 }}>
                                 <input type="radio" name="bg-equip-opt" value={opt}
                                   checked={data.customBgEquipOption === opt}
                                   onChange={() => patch({ customBgEquipOption: opt })} />
@@ -530,7 +530,7 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
                               </label>
                             ))}
                             {data.customBgEquipOption === 'items' && (
-                              <textarea className="notes-area" style={{ minHeight: 44, fontSize: 12, marginTop: 4 }}
+                              <textarea className="notes-area" style={{ minHeight: 44, fontSize: '0.8rem', marginTop: 4 }}
                                 value={data.customBgEquipItems}
                                 onChange={e => patch({ customBgEquipItems: e.target.value })}
                                 placeholder="Es. Piede di porco, 2 torce, 15 GP…" />
@@ -659,9 +659,9 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
 
                           {/* Saving throw proficiencies */}
                           <div style={{ marginTop: 10 }}>
-                            <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>
+                            <div style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: 4 }}>
                               {t('creator.customClsSaveProfs', 'Saving Throws')}
-                              <span style={{ fontSize: 11, fontWeight: 400, marginLeft: 6, color: 'var(--c-muted)' }}>
+                              <span style={{ fontSize: '0.733rem', fontWeight: 400, marginLeft: 6, color: 'var(--c-muted)' }}>
                                 ({data.customClassSaveProfs.length}/2)
                               </span>
                             </div>
@@ -670,7 +670,7 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
                                 const checked = data.customClassSaveProfs.includes(a);
                                 const maxed = data.customClassSaveProfs.length >= 2;
                                 return (
-                                  <label key={a} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, cursor: checked || !maxed ? 'pointer' : 'default', opacity: !checked && maxed ? 0.4 : 1 }}>
+                                  <label key={a} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.8rem', cursor: checked || !maxed ? 'pointer' : 'default', opacity: !checked && maxed ? 0.4 : 1 }}>
                                     <input type="checkbox" checked={checked}
                                       disabled={!checked && maxed}
                                       onChange={e => {
@@ -699,9 +699,9 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
 
                           {/* Skill options */}
                           <div style={{ marginTop: 8 }}>
-                            <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 2 }}>
+                            <div style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: 2 }}>
                               {t('creator.customClsSkillOptions', 'Available skills')}
-                              <span style={{ fontSize: 11, fontWeight: 400, marginLeft: 6, color: 'var(--c-muted)' }}>
+                              <span style={{ fontSize: '0.733rem', fontWeight: 400, marginLeft: 6, color: 'var(--c-muted)' }}>
                                 {data.customClassSkillOptions.length === 0
                                   ? t('creator.customClsSkillAllAvail', '(all skills)')
                                   : `(${data.customClassSkillOptions.length} selected)`}
@@ -711,7 +711,7 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
                               {SKILLS.map(sk => {
                                 const checked = data.customClassSkillOptions.includes(sk.id);
                                 return (
-                                  <label key={sk.id} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, cursor: 'pointer' }}>
+                                  <label key={sk.id} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.733rem', cursor: 'pointer' }}>
                                     <input type="checkbox" checked={checked}
                                       onChange={e => {
                                         if (e.target.checked)

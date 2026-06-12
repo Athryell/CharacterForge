@@ -145,7 +145,8 @@
     "backgroundCustomPlaceholder": "Type the background...",
     "level": "Level",
     "profBonus": "Proficiency Bonus",
-    "alignment": "Alignment",
+    "alignment": "Allineamento",
+    "alignmentInfo": "Descrizioni allineamenti",
     "xp": "Experience (XP)",
     "experienceShort": "Experience",
     "imageUrl": "🖼 Character image (URL)",
@@ -187,7 +188,8 @@
     "concentrating": "Concentrating",
     "noConcentration": "Not concentrating",
     "deathSuccess": "Successes",
-    "deathFail": "Failures"
+    "deathFail": "Failures",
+    "exhaustionSpeedPenalty": "Velocità base"
   },
   "deathSave": {
     "rollBtn": "Roll d20",
@@ -455,7 +457,19 @@
     "presetFinesseNote": "This weapon uses Strength by default. You can also use Dexterity (edit the weapon stat from STR to DEX)."
   },
   "conditions": {
-    "title": "Conditions"
+    "title": "Condizioni",
+    "remove": "Rimuovi condizione",
+    "customBtn": "+ Condizione custom",
+    "customForm": {
+      "nameLabel": "Nome",
+      "namePlaceholder": "Nome condizione",
+      "iconLabel": "Icona",
+      "descLabel": "Descrizione",
+      "descPlaceholder": "Descrizione opzionale",
+      "cancel": "Annulla",
+      "add": "+ Aggiungi",
+      "nameRequired": "Il nome è obbligatorio"
+    }
   },
   "activityLog": {
     "empty": "No activity recorded.",
@@ -513,8 +527,9 @@
     "font": "Font",
     "fontDefault": "Default",
     "textSize": "Text size",
-    "sizeNormal": "Normal",
-    "sizeLarge": "Large",
+    "sizeSmall": "Piccolo",
+    "sizeNormal": "Normale",
+    "sizeLarge": "Grande",
     "sizeXLarge": "Extra large",
     "contrast": "Contrast",
     "contrastDefault": "Default",
@@ -685,7 +700,18 @@
       "Chaotic Neutral": "Chaotic Neutral",
       "Lawful Evil": "Lawful Evil",
       "Neutral Evil": "Neutral Evil",
-      "Chaotic Evil": "Chaotic Evil"
+      "Chaotic Evil": "Chaotic Evil",
+      "desc": {
+        "Lawful Good": "L'eroe classico. Rispetta la legge, protegge gli innocenti e fa sempre la cosa giusta.",
+        "Neutral Good": "Fa del suo meglio. Vuole aiutare gli altri ma non si sente vincolato da regole o tradizioni.",
+        "Chaotic Good": "Il ribelle con una causa. Fa ciò che è giusto ma rifiuta che regole o istituzioni ostacolino i propri obiettivi.",
+        "Lawful Neutral": "Il seguace del codice. Obbedisce a leggi o tradizioni senza giudicarne le implicazioni morali.",
+        "True Neutral": "L'equilibrista. Non sente una forte attrazione verso bene, male, legge o caos — spesso agisce per interesse personale.",
+        "Chaotic Neutral": "Lo spirito libero. Segue i propri capricci e mette la libertà personale sopra ogni altra cosa.",
+        "Lawful Evil": "Il tiranno. Usa leggi, regole e gerarchie come strumenti per raggiungere i propri fini egoistici.",
+        "Neutral Evil": "Il pragmatico egoista. Pensa solo a sé stesso e farà qualsiasi cosa pur di ottenere ciò che vuole.",
+        "Chaotic Evil": "La forza della distruzione. Mosso da avidità, odio e dal desiderio di causare sofferenza."
+      }
     },
     "conditions": {
       "blinded": {

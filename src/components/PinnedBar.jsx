@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Icon } from '../config/icons';
+import { Icon, useIconMode } from '../config/icons';
 import { useUnits } from '../hooks/useUnits';
 
 const PINNABLE_DND = [
@@ -8,7 +8,6 @@ const PINNABLE_DND = [
   { id: 'inspiration',   labelKey: 'pinned.inspiration' },
   { id: 'concentration', labelKey: 'pinned.concentration' },
   { id: 'conditions',    labelKey: 'pinned.conditions' },
-  { id: 'exhaustion',    labelKey: 'pinned.exhaustion' },
   { id: 'deathSaves',    labelKey: 'pinned.deathSaves' },
 ];
 
@@ -35,6 +34,7 @@ export function savePinned(pinned) {
 
 export default function PinnedBar({ state, editMode, pinned, onTogglePin, onUpdate, system, onShortRest, onLongRest }) {
   const { t } = useTranslation();
+  const { iconMode } = useIconMode();
   const showRestBtns = !editMode && system === 'dnd5e';
   if (!editMode && pinned.length === 0 && !showRestBtns) return null;
 
@@ -66,11 +66,13 @@ export default function PinnedBar({ state, editMode, pinned, onTogglePin, onUpda
         <div className="pinned-rest-group">
           <button className="pinned-rest-btn" onClick={onShortRest}>
             <Icon id="game.shortRest" size={13} />
-            <span>{t('rest.short')}</span>
+            <span className="rest-label">{t('rest.short')}</span>
+            {iconMode === 'none' && <span className="rest-abbr">SR</span>}
           </button>
           <button className="pinned-rest-btn primary" onClick={onLongRest}>
             <Icon id="game.longRest" size={13} />
-            <span>{t('rest.long')}</span>
+            <span className="rest-label">{t('rest.long')}</span>
+            {iconMode === 'none' && <span className="rest-abbr">LR</span>}
           </button>
         </div>
       )}
@@ -138,30 +140,22 @@ function PinContent({ id, labelKey, state, onUpdate, active, editMode }) {
     case 'conditions': {
       const active = state.conditions || [];
       const exhLvl = state.exhaustionLevel || 0;
+      const customConds = state.customConditions || [];
       const hasAny = active.length > 0 || exhLvl > 0;
       return (
         <span className="pin-content">
           <Icon id="widget.conditions" size={13} />{!hasAny
             ? <span className="pin-hint"> {t('pinned.none', 'None')}</span>
             : <>
-                {active.map(cid => (
-                  <span key={cid} className="pin-cond">{t(`data.conditions.${cid}.name`, cid)}</span>
-                ))}
+                {active.map(cid => {
+                  const name = cid.startsWith('custom_')
+                    ? (customConds.find(c => c.id === cid)?.name ?? cid)
+                    : t(`data.conditions.${cid}.name`, cid);
+                  return <span key={cid} className="pin-cond">{name}</span>;
+                })}
                 {exhLvl > 0 && <span className="pin-cond"><Icon id="game.exhaustion" size={12} /> {t('pinned.exhaustionShort', 'Exh.')}{exhLvl}</span>}
               </>
           }
-        </span>
-      );
-    }
-    case 'exhaustion': {
-      const lvl = state.exhaustionLevel || 0;
-      if (lvl === 0) return <span className="pin-content"><span className="pin-hint"><Icon id="game.exhaustion" size={13} /> {t('pinned.noExhaustion', 'No exhaustion')}</span></span>;
-      const spdPenalty = lvl >= 5 ? 0 : toDisplaySpeed(lvl * 5);
-      const spdStr = lvl >= 6 ? t('pinned.exhaustionDeath', 'Death') : lvl === 5 ? `0 ${speedUnit}` : `−${spdPenalty} ${speedUnit}`;
-      return (
-        <span className="pin-content pin-on"
-          title={`${t('pinned.exhaustionLevel', 'Exhaustion level')} ${lvl}: ${spdStr}`}>
-          <Icon id="game.exhaustion" size={13} /> {t('pinned.exhaustionShort', 'Exh.')} {lvl} · {spdStr}
         </span>
       );
     }

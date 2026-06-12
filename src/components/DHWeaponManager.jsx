@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DH_WEAPONS } from '../data/systems/daggerheart/weapons';
 
@@ -93,7 +93,7 @@ export default function DHWeaponManager({ weapons = [], proficiency = 1, onUpdat
                   ['two-handed',  t('dh.weapons.twoHanded', '2H')],
                 ].map(([val, label]) => (
                   <button key={String(val)} className={`filter-chip ${handsFilter === val ? 'active' : ''}`}
-                    style={{ fontSize: 11 }} onClick={() => setHandsFilter(val)}>
+                    style={{ fontSize: '0.733rem' }} onClick={() => setHandsFilter(val)}>
                     {label}
                   </button>
                 ))}
@@ -173,11 +173,11 @@ export default function DHWeaponManager({ weapons = [], proficiency = 1, onUpdat
               <div className="field" style={{ marginTop: 6 }}>
                 <label>
                   {t('dh.weapons.feature', 'Feature')}
-                  <span style={{ fontWeight: 400, fontSize: 11, marginLeft: 4, color: 'var(--c-muted)' }}>
+                  <span style={{ fontWeight: 400, fontSize: '0.733rem', marginLeft: 4, color: 'var(--c-muted)' }}>
                     ({t('common.optional', 'optional')})
                   </span>
                 </label>
-                <textarea className="notes-area" style={{ minHeight: 44, fontSize: 12 }}
+                <textarea className="notes-area" style={{ minHeight: 44, fontSize: '0.8rem' }}
                   value={customForm.feature}
                   onChange={e => patchCustom({ feature: e.target.value })}
                   placeholder={t('dh.weapons.featurePlaceholder', 'Reach, Thrown, special effect…')} />

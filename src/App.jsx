@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+﻿import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useCharacter } from './hooks/useCharacter';
@@ -9,6 +9,7 @@ import {
   createDefaultState, ABILITIES, SKILLS,
   SPELLCASTING_CLASS, getMod, fmtMod, HIT_DICE,
 } from './data/systems/dnd5e/mechanics';
+import { DND_CONDITIONS } from './data/systems/dnd5e/conditions';
 import dataManager from './data/dataManager';
 import SourceManager from './components/SourceManager';
 import CharacterCreator from './components/CharacterCreator';
@@ -354,10 +355,10 @@ function SubclassFeaturesEditor({ features, currentLevel, onChange }) {
               className="notes-area" style={{ minHeight: 44 }} />
           </div>
           <button onClick={() => remove(f.id)} className="mod-btn"
-            style={{ marginTop: 20, color: 'var(--c-warn)', fontSize: 16, lineHeight: 1 }}>×</button>
+            style={{ marginTop: 20, color: 'var(--c-warn)', fontSize: '1.067rem', lineHeight: 1 }}>×</button>
         </div>
       ))}
-      <button className="io-btn" style={{ fontSize: 12, marginTop: 2 }} onClick={add}>
+      <button className="io-btn" style={{ fontSize: '0.8rem', marginTop: 2 }} onClick={add}>
         + {t('identity.addSubclassFeature')}
       </button>
     </div>
@@ -403,7 +404,7 @@ function SubclassSection({ state, update, t }) {
       </Field>
       {isCustom && (
         <div style={{ gridColumn: '1 / -1', marginTop: 4 }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--c-muted)', marginBottom: 6 }}>{t('identity.subclassFeatures')}</div>
+          <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--c-muted)', marginBottom: 6 }}>{t('identity.subclassFeatures')}</div>
           <SubclassFeaturesEditor
             features={state.subclassFeatures || []}
             currentLevel={state.charLevel}
@@ -856,7 +857,10 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                     </Field>
                     <Field label={t('identity.profBonus')}><input value={`+${char.profBonus}`} readOnly /></Field>
                     <Field label={t('identity.alignment')}>
-                      <AlignmentPicker value={state.charAlignment} onChange={a => update({ charAlignment: a })} />
+                      <AlignmentPicker
+                        value={state.charAlignment}
+                        onChange={a => update({ charAlignment: a })}
+                      />
                     </Field>
                     <Field label={t('identity.xp')}>
                       <input type="number" min="0" value={state.charXP} onChange={e => update({ charXP: parseInt(e.target.value)||0 })} />
@@ -1109,22 +1113,38 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
             <div className="stat-pill">
               <div className="stat-pill-label">{t('combat.speed')}</div>
               <div style={{ display:'flex', alignItems:'center', gap:2 }}>
-                <input className="stat-pill-input" type="text" inputMode="decimal"
-                  value={speedInputVal !== null ? speedInputVal : String(toDisplaySpeed(parseSpeedFt(state.speed)))}
-                  onFocus={() => setSpeedInputVal(String(toDisplaySpeed(parseSpeedFt(state.speed))))}
-                  onChange={e => setSpeedInputVal(e.target.value)}
-                  onBlur={() => { update({ speed: String(fromDisplaySpeed(speedInputVal ?? '0')) }); setSpeedInputVal(null); }}
-                  onKeyDown={e => { if (e.key === 'Enter') { update({ speed: String(fromDisplaySpeed(speedInputVal ?? '0')) }); setSpeedInputVal(null); e.target.blur(); } }} />
-                <span style={{ fontSize:10, color:'var(--c-muted)', whiteSpace:'nowrap' }}>
-                  {speedUnit === 'sq' ? '□' : speedUnit}
-                </span>
+                {(() => {
+                  const spdUnit = speedUnit === 'sq' ? '□' : speedUnit;
+                  const rawDisplay = toDisplaySpeed(parseSpeedFt(state.speed));
+                  const spdBonus = equipBonuses.SPD || 0;
+                  const baseDisplay = rawDisplay + spdBonus;
+                  const exhLvl = state.exhaustionLevel || 0;
+                  const exhPenaltyDisplay = exhLvl >= 5 ? baseDisplay : Math.min(baseDisplay, toDisplaySpeed(exhLvl * 5));
+                  const effectiveDisplay = Math.max(0, baseDisplay - exhPenaltyDisplay);
+                  return (<>
+                    <input className="stat-pill-input" type="text" inputMode="decimal"
+                      style={exhPenaltyDisplay > 0 ? { color: 'var(--c-warn)' } : undefined}
+                      value={speedInputVal !== null ? speedInputVal : String(effectiveDisplay)}
+                      onFocus={() => setSpeedInputVal(String(rawDisplay))}
+                      onChange={e => setSpeedInputVal(e.target.value)}
+                      onBlur={() => { update({ speed: String(fromDisplaySpeed(speedInputVal ?? '0')) }); setSpeedInputVal(null); }}
+                      onKeyDown={e => { if (e.key === 'Enter') { update({ speed: String(fromDisplaySpeed(speedInputVal ?? '0')) }); setSpeedInputVal(null); e.target.blur(); } }} />
+                    <span style={{ fontSize:10, color:'var(--c-muted)', whiteSpace:'nowrap' }}>{spdUnit}</span>
+                    {spdBonus !== 0 && (
+                      <span className="equip-bonus-badge"
+                        title={(equipBonusesDetailed.SPD||[]).map(s=>`${s.name}: ${s.value>=0?'+':''}${s.value}`).join(', ')}>
+                        🎒
+                      </span>
+                    )}
+                    {exhPenaltyDisplay > 0 && (
+                      <span className="exhaustion-speed-badge"
+                        title={`${t('combat.exhaustionSpeedPenalty', 'Base speed')}: ${rawDisplay}${spdBonus ? ` + ${Math.abs(spdBonus)}` : ''} ${spdUnit}`}>
+                        <Icon id="game.exhaustion" size={10} />−{exhPenaltyDisplay}
+                      </span>
+                    )}
+                  </>);
+                })()}
               </div>
-              {equipBonuses.SPD ? (
-                <span className="equip-bonus-badge"
-                  title={(equipBonusesDetailed.SPD||[]).map(s=>`${s.name}: ${s.value>=0?'+':''}${s.value}`).join(', ')}>
-                  🎒
-                </span>
-              ) : null}
             </div>
           </div>
         </div>
@@ -1179,6 +1199,13 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
             onChange={conditions => update({ conditions })}
             exhaustionLevel={state.exhaustionLevel||0}
             onExhaustionChange={level => update({ exhaustionLevel: level })}
+            conditions={[...DND_CONDITIONS, ...(state.customConditions || [])]}
+            onAddCustom={cond => update({ customConditions: [...(state.customConditions || []), cond] })}
+            onRemoveCustom={id => update(prev => ({
+              ...prev,
+              customConditions: (prev.customConditions || []).filter(c => c.id !== id),
+              conditions: (prev.conditions || []).filter(c => c !== id),
+            }))}
           />
         </div>
       );
@@ -2026,11 +2053,11 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
         )}
         {editMode && (
           <>
-            <button className="io-btn" style={{ fontSize: 12, padding: '4px 10px' }}
+            <button className="io-btn" style={{ fontSize: '0.8rem', padding: '4px 10px' }}
               onClick={() => { const d = getDefaultLayoutForSystem(activeSystem || DEFAULT_SYSTEM); setLayout(d); saveLayoutForSystem(activeSystem || DEFAULT_SYSTEM, d); const dt = getDefaultTabsForSystem(activeSystem || DEFAULT_SYSTEM); setTabs(dt); saveTabsForSystem(activeSystem || DEFAULT_SYSTEM, dt); }}>
               {t('nav.reset')}
             </button>
-            <button className="io-btn primary" style={{ fontSize: 12, padding: '4px 10px' }}
+            <button className="io-btn primary" style={{ fontSize: '0.8rem', padding: '4px 10px' }}
               onClick={() => setEditMode(false)}>
               {t('nav.layoutDone')}
             </button>
@@ -2130,14 +2157,14 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
               <div className="hmenu-section">
                 <div className="hmenu-label">{t('menu.units')}</div>
                 <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 4, padding: '0 14px' }}>
-                  <span style={{ fontSize: 11, color: 'var(--c-muted)', minWidth: 52 }}>{t('menu.weightUnit')}</span>
+                  <span style={{ fontSize: '0.733rem', color: 'var(--c-muted)', minWidth: 52 }}>{t('menu.weightUnit')}</span>
                   {[['kg','kg'],['lbs','lbs']].map(([val, label]) => (
                     <button key={val} className={`hmenu-theme-btn ${weightUnit === val ? 'active' : ''}`}
                       onClick={() => setUnitPref('weightUnit', val)}>{label}</button>
                   ))}
                 </div>
                 <div style={{ display: 'flex', gap: 6, alignItems: 'center', padding: '0 14px' }}>
-                  <span style={{ fontSize: 11, color: 'var(--c-muted)', minWidth: 52 }}>{t('menu.speedUnit')}</span>
+                  <span style={{ fontSize: '0.733rem', color: 'var(--c-muted)', minWidth: 52 }}>{t('menu.speedUnit')}</span>
                   {[['ft','ft'],['m','m'],['sq','□']].map(([val, label]) => (
                     <button key={val} className={`hmenu-theme-btn ${speedUnit === val ? 'active' : ''}`}
                       onClick={() => setUnitPref('speedUnit', val)}>{label}</button>
@@ -2167,6 +2194,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                 <div className="hmenu-label">{t('accessibility.textSize')}</div>
                 <div className="hmenu-row">
                   {[
+                    { value: 'small',  label: t('accessibility.sizeSmall')  },
                     { value: 'normal', label: t('accessibility.sizeNormal') },
                     { value: 'large',  label: t('accessibility.sizeLarge')  },
                     { value: 'xlarge', label: t('accessibility.sizeXLarge') },

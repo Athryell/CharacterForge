@@ -22,7 +22,7 @@ export function parseSpeedFt(s) {
 export function useUnits() {
   const [prefs, setPrefs] = useState(load);
   const weightUnit = prefs.weightUnit || 'kg';
-  const speedUnit = prefs.speedUnit || 'ft';
+  const speedUnit = prefs.speedUnit || 'm';
 
   useEffect(() => {
     function handleChange() { setPrefs(load()); }

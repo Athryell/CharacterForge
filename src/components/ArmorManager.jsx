@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DND_ARMOR_PRESETS as ARMOR_PRESETS, TYPE_LABEL, calcArmorAC } from '../data/systems/dnd5e/armors';
 import { TagPill, TagSelector } from './Tags';
@@ -27,9 +27,9 @@ function ArmorEditForm({ form, onChange, onSave, onCancel, onDelete, allTags, it
         <div className="field" style={{ flex: '0 0 90px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
           <label>{t('armor.typeLabel', 'Tipo')}</label>
           <div style={{ display: 'flex', gap: 4, marginTop: 6 }}>
-            <button className={`filter-chip ${form.type === 'armor' ? 'active' : ''}`} style={{ fontSize: 11 }}
+            <button className={`filter-chip ${form.type === 'armor' ? 'active' : ''}`} style={{ fontSize: '0.733rem' }}
               onClick={() => patch({ type: 'armor' })}>{t('armor.typeArmor', 'Armatura')}</button>
-            <button className={`filter-chip ${form.type === 'shield' ? 'active' : ''}`} style={{ fontSize: 11 }}
+            <button className={`filter-chip ${form.type === 'shield' ? 'active' : ''}`} style={{ fontSize: '0.733rem' }}
               onClick={() => patch({ type: 'shield' })}>{t('armor.typeShield', 'Scudo')}</button>
           </div>
         </div>
@@ -41,7 +41,7 @@ function ArmorEditForm({ form, onChange, onSave, onCancel, onDelete, allTags, it
             <label>{t('armor.armorTypeLabel', 'Categoria')}</label>
             <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 4 }}>
               {[['light','Leggera'],['medium','Media'],['heavy','Pesante']].map(([k, lbl]) => (
-                <button key={k} className={`filter-chip ${form.armorType === k ? 'active' : ''}`} style={{ fontSize: 11 }}
+                <button key={k} className={`filter-chip ${form.armorType === k ? 'active' : ''}`} style={{ fontSize: '0.733rem' }}
                   onClick={() => patch({ armorType: k })}>{t('data.armorTypes.' + k, lbl)}</button>
               ))}
             </div>
@@ -190,7 +190,7 @@ export default function ArmorManager({ armors = [], desMod = 0, onUpdate, profic
             <div className="weapon-preset-list">
               {Object.entries(grouped).map(([grp, items]) => items.length === 0 ? null : (
                 <div key={grp}>
-                  <div style={{ fontSize: 10, color: 'var(--c-muted)', fontWeight: 600, marginBottom: 3, marginTop: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                  <div style={{ fontSize: '0.667rem', color: 'var(--c-muted)', fontWeight: 600, marginBottom: 3, marginTop: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>
                     {grp === 'shield' ? t('armor.typeShield', 'Scudo') : t('data.armorTypes.' + grp, TYPE_LABEL[grp] || grp)}
                   </div>
                   {items.map(p => {
@@ -236,17 +236,17 @@ export default function ArmorManager({ armors = [], desMod = 0, onUpdate, profic
                   onClick={e => { e.stopPropagation(); toggleEquip(a); }}
                 />
                 <div className="weapon-name">{a.name}</div>
-                <span className="weapon-prop" style={{ fontSize: 10 }}>
+                <span className="weapon-prop" style={{ fontSize: '0.667rem' }}>
                   {isShield ? `+${a.acValue} CA` : `CA ${a.acValue}`}
                 </span>
                 {!a.isProficient && <span className="weapon-prop" style={{ color: 'var(--c-warn-text)' }}>{t('weapons.noProf', 'No comp.')}</span>}
                 {(a.tags || []).map(tag => <TagPill key={tag} tag={tag} allTags={allTags} small />)}
               </div>
               <div className="weapon-meta">
-                <span className="weapon-prop" style={{ fontSize: 10 }}>
+                <span className="weapon-prop" style={{ fontSize: '0.667rem' }}>
                   {isShield ? t('armor.typeShield', 'Scudo') : (a.armorType ? t('data.armorTypes.' + a.armorType, TYPE_LABEL[a.armorType] || a.armorType) : t('armor.typeArmor', 'Armatura'))}
                 </span>
-                {a.weight && <span className="weapon-prop" style={{ fontSize: 10 }}>{a.weight} {weightUnit}</span>}
+                {a.weight && <span className="weapon-prop" style={{ fontSize: '0.667rem' }}>{a.weight} {weightUnit}</span>}
               </div>
             </div>
 
@@ -265,7 +265,7 @@ export default function ArmorManager({ armors = [], desMod = 0, onUpdate, profic
             {isExpanded && !isEditing && (
               <div className="weapon-expanded-section" onClick={e => e.stopPropagation()}>
                 {a.desc && (
-                  <div style={{ fontSize: 12, color: 'var(--c-muted)', marginBottom: 4 }}>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--c-muted)', marginBottom: 4 }}>
                     <KeywordText text={a.desc} />
                   </div>
                 )}

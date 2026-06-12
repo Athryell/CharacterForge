@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { WEAPON_PROPERTIES, WEAPON_PROPERTY_DESCS, WEAPON_MASTERIES } from '../data/systems/dnd5e/weapons';
 import dataManager from '../data/dataManager';
@@ -36,7 +36,7 @@ function PropertyMasteryPicker({ properties, mastery, onChangeProperties, onChan
         <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
           {predefinedKeys.map(key => (
             <button key={key} className={`filter-chip ${properties.includes(key) ? 'active' : ''}`}
-              style={{ fontSize: 11 }} title={WEAPON_PROPERTY_DESCS[key]}
+              style={{ fontSize: '0.733rem' }} title={WEAPON_PROPERTY_DESCS[key]}
               onClick={() => toggleProp(key)}>
               {t('data.weaponProps.' + key, WEAPON_PROPERTIES[key])}
             </button>
@@ -55,7 +55,7 @@ function PropertyMasteryPicker({ properties, mastery, onChangeProperties, onChan
         <div style={{ display: 'flex', gap: 4, marginTop: 4, alignItems: 'center' }}>
           <input value={custom} onChange={e => setCustom(e.target.value)}
             placeholder={t('weapons.customPropPlaceholder')}
-            style={{ flex: 1, fontSize: 12 }}
+            style={{ flex: 1, fontSize: '0.8rem' }}
             onKeyDown={e => e.key === 'Enter' && addCustom()} />
           <button className="io-btn" onClick={addCustom}>+</button>
         </div>
@@ -65,14 +65,14 @@ function PropertyMasteryPicker({ properties, mastery, onChangeProperties, onChan
         <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
           {Object.entries(WEAPON_MASTERIES).filter(([k]) => k !== 'none').map(([key, { label, desc }]) => (
             <button key={key} className={`filter-chip ${mastery === key ? 'active' : ''}`}
-              style={{ fontSize: 11 }} title={desc}
+              style={{ fontSize: '0.733rem' }} title={desc}
               onClick={() => onChangeMastery(mastery === key ? 'none' : key)}>
               {t('data.masteries.' + key, label)}
             </button>
           ))}
         </div>
         {mastery && mastery !== 'none' && WEAPON_MASTERIES[mastery] && (
-          <div style={{ fontSize: 10, color: 'var(--c-muted)', marginTop: 3 }}>
+          <div style={{ fontSize: '0.667rem', color: 'var(--c-muted)', marginTop: 3 }}>
             {WEAPON_MASTERIES[mastery]?.desc}
           </div>
         )}
@@ -81,7 +81,7 @@ function PropertyMasteryPicker({ properties, mastery, onChangeProperties, onChan
           <input
             value={isCustomMastery ? mastery : ''}
             placeholder={t('weapons.customMasteryPlaceholder')}
-            style={{ fontSize: 12, width: '100%' }}
+            style={{ fontSize: '0.8rem', width: '100%' }}
             onChange={e => onChangeMastery(e.target.value || 'none')}
           />
         </div>
@@ -336,7 +336,7 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
                 )}
                 {predefinedProps.map(p => <span key={p} className="weapon-prop" title={WEAPON_PROPERTY_DESCS[p]}>{t("data.weaponProps." + p, WEAPON_PROPERTIES[p])}</span>)}
                 {customProps.map(p => <span key={p} className="weapon-prop">{p}</span>)}
-                {w.weight && <span className="weapon-prop" style={{ fontSize: 10 }}>{w.weight} {weightUnit || 'kg'}</span>}
+                {w.weight && <span className="weapon-prop" style={{ fontSize: '0.667rem' }}>{w.weight} {weightUnit || 'kg'}</span>}
               </div>
             </div>
 
@@ -360,7 +360,7 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
 
             {isExpanded && !isEditing && (
               <div className="weapon-expanded-section" onClick={e => e.stopPropagation()}>
-                {w.desc && <div style={{ fontSize: 12, color: 'var(--c-muted)', marginBottom: 4 }}>
+                {w.desc && <div style={{ fontSize: '0.8rem', color: 'var(--c-muted)', marginBottom: 4 }}>
                   <KeywordText text={w.desc}
                     onRoll={onRoll}
                     label={w.name}
@@ -368,12 +368,12 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
                     onCounterChange={(idx, vals) => onUpdate(weapons.map(w2 => w2.id === w.id ? { ...w2, counters: { ...(w2.counters || {}), [idx]: vals } } : w2))} />
                 </div>}
                 {predefinedProps.filter(p => WEAPON_PROPERTY_DESCS[p]).map(p => (
-                  <div key={p} style={{ fontSize: 11, color: 'var(--c-muted)', marginBottom: 4 }}>
+                  <div key={p} style={{ fontSize: '0.733rem', color: 'var(--c-muted)', marginBottom: 4 }}>
                     <strong>{t("data.weaponProps." + p, WEAPON_PROPERTIES[p] || p)}:</strong> {WEAPON_PROPERTY_DESCS[p]}
                   </div>
                 ))}
                 {w.mastery && w.mastery !== 'none' && (
-                  <div style={{ fontSize: 11, color: 'var(--c-muted)', marginBottom: 4 }}>
+                  <div style={{ fontSize: '0.733rem', color: 'var(--c-muted)', marginBottom: 4 }}>
                     <strong>{WEAPON_MASTERIES[w.mastery] ? t("data.masteries." + w.mastery, WEAPON_MASTERIES[w.mastery].label) : w.mastery}:</strong>
                     {WEAPON_MASTERIES[w.mastery] && ` ${WEAPON_MASTERIES[w.mastery].desc}`}
                   </div>

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+﻿import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DND_CLASSES, SUBCLASS_DATA } from '../data/systems/dnd5e/classes';
 import { ABILITIES } from '../data/systems/dnd5e/mechanics';
@@ -362,9 +362,9 @@ export default function LevelUpModal({ currentLevel, charClass, charState, onCom
               </div>
               {changes.features.length > 0 && (
                 <div style={{ marginTop: 12 }}>
-                  <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 6 }}>New Features</div>
+                  <div style={{ fontWeight: 600, fontSize: '0.867rem', marginBottom: 6 }}>New Features</div>
                   <ul style={{ paddingLeft: 16, margin: 0 }}>
-                    {changes.features.map((f, i) => <li key={i} style={{ fontSize: 13 }}>{f.name}</li>)}
+                    {changes.features.map((f, i) => <li key={i} style={{ fontSize: '0.867rem' }}>{f.name}</li>)}
                   </ul>
                 </div>
               )}
@@ -395,7 +395,7 @@ function ExpandableFeature({ feature, noted, subclass }) {
       <div style={{ flex: 1 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div className="feature-name">{feature.name}</div>
-          <span style={{ fontSize: 12, color: 'var(--c-accent)', fontWeight: 600 }}>{noted}</span>
+          <span style={{ fontSize: '0.8rem', color: 'var(--c-accent)', fontWeight: 600 }}>{noted}</span>
         </div>
         {open && <div className="feature-desc" style={{ marginTop: 4 }}>{feature.desc}</div>}
       </div>
