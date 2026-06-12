@@ -145,8 +145,8 @@
     "backgroundCustomPlaceholder": "Type the background...",
     "level": "Level",
     "profBonus": "Proficiency Bonus",
-    "alignment": "Allineamento",
-    "alignmentInfo": "Descrizioni allineamenti",
+    "alignment": "Alignment",
+    "alignmentInfo": "Alignment descriptions",
     "xp": "Experience (XP)",
     "experienceShort": "Experience",
     "imageUrl": "🖼 Character image (URL)",
@@ -189,7 +189,7 @@
     "noConcentration": "Not concentrating",
     "deathSuccess": "Successes",
     "deathFail": "Failures",
-    "exhaustionSpeedPenalty": "Velocità base"
+    "exhaustionSpeedPenalty": "Base speed"
   },
   "deathSave": {
     "rollBtn": "Roll d20",
@@ -238,7 +238,7 @@
     "addFormDicePlaceholder": "1d20+3",
     "rollLabel": "🎲 Roll",
     "deleteBtn": "✕ Delete",
-    "filterType": "Tipo"
+    "filterType": "Type"
   },
   "spells": {
     "filterAll": "All",
@@ -288,35 +288,35 @@
     "noSpells2": "No spells. Click ＋ to add one.",
     "descEditLabel": "Description",
     "alwaysPrepared": "Always prepared",
-    "filterLevel": "Livello",
-    "filterSchool": "Scuola",
-    "filterPreparedOnly": "Solo preparate",
-    "filterAlwaysPrepared": "Sempre preparate",
-    "filterDuration": "Durata",
-    "filterRange": "Gittata",
-    "durationInstant": "Istantaneo",
+    "filterLevel": "Level",
+    "filterSchool": "School",
+    "filterPreparedOnly": "Prepared only",
+    "filterAlwaysPrepared": "Always prepared",
+    "filterDuration": "Duration",
+    "filterRange": "Range",
+    "durationInstant": "Instant",
     "duration1Round": "1 round",
-    "duration1Min": "1 minuto",
-    "duration10Min": "10 minuti",
-    "duration1Hour": "1 ora",
-    "durationConc": "Concentrazione",
-    "rangeSelf": "Su se stesso",
-    "rangeTouch": "Contatto",
-    "rangeClose": "Vicino (≤{{val}} {{unit}})",
-    "rangeMedium": "Medio ({{min}}–{{max}} {{unit}})",
-    "rangeLong": "Lungo ({{val}}+ {{unit}})"
+    "duration1Min": "1 minute",
+    "duration10Min": "10 minutes",
+    "duration1Hour": "1 hour",
+    "durationConc": "Concentration",
+    "rangeSelf": "Self",
+    "rangeTouch": "Touch",
+    "rangeClose": "Close (≤{{val}} {{unit}})",
+    "rangeMedium": "Medium ({{min}}–{{max}} {{unit}})",
+    "rangeLong": "Long ({{val}}+ {{unit}})"
   },
   "filterSort": {
-    "filters": "Filtri",
-    "sort": "Ordina",
-    "sortBy": "Ordina per",
-    "all": "Tutti",
-    "reset": "Reimposta filtri",
-    "sortDefault": "Predefinito",
+    "filters": "Filters",
+    "sort": "Sort",
+    "sortBy": "Sort by",
+    "all": "All",
+    "reset": "Reset filters",
+    "sortDefault": "Default",
     "sortAlpha": "A → Z",
-    "sortLevel": "Per livello",
-    "sortSchool": "Per scuola",
-    "sortType": "Per tipo"
+    "sortLevel": "By level",
+    "sortSchool": "By school",
+    "sortType": "By type"
   },
   "inventory": {
     "addBtn": "+ Add item",
@@ -487,18 +487,18 @@
     "presetFinesseNote": "This weapon uses Strength by default. You can also use Dexterity (edit the weapon stat from STR to DEX)."
   },
   "conditions": {
-    "title": "Condizioni",
-    "remove": "Rimuovi condizione",
-    "customBtn": "+ Condizione custom",
+    "title": "Conditions",
+    "remove": "Remove condition",
+    "customBtn": "+ Custom condition",
     "customForm": {
-      "nameLabel": "Nome",
-      "namePlaceholder": "Nome condizione",
-      "iconLabel": "Icona",
-      "descLabel": "Descrizione",
-      "descPlaceholder": "Descrizione opzionale",
-      "cancel": "Annulla",
-      "add": "+ Aggiungi",
-      "nameRequired": "Il nome è obbligatorio"
+      "nameLabel": "Name",
+      "namePlaceholder": "Condition name",
+      "iconLabel": "Icon",
+      "descLabel": "Description",
+      "descPlaceholder": "Optional description",
+      "cancel": "Cancel",
+      "add": "+ Add",
+      "nameRequired": "Name is required"
     }
   },
   "activityLog": {
@@ -529,7 +529,7 @@
     "iconAccent": "Accent color",
     "units": "Units",
     "weightUnit": "Weight",
-    "speedUnit": "Distanza",
+    "speedUnit": "Distance",
     "groupStyle": "Style",
     "groupLangUnits": "Language & Units"
   },
@@ -557,9 +557,9 @@
     "font": "Font",
     "fontDefault": "Default",
     "textSize": "Text size",
-    "sizeSmall": "Piccolo",
-    "sizeNormal": "Normale",
-    "sizeLarge": "Grande",
+    "sizeSmall": "Small",
+    "sizeNormal": "Normal",
+    "sizeLarge": "Large",
     "sizeXLarge": "Extra large",
     "contrast": "Contrast",
     "contrastDefault": "Default",
@@ -732,15 +732,15 @@
       "Neutral Evil": "Neutral Evil",
       "Chaotic Evil": "Chaotic Evil",
       "desc": {
-        "Lawful Good": "L'eroe classico. Rispetta la legge, protegge gli innocenti e fa sempre la cosa giusta.",
-        "Neutral Good": "Fa del suo meglio. Vuole aiutare gli altri ma non si sente vincolato da regole o tradizioni.",
-        "Chaotic Good": "Il ribelle con una causa. Fa ciò che è giusto ma rifiuta che regole o istituzioni ostacolino i propri obiettivi.",
-        "Lawful Neutral": "Il seguace del codice. Obbedisce a leggi o tradizioni senza giudicarne le implicazioni morali.",
-        "True Neutral": "L'equilibrista. Non sente una forte attrazione verso bene, male, legge o caos — spesso agisce per interesse personale.",
-        "Chaotic Neutral": "Lo spirito libero. Segue i propri capricci e mette la libertà personale sopra ogni altra cosa.",
-        "Lawful Evil": "Il tiranno. Usa leggi, regole e gerarchie come strumenti per raggiungere i propri fini egoistici.",
-        "Neutral Evil": "Il pragmatico egoista. Pensa solo a sé stesso e farà qualsiasi cosa pur di ottenere ciò che vuole.",
-        "Chaotic Evil": "La forza della distruzione. Mosso da avidità, odio e dal desiderio di causare sofferenza."
+        "Lawful Good": "The classic hero. Upholds the law, protects the innocent, and always does what is right.",
+        "Neutral Good": "Does the best they can. Wants to help others but feels no obligation to rules or tradition.",
+        "Chaotic Good": "The rebel with a cause. Does what is right but refuses to let rules or institutions stand in the way.",
+        "Lawful Neutral": "The adherent to the code. Follows strict laws or tradition without judging their moral weight.",
+        "True Neutral": "Balancer of scales. Feels no strong pull toward good, evil, law, or chaos — often acts in self-interest.",
+        "Chaotic Neutral": "The free spirit. Follows personal whims and prizes freedom above all else.",
+        "Lawful Evil": "The tyrant. Uses laws, rules, and hierarchies as tools to achieve selfish ends.",
+        "Neutral Evil": "The selfish pragmatist. Looks out for number one and will do whatever it takes to get what they want.",
+        "Chaotic Evil": "The force of destruction. Driven by greed, hatred, and the desire to cause suffering."
       }
     },
     "conditions": {
