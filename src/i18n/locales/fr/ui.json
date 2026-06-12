@@ -235,7 +235,8 @@
     "addFormDescPlaceholder": "Detailed description...",
     "addFormDicePlaceholder": "1d20+3",
     "rollLabel": "🎲 Roll",
-    "deleteBtn": "✕ Delete"
+    "deleteBtn": "✕ Delete",
+    "filterType": "Type"
   },
   "spells": {
     "filterAll": "All",
@@ -284,7 +285,36 @@
     "castSlot": "Slot Lv. {{level}}",
     "noSpells2": "No spells. Click ＋ to add one.",
     "descEditLabel": "Description",
-    "alwaysPrepared": "Always prepared"
+    "alwaysPrepared": "Always prepared",
+    "filterLevel": "Niveau",
+    "filterSchool": "École",
+    "filterPreparedOnly": "Préparés seulement",
+    "filterAlwaysPrepared": "Toujours préparés",
+    "filterDuration": "Durée",
+    "filterRange": "Portée",
+    "durationInstant": "Instantané",
+    "duration1Round": "1 round",
+    "duration1Min": "1 minute",
+    "duration10Min": "10 minutes",
+    "duration1Hour": "1 heure",
+    "durationConc": "Concentration",
+    "rangeSelf": "Soi-même",
+    "rangeTouch": "Contact",
+    "rangeClose": "Proche (≤{{val}} {{unit}})",
+    "rangeMedium": "Moyen ({{min}}–{{max}} {{unit}})",
+    "rangeLong": "Long ({{val}}+ {{unit}})"
+  },
+  "filterSort": {
+    "filters": "Filtres",
+    "sort": "Trier",
+    "sortBy": "Trier par",
+    "all": "Tous",
+    "reset": "Réinitialiser",
+    "sortDefault": "Défaut",
+    "sortAlpha": "A → Z",
+    "sortLevel": "Par niveau",
+    "sortSchool": "Par école",
+    "sortType": "Par type"
   },
   "inventory": {
     "addBtn": "+ Add item",
@@ -485,7 +515,7 @@
     "iconAccent": "Accent color",
     "units": "Units",
     "weightUnit": "Weight",
-    "speedUnit": "Speed",
+    "speedUnit": "Distance",
     "groupStyle": "Style",
     "groupLangUnits": "Language & Units"
   },

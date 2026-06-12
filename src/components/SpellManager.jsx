@@ -5,6 +5,26 @@ import dataManager from '../data/dataManager';
 import { TagPill, TagSelector, TagFilterBar } from './Tags';
 import { KeywordText } from './Tooltip';
 import { Icon } from '../config/icons';
+import FilterSortBar from './FilterSortBar';
+import { useFilterSort } from '../hooks/useFilterSort';
+import { useUnits, parseSpeedFt } from '../hooks/useUnits';
+
+// Converts "120 feet", "60/120 feet" → "36 m", "18/36 m" etc. based on display unit.
+// Non-numeric values (Self, Touch, Sight…) pass through unchanged.
+function convertRangeText(text, toDisplaySpeed, speedUnit) {
+  if (!text) return text;
+  const unitLabel = speedUnit === 'sq' ? 'sq' : speedUnit;
+  return text.replace(/(\d+)(?:\/(\d+))?\s*feet/gi, (_, n1, n2) => {
+    const v1 = toDisplaySpeed(parseInt(n1));
+    if (n2) return `${v1}/${toDisplaySpeed(parseInt(n2))} ${unitLabel}`;
+    return `${v1} ${unitLabel}`;
+  });
+}
+
+const SCHOOL_SHORT = {
+  enchantment: 'Enc', divination: 'Div', evocation: 'Evo', illusion: 'Ill',
+  conjuration: 'Con', necromancy: 'Nec', transmutation: 'Tra', abjuration: 'Abj',
+};
 
 const LEVEL_LABELS = {
   0: 'Trucchetti', 1: '1°', 2: '2°', 3: '3°', 4: '4°',
@@ -135,8 +155,72 @@ function SpellEditForm({ spell, srd, onSave, onCancel, onDelete, added, onToggle
   );
 }
 
+const SPELL_FILTERS = (t, toDisplaySpeed, speedUnit) => [
+  {
+    id: 'level',
+    label: t('spells.filterLevel'),
+    options: [
+      { value: 'all', label: t('filterSort.all') },
+      { value: '0', label: t('spells.filterCantrips') },
+      { value: '1', label: '1°' }, { value: '2', label: '2°' }, { value: '3', label: '3°' },
+      { value: '4', label: '4°' }, { value: '5', label: '5°' }, { value: '6', label: '6°' },
+      { value: '7', label: '7°' }, { value: '8', label: '8°' }, { value: '9', label: '9°' },
+    ],
+  },
+  {
+    id: 'school',
+    label: t('spells.filterSchool'),
+    options: [
+      { value: 'all', label: t('filterSort.all') },
+      ...SCHOOLS.map(s => ({ value: s, label: SCHOOL_SHORT[s] || t(`data.schools.${s}`, s) })),
+    ],
+  },
+  {
+    id: 'prepared',
+    label: t('spells.filterPrepared'),
+    options: [
+      { value: 'all', label: t('filterSort.all') },
+      { value: 'prepared', label: t('spells.filterPreparedOnly') },
+      { value: 'always', label: t('spells.filterAlwaysPrepared') },
+    ],
+  },
+  {
+    id: 'duration',
+    label: t('spells.filterDuration'),
+    options: [
+      { value: 'all', label: t('filterSort.all') },
+      { value: 'instant', label: t('spells.durationInstant') },
+      { value: '1round', label: t('spells.duration1Round') },
+      { value: '1min', label: t('spells.duration1Min') },
+      { value: '10min', label: t('spells.duration10Min') },
+      { value: '1hour', label: t('spells.duration1Hour') },
+      { value: 'concentration', label: t('spells.durationConc') },
+    ],
+  },
+  {
+    id: 'range',
+    label: t('spells.filterRange'),
+    options: [
+      { value: 'all', label: t('filterSort.all') },
+      { value: 'self', label: t('spells.rangeSelf') },
+      { value: 'touch', label: t('spells.rangeTouch') },
+      { value: 'close', label: t('spells.rangeClose', { val: toDisplaySpeed(30), unit: speedUnit }) },
+      { value: 'medium', label: t('spells.rangeMedium', { min: toDisplaySpeed(30), max: toDisplaySpeed(150), unit: speedUnit }) },
+      { value: 'long', label: t('spells.rangeLong', { val: toDisplaySpeed(150), unit: speedUnit }) },
+    ],
+  },
+];
+
+const SPELL_SORTS = (t) => [
+  { value: 'default', label: t('filterSort.sortDefault') },
+  { value: 'alpha', label: t('filterSort.sortAlpha') },
+  { value: 'level', label: t('filterSort.sortLevel') },
+  { value: 'school', label: t('filterSort.sortSchool') },
+];
+
 export default function SpellManager({ spells = [], charClass, onUpdate, onRoll, allTags = [], onUpdateTags, onCreateTag, spellSlots = [], concentratingSpell = null, onCast, onAddAction, onRemoveAction, actionNames, homebrewKey = 0 }) {
   const { t } = useTranslation();
+  const { toDisplaySpeed, speedUnit } = useUnits();
   const [view, setView] = useState('list');
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [castMenu, setCastMenu] = useState(null);
@@ -145,10 +229,71 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
   const [filterClass, setFilterClass] = useState(charClass || '');
   const [filterSearch, setFilterSearch] = useState('');
   const [expanded, setExpanded] = useState(null);
-  const [spellFilter, setSpellFilter] = useState('all');
   const [spellTagFilter, setSpellTagFilter] = useState(null);
   const [customForm, setCustomForm] = useState(EMPTY_CUSTOM);
   const [editingSpellName, setEditingSpellName] = useState(null);
+
+  const spellFilters = useMemo(() => SPELL_FILTERS(t, toDisplaySpeed, speedUnit), [t, toDisplaySpeed, speedUnit]);
+  const spellSorts = useMemo(() => SPELL_SORTS(t), [t]);
+
+  const {
+    activeFilters, toggleFilter, resetFilters,
+    activeSort, setActiveSort,
+    activePanel, togglePanel,
+    hasActiveFilters, hasActiveSort,
+    filteredItems,
+  } = useFilterSort({
+    filters: spellFilters,
+    sorts: spellSorts,
+    items: spells,
+    filterFn: (spell, filters) => {
+      if (filters.level.length > 0 && !filters.level.includes(String(spell.level))) return false;
+      if (filters.school.length > 0 && !filters.school.includes(spell.school)) return false;
+      if (filters.prepared.length > 0) {
+        const ok = filters.prepared.some(p => {
+          if (p === 'prepared') return spell.prepared || spell.alwaysPrepared;
+          if (p === 'always') return spell.alwaysPrepared;
+          return false;
+        });
+        if (!ok) return false;
+      }
+      if (filters.duration.length > 0) {
+        const d = (spell.duration || '').toLowerCase();
+        const ok = filters.duration.some(dur => {
+          if (dur === 'instant') return d.includes('instant');
+          if (dur === '1round') return d.includes('round');
+          if (dur === '1min') return d.includes('1 minute') || d.includes('1 minuto');
+          if (dur === '10min') return d.includes('10 minute') || d.includes('10 minuti');
+          if (dur === '1hour') return d.includes('hour') || d.includes('ora');
+          if (dur === 'concentration') return !!spell.concentration;
+          return false;
+        });
+        if (!ok) return false;
+      }
+      if (filters.range.length > 0) {
+        const r = (spell.range || '').toLowerCase();
+        const isSelf = r.includes('self') || r.includes('sé');
+        const isTouch = r.includes('touch') || r.includes('contatto');
+        const rangeFt = isSelf || isTouch ? 0 : parseSpeedFt(spell.range || '');
+        const ok = filters.range.some(range => {
+          if (range === 'self') return isSelf;
+          if (range === 'touch') return isTouch;
+          if (range === 'close') return !isSelf && !isTouch && rangeFt > 0 && rangeFt <= 30;
+          if (range === 'medium') return rangeFt > 30 && rangeFt <= 150;
+          if (range === 'long') return rangeFt > 150;
+          return false;
+        });
+        if (!ok) return false;
+      }
+      return true;
+    },
+    sortFn: (items, sort) => {
+      if (sort === 'alpha') return items.sort((a, b) => a.name.localeCompare(b.name));
+      if (sort === 'level') return items.sort((a, b) => a.level - b.level || a.name.localeCompare(b.name));
+      if (sort === 'school') return items.sort((a, b) => (a.school || '').localeCompare(b.school || '') || a.name.localeCompare(b.name));
+      return items;
+    },
+  });
 
   const actionTypesSpell = [
     ['action', t('actions.typeAction')],
@@ -160,9 +305,6 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const srdByName = useMemo(() => Object.fromEntries(dataManager.getSpells().map(s => [s.name, s])), [homebrewKey]);
   const knownNames = useMemo(() => new Set(spells.map(s => s.name)), [spells]);
-
-  const availableLevels = useMemo(() =>
-    [...new Set(spells.map(s => s.level))].sort((a, b) => a - b), [spells]);
 
   const browsedSpells = useMemo(() => filterSpells({
     spells: dataManager.getSpells(),
@@ -205,13 +347,9 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
   }
 
   const filteredKnown = useMemo(() => {
-    let result = spells;
-    if (spellFilter === '0') result = result.filter(s => s.level === 0);
-    else if (spellFilter === 'prepared') result = result.filter(s => s.prepared || s.alwaysPrepared);
-    else if (spellFilter !== 'all') { const lvl = parseInt(spellFilter); result = result.filter(s => s.level === lvl); }
-    if (spellTagFilter) result = result.filter(s => (s.tags || []).includes(spellTagFilter));
-    return result;
-  }, [spells, spellFilter, spellTagFilter]);
+    if (!spellTagFilter) return filteredItems;
+    return filteredItems.filter(s => (s.tags || []).includes(spellTagFilter));
+  }, [filteredItems, spellTagFilter]);
 
   const byLevel = {};
   filteredKnown.forEach(s => { if (!byLevel[s.level]) byLevel[s.level] = []; byLevel[s.level].push(s); });
@@ -222,16 +360,20 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
       <div className="section-header-bar">
         {view === 'list' ? (
           <>
-            <div className="filter-bar" style={{ flex: 1, marginBottom: 0 }}>
-              <button className={`filter-chip ${spellFilter === 'all' ? 'active' : ''}`} onClick={() => setSpellFilter('all')}>{t('spells.filterAll')}</button>
-              {availableLevels.map(lvl => (
-                <button key={lvl} className={`filter-chip ${spellFilter === String(lvl) ? 'active' : ''}`} onClick={() => setSpellFilter(String(lvl))}>
-                  {lvl === 0 ? t('spells.filterCantrips') : LEVEL_LABELS[lvl]}
-                </button>
-              ))}
-              {spells.some(s => s.prepared || s.alwaysPrepared) && (
-                <button className={`filter-chip ${spellFilter === 'prepared' ? 'active' : ''}`} onClick={() => setSpellFilter('prepared')}>{t('spells.filterPrepared')}</button>
-              )}
+            <div style={{ flex: 1 }}>
+              <FilterSortBar
+                filters={spellFilters}
+                sorts={spellSorts}
+                activeFilters={activeFilters}
+                activeSort={activeSort}
+                activePanel={activePanel}
+                hasActiveFilters={hasActiveFilters}
+                hasActiveSort={hasActiveSort}
+                onFilterToggle={toggleFilter}
+                onSortChange={setActiveSort}
+                onPanelToggle={togglePanel}
+                onReset={resetFilters}
+              />
             </div>
             <div style={{ position: 'relative' }}>
               <button className="add-icon-btn" onClick={() => setShowAddMenu(v => !v)} title={t('spells.addTitle')}>＋</button>
@@ -275,6 +417,7 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
                   const actionType = spell.actionType || srd.actionType || detectActionType(spell.desc);
                   const duration = spell.duration || srd.duration || null;
                   const range = spell.range || srd.range || null;
+                  const rangeDisplay = convertRangeText(range, toDisplaySpeed, speedUnit);
                   const ab = ACTION_BADGE[actionType] || ACTION_BADGE.action;
                   const isEditing = editingSpellName === spell.name;
                   const isExpanded = expanded === spell.name;
@@ -298,9 +441,9 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
                           {spell.acquiredAtLevel && <span className="level-badge">Lv. {spell.acquiredAtLevel}</span>}
                           {(spell.tags || []).map(tag => <TagPill key={tag} tag={tag} allTags={allTags} small />)}
                         </div>
-                        {!isExpanded && !isEditing && (range || duration) && (
+                        {!isExpanded && !isEditing && (rangeDisplay || duration) && (
                           <div style={{ fontSize:10, color:'var(--c-muted)', marginTop:1, display:'flex', gap:8 }}>
-                            {range && <span>{range}</span>}
+                            {rangeDisplay && <span>{rangeDisplay}</span>}
                             {duration && <span>{duration}</span>}
                           </div>
                         )}
@@ -326,7 +469,7 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
                           <>
                             {(range || duration) && (
                               <div style={{ display:'flex', gap:10, marginTop:4, fontSize:11, color:'var(--c-muted)' }}>
-                                {range && <span>📍 {range}</span>}
+                                {rangeDisplay && <span>📍 {rangeDisplay}</span>}
                                 {duration && <span>⏱ {duration}</span>}
                               </div>
                             )}

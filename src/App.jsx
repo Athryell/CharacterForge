@@ -22,12 +22,12 @@ import { calcArmorAC } from './data/systems/dnd5e/armors';
 import TabBar from './components/TabBar';
 import SpellManager from './components/SpellManager';
 import InventoryManager from './components/InventoryManager';
-import { TagFilterBar, TagPill, TagSelector } from './components/Tags';
-import { KeywordText, parseTextBonuses, resolveNotations } from './components/Tooltip';
+import { parseTextBonuses, resolveNotations } from './components/Tooltip';
 import { CharContext } from './components/CharContext';
 import WidgetGrid from './components/WidgetGrid';
 import PinnedBar, { loadPinned, savePinned } from './components/PinnedBar';
 import FeatureManager from './components/FeatureManager';
+import ActionManager from './components/ActionManager';
 import AlignmentPicker from './components/AlignmentPicker';
 import DHWeaponManager from './components/DHWeaponManager';
 import DHArmorManager from './components/DHArmorManager';
@@ -178,109 +178,6 @@ function SystemSelector({ activeSystem, onChange }) {
   );
 }
 
-const ACTION_TYPE_KEYS = ['action', 'bonus', 'reaction', 'free'];
-
-function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag, onRemove, onEdit, onToggleHide }) {
-  const { t } = useTranslation();
-  const [expanded, setExpanded] = useState(false);
-  const [editingTags, setEditingTags] = useState(false);
-  const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState(null);
-  const badgeClass = { action:'badge-action', bonus:'badge-bonus', reaction:'badge-reaction', free:'badge-free' }[action.type] || 'badge-free';
-  const typeLabels = { action: t('actions.typeAction'), bonus: t('actions.typeBonus'), reaction: t('actions.typeReaction'), free: t('actions.typeFree') };
-  const typeLabel = typeLabels[action.type] || action.type;
-  const isHidden = !!action.hidden;
-
-  function startEdit(e) {
-    e.stopPropagation();
-    setForm({ name: action.name, type: action.type||'action', desc: action.desc||'', dice: action.dice||'' });
-    setEditing(true);
-  }
-  function saveEdit(e) {
-    e.stopPropagation();
-    if (form.name.trim()) { onEdit && onEdit(action.id, form); }
-    setEditing(false);
-  }
-
-  if (editing && form) {
-    return (
-      <div className={`action-item expanded${isHidden ? ' action-hidden' : ''}`} onClick={e => e.stopPropagation()}>
-        <div className={`action-badge ${badgeClass}`}>
-          <select value={form.type} onChange={e => setForm(f => ({...f, type: e.target.value}))}
-            style={{ background:'transparent', border:'none', color:'inherit', font:'inherit', cursor:'pointer' }}>
-            {ACTION_TYPE_KEYS.map(v => <option key={v} value={v}>{typeLabels[v]}</option>)}
-          </select>
-        </div>
-        <div className="action-content" style={{ flex:1 }}>
-          <input value={form.name} onChange={e => setForm(f => ({...f, name: e.target.value}))}
-            style={{ width:'100%', marginBottom:4, fontSize:13, fontWeight:600, background:'var(--c-bg)', color:'var(--c-ink)', border:'0.5px solid var(--c-border-mid)', borderRadius:'var(--r)', padding:'5px 8px' }} placeholder={t('actions.addFormNamePlaceholder')} autoFocus />
-          <textarea value={form.desc} onChange={e => setForm(f => ({...f, desc: e.target.value}))}
-            className="notes-area" style={{ minHeight:48, marginBottom:4 }} placeholder={t('actions.addFormDescPlaceholder')} />
-          <input value={form.dice} onChange={e => setForm(f => ({...f, dice: e.target.value}))}
-            style={{ width:'100%', fontSize:11, background:'var(--c-bg)', color:'var(--c-ink)', border:'0.5px solid var(--c-border-mid)', borderRadius:'var(--r)', padding:'5px 8px' }} placeholder={t('actions.addFormDicePlaceholder')} />
-          <div style={{ display:'flex', gap:6, marginTop:8, justifyContent:'space-between', alignItems:'center' }}>
-            <div style={{ display:'flex', gap:6 }}>
-              {onToggleHide && (
-                <button className="icon-btn" title={isHidden ? 'Mostra' : 'Nascondi'}
-                  onClick={e => { e.stopPropagation(); onToggleHide(action.id); }}>
-                  <Icon id={isHidden ? 'action.show' : 'action.hide'} size={14} />
-                </button>
-              )}
-              {onRemove && (
-                <button className="io-btn danger" onClick={e => { e.stopPropagation(); onRemove(action.id); setEditing(false); }}>{t('actions.deleteBtn')}</button>
-              )}
-            </div>
-            <div style={{ display:'flex', gap:6 }}>
-              <button className="io-btn" onClick={e => { e.stopPropagation(); setEditing(false); }}>{t('common.cancel')}</button>
-              <button className="io-btn primary" onClick={saveEdit}>{t('common.save')}</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className={`action-item ${expanded ? 'expanded' : ''}${isHidden ? ' action-hidden' : ''}`}
-      onClick={() => { if (editingTags) return; setExpanded(e => !e); }}>
-      <div className={`action-badge ${badgeClass}`}>{typeLabel}</div>
-      <div className="action-content">
-        <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-          <div className="action-name" style={{ flex:1 }}>{action.name}</div>
-          {(action.tags||[]).map(t => <TagPill key={t} tag={t} allTags={allTags} small />)}
-          {isHidden && <span style={{ opacity:0.5 }} title="Nascosta"><Icon id="action.hide" size={12} /></span>}
-        </div>
-        {expanded && (
-          <div className="action-desc-full" onClick={e => e.stopPropagation()}>
-            <KeywordText text={action.desc} onRoll={onRoll} label={action.name} />
-            {action.dice && (
-              <div className="action-roll" onClick={e => { e.stopPropagation(); onRoll(action.dice, action.name); }}>
-                {t('actions.rollLabel')} {action.dice}
-              </div>
-            )}
-            <div style={{ marginTop:8 }}>
-              {editingTags ? (
-                <>
-                  <TagSelector selected={action.tags||[]} allTags={allTags}
-                    onChange={tags => onUpdateTags && onUpdateTags(action.id, tags)}
-                    onCreateTag={onCreateTag} />
-                  <button className="tag-edit-btn" style={{ marginLeft:6 }} onClick={e => { e.stopPropagation(); setEditingTags(false); }}><Icon id="action.done" size={13} /> {t('actions.tagDone')}</button>
-                </>
-              ) : (
-                <button className="tag-edit-btn" onClick={e => { e.stopPropagation(); setEditingTags(true); }}>
-                  <Icon id="action.tag" size={13} /> {(action.tags||[]).length === 0 ? t('actions.addTagBtn') : t('actions.editTagBtn')}
-                </button>
-              )}
-            </div>
-            <div className="item-edit-actions">
-              <button className="io-btn" onClick={startEdit}><Icon id="action.editItem" size={13} /> {t('common.edit')}</button>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
 
 // ── Daggerheart helpers ─────────────────────────────────────────
 function DHDomainCardForm({ domains, onAdd, onCancel, t }) {
@@ -473,7 +370,6 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
 
   // UI state
   const [activeTab, setActiveTab] = useState('main');
-  const [actionFilter, setActionFilter] = useState('all');
   const [toast, setToast] = useState('');
   const [toastAction, setToastAction] = useState(null);
   const [hpAmount, setHpAmount] = useState(0);
@@ -483,10 +379,8 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
   const [editingIdentity, setEditingIdentity] = useState(false);
   const [editingDHEvasion, setEditingDHEvasion] = useState(false);
   const [dhOpenFeature, setDhOpenFeature] = useState(null);
-  const [actionTagFilter, setActionTagFilter] = useState(null);
   const [showMenu, setShowMenu] = useState(false);
   const [hoveredAttr, setHoveredAttr] = useState(null);
-  const [addActionForm, setAddActionForm] = useState({ name:'', type:'action', desc:'', dice:'' });
   const [addOpenFor, setAddOpenFor] = useState(null);
   const [homebrewVersion, setHomebrewVersion] = useState(0);
   const [showSources, setShowSources] = useState(false);
@@ -718,8 +612,6 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
     a.click(); URL.revokeObjectURL(url);
     window.umami?.track('character-exported');
   }
-  const filteredActions = (state.actions||[])
-    .filter(a => actionFilter === 'all' || a.type === actionFilter);
   const hasSpells = !!SPELLCASTING_CLASS[state.charClass];
 
   // ── Layout management ──────────────────────────────────────────
@@ -1212,75 +1104,26 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
 
       case 'actions': return (
         <div className="card">
-          <div className="card-title" style={{ justifyContent:'space-between' }}>
-            <span><Icon id="widget.actions" /> {t('widgets.actions')}</span>
-            <button className={`icon-btn ${addOpenFor === 'actions' ? 'active' : ''}`}
-              onClick={() => {
-                const defaultType = ACTION_TYPE_KEYS.includes(actionFilter) ? actionFilter : 'action';
-                setAddActionForm(f => ({ ...f, type: defaultType }));
-                setAddOpenFor(v => v === 'actions' ? null : 'actions');
-              }}>+</button>
-          </div>
-          <div className="filter-bar">
-            {[['all', t('actions.filterAll')],['action', t('actions.filterAction')],['bonus', t('actions.filterBonus')],['reaction', t('actions.filterReaction')],['free', t('actions.filterFree')]].map(([v,l]) => (
-              <button key={v} className={`filter-chip ${actionFilter === v ? 'active' : ''}`} onClick={() => setActionFilter(v)}>{l}</button>
-            ))}
-          </div>
-          {allTags.length > 0 && <TagFilterBar allTags={allTags} activeTag={actionTagFilter} onSelect={setActionTagFilter} />}
-          {addOpenFor === 'actions' && (
-            <div className="weapon-add-panel" style={{ marginBottom:8 }}>
-              <div className="field-row">
-                <div className="field">
-                  <label>{t('actions.addFormName')}</label>
-                  <input value={addActionForm.name} onChange={e => setAddActionForm(f => ({...f, name:e.target.value}))} placeholder={t('actions.addFormNamePlaceholder')} autoFocus />
-                </div>
-                <div className="field">
-                  <label>{t('actions.addFormType')}</label>
-                  <select value={addActionForm.type} onChange={e => setAddActionForm(f => ({...f, type:e.target.value}))}>
-                    {ACTION_TYPE_KEYS.map(v => <option key={v} value={v}>{t(`actions.type${v.charAt(0).toUpperCase()+v.slice(1)}`)}</option>)}
-                  </select>
-                </div>
-                <div className="field">
-                  <label>{t('actions.addFormDice')}</label>
-                  <input value={addActionForm.dice} onChange={e => setAddActionForm(f => ({...f, dice:e.target.value}))} placeholder={t('actions.addFormDicePlaceholder')} />
-                </div>
-              </div>
-              <div className="field" style={{ marginTop:6 }}>
-                <label>{t('actions.addFormDesc')}</label>
-                <textarea className="notes-area" style={{ minHeight:48 }} value={addActionForm.desc} onChange={e => setAddActionForm(f => ({...f, desc:e.target.value}))} placeholder={t('actions.addFormDescPlaceholder')} />
-              </div>
-              <div style={{ display:'flex', gap:8, marginTop:8, justifyContent:'flex-end' }}>
-                <button className="io-btn" onClick={() => { setAddOpenFor(null); setAddActionForm({ name:'', type:'action', desc:'', dice:'' }); }}>{t('common.cancel')}</button>
-                <button className="io-btn primary" disabled={!addActionForm.name.trim()} onClick={() => {
-                  if (!addActionForm.name.trim()) return;
-                  update({ actions: [...(state.actions||[]), { ...addActionForm, id: Date.now().toString() }] });
-                  setAddOpenFor(null);
-                  setAddActionForm({ name:'', type:'action', desc:'', dice:'' });
-                }}>{t('common.add')}</button>
-              </div>
-            </div>
-          )}
-          <div className="action-list">
-            {filteredActions.filter(a => !actionTagFilter || (a.tags||[]).includes(actionTagFilter)).map(action => (
-              <ActionItem key={action.id||action.name} action={action} allTags={allTags} onRoll={handleRoll}
-                onUpdateTags={(id,tags) => {
-                  const action = (state.actions||[]).find(a => a.id===id);
-                  const upd = { actions: state.actions.map(a => a.id===id ? {...a,tags} : a) };
-                  if (action) {
-                    upd.weapons = (state.weapons||[]).map(w => w.name===action.name ? {...w,tags} : w);
-                    upd.spells = (state.spells||[]).map(s => s.name===action.name ? {...s,tags} : s);
-                    upd.features = (state.features||[]).map(f => f.name===action.name ? {...f,tags} : f);
-                    upd.equipment = (state.equipment||[]).map(e => e.name===action.name ? {...e,tags} : e);
-                  }
-                  update(upd);
-                }}
-                onCreateTag={createTag}
-                onRemove={id => update({ actions: state.actions.filter(a => a.id !== id) })}
-                onEdit={(id, patch) => update({ actions: state.actions.map(a => a.id === id ? {...a, ...patch} : a) })}
-                onToggleHide={id => update({ actions: state.actions.map(a => a.id === id ? {...a, hidden: !a.hidden} : a) })}
-              />
-            ))}
-          </div>
+          <div className="card-title"><Icon id="widget.actions" /> {t('widgets.actions')}</div>
+          <ActionManager
+            actions={state.actions || []}
+            spells={state.spells || []}
+            allTags={allTags}
+            onUpdate={newActions => update({ actions: newActions })}
+            onRoll={handleRoll}
+            onUpdateTags={(id, tags) => {
+              const action = (state.actions || []).find(a => a.id === id);
+              const upd = { actions: state.actions.map(a => a.id === id ? { ...a, tags } : a) };
+              if (action) {
+                upd.weapons = (state.weapons || []).map(w => w.name === action.name ? { ...w, tags } : w);
+                upd.spells = (state.spells || []).map(s => s.name === action.name ? { ...s, tags } : s);
+                upd.features = (state.features || []).map(f => f.name === action.name ? { ...f, tags } : f);
+                upd.equipment = (state.equipment || []).map(e => e.name === action.name ? { ...e, tags } : e);
+              }
+              update(upd);
+            }}
+            onCreateTag={createTag}
+          />
         </div>
       );
 
