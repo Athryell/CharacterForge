@@ -146,6 +146,7 @@
     "level": "Level",
     "profBonus": "Proficiency Bonus",
     "alignment": "Alignment",
+    "alignmentInfo": "Alignment descriptions",
     "xp": "Experience (XP)",
     "experienceShort": "Experience",
     "imageUrl": "🖼 Character image (URL)",
@@ -187,7 +188,8 @@
     "concentrating": "Concentrating",
     "noConcentration": "Not concentrating",
     "deathSuccess": "Successes",
-    "deathFail": "Failures"
+    "deathFail": "Failures",
+    "exhaustionSpeedPenalty": "Base speed"
   },
   "deathSave": {
     "rollBtn": "Roll d20",
@@ -236,7 +238,7 @@
     "addFormDicePlaceholder": "1d20+3",
     "rollLabel": "🎲 Roll",
     "deleteBtn": "✕ Delete",
-    "filterType": "Typ"
+    "filterType": "Type"
   },
   "spells": {
     "filterAll": "All",
@@ -286,35 +288,35 @@
     "noSpells2": "No spells. Click ＋ to add one.",
     "descEditLabel": "Description",
     "alwaysPrepared": "Always prepared",
-    "filterLevel": "Stufe",
-    "filterSchool": "Schule",
-    "filterPreparedOnly": "Nur vorbereitet",
-    "filterAlwaysPrepared": "Immer vorbereitet",
-    "filterDuration": "Dauer",
-    "filterRange": "Reichweite",
-    "durationInstant": "Sofort",
-    "duration1Round": "1 Runde",
-    "duration1Min": "1 Minute",
-    "duration10Min": "10 Minuten",
-    "duration1Hour": "1 Stunde",
-    "durationConc": "Konzentration",
-    "rangeSelf": "Selbst",
-    "rangeTouch": "Berührung",
-    "rangeClose": "Nah (≤{{val}} {{unit}})",
-    "rangeMedium": "Mittel ({{min}}–{{max}} {{unit}})",
-    "rangeLong": "Weit ({{val}}+ {{unit}})"
+    "filterLevel": "Level",
+    "filterSchool": "School",
+    "filterPreparedOnly": "Prepared only",
+    "filterAlwaysPrepared": "Always prepared",
+    "filterDuration": "Duration",
+    "filterRange": "Range",
+    "durationInstant": "Instant",
+    "duration1Round": "1 round",
+    "duration1Min": "1 minute",
+    "duration10Min": "10 minutes",
+    "duration1Hour": "1 hour",
+    "durationConc": "Concentration",
+    "rangeSelf": "Self",
+    "rangeTouch": "Touch",
+    "rangeClose": "Close (≤{{val}} {{unit}})",
+    "rangeMedium": "Medium ({{min}}–{{max}} {{unit}})",
+    "rangeLong": "Long ({{val}}+ {{unit}})"
   },
   "filterSort": {
-    "filters": "Filter",
-    "sort": "Sortieren",
-    "sortBy": "Sortieren nach",
-    "all": "Alle",
-    "reset": "Filter zurücksetzen",
-    "sortDefault": "Standard",
+    "filters": "Filters",
+    "sort": "Sort",
+    "sortBy": "Sort by",
+    "all": "All",
+    "reset": "Reset filters",
+    "sortDefault": "Default",
     "sortAlpha": "A → Z",
-    "sortLevel": "Nach Stufe",
-    "sortSchool": "Nach Schule",
-    "sortType": "Nach Typ"
+    "sortLevel": "By level",
+    "sortSchool": "By school",
+    "sortType": "By type"
   },
   "inventory": {
     "addBtn": "+ Add item",
@@ -485,7 +487,19 @@
     "presetFinesseNote": "This weapon uses Strength by default. You can also use Dexterity (edit the weapon stat from STR to DEX)."
   },
   "conditions": {
-    "title": "Conditions"
+    "title": "Conditions",
+    "remove": "Remove condition",
+    "customBtn": "+ Custom condition",
+    "customForm": {
+      "nameLabel": "Name",
+      "namePlaceholder": "Condition name",
+      "iconLabel": "Icon",
+      "descLabel": "Description",
+      "descPlaceholder": "Optional description",
+      "cancel": "Cancel",
+      "add": "+ Add",
+      "nameRequired": "Name is required"
+    }
   },
   "activityLog": {
     "empty": "No activity recorded.",
@@ -515,7 +529,7 @@
     "iconAccent": "Accent color",
     "units": "Units",
     "weightUnit": "Weight",
-    "speedUnit": "Distanz",
+    "speedUnit": "Distance",
     "groupStyle": "Style",
     "groupLangUnits": "Language & Units"
   },
@@ -543,9 +557,9 @@
     "font": "Font",
     "fontDefault": "Default",
     "textSize": "Text size",
-    "sizeSmall": "Klein",
+    "sizeSmall": "Small",
     "sizeNormal": "Normal",
-    "sizeLarge": "Groß",
+    "sizeLarge": "Large",
     "sizeXLarge": "Extra large",
     "contrast": "Contrast",
     "contrastDefault": "Default",
@@ -716,7 +730,18 @@
       "Chaotic Neutral": "Chaotic Neutral",
       "Lawful Evil": "Lawful Evil",
       "Neutral Evil": "Neutral Evil",
-      "Chaotic Evil": "Chaotic Evil"
+      "Chaotic Evil": "Chaotic Evil",
+      "desc": {
+        "Lawful Good": "The classic hero. Upholds the law, protects the innocent, and always does what is right.",
+        "Neutral Good": "Does the best they can. Wants to help others but feels no obligation to rules or tradition.",
+        "Chaotic Good": "The rebel with a cause. Does what is right but refuses to let rules or institutions stand in the way.",
+        "Lawful Neutral": "The adherent to the code. Follows strict laws or tradition without judging their moral weight.",
+        "True Neutral": "Balancer of scales. Feels no strong pull toward good, evil, law, or chaos — often acts in self-interest.",
+        "Chaotic Neutral": "The free spirit. Follows personal whims and prizes freedom above all else.",
+        "Lawful Evil": "The tyrant. Uses laws, rules, and hierarchies as tools to achieve selfish ends.",
+        "Neutral Evil": "The selfish pragmatist. Looks out for number one and will do whatever it takes to get what they want.",
+        "Chaotic Evil": "The force of destruction. Driven by greed, hatred, and the desire to cause suffering."
+      }
     },
     "conditions": {
       "blinded": {
