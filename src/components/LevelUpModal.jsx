@@ -1,8 +1,8 @@
 ﻿import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DND_CLASSES, SUBCLASS_DATA } from '../data/systems/dnd5e/classes';
-import { ABILITIES } from '../data/systems/dnd5e/mechanics';
-import { getSpeciesData } from '../data/systems/dnd5e/species';
+import { DND_CLASSES, SUBCLASS_DATA } from '../data/systems/dnd5e2024/classes';
+import { ABILITIES } from '../data/systems/dnd5e2024/mechanics';
+import { getSpeciesData } from '../data/systems/dnd5e2024/species';
 import { Icon } from '../config/icons';
 
 const ABILITY_LABELS = { STR: 'STR', DEX: 'DEX', CON: 'CON', INT: 'INT', WIS: 'WIS', CHA: 'CHA' };
@@ -110,7 +110,12 @@ export default function LevelUpModal({ currentLevel, charClass, charState, onCom
     if (currentStep === 'choices') {
       return choiceFeatures.every(f => {
         const c = choices[f.name];
-        return c && (c.selected || c.custom?.trim());
+        if (!c) return false;
+        if ((f.choose || 1) > 1) {
+          const selArr = Array.isArray(c.selected) ? c.selected : [];
+          return (selArr.length + (c.custom?.trim() ? 1 : 0)) >= f.choose;
+        }
+        return c.selected || c.custom?.trim();
       });
     }
     return true;
@@ -129,15 +134,28 @@ export default function LevelUpModal({ currentLevel, charClass, charState, onCom
 
     choiceFeatures.forEach(f => {
       const c = choices[f.name] || {};
-      const label = c.custom?.trim() || c.selected;
-      if (label) {
-        features.push({
-          id: `${charClass}_lv${targetLevel}_${f.name.replace(/\W+/g, '_')}_${Date.now()}_${Math.random().toString(36).slice(2,6)}`,
-          name: label,
-          desc: f.desc,
-          source: charClass,
-          sourceType: 'class',
+      if ((f.choose || 1) > 1) {
+        const selArr = Array.isArray(c.selected) ? c.selected : [];
+        [...selArr, ...(c.custom?.trim() ? [c.custom.trim()] : [])].forEach(label => {
+          features.push({
+            id: `${charClass}_lv${targetLevel}_${label.replace(/\W+/g, '_')}_${Date.now()}_${Math.random().toString(36).slice(2,6)}`,
+            name: label,
+            desc: f.desc,
+            source: charClass,
+            sourceType: 'class',
+          });
         });
+      } else {
+        const label = c.custom?.trim() || c.selected;
+        if (label) {
+          features.push({
+            id: `${charClass}_lv${targetLevel}_${f.name.replace(/\W+/g, '_')}_${Date.now()}_${Math.random().toString(36).slice(2,6)}`,
+            name: label,
+            desc: f.desc,
+            source: charClass,
+            sourceType: 'class',
+          });
+        }
       }
     });
 
@@ -266,6 +284,45 @@ export default function LevelUpModal({ currentLevel, charClass, charState, onCom
               <div className="creator-subtitle">{t('levelUp.stepChoices')}</div>
               {choiceFeatures.map((f, fi) => {
                 const c = choices[f.name] || {};
+                const isMulti = (f.choose || 1) > 1;
+
+                if (isMulti) {
+                  const selArr = Array.isArray(c.selected) ? c.selected : [];
+                  const picked = selArr.length + (c.custom?.trim() ? 1 : 0);
+                  const needed = f.choose;
+                  return (
+                    <div key={fi} style={{ marginBottom: 20 }}>
+                      <div style={{ fontWeight: 600, marginBottom: 4 }}>{f.name}</div>
+                      <p className="hint-text" style={{ marginBottom: 8 }}>
+                        {f.desc} — <strong>{t('levelUp.chooseProgress', { picked, total: needed })}</strong>
+                      </p>
+                      <div className="creator-grid">
+                        {(f.choices || []).map(opt => {
+                          const isSelected = selArr.includes(opt);
+                          const maxReached = picked >= needed && !isSelected;
+                          return (
+                            <div key={opt}
+                              className={`creator-card ${isSelected ? 'selected' : ''} ${maxReached ? 'disabled' : ''}`}
+                              onClick={() => {
+                                if (maxReached) return;
+                                const newSel = isSelected ? selArr.filter(s => s !== opt) : [...selArr, opt];
+                                setChoices(prev => ({ ...prev, [f.name]: { ...c, selected: newSel } }));
+                              }}>
+                              <div className="creator-card-name">{opt}</div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {picked < needed && (
+                        <input style={{ marginTop: 8 }}
+                          placeholder={t('levelUp.customChoice')}
+                          value={c.custom || ''}
+                          onChange={e => setChoices(prev => ({ ...prev, [f.name]: { ...c, custom: e.target.value } }))} />
+                      )}
+                    </div>
+                  );
+                }
+
                 return (
                   <div key={fi} style={{ marginBottom: 20 }}>
                     <div style={{ fontWeight: 600, marginBottom: 4 }}>{f.name}</div>
@@ -284,13 +341,13 @@ export default function LevelUpModal({ currentLevel, charClass, charState, onCom
                       </div>
                     </div>
                     {(c.custom !== undefined || (!c.selected && c.custom !== undefined)) && (
-                      <input style={{ marginTop: 8, width: '100%' }}
+                      <input style={{ marginTop: 8 }}
                         placeholder={t('levelUp.customChoice')}
                         value={c.custom || ''}
                         onChange={e => setChoices(prev => ({ ...prev, [f.name]: { selected: null, custom: e.target.value } }))} />
                     )}
                     {!c.selected && c.custom === undefined && (
-                      <input style={{ marginTop: 8, width: '100%' }}
+                      <input style={{ marginTop: 8 }}
                         placeholder={t('levelUp.customChoice')}
                         value=""
                         onChange={e => setChoices(prev => ({ ...prev, [f.name]: { selected: null, custom: e.target.value } }))} />

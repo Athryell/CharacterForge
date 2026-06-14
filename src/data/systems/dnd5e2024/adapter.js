@@ -16,7 +16,7 @@ function mergeByKey(srdList, hbList, keyFn = item => item.name) {
 }
 
 const dnd5eAdapter = {
-  systemId: 'dnd5e',
+  systemId: 'dnd5e2024',
 
   // ── Dati base ────────────────────────────────────────────────────────────
 

@@ -2,14 +2,15 @@
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useCharacter } from './hooks/useCharacter';
-import { loadCharsIndex, deleteChar, getActiveCharId, setActiveCharId, generateCharId, migrateLegacy, saveCharState } from './chars';
+import { loadCharsIndex, saveCharsIndex, deleteChar, getActiveCharId, setActiveCharId, generateCharId, migrateLegacy, saveCharState } from './chars';
 import CharacterSelect from './components/CharacterSelect';
 import Onboarding, { CornerButtons, loadOnboardingSeen } from './components/Onboarding';
 import {
   createDefaultState, ABILITIES, SKILLS,
   SPELLCASTING_CLASS, getMod, fmtMod, HIT_DICE,
-} from './data/systems/dnd5e/mechanics';
-import { DND_CONDITIONS } from './data/systems/dnd5e/conditions';
+  resolveResourceFormula, getProfBonus,
+} from './data/systems/dnd5e2024/mechanics';
+import { DND_CONDITIONS } from './data/systems/dnd5e2024/conditions';
 import dataManager from './data/dataManager';
 import SourceManager from './components/SourceManager';
 import CharacterCreator from './components/CharacterCreator';
@@ -18,7 +19,7 @@ import LevelDownModal from './components/LevelDownModal';
 import ConditionTracker from './components/ConditionTracker';
 import WeaponManager from './components/WeaponManager';
 import ArmorManager from './components/ArmorManager';
-import { calcArmorAC, DND_ARMOR_PRESETS } from './data/systems/dnd5e/armors';
+import { calcArmorAC, DND_ARMOR_PRESETS } from './data/systems/dnd5e2024/armors';
 import TabBar from './components/TabBar';
 import SpellManager from './components/SpellManager';
 import InventoryManager from './components/InventoryManager';
@@ -31,9 +32,9 @@ import ActionManager from './components/ActionManager';
 import AlignmentPicker from './components/AlignmentPicker';
 import DHWeaponManager from './components/DHWeaponManager';
 import DHArmorManager from './components/DHArmorManager';
-import { CLASS_FEATURES, getSubclassesForClass } from './data/systems/dnd5e/classes';
-import { SPECIES_FEATURES, getAutoFeatures } from './data/systems/dnd5e/species';
-import { BACKGROUND_FEATURES } from './data/systems/dnd5e/backgrounds';
+import { CLASS_FEATURES, DND_CLASSES, getSubclassesForClass } from './data/systems/dnd5e2024/classes';
+import { SPECIES_FEATURES, getAutoFeatures } from './data/systems/dnd5e2024/species';
+import { BACKGROUND_FEATURES } from './data/systems/dnd5e2024/backgrounds';
 import { getDefaultLayoutForSystem, getWidgetsForTab, loadLayoutForSystem, saveLayoutForSystem, loadTabsForSystem, saveTabsForSystem, getDefaultTabsForSystem, getWidgetLabel } from './layout';
 import { DH_TRAITS, DH_TRAIT_NAMES, rollDualityDice, getDHTier, getDHProficiency } from './data/systems/daggerheart/mechanics';
 import { getDHClasses, getDHDomains, getDHAncestries, getDHCommunities, getDHConditions, getDHTraitUses } from './data/systems/daggerheart/getters';
@@ -41,7 +42,7 @@ import { SYSTEMS, DEFAULT_SYSTEM, getSystem } from './data/systems';
 import { useTheme, ACCENT_PRESETS } from './hooks/useTheme';
 import { useUnits, parseSpeedFt } from './hooks/useUnits';
 import { useAccessibility } from './hooks/useAccessibility';
-import { Icon, useIconMode } from './config/icons';
+import { Icon, ICON_MAP, useIconMode } from './config/icons';
 import { Shield as ShieldIcon } from 'lucide-react';
 import './App.css';
 
@@ -327,6 +328,24 @@ function HMenuGroup({ label, children }) {
   );
 }
 
+// ── Resource Icon ────────────────────────────────────────────────
+const DICE_ICONS = ['d4','d6','d8','d10','d12','d20'];
+
+function ResourceIcon({ icon, size = 16 }) {
+  const { iconMode } = useIconMode();
+  if (DICE_ICONS.includes(icon)) {
+    return <span className="resource-dice-icon">{icon}</span>;
+  }
+  const entry = ICON_MAP[`resource.${icon}`];
+  if (!entry) return null;
+  if (iconMode === 'none') return null;
+  if (iconMode === 'lucide' && entry.lucide) {
+    const L = entry.lucide;
+    return <L size={size} />;
+  }
+  return <span>{entry.emoji}</span>;
+}
+
 // ── Character App (single character) ────────────────────────────
 function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSystemChange }) {
   const { t, i18n } = useTranslation();
@@ -350,6 +369,24 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
     setTabs(loadTabsForSystem(activeSystem || DEFAULT_SYSTEM));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeSystem]);
+
+  useEffect(() => {
+    const topbar = document.querySelector('.topbar');
+    if (!topbar) return;
+    const update = () => document.documentElement.style.setProperty('--topbar-height', `${topbar.offsetHeight}px`);
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+
+  useEffect(() => {
+    const bar = document.querySelector('.top-bar');
+    if (!bar) return;
+    const update = () => document.documentElement.style.setProperty('--top-bar-height', `${bar.offsetHeight}px`);
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
   const [pinned, setPinned] = useState(loadPinned);
   const [activityLog, setActivityLog] = useState(() => {
     try { const v = JSON.parse(localStorage.getItem('characterforge_log')); return Array.isArray(v) ? v : []; } catch { return []; }
@@ -389,6 +426,9 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
   const [showLevelDown, setShowLevelDown] = useState(false);
   const [concentrationCheck, setConcentrationCheck] = useState(null);
   const [editingCombat, setEditingCombat] = useState(false);
+  const [editingResources, setEditingResources] = useState(false);
+  const [addingResource, setAddingResource] = useState(false);
+  const [newResource, setNewResource] = useState({ name:'', icon:'d6', formula:'fixed:1', resetOn:'long', pinned:false });
   const { mode: themeMode, accentId, setThemeMode, setAccent } = useTheme();
   const { iconMode, setIconMode, iconAccent, setIconAccent } = useIconMode();
   const { weightUnit, speedUnit, setPref: setUnitPref, toDisplayWeight, toDisplaySpeed, fromDisplaySpeed } = useUnits();
@@ -492,7 +532,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
 
   const acDerivedData = useMemo(() => {
     const dexMod = getMod(effectiveAbilities.DEX);
-    const armors = activeSystem === 'dnd5e' ? (state.armors || []) : [];
+    const armors = activeSystem === 'dnd5e2024' ? (state.armors || []) : [];
     const ea = armors.find(a => a.type === 'armor' && a.equipped);
     const preset = ea?.presetId ? DND_ARMOR_PRESETS.find(p => p.id === ea.presetId) : null;
     const dexContrib = preset
@@ -507,7 +547,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
 
   // STR speed penalty: 10 ft if equipped preset armor has strReq and STR < strReq
   const strSpeedPenaltyFt = useMemo(() => {
-    if (activeSystem !== 'dnd5e') return 0;
+    if (activeSystem !== 'dnd5e2024') return 0;
     const armors = state.armors || [];
     const ea = armors.find(a => a.type === 'armor' && a.equipped && a.presetId);
     if (!ea) return 0;
@@ -558,7 +598,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
       let suffix = '';
       if (result.natural === 20 && result.sides === 20) suffix = ` — ⭐ ${t('dice.natural20')}`;
       else if (result.natural === 1 && result.sides === 20) suffix = ` — 💀 ${t('dice.natural1')}`;
-      const exhaustionLvl = activeSystem === 'dnd5e' ? (state.exhaustionLevel || 0) : 0;
+      const exhaustionLvl = activeSystem === 'dnd5e2024' ? (state.exhaustionLevel || 0) : 0;
       const penalty = result.sides === 20 && exhaustionLvl > 0 ? exhaustionLvl * 2 : 0;
       const finalTotal = result.total - penalty;
       const exhNote = penalty > 0 ? ` ${t('dice.exhaustionPenalty', { penalty })}` : '';
@@ -582,15 +622,89 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
     addLog('game.heal', msg);
   }
 
+  function handleClassOrLevelChange(patch) {
+    char.onClassOrLevelChange(patch);
+    if (activeSystem !== 'dnd5e2024') return;
+    const newClass = patch.charClass || state.charClass;
+    const newLevel = patch.charLevel || state.charLevel;
+    const classData = DND_CLASSES.find(c => c.name === newClass);
+    if (!classData?.resources?.length) { update({ resources: (state.resources || []).filter(r => r.source === 'custom' || r.source === 'feat') }); return; }
+    const newProfBonus = getProfBonus(newLevel);
+    const customResources = (state.resources || []).filter(r => r.source === 'custom' || r.source === 'feat');
+    const newResources = classData.resources.map(r => {
+      const maxVal = (r.startLevel && newLevel < r.startLevel) ? 0 : resolveResourceFormula(r.formula, state.abilities, newLevel, newProfBonus);
+      const existing = (state.resources || []).find(er => er.id === r.id);
+      let resetOn = r.resetOn;
+      if (r.id === 'bardic_inspiration') resetOn = newLevel >= 5 ? 'short' : 'long';
+      return { ...r, resetOn, max: maxVal, current: existing ? Math.min(existing.current, maxVal) : maxVal, pinned: existing?.pinned ?? false };
+    });
+    if (newClass === 'Bard' && newLevel >= 5 && (state.charLevel || 1) < 5) {
+      showToast(t('resources.bardInspirationShortRest'));
+    }
+    update({ resources: [...newResources, ...customResources] });
+  }
+
+  function toggleResourcePip(id, pipIdx) {
+    update({
+      resources: (state.resources || []).map(r => {
+        if (r.id !== id) return r;
+        return { ...r, current: pipIdx < r.current ? pipIdx : pipIdx + 1 };
+      })
+    });
+  }
+  function incrementResource(id) {
+    update({ resources: (state.resources || []).map(r => r.id === id ? { ...r, current: Math.min(r.max, r.current + 1) } : r) });
+  }
+  function decrementResource(id) {
+    update({ resources: (state.resources || []).map(r => r.id === id ? { ...r, current: Math.max(0, r.current - 1) } : r) });
+  }
+  function toggleResourcePin(id) {
+    update({ resources: (state.resources || []).map(r => r.id === id ? { ...r, pinned: !r.pinned } : r) });
+  }
+  function removeResource(id) {
+    update({ resources: (state.resources || []).filter(r => r.id !== id) });
+  }
+  function addCustomResource() {
+    if (!newResource.name.trim()) return;
+    const rawFormula = newResource.formula.trim() || 'fixed:1';
+    const formula = /^\d+$/.test(rawFormula) ? `fixed:${rawFormula}` : rawFormula;
+    const maxVal = resolveResourceFormula(formula, state.abilities, state.charLevel, char.profBonus);
+    const r = {
+      id: `custom_${Date.now()}`,
+      name: newResource.name.trim(),
+      icon: newResource.icon,
+      formula,
+      current: maxVal,
+      max: maxVal,
+      resetOn: newResource.resetOn,
+      source: 'custom',
+      pinned: newResource.pinned,
+    };
+    update({ resources: [...(state.resources || []), r] });
+    setAddingResource(false);
+    setNewResource({ name:'', icon:'d6', formula:'fixed:1', resetOn:'long', pinned:false });
+  }
+
   function handleLongRest() {
     char.longRest();
-    update({ hitDiceUsed: 0, exhaustionLevel: Math.max(0, (state.exhaustionLevel || 0) - 1) });
+    update({
+      hitDiceUsed: 0,
+      exhaustionLevel: Math.max(0, (state.exhaustionLevel || 0) - 1),
+      resources: (state.resources || []).map(r =>
+        r.resetOn === 'long' || r.resetOn === 'short' ? { ...r, current: r.max } : r
+      ),
+    });
     showToast(t('toast.longRest'));
     addLog('game.longRest', t('toast.longRest'));
     window.umami?.track('long-rest');
   }
   function handleShortRest() {
     char.shortRest();
+    update({
+      resources: (state.resources || []).map(r =>
+        r.resetOn === 'short' ? { ...r, current: r.max } : r
+      ),
+    });
     showToast(
       <>{t('toast.shortRestMain')} <em className="toast-hint">{t('toast.shortRestHint')}</em></>,
       { label: t('common.done'), onClick: () => { setToast(''); setToastAction(null); } },
@@ -708,7 +822,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                         if (cls === '__custom__') {
                           update({ charClass: '__custom__', charClassCustom: isCustomClass ? state.charClass : '' });
                         } else {
-                          char.onClassOrLevelChange({ charClass: cls });
+                          handleClassOrLevelChange({ charClass: cls });
                           const kept = (state.features||[]).filter(f => f.sourceType !== 'class');
                           update({ features: [...kept, ...getAutoFeatures('class', cls, CLASS_FEATURES)] });
                         }
@@ -766,12 +880,12 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                     </Field>
                     <Field label={t('identity.level')}>
                       <div className="hp-stepper" style={{ gap:4 }}>
-                        {activeSystem === 'dnd5e'
+                        {activeSystem === 'dnd5e2024'
                           ? <button className="mod-btn" style={{ color: state.charLevel > 1 ? 'var(--c-warn)' : undefined }} disabled={state.charLevel <= 1} onClick={() => setShowLevelDown(true)}>−</button>
                           : <button className="mod-btn" onClick={() => char.onClassOrLevelChange({ charLevel: Math.max(1, state.charLevel-1) })}>−</button>
                         }
-                        <input type="number" min="1" max="20" style={{ width:50, textAlign:'center' }} value={state.charLevel} onChange={e => char.onClassOrLevelChange({ charLevel: Math.max(1, parseInt(e.target.value)||1) })} />
-                        {activeSystem === 'dnd5e'
+                        <input type="number" min="1" max="20" style={{ width:50, textAlign:'center' }} value={state.charLevel} onChange={e => handleClassOrLevelChange({ charLevel: Math.max(1, parseInt(e.target.value)||1) })} />
+                        {activeSystem === 'dnd5e2024'
                           ? <button className="mod-btn" style={{ color: state.charLevel < 20 ? 'var(--c-accent)' : undefined }} disabled={state.charLevel >= 20} onClick={() => setShowLevelUp(true)}>+</button>
                           : <button className="mod-btn" onClick={() => char.onClassOrLevelChange({ charLevel: Math.min(20, state.charLevel+1) })}>+</button>
                         }
@@ -966,7 +1080,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
             <button className="hp-action-btn success" onClick={() => char.modHP(hpAmount)}><Icon id="game.heal" size={13} /> {t('hp.heal')}</button>
             <button className="hp-action-btn temp" onClick={() => update({ hpTemp: hpAmount })}><Icon id="game.tempHp" size={13} /> {t('hp.tempBtn')}</button>
           </div>
-          {activeSystem === 'dnd5e' && (
+          {activeSystem === 'dnd5e2024' && (
             <div className="hit-dice-row">
               <span className="hit-dice-label">{t('hp.hitDiceLabel')}</span>
               <button className="mod-btn" onClick={() => update({ hitDiceUsed: Math.min(state.charLevel, (state.hitDiceUsed||0)+1) })} disabled={(state.hitDiceUsed||0) >= state.charLevel}>−</button>
@@ -1128,15 +1242,135 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
       );
       }
 
-      case 'inspiration': return (
+      case 'resources': return (
         <div className="card">
-          <div className="card-title" style={{ marginBottom:12 }}><Icon id="widget.inspiration" /> {t('widgets.inspiration')}</div>
-          <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-            <button className={`icon-btn${state.inspiration ? ' active' : ''}`} onClick={() => update({ inspiration:!state.inspiration })}><Icon id="game.inspiration" size={14} /></button>
+          <div className="card-title" style={{ justifyContent:'space-between' }}>
+            <span><Icon id="widget.resources" /> {t('widgets.resources')}</span>
+            <button className={`icon-btn${editingResources ? ' active' : ''}`}
+              onClick={() => { setEditingResources(v => !v); setAddingResource(false); }}>
+              {editingResources ? <Icon id="action.done" size={14} /> : <Icon id="action.edit" size={14} />}
+            </button>
+          </div>
+          {/* Inspiration row */}
+          <div className="resource-inspiration-row">
+            <button className={`icon-btn${state.inspiration ? ' active' : ''}`}
+              onClick={() => update({ inspiration: !state.inspiration })}>
+              <Icon id="game.inspiration" size={14} />
+            </button>
             <span className="toggle-label" style={{ color: state.inspiration ? 'var(--c-accent)' : 'var(--c-hint)' }}>
               {state.inspiration ? t('combat.inspiration') : t('combat.noInspiration')}
             </span>
           </div>
+          {/* Class / feat / custom resources */}
+          {(state.resources || []).filter(r => (r.max ?? 1) > 0).map(r => (
+            <div key={r.id} className="resource-item">
+              <div className="resource-label-row">
+                <ResourceIcon icon={r.icon} size={13} />
+                <span className="resource-name">{t(`resources.${r.id}`, r.name)}</span>
+                {editingResources && r.source !== 'class' && (
+                  <button className="icon-btn resource-remove-btn"
+                    onClick={() => removeResource(r.id)}>
+                    <Icon id="action.remove" size={11} />
+                  </button>
+                )}
+              </div>
+              {r.isPool ? (
+                <div className="resource-pool">
+                  <button className="mod-btn" onClick={() => decrementResource(r.id)}>−</button>
+                  <span className="resource-pool-val">
+                    {r.current}<span className="resource-pool-max">/{r.max}</span>
+                  </span>
+                  <button className="mod-btn" onClick={() => incrementResource(r.id)}>+</button>
+                </div>
+              ) : (
+                <div className="resource-pips">
+                  {Array.from({ length: r.max }).map((_, i) => (
+                    <button key={i}
+                      className={`icon-btn resource-pip-btn${i < r.current ? ' active' : ''}`}
+                      onClick={() => toggleResourcePip(r.id, i)}>
+                      <ResourceIcon icon={r.icon} size={13} />
+                    </button>
+                  ))}
+                </div>
+              )}
+              {editingResources && (
+                <label className="resource-pin-label">
+                  <input type="checkbox" checked={r.pinned || false}
+                    onChange={() => toggleResourcePin(r.id)} />
+                  <span>{t('resources.pinLabel')}</span>
+                  {r.source === 'class' && (
+                    <span className="hint-text" style={{ marginLeft:4 }}>({t('resources.classResource')})</span>
+                  )}
+                </label>
+              )}
+            </div>
+          ))}
+          {/* Edit panel */}
+          {editingResources && (
+            <div className="resource-edit-panel">
+              {!addingResource ? (
+                <button className="icon-btn" style={{ marginTop:4 }}
+                  onClick={() => setAddingResource(true)}>
+                  <Icon id="action.add" size={12} /> {t('resources.addBtn')}
+                </button>
+              ) : (
+                <div className="resource-add-form">
+                  <div className="field">
+                    <label>{t('resources.nameLabel')}</label>
+                    <input value={newResource.name}
+                      onChange={e => setNewResource(r => ({ ...r, name: e.target.value }))}
+                      placeholder={t('resources.nameLabel')} />
+                  </div>
+                  <div className="field">
+                    <label>{t('resources.iconLabel')}</label>
+                    <div className="resource-icon-picker">
+                      {DICE_ICONS.map(d => (
+                        <button key={d}
+                          className={`filter-chip${newResource.icon === d ? ' active' : ''}`}
+                          onClick={() => setNewResource(r => ({ ...r, icon: d }))}>
+                          {d}
+                        </button>
+                      ))}
+                      {Object.keys(ICON_MAP).filter(k => k.startsWith('resource.')).map(k => k.slice(9)).map(ic => (
+                        <button key={ic}
+                          className={`filter-chip${newResource.icon === ic ? ' active' : ''}`}
+                          onClick={() => setNewResource(r => ({ ...r, icon: ic }))}>
+                          <ResourceIcon icon={ic} size={12} />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="field">
+                    <label>{t('resources.maxLabel')}</label>
+                    <input value={newResource.formula}
+                      onChange={e => setNewResource(r => ({ ...r, formula: e.target.value }))}
+                      placeholder={t('resources.maxFormula')} />
+                  </div>
+                  <div className="field">
+                    <label>{t('resources.resetLabel')}</label>
+                    <select value={newResource.resetOn}
+                      onChange={e => setNewResource(r => ({ ...r, resetOn: e.target.value }))}>
+                      <option value="none">{t('resources.resetNone')}</option>
+                      <option value="short">{t('resources.resetShort')}</option>
+                      <option value="long">{t('resources.resetLong')}</option>
+                    </select>
+                  </div>
+                  <label className="resource-pin-label">
+                    <input type="checkbox" checked={newResource.pinned}
+                      onChange={e => setNewResource(r => ({ ...r, pinned: e.target.checked }))} />
+                    <span>{t('resources.pinLabel')}</span>
+                  </label>
+                  <div style={{ display:'flex', gap:8, marginTop:8 }}>
+                    <button className="io-btn primary" onClick={addCustomResource}>{t('common.add')}</button>
+                    <button className="io-btn" onClick={() => {
+                      setAddingResource(false);
+                      setNewResource({ name:'', icon:'d6', formula:'fixed:1', resetOn:'long', pinned:false });
+                    }}>{t('common.cancel')}</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       );
 
@@ -1940,21 +2174,39 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
       traitValues: activeSystem === 'daggerheart' ? (state.traits || {}) : effectiveAbilities,
       charLevel:   state.charLevel,
       profBonus:   activeSystem === 'daggerheart' ? getDHProficiency(state.charLevel) : char.profBonus,
-      systemId:    activeSystem || 'dnd5e',
+      systemId:    activeSystem || 'dnd5e2024',
     }}>
     <div className="sheet">
       <Toast message={toast} action={toastAction} />
       {showCreator && <CharacterCreator onComplete={handleCreatorComplete} onCancel={() => setShowCreator(false)} systemId={activeSystem || DEFAULT_SYSTEM} />}
-      {showLevelUp && activeSystem === 'dnd5e' && (
+      {showLevelUp && activeSystem === 'dnd5e2024' && (
         <LevelUpModal
           currentLevel={state.charLevel}
           charClass={state.charClass}
           charState={state}
-          onComplete={changes => { char.levelUp(changes); setShowLevelUp(false); }}
+          onComplete={changes => {
+            char.levelUp(changes);
+            const newLevel = (state.charLevel || 1) + 1;
+            const classData = DND_CLASSES.find(c => c.name === state.charClass);
+            if (classData?.resources?.length) {
+              const newProfBonus = getProfBonus(newLevel);
+              const customRes = (state.resources || []).filter(r => r.source === 'custom' || r.source === 'feat');
+              const classRes = classData.resources.map(r => {
+                const maxVal = (r.startLevel && newLevel < r.startLevel) ? 0 : resolveResourceFormula(r.formula, state.abilities, newLevel, newProfBonus);
+                const existing = (state.resources || []).find(er => er.id === r.id);
+                let resetOn = r.resetOn;
+                if (r.id === 'bardic_inspiration') resetOn = newLevel >= 5 ? 'short' : 'long';
+                return { ...r, resetOn, max: maxVal, current: existing ? Math.min(existing.current, maxVal) : maxVal, pinned: existing?.pinned ?? false };
+              });
+              update({ resources: [...classRes, ...customRes] });
+              if (state.charClass === 'Bard' && newLevel === 5) showToast(t('resources.bardInspirationShortRest'));
+            }
+            setShowLevelUp(false);
+          }}
           onCancel={() => setShowLevelUp(false)}
         />
       )}
-      {showLevelDown && activeSystem === 'dnd5e' && (
+      {showLevelDown && activeSystem === 'dnd5e2024' && (
         <LevelDownModal
           currentLevel={state.charLevel}
           charState={state}
@@ -1979,9 +2231,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
 
       {/* Top bar */}
       <div className="top-bar">
-        <div className="top-bar-system-name">
-          {getSystem(activeSystem || DEFAULT_SYSTEM).icon} {t(`system.${(activeSystem || DEFAULT_SYSTEM)}`, getSystem(activeSystem || DEFAULT_SYSTEM).shortName)}
-        </div>
+        <div className="top-bar-system-name">⚔ CharacterForge</div>
         {onBackToSelect && (
           <button className="icon-btn" onClick={onBackToSelect} title="Tutti i personaggi"><Icon id="action.allChars" size={16} /></button>
         )}
@@ -2183,6 +2433,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
         onTabChange={handleTabChange}
         editMode={editMode}
         onReorderTabs={next => { setTabs(next); saveTabsForSystem(activeSystem || DEFAULT_SYSTEM, next); }}
+        systemName={t(`system.${activeSystem || DEFAULT_SYSTEM}`, getSystem(activeSystem || DEFAULT_SYSTEM).shortName)}
       />
 
       <PinnedBar
@@ -2194,6 +2445,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
         system={activeSystem || DEFAULT_SYSTEM}
         onShortRest={handleShortRest}
         onLongRest={handleLongRest}
+        onToggleResourcePip={toggleResourcePip}
       />
 
       {editMode && (
@@ -2222,6 +2474,31 @@ export default function App() {
   const [chars, setChars] = useState(() => loadCharsIndex());
   const [activeCharId, setActive] = useState(() => {
     migrateLegacy(createDefaultState);
+    // Migrate old system ID 'dnd5e' → 'dnd5e2024' in localStorage
+    try {
+      if (localStorage.getItem('characterforge_active_system') === 'dnd5e') {
+        localStorage.setItem('characterforge_active_system', 'dnd5e2024');
+      }
+      const idx = loadCharsIndex();
+      const needsMigration = idx.some(c => !c.system || c.system === 'dnd5e');
+      if (needsMigration) {
+        const updated = idx.map(c => (!c.system || c.system === 'dnd5e') ? { ...c, system: 'dnd5e2024' } : c);
+        saveCharsIndex(updated);
+        updated.forEach(c => {
+          if (c.system === 'dnd5e2024') {
+            const raw = localStorage.getItem(`characterforge_char_${c.id}`);
+            if (raw) {
+              try {
+                const cs = JSON.parse(raw);
+                if (!cs.system || cs.system === 'dnd5e') {
+                  localStorage.setItem(`characterforge_char_${c.id}`, JSON.stringify({ ...cs, system: 'dnd5e2024' }));
+                }
+              } catch {}
+            }
+          }
+        });
+      }
+    } catch {}
     return getActiveCharId();
   });
   const [showCreator, setShowCreator] = useState(false);
@@ -2265,7 +2542,7 @@ export default function App() {
     setShowCreator(false);
   }
 
-  const filteredChars = chars.filter(c => (c.system || 'dnd5e') === activeSystem);
+  const filteredChars = chars.filter(c => (c.system || 'dnd5e2024') === activeSystem);
   const systemSelectorNode = <SystemSelector activeSystem={activeSystem} onChange={handleSystemChange} />;
 
   return (

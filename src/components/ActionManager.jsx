@@ -6,7 +6,7 @@ import { TagPill, TagSelector, TagFilterBar } from './Tags';
 import FilterSortBar from './FilterSortBar';
 import { useFilterSort } from '../hooks/useFilterSort';
 import { useUnits, parseSpeedFt } from '../hooks/useUnits';
-import { SCHOOLS } from '../data/systems/dnd5e/spells';
+import { SCHOOLS } from '../data/systems/dnd5e2024/spells';
 
 const ACTION_TYPE_KEYS = ['action', 'bonus', 'reaction', 'free'];
 

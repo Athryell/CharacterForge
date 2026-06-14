@@ -84,7 +84,7 @@
   },
   "system": {
     "selector": "Game System",
-    "dnd5e": "D&D 5.5e 2024",
+    "dnd5e2024": "D&D 5.5e 2024",
     "daggerheart": "Daggerheart"
   },
   "nav": {
@@ -598,7 +598,7 @@
     "italian": "Italiano",
     "english": "English",
     "system": "System",
-    "dnd5e": "D&D 5e / 2024",
+    "dnd5e2024": "D&D 5e / 2024",
     "custom": "Custom"
   },
   "creator": {

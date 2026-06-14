@@ -84,7 +84,7 @@
   },
   "system": {
     "selector": "Game System",
-    "dnd5e": "D&D 5.5e 2024",
+    "dnd5e2024": "D&D 5.5e 2024",
     "daggerheart": "Daggerheart"
   },
   "nav": {
@@ -93,7 +93,9 @@
     "import": "⬆ Importa",
     "layout": "⠿ Layout",
     "layoutDone": "✓ Conferma",
-    "reset": "↺ Reset"
+    "reset": "↺ Reset",
+    "mainNav": "Navigazione principale",
+    "more": "Altro"
   },
   "tabs": {
     "main": "Personaggio",
@@ -113,6 +115,7 @@
     "hp": "Punti ferita",
     "combatStats": "Statistiche combattimento",
     "inspiration": "Ispirazione",
+    "resources": "Risorse",
     "deathSaves": "Tiri salvezza morte",
     "conditions": "Condizioni",
     "actions": "Azioni",
@@ -393,6 +396,7 @@
     "lvlHelp": "scales with level",
     "bonusHelp": "to add bonus",
     "counterHelp": "creates clickable counter",
+    "countHelp": "counter dinamico (dimensione dalla formula)",
     "dynamicHint": "Hover ≈ to see the original formula",
     "group": {
       "dice": "Dice",
@@ -511,6 +515,40 @@
     "overrideAC": "Modifica",
     "dexBonus": "Bonus DES: {{effective}} (max +{{max}})"
   },
+  "resources": {
+    "title": "Risorse",
+    "editBtn": "✏ Modifica",
+    "addBtn": "+ Aggiungi risorsa",
+    "nameLabel": "Nome",
+    "iconLabel": "Icona",
+    "maxLabel": "Massimo",
+    "maxFormula": "Formula (es. [CHA], [PRO], [LVL])",
+    "resetLabel": "Ripristino",
+    "resetNone": "Mai",
+    "resetShort": "Riposo breve",
+    "resetLong": "Riposo lungo",
+    "pinLabel": "Aggiungi alla barra",
+    "removeBtn": "Rimuovi",
+    "classResource": "risorsa di classe",
+    "bardic_inspiration": "Ispirazione bardica",
+    "ki_points": "Punti ki",
+    "sorcery_points": "Punti stregoneria",
+    "wild_shape": "Forma selvatica",
+    "action_surge": "Impeto",
+    "second_wind": "Riprendere fiato",
+    "rage": "Ira",
+    "lay_on_hands": "Imposizione delle mani",
+    "channel_divinity": "Canalizza divinità",
+    "eldritch_invocations": "Invocazioni occulte",
+    "divine_sense": "Senso divino",
+    "arcane_recovery": "Recupero arcano",
+    "focus_points": "Punti Concentrazione",
+    "indomitable": "Indomito",
+    "innate_sorcery": "Stregoneria Innata",
+    "magical_cunning": "Astuzia Magica",
+    "favored_enemy": "Nemico Prediletto",
+    "bardInspirationShortRest": "Ispirazione Bardica ora si ricarica con un Riposo Breve!"
+  },
   "conditions": {
     "title": "Condizioni",
     "remove": "Remove condition",
@@ -598,7 +636,7 @@
     "italian": "Italiano",
     "english": "English",
     "system": "Sistema",
-    "dnd5e": "D&D 5e / 2024",
+    "dnd5e2024": "D&D 5e / 2024",
     "custom": "Personalizzato"
   },
   "creator": {
@@ -1121,7 +1159,8 @@
     "asiPlus2": "+2 to one ability",
     "asiPlus1": "+1 to two abilities",
     "spellsToLearn": "Choose {{count}} spell(s) to learn",
-    "newSpeciesSpell": "Nuovo incantesimo di specie: {{name}} ({{level}}, sempre preparato)"
+    "newSpeciesSpell": "Nuovo incantesimo di specie: {{name}} ({{level}}, sempre preparato)",
+    "chooseProgress": "{{picked}}/{{total}} selezionati"
   },
   "levelDown": {
     "title": "Go back to level {{level}}?",

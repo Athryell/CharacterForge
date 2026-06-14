@@ -25,13 +25,33 @@ export function parseTextBonuses(text = '') {
 // IT→EN ability abbreviation map for backward-compat notation resolution
 const IT_TO_EN_ABBR = { FOR:'STR', DES:'DEX', COS:'CON', SAG:'WIS', CAR:'CHA', INT:'INT' };
 
+// Resolve a [countX] formula to a numeric pip count
+function resolveCountFormula(formula, abilities, charLevel, profBonus) {
+  if (/^\d+$/.test(formula)) return parseInt(formula);
+  if (formula === 'PRO') return profBonus ?? 2;
+  if (formula === 'LVL') return charLevel ?? 1;
+  if (formula === 'LVL/2') return Math.max(1, Math.floor((charLevel ?? 1) / 2));
+  const lvlMultMatch = formula.match(/^LVL\*(\d+)$/);
+  if (lvlMultMatch) return (charLevel ?? 1) * parseInt(lvlMultMatch[1]);
+  const score = (abilities || {})[formula.toUpperCase()] ?? 10;
+  return Math.max(1, Math.floor((score - 10) / 2));
+}
+
+const COUNT_NOTATION_RE = /\[count(CHA|STR|DEX|CON|INT|WIS|PRO|LVL\/2|LVL\*\d+|LVL|\d+)\]/gi;
+
 // Resolve [ATTR], [PRO], and [LVL:...] notations in a text string
 // Supports D&D ([STR],[FOR],...) and DH ([AGI],[FIN],...) traits via optional traitMap.
 // traitMap: { AGI: mod, FIN: mod, ... } — DH modifiers already resolved, no score conversion needed.
 export function resolveNotations(text, abilities, charLevel, profBonus, traitMap = null) {
   if (!text) return text;
 
-  const resolved1 = text.replace(/(?<!@)\[(STR|DEX|CON|INT|WIS|CHA|FOR|DES|COS|SAG|CAR|PRO|AGI|FIN|INS|PRE|KNO)\]/gi, (_, attr) => {
+  // [countX] → [N] static counter with dynamically computed size
+  const resolved0 = text.replace(COUNT_NOTATION_RE, (_, formula) => {
+    const n = resolveCountFormula(formula, abilities, charLevel, profBonus);
+    return `[${n}]`;
+  });
+
+  const resolved1 = resolved0.replace(/(?<!@)\[(STR|DEX|CON|INT|WIS|CHA|FOR|DES|COS|SAG|CAR|PRO|AGI|FIN|INS|PRE|KNO)\]/gi, (_, attr) => {
     if (attr.toUpperCase() === 'PRO') return String(profBonus ?? 2);
     const upper = attr.toUpperCase();
     if (traitMap && upper in traitMap) return String(traitMap[upper] ?? 0);
@@ -83,6 +103,12 @@ export function NotationHelpBar() {
         </>
       )}
       <span><strong>[3]</strong> {t('notation.counterHelp')}</span>
+      {!isDH && (
+        <>
+          <span className="notation-help-sep">·</span>
+          <span><strong>[countCHA]</strong> {t('notation.countHelp')}</span>
+        </>
+      )}
     </div>
   );
 }
@@ -126,7 +152,7 @@ function Tooltip({ text, children }) {
 
 // Renders text with keyword tooltips applied automatically
 // Supports [ATTR], [LVL:...], and +N@[STAT] notations resolved from CharContext
-const DYNAMIC_NOTATION_RE = /\[(STR|DEX|CON|INT|WIS|CHA|FOR|DES|COS|SAG|CAR|PRO|AGI|FIN|INS|PRE|KNO)\]|\[LVL:|[+-]\d+@\[[A-Z-]+\]/i;
+const DYNAMIC_NOTATION_RE = /\[(STR|DEX|CON|INT|WIS|CHA|FOR|DES|COS|SAG|CAR|PRO|AGI|FIN|INS|PRE|KNO)\]|\[LVL:|[+-]\d+@\[[A-Z-]+\]|\[count/i;
 const BONUS_NOTATION_SPLIT = /([+-]\d+@\[[A-Z-]+\])/gi;
 const BONUS_NOTATION_PARSE = /^([+-]\d+)@\[([A-Z-]+)\]$/i;
 const COUNTER_NOTATION_SPLIT = /(\[\d+\])/g;

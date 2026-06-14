@@ -404,6 +404,25 @@ Mai hardcodare emoji direttamente nei componenti — aggiungere prima la voce in
 
 ---
 
+## Notazioni nelle descrizioni (Tooltip / KeywordText)
+
+| Sintassi | Effetto |
+|----------|---------|
+| `[STR]` `[DEX]` … `[PRO]` | Modificatore caratteristica o bonus competenza (risolto dinamicamente) |
+| `[LVL:1d6,5:1d8]` | Valore scalante per livello |
+| `+2@[AC]` | Badge bonus equipaggiamento inline |
+| `[3]` | Counter statico: 3 pip cliccabili |
+| `[countCHA]` | Counter dinamico: numero di pip = mod. CHA (min 1) |
+| `[countPRO]` | Counter dinamico: pip = bonus competenza |
+| `[countLVL]` | Counter dinamico: pip = livello personaggio |
+| `[countLVL/2]` | Counter dinamico: pip = livello ÷ 2 (min 1) |
+| `[countLVL*5]` | Counter dinamico: pip = livello × 5 |
+| `[countN]` | Counter dinamico con valore numerico fisso N |
+
+Le formule `[countX]` sono risolte in `resolveNotations()` (Tooltip.jsx) prima del rendering. Il badge `≈` appare se il testo contiene notazioni dinamiche.
+
+---
+
 ## Problemi noti da risolvere
 
 - `.mod-btn` è definito **due volte** con valori inconsistenti (16px e 24px con `!important`) — unificare a 24px senza `!important`

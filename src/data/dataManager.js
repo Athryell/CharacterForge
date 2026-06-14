@@ -2,48 +2,48 @@
 // Singleton che fonde dati SRD built-in con pacchetti homebrew salvati in localStorage.
 // I pacchetti homebrew NON vanno mai nel codice sorgente o nel repo.
 
-import dnd5eAdapter   from './systems/dnd5e/adapter';
+import dnd5eAdapter   from './systems/dnd5e2024/adapter';
 import dhAdapter      from './systems/daggerheart/adapter';
 
 // Raw data for SRD counts in getSources()
-import { DND_SPELLS }      from './systems/dnd5e/spells';
-import { DND_WEAPONS }     from './systems/dnd5e/weapons';
-import { DND_CONDITIONS }  from './systems/dnd5e/conditions';
-import { DND_CLASS_NAMES } from './systems/dnd5e/classes';
-import { DND_SPECIES }     from './systems/dnd5e/species';
-import { DND_BACKGROUNDS } from './systems/dnd5e/backgrounds';
+import { DND_SPELLS }      from './systems/dnd5e2024/spells';
+import { DND_WEAPONS }     from './systems/dnd5e2024/weapons';
+import { DND_CONDITIONS }  from './systems/dnd5e2024/conditions';
+import { DND_CLASS_NAMES } from './systems/dnd5e2024/classes';
+import { DND_SPECIES }     from './systems/dnd5e2024/species';
+import { DND_BACKGROUNDS } from './systems/dnd5e2024/backgrounds';
 
 // ── i18n — D&D 5e (da nuova posizione) ──────────────────────────────────────
-import spellsEN      from './systems/dnd5e/i18n/spells.i18n.json';
-import spellsIT      from './systems/dnd5e/i18n/spells.i18n.it.json';
-import spellsDE      from './systems/dnd5e/i18n/spells.i18n.de.json';
-import spellsES      from './systems/dnd5e/i18n/spells.i18n.es.json';
-import spellsFR      from './systems/dnd5e/i18n/spells.i18n.fr.json';
-import weaponsEN     from './systems/dnd5e/i18n/weapons.i18n.json';
-import weaponsIT     from './systems/dnd5e/i18n/weapons.i18n.it.json';
-import weaponsDE     from './systems/dnd5e/i18n/weapons.i18n.de.json';
-import weaponsES     from './systems/dnd5e/i18n/weapons.i18n.es.json';
-import weaponsFR     from './systems/dnd5e/i18n/weapons.i18n.fr.json';
-import conditionsEN  from './systems/dnd5e/i18n/conditions.i18n.json';
-import conditionsIT  from './systems/dnd5e/i18n/conditions.i18n.it.json';
-import conditionsDE  from './systems/dnd5e/i18n/conditions.i18n.de.json';
-import conditionsES  from './systems/dnd5e/i18n/conditions.i18n.es.json';
-import conditionsFR  from './systems/dnd5e/i18n/conditions.i18n.fr.json';
-import classesEN     from './systems/dnd5e/i18n/classes.i18n.json';
-import classesIT     from './systems/dnd5e/i18n/classes.i18n.it.json';
-import classesDE     from './systems/dnd5e/i18n/classes.i18n.de.json';
-import classesES     from './systems/dnd5e/i18n/classes.i18n.es.json';
-import classesFR     from './systems/dnd5e/i18n/classes.i18n.fr.json';
-import speciesEN     from './systems/dnd5e/i18n/species.i18n.json';
-import speciesIT     from './systems/dnd5e/i18n/species.i18n.it.json';
-import speciesDE     from './systems/dnd5e/i18n/species.i18n.de.json';
-import speciesES     from './systems/dnd5e/i18n/species.i18n.es.json';
-import speciesFR     from './systems/dnd5e/i18n/species.i18n.fr.json';
-import backgroundsEN from './systems/dnd5e/i18n/backgrounds.i18n.json';
-import backgroundsIT from './systems/dnd5e/i18n/backgrounds.i18n.it.json';
-import backgroundsDE from './systems/dnd5e/i18n/backgrounds.i18n.de.json';
-import backgroundsES from './systems/dnd5e/i18n/backgrounds.i18n.es.json';
-import backgroundsFR from './systems/dnd5e/i18n/backgrounds.i18n.fr.json';
+import spellsEN      from './systems/dnd5e2024/i18n/spells.i18n.json';
+import spellsIT      from './systems/dnd5e2024/i18n/spells.i18n.it.json';
+import spellsDE      from './systems/dnd5e2024/i18n/spells.i18n.de.json';
+import spellsES      from './systems/dnd5e2024/i18n/spells.i18n.es.json';
+import spellsFR      from './systems/dnd5e2024/i18n/spells.i18n.fr.json';
+import weaponsEN     from './systems/dnd5e2024/i18n/weapons.i18n.json';
+import weaponsIT     from './systems/dnd5e2024/i18n/weapons.i18n.it.json';
+import weaponsDE     from './systems/dnd5e2024/i18n/weapons.i18n.de.json';
+import weaponsES     from './systems/dnd5e2024/i18n/weapons.i18n.es.json';
+import weaponsFR     from './systems/dnd5e2024/i18n/weapons.i18n.fr.json';
+import conditionsEN  from './systems/dnd5e2024/i18n/conditions.i18n.json';
+import conditionsIT  from './systems/dnd5e2024/i18n/conditions.i18n.it.json';
+import conditionsDE  from './systems/dnd5e2024/i18n/conditions.i18n.de.json';
+import conditionsES  from './systems/dnd5e2024/i18n/conditions.i18n.es.json';
+import conditionsFR  from './systems/dnd5e2024/i18n/conditions.i18n.fr.json';
+import classesEN     from './systems/dnd5e2024/i18n/classes.i18n.json';
+import classesIT     from './systems/dnd5e2024/i18n/classes.i18n.it.json';
+import classesDE     from './systems/dnd5e2024/i18n/classes.i18n.de.json';
+import classesES     from './systems/dnd5e2024/i18n/classes.i18n.es.json';
+import classesFR     from './systems/dnd5e2024/i18n/classes.i18n.fr.json';
+import speciesEN     from './systems/dnd5e2024/i18n/species.i18n.json';
+import speciesIT     from './systems/dnd5e2024/i18n/species.i18n.it.json';
+import speciesDE     from './systems/dnd5e2024/i18n/species.i18n.de.json';
+import speciesES     from './systems/dnd5e2024/i18n/species.i18n.es.json';
+import speciesFR     from './systems/dnd5e2024/i18n/species.i18n.fr.json';
+import backgroundsEN from './systems/dnd5e2024/i18n/backgrounds.i18n.json';
+import backgroundsIT from './systems/dnd5e2024/i18n/backgrounds.i18n.it.json';
+import backgroundsDE from './systems/dnd5e2024/i18n/backgrounds.i18n.de.json';
+import backgroundsES from './systems/dnd5e2024/i18n/backgrounds.i18n.es.json';
+import backgroundsFR from './systems/dnd5e2024/i18n/backgrounds.i18n.fr.json';
 
 const I18N = {
   spells:      { en: spellsEN,      it: spellsIT,      de: spellsDE,      es: spellsES,      fr: spellsFR },
@@ -55,7 +55,7 @@ const I18N = {
 };
 
 const ADAPTERS = {
-  dnd5e:       dnd5eAdapter,
+  dnd5e2024:   dnd5eAdapter,
   daggerheart: dhAdapter,
 };
 
@@ -90,8 +90,8 @@ function getCurrentLang() {
 
 const dataManager = {
   // ── Adapter registry ─────────────────────────────────────────────────────
-  getAdapter(systemId = 'dnd5e') {
-    return ADAPTERS[systemId] || ADAPTERS.dnd5e;
+  getAdapter(systemId = 'dnd5e2024') {
+    return ADAPTERS[systemId] || ADAPTERS.dnd5e2024;
   },
 
   // ── Incantesimi ──────────────────────────────────────────────────────────

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ALIGNMENTS } from '../data/systems/dnd5e/mechanics';
+import { ALIGNMENTS } from '../data/systems/dnd5e2024/mechanics';
 
 export default function AlignmentPicker({ value, onChange }) {
   const { t } = useTranslation();

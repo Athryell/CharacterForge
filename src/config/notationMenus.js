@@ -1,5 +1,5 @@
 export const NOTATION_MENUS = {
-  dnd5e: [
+  dnd5e2024: [
     {
       group: 'notation.group.dice',
       items: [
@@ -82,5 +82,5 @@ export const NOTATION_MENUS = {
 };
 
 export function getNotationMenu(systemId) {
-  return NOTATION_MENUS[systemId] || NOTATION_MENUS.dnd5e;
+  return NOTATION_MENUS[systemId] || NOTATION_MENUS.dnd5e2024;
 }

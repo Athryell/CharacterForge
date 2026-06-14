@@ -113,7 +113,7 @@ export default function LevelDownModal({ currentLevel, charState, onConfirm, onC
 
         <div className="creator-footer">
           <button className="io-btn" onClick={onCancel}>{t('levelDown.cancel')}</button>
-          <button className="io-btn primary" style={{ background: 'var(--c-warn)', color: 'var(--c-warn-text)' }}
+          <button className="io-btn danger solid"
             onClick={() => { window.umami?.track('level-down', { level: targetLevel }); onConfirm([...keptIds]); }}>
             {t('levelDown.confirm')}
           </button>

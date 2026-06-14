@@ -214,7 +214,7 @@ const CLASS_LEVEL_DATA = {
             { name: 'Cleric Subclass', desc: 'Choose a Cleric subclass. The Life Domain subclass is in the SRD.', auto: false, choices: ['Life Domain'] },
           ], hpDie: 'd8', subclass: true, asi: false, epicBoon: false },
     2:  { features: [
-            { name: 'Channel Divinity', desc: 'Use Channel Divinity once per Short/Long Rest. Turn Undead: each Undead within 30 ft must make a WIS save or be Turned. Divine Spark: expend one use to add a d8 per Channel Divinity use to heal or deal Radiant damage.', auto: true },
+            { name: 'Channel Divinity', desc: 'Use Channel Divinity twice per Short/Long Rest. Turn Undead: each Undead within 30 ft must make a WIS save or be Turned. Divine Spark: expend one use to add a d8 per Channel Divinity use to heal or deal Radiant damage. Uses increase to 3 at lv6 and 4 at lv18.', auto: true },
           ], hpDie: 'd8', subclass: false, asi: false, epicBoon: false },
     3:  { features: [
             { name: 'Subclass Feature', desc: 'See your subclass description.', auto: true },
@@ -222,7 +222,6 @@ const CLASS_LEVEL_DATA = {
     4:  { features: [], hpDie: 'd8', subclass: false, asi: true, epicBoon: false },
     5:  { features: [
             { name: 'Smite Undead', desc: 'When you use Turn Undead, you can roll 2d8 + WIS mod Radiant damage against each creature Turned; a failed save also destroys creatures with CR ≤ 1/2 your Cleric level.', auto: true },
-            { name: 'Channel Divinity (2 uses)', desc: 'You can now use Channel Divinity twice per Short/Long Rest.', auto: true },
           ], hpDie: 'd8', subclass: false, asi: false, epicBoon: false },
     6:  { features: [
             { name: 'Subclass Feature', desc: 'See your subclass description.', auto: true },
@@ -247,7 +246,9 @@ const CLASS_LEVEL_DATA = {
     17: { features: [
             { name: 'Subclass Feature', desc: 'See your subclass description.', auto: true },
           ], hpDie: 'd8', subclass: false, asi: false, epicBoon: false },
-    18: { features: [], hpDie: 'd8', subclass: false, asi: false, epicBoon: false },
+    18: { features: [
+            { name: 'Channel Divinity (4 uses)', desc: 'You can now use Channel Divinity four times per Short/Long Rest.', auto: true },
+          ], hpDie: 'd8', subclass: false, asi: false, epicBoon: false },
     19: { features: [], hpDie: 'd8', subclass: false, asi: false, epicBoon: true },
     20: { features: [
             { name: 'Greater Divine Intervention', desc: 'Divine Intervention now succeeds automatically. You can use it once per Long Rest without the 7-day restriction.', auto: true },
@@ -629,7 +630,7 @@ const CLASS_LEVEL_DATA = {
           ], hpDie: 'd6', subclass: true, asi: false, epicBoon: false },
     2:  { features: [
             { name: 'Font of Magic', desc: 'Gain Sorcery Points = Sorcerer level (recover on Long Rest). Spend to create spell slots or fuel Metamagic options.', auto: true },
-            { name: 'Metamagic', desc: 'Learn 2 Metamagic options (Careful, Distant, Empowered, Extended, Heightened, Quickened, Seeking, Subtle, or Transmuted Spell).', auto: false, choices: ['Careful Spell', 'Distant Spell', 'Empowered Spell', 'Extended Spell', 'Heightened Spell', 'Quickened Spell', 'Subtle Spell', 'Transmuted Spell'] },
+            { name: 'Metamagic', desc: 'Learn 2 Metamagic options.', auto: false, choose: 2, choices: ['Careful Spell', 'Distant Spell', 'Empowered Spell', 'Extended Spell', 'Heightened Spell', 'Quickened Spell', 'Subtle Spell', 'Transmuted Spell'] },
           ], hpDie: 'd6', subclass: false, asi: false, epicBoon: false },
     3:  { features: [
             { name: 'Subclass Feature', desc: 'See your subclass description.', auto: true },
@@ -788,6 +789,9 @@ const SRD_CLASSES_DATA = [
     skillCount: 2,
     skillOptions: ['animal-handling', 'athletics', 'intimidation', 'nature', 'perception', 'survival'],
     subclassLevel: 3,
+    resources: [
+      { id: 'rage', name: 'Rage', icon: 'flame', formula: '[LVL:1:2,3:3,6:4,12:5,17:6]', resetOn: 'long', source: 'class' },
+    ],
   },
   {
     name: 'Bard',
@@ -799,6 +803,9 @@ const SRD_CLASSES_DATA = [
     skillCount: 3,
     skillOptions: ALL_SKILLS,
     subclassLevel: 3,
+    resources: [
+      { id: 'bardic_inspiration', name: 'Bardic Inspiration', icon: 'music', formula: '[CHA]', resetOn: 'long', source: 'class' },
+    ],
   },
   {
     name: 'Cleric',
@@ -810,6 +817,9 @@ const SRD_CLASSES_DATA = [
     skillCount: 2,
     skillOptions: ['history', 'insight', 'medicine', 'persuasion', 'religion'],
     subclassLevel: 1,
+    resources: [
+      { id: 'channel_divinity', name: 'Channel Divinity', icon: 'sun', formula: '[LVL:2:2,6:3,18:4]', resetOn: 'short', source: 'class' },
+    ],
   },
   {
     name: 'Druid',
@@ -821,6 +831,9 @@ const SRD_CLASSES_DATA = [
     skillCount: 2,
     skillOptions: ['arcana', 'animal-handling', 'insight', 'medicine', 'nature', 'perception', 'religion', 'survival'],
     subclassLevel: 2,
+    resources: [
+      { id: 'wild_shape', name: 'Wild Shape', icon: 'paw-print', formula: 'fixed:2', resetOn: 'short', source: 'class', startLevel: 2 },
+    ],
   },
   {
     name: 'Fighter',
@@ -832,6 +845,11 @@ const SRD_CLASSES_DATA = [
     skillCount: 2,
     skillOptions: ['acrobatics', 'animal-handling', 'athletics', 'history', 'insight', 'intimidation', 'perception', 'survival'],
     subclassLevel: 3,
+    resources: [
+      { id: 'second_wind', name: 'Second Wind', icon: 'heart-pulse', formula: 'fixed:1', resetOn: 'short', source: 'class' },
+      { id: 'action_surge', name: 'Action Surge', icon: 'zap', formula: '[LVL:2:1,17:2]', resetOn: 'short', source: 'class' },
+      { id: 'indomitable', name: 'Indomitable', icon: 'shield', formula: '[LVL:9:1,13:2,17:3]', resetOn: 'long', source: 'class' },
+    ],
   },
   {
     name: 'Monk',
@@ -843,6 +861,9 @@ const SRD_CLASSES_DATA = [
     skillCount: 2,
     skillOptions: ['acrobatics', 'athletics', 'history', 'insight', 'religion', 'stealth'],
     subclassLevel: 3,
+    resources: [
+      { id: 'focus_points', name: 'Focus Points', icon: 'diamond-plus', formula: '[LVL]', resetOn: 'short', source: 'class', startLevel: 2 },
+    ],
   },
   {
     name: 'Paladin',
@@ -854,6 +875,10 @@ const SRD_CLASSES_DATA = [
     skillCount: 2,
     skillOptions: ['athletics', 'insight', 'intimidation', 'medicine', 'persuasion', 'religion'],
     subclassLevel: 3,
+    resources: [
+      { id: 'channel_divinity', name: 'Channel Divinity', icon: 'sun', formula: '[LVL:1:0,3:2,11:3]', resetOn: 'short', source: 'class' },
+      { id: 'lay_on_hands', name: 'Lay on Hands', icon: 'hand-heart', formula: '[LVL*5]', resetOn: 'long', source: 'class', isPool: true },
+    ],
   },
   {
     name: 'Ranger',
@@ -865,6 +890,9 @@ const SRD_CLASSES_DATA = [
     skillCount: 3,
     skillOptions: ['animal-handling', 'athletics', 'insight', 'investigation', 'nature', 'perception', 'stealth', 'survival'],
     subclassLevel: 3,
+    resources: [
+      { id: 'favored_enemy', name: 'Favored Enemy', icon: 'target', formula: '[LVL:1:2,5:3,9:4,13:5,17:6]', resetOn: 'long', source: 'class' },
+    ],
   },
   {
     name: 'Rogue',
@@ -876,6 +904,7 @@ const SRD_CLASSES_DATA = [
     skillCount: 4,
     skillOptions: ['acrobatics', 'athletics', 'deception', 'insight', 'intimidation', 'investigation', 'perception', 'persuasion', 'sleight-of-hand', 'stealth'],
     subclassLevel: 3,
+    resources: [],
   },
   {
     name: 'Sorcerer',
@@ -887,6 +916,10 @@ const SRD_CLASSES_DATA = [
     skillCount: 2,
     skillOptions: ['arcana', 'deception', 'insight', 'intimidation', 'nature', 'persuasion', 'religion'],
     subclassLevel: 1,
+    resources: [
+      { id: 'innate_sorcery', name: 'Innate Sorcery', icon: 'star', formula: '[LVL:1:1,7:2]', resetOn: 'long', source: 'class' },
+      { id: 'sorcery_points', name: 'Sorcery Points', icon: 'sparkles', formula: '[LVL]', resetOn: 'long', source: 'class', startLevel: 2 },
+    ],
   },
   {
     name: 'Warlock',
@@ -898,6 +931,9 @@ const SRD_CLASSES_DATA = [
     skillCount: 2,
     skillOptions: ['arcana', 'deception', 'history', 'intimidation', 'investigation', 'nature', 'religion'],
     subclassLevel: 1,
+    resources: [
+      { id: 'magical_cunning', name: 'Magical Cunning', icon: 'eye', formula: 'fixed:1', resetOn: 'long', source: 'class', startLevel: 2 },
+    ],
   },
   {
     name: 'Wizard',
@@ -909,6 +945,9 @@ const SRD_CLASSES_DATA = [
     skillCount: 2,
     skillOptions: ['arcana', 'history', 'insight', 'investigation', 'medicine', 'religion'],
     subclassLevel: 3,
+    resources: [
+      { id: 'arcane_recovery', name: 'Arcane Recovery', icon: 'sparkles', formula: 'fixed:1', resetOn: 'long', source: 'class' },
+    ],
   },
 ];
 

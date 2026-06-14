@@ -10,6 +10,8 @@ import {
   Target, Crosshair, Activity, ShoppingBag,
   Snowflake, Droplets, Droplet, Wind, Frown, CircleDot,
   Bandage, Cloud, Leaf, Circle,
+  PawPrint, HeartPulse, HandHeart, Layers,
+  Music, DiamondPlus,
 } from 'lucide-react';
 
 // ── Context ─────────────────────────────────────────────────────────────────
@@ -72,6 +74,7 @@ export const ICON_MAP = {
   'widget.currency':    { emoji: '💰', lucide: ShoppingBag,  label: 'Currency'     },
   'widget.notes':       { emoji: '📝', lucide: StickyNote,   gameIcon: 'scroll-unfurled', label: 'Notes'        },
   'widget.inspiration': { emoji: '⭐', lucide: Star,         label: 'Inspiration'  },
+  'widget.resources':   { emoji: '♦',  lucide: Layers,       label: 'Resources'    },
   'widget.deathSaves':  { emoji: '💀', lucide: Skull,        gameIcon: 'skulls',           label: 'Death Saves'  },
   'widget.spellSlots':  { emoji: '🔥', lucide: Flame,        gameIcon: 'burning-meteor',   label: 'Spell Slots'  },
   'widget.spellStats':  { emoji: '✨', lucide: Sparkles,     label: 'Spell Stats'  },
@@ -125,6 +128,21 @@ export const ICON_MAP = {
   'cond.restrained':    { emoji: '⛓️',  lucide: Link,          label: 'Restrained'    },
   'cond.stunned':       { emoji: '⭐',  lucide: Sparkles,      label: 'Stunned'       },
   'cond.unconscious':   { emoji: '💤',  lucide: Moon,          label: 'Unconscious'   },
+
+  // ── Resources ─────────────────────────────────────────────────────────────
+  'resource.sparkles':      { emoji: '✨', lucide: Sparkles,    label: 'Sparkles'     },
+  'resource.flame':         { emoji: '🔥', lucide: Flame,       label: 'Flame'        },
+  'resource.zap':           { emoji: '⚡', lucide: Zap,         label: 'Zap'          },
+  'resource.sun':           { emoji: '☀',  lucide: Sun,         label: 'Sun'          },
+  'resource.eye':           { emoji: '👁',  lucide: Eye,         label: 'Eye'          },
+  'resource.paw-print':     { emoji: '🐾', lucide: PawPrint,    label: 'Paw Print'    },
+  'resource.heart-pulse':   { emoji: '💗', lucide: HeartPulse,  label: 'Heart Pulse'  },
+  'resource.hand-heart':    { emoji: '🤲', lucide: HandHeart,   label: 'Hand Heart'   },
+  'resource.music':         { emoji: '🎵', lucide: Music,       label: 'Music'        },
+  'resource.shield':        { emoji: '🛡',  lucide: Shield,      label: 'Shield'       },
+  'resource.target':        { emoji: '🎯', lucide: Target,      label: 'Target'       },
+  'resource.star':          { emoji: '⭐', lucide: Star,        label: 'Star'         },
+  'resource.diamond-plus':  { emoji: '◈',  lucide: DiamondPlus, label: 'Diamond Plus' },
 
   // ── Misc ──────────────────────────────────────────────────────────────────
   'misc.kofi':     { emoji: '☕', lucide: Coffee,       label: 'Support'   },
