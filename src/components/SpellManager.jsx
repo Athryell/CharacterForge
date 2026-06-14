@@ -1,6 +1,6 @@
 ﻿import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SCHOOLS, SPELL_CLASSES, filterSpells } from '../data/systems/dnd5e/spells';
+import { SCHOOLS, SPELL_CLASSES, filterSpells } from '../data/systems/dnd5e2024/spells';
 import dataManager from '../data/dataManager';
 import { TagPill, TagSelector, TagFilterBar } from './Tags';
 import { KeywordText } from './Tooltip';

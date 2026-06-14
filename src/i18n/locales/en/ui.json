@@ -47,7 +47,7 @@
   },
   "system": {
     "selector": "Game System",
-    "dnd5e": "D&D 5.5e 2024",
+    "dnd5e2024": "D&D 5.5e 2024",
     "daggerheart": "Daggerheart"
   },
   "nav": {
@@ -56,7 +56,9 @@
     "import": "⬆ Import",
     "layout": "⠿ Layout",
     "layoutDone": "✓ Done",
-    "reset": "↺ Reset"
+    "reset": "↺ Reset",
+    "mainNav": "Main navigation",
+    "more": "More"
   },
   "tabs": {
     "main": "Character",
@@ -76,6 +78,7 @@
     "hp": "Hit Points",
     "combatStats": "Combat Stats",
     "inspiration": "Inspiration",
+    "resources": "Resources",
     "deathSaves": "Death Saving Throws",
     "conditions": "Conditions",
     "actions": "Actions",
@@ -356,6 +359,7 @@
     "lvlHelp": "scales with level",
     "bonusHelp": "to add bonus",
     "counterHelp": "creates clickable counter",
+    "countHelp": "dynamic counter (size from formula)",
     "dynamicHint": "Hover ≈ to see the original formula",
     "group": {
       "dice": "Dice",
@@ -474,6 +478,40 @@
     "overrideAC": "Override",
     "dexBonus": "DEX bonus: {{effective}} (max +{{max}})"
   },
+  "resources": {
+    "title": "Resources",
+    "editBtn": "✏ Edit",
+    "addBtn": "Add resource",
+    "nameLabel": "Name",
+    "iconLabel": "Icon",
+    "maxLabel": "Maximum",
+    "maxFormula": "Formula (e.g. [CHA], [PRO], [LVL])",
+    "resetLabel": "Resets on",
+    "resetNone": "Never",
+    "resetShort": "Short Rest",
+    "resetLong": "Long Rest",
+    "pinLabel": "Pin to top bar",
+    "removeBtn": "Remove",
+    "classResource": "class resource",
+    "bardic_inspiration": "Bardic Inspiration",
+    "ki_points": "Ki Points",
+    "sorcery_points": "Sorcery Points",
+    "wild_shape": "Wild Shape",
+    "action_surge": "Action Surge",
+    "second_wind": "Second Wind",
+    "rage": "Rage",
+    "lay_on_hands": "Lay on Hands",
+    "channel_divinity": "Channel Divinity",
+    "eldritch_invocations": "Eldritch Invocations",
+    "divine_sense": "Divine Sense",
+    "arcane_recovery": "Arcane Recovery",
+    "focus_points": "Focus Points",
+    "indomitable": "Indomitable",
+    "innate_sorcery": "Innate Sorcery",
+    "magical_cunning": "Magical Cunning",
+    "favored_enemy": "Favored Enemy",
+    "bardInspirationShortRest": "Bardic Inspiration now recharges on a Short Rest!"
+  },
   "conditions": {
     "title": "Conditions",
     "remove": "Remove condition",
@@ -561,7 +599,7 @@
     "italian": "Italiano",
     "english": "English",
     "system": "System",
-    "dnd5e": "D&D 5e / 2024",
+    "dnd5e2024": "D&D 5e / 2024",
     "custom": "Custom"
   },
   "creator": {
@@ -1072,7 +1110,8 @@
     "asiPlus2": "+2 to one ability",
     "asiPlus1": "+1 to two abilities",
     "spellsToLearn": "Choose {{count}} spell(s) to learn",
-    "newSpeciesSpell": "New species spell: {{name}} ({{level}}, always prepared)"
+    "newSpeciesSpell": "New species spell: {{name}} ({{level}}, always prepared)",
+    "chooseProgress": "{{picked}}/{{total}} selected"
   },
   "levelDown": {
     "title": "Go back to level {{level}}?",

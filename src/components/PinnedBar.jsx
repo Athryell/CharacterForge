@@ -1,7 +1,18 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Icon, useIconMode } from '../config/icons';
+import { Icon, ICON_MAP, useIconMode } from '../config/icons';
 import { useUnits } from '../hooks/useUnits';
+
+const DICE_ICONS = ['d4','d6','d8','d10','d12','d20'];
+
+function ResourceIcon({ icon, size = 13 }) {
+  const { iconMode } = useIconMode();
+  if (DICE_ICONS.includes(icon)) return <span className="resource-dice-icon">{icon}</span>;
+  const entry = ICON_MAP[`resource.${icon}`];
+  if (!entry || iconMode === 'none') return null;
+  if (iconMode === 'lucide' && entry.lucide) { const L = entry.lucide; return <L size={size} />; }
+  return <span>{entry.emoji}</span>;
+}
 
 const PINNABLE_DND = [
   { id: 'hp',            labelKey: 'pinned.hp' },
@@ -32,11 +43,13 @@ export function savePinned(pinned) {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(pinned)); } catch {}
 }
 
-export default function PinnedBar({ state, editMode, pinned, onTogglePin, onUpdate, system, onShortRest, onLongRest }) {
+export default function PinnedBar({ state, editMode, pinned, onTogglePin, onUpdate, system, onShortRest, onLongRest, onToggleResourcePip }) {
   const { t } = useTranslation();
   const { iconMode } = useIconMode();
-  const showRestBtns = !editMode && system === 'dnd5e';
-  if (!editMode && pinned.length === 0 && !showRestBtns) return null;
+  const showRestBtns = !editMode && system === 'dnd5e2024';
+  const pinnedResources = (state?.resources || []).filter(r => r.pinned);
+
+  if (!editMode && pinned.length === 0 && !showRestBtns && pinnedResources.length === 0) return null;
 
   const PINNABLE = system === 'daggerheart' ? PINNABLE_DH : PINNABLE_DND;
   const items = editMode ? PINNABLE : PINNABLE.filter(p => pinned.includes(p.id));
@@ -62,17 +75,35 @@ export default function PinnedBar({ state, editMode, pinned, onTogglePin, onUpda
           </div>
         );
       })}
+      {/* Pinned resources (from resource tracker widget) */}
+      {pinnedResources.map(r => (
+        <div key={r.id} className="pin-item">
+          <span className="pin-content">
+            <ResourceIcon icon={r.icon} size={13} />
+            {' '}
+            {r.isPool ? (
+              <span>{r.current}/{r.max}</span>
+            ) : (
+              Array.from({ length: r.max }).map((_, i) => (
+                <span key={i}
+                  className={`pin-pip${i < r.current ? ' on' : ''}`}
+                  onClick={() => onToggleResourcePip?.(r.id, i)} />
+              ))
+            )}
+          </span>
+        </div>
+      ))}
       {showRestBtns && (
         <div className="pinned-rest-group">
-          <button className="pinned-rest-btn" onClick={onShortRest}>
+          <button className="pinned-rest-btn" onClick={onShortRest} aria-label={t('rest.short')} title={t('rest.short')}>
             <Icon id="game.shortRest" size={13} />
             <span className="rest-label">{t('rest.short')}</span>
-            {iconMode === 'none' && <span className="rest-abbr">SR</span>}
+            <span className="rest-abbr">SR</span>
           </button>
-          <button className="pinned-rest-btn primary" onClick={onLongRest}>
+          <button className="pinned-rest-btn primary" onClick={onLongRest} aria-label={t('rest.long')} title={t('rest.long')}>
             <Icon id="game.longRest" size={13} />
             <span className="rest-label">{t('rest.long')}</span>
-            {iconMode === 'none' && <span className="rest-abbr">LR</span>}
+            <span className="rest-abbr">LR</span>
           </button>
         </div>
       )}

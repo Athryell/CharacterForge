@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import {
   createDefaultState, getMod, getProfBonus, fmtMod,
   SPELLCASTING_CLASS, HIT_DICE, SLOT_TABLE, SKILLS, JSON_SCHEMA_VERSION,
-} from '../data/systems/dnd5e/mechanics';
+} from '../data/systems/dnd5e2024/mechanics';
 import { saveCharState, loadCharState } from '../chars';
 const LEGACY_KEY = 'characterforge_state';
 

@@ -9,7 +9,7 @@ export const WIDGET_DEFS = [
   { id: 'senses',        label: 'widgets.senses',        defaultTab: 'main',      defaultCol: 0, defaultFullWidth: true  },
   { id: 'hp',            label: 'widgets.hp',            defaultTab: 'combat',    defaultCol: 0, defaultFullWidth: true  },
   { id: 'combatStats',   label: 'widgets.combatStats',   defaultTab: 'combat',    defaultCol: 0, defaultFullWidth: true  },
-  { id: 'inspiration',   label: 'widgets.inspiration',   defaultTab: 'combat',    defaultCol: 0, defaultFullWidth: false },
+  { id: 'resources',     label: 'widgets.resources',     defaultTab: 'combat',    defaultCol: 0, defaultFullWidth: false },
   { id: 'deathSaves',    label: 'widgets.deathSaves',    defaultTab: 'combat',    defaultCol: 0, defaultFullWidth: false },
   { id: 'conditions',    label: 'widgets.conditions',    defaultTab: 'combat',    defaultCol: 1, defaultFullWidth: false },
   { id: 'actions',       label: 'widgets.actions',       defaultTab: 'combat',    defaultCol: 0, defaultFullWidth: true,  defaultBottomFull: true },
@@ -40,8 +40,10 @@ const TAB_STORAGE    = 'characterforge_tabs';
 
 export function loadLayout() {
   try {
-    const saved = JSON.parse(localStorage.getItem(WIDGET_STORAGE));
+    let saved = JSON.parse(localStorage.getItem(WIDGET_STORAGE));
     if (saved && Array.isArray(saved)) {
+      // Migrate: rename 'inspiration' widget → 'resources'
+      saved = saved.map(w => w.id === 'inspiration' ? { ...w, id: 'resources' } : w);
       const savedIds = new Set(saved.map(w => w.id));
       const newWidgets = WIDGET_DEFS
         .filter(w => !savedIds.has(w.id))

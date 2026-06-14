@@ -86,6 +86,36 @@ export function fmtMod(n) {
   return n >= 0 ? '+' + n : '' + n;
 }
 
+export function resolveResourceFormula(formula, abilities, charLevel, profBonus) {
+  if (!formula) return 1;
+  if (formula.startsWith('fixed:')) return parseInt(formula.split(':')[1]) || 1;
+  if (formula === '[LVL]') return charLevel;
+  if (formula === '[LVL/2]') return Math.max(1, Math.floor(charLevel / 2));
+  if (formula === '[LVL*5]') return charLevel * 5;
+  if (formula === '[PRO]') return profBonus;
+  // [LVL:t:v,...] pattern — returns value for highest threshold met, 0 if below all thresholds
+  if (formula.startsWith('[LVL:')) {
+    const inner = formula.slice(5, -1);
+    const pairs = inner.split(',').map(p => { const [t, v] = p.split(':'); return [parseInt(t), parseInt(v)]; });
+    let result = 0;
+    for (const [t, v] of pairs) { if (charLevel >= t) result = v; }
+    return result;
+  }
+  // [ATTR+N] pattern — e.g. [CHA+1] = max(1, mod + 1)
+  const attrPlusMatch = formula.match(/^\[(STR|DEX|CON|INT|WIS|CHA)\+(\d+)\]$/);
+  if (attrPlusMatch) {
+    const mod = Math.floor(((abilities[attrPlusMatch[1]] || 10) - 10) / 2);
+    return Math.max(1, mod + parseInt(attrPlusMatch[2]));
+  }
+  // [ATTR] pattern — e.g. [CHA] = max(1, mod)
+  const attrMatch = formula.match(/^\[(STR|DEX|CON|INT|WIS|CHA)\]$/);
+  if (attrMatch) {
+    const mod = Math.floor(((abilities[attrMatch[1]] || 10) - 10) / 2);
+    return Math.max(1, mod);
+  }
+  return 1;
+}
+
 export function createDefaultState() {
   return {
     schemaVersion: JSON_SCHEMA_VERSION,
@@ -139,5 +169,6 @@ export function createDefaultState() {
     speciesLegacy: null,
     speciesSpellStat: 'INT',
     resistances: [],
+    resources: [],
   };
 }

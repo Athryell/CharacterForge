@@ -1,11 +1,11 @@
 ﻿import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Icon } from '../../config/icons';
-import { ABILITIES, SKILLS, HIT_DICE, SPELLCASTING_CLASS } from '../../data/systems/dnd5e/mechanics';
+import { ABILITIES, SKILLS, HIT_DICE, SPELLCASTING_CLASS } from '../../data/systems/dnd5e2024/mechanics';
 import AlignmentPicker from '../AlignmentPicker';
-import { CLASS_FEATURES, CLASS_SAVE_PROFS, CLASS_SKILL_COUNT, CLASS_SKILL_OPTIONS } from '../../data/systems/dnd5e/classes';
-import { SPECIES_FEATURES, getAutoFeatures, getSpeciesData } from '../../data/systems/dnd5e/species';
-import { BACKGROUND_FEATURES } from '../../data/systems/dnd5e/backgrounds';
+import { CLASS_FEATURES, CLASS_SAVE_PROFS, CLASS_SKILL_COUNT, CLASS_SKILL_OPTIONS } from '../../data/systems/dnd5e2024/classes';
+import { SPECIES_FEATURES, getAutoFeatures, getSpeciesData } from '../../data/systems/dnd5e2024/species';
+import { BACKGROUND_FEATURES } from '../../data/systems/dnd5e2024/backgrounds';
 import dataManager from '../../data/dataManager';
 
 // SRD 5.5e (2024) — specie: solo tratti, nessun bonus caratteristica
@@ -271,7 +271,7 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
     }
 
     return {
-      system: 'dnd5e',
+      system: 'dnd5e2024',
       charName: data.charName,
       charClass: selectedCls,
       charRace: data.charRace === CUSTOM_SENTINEL ? data.customSpecies : data.charRace,
@@ -1042,7 +1042,7 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
             <button className={`io-btn primary ${!canNextStep ? 'disabled' : ''}`}
               onClick={() => canNextStep && setStep(s => s + 1)}>{t('creator.next')}</button>
           ) : (
-            <button className="io-btn primary" onClick={() => { window.umami?.track('character-created', { system: 'dnd5e', class: data.charClass }); onComplete(buildFinalState()); }}>{t('creator.create')}</button>
+            <button className="io-btn primary" onClick={() => { window.umami?.track('character-created', { system: 'dnd5e2024', class: data.charClass }); onComplete(buildFinalState()); }}>{t('creator.create')}</button>
           )}
         </div>
       </div>

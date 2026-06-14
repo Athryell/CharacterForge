@@ -1,12 +1,12 @@
 // Registry of supported game systems
 export const SYSTEMS = [
   {
-    id: 'dnd5e',
+    id: 'dnd5e2024',
     name: 'D&D 5.5e 2024',
     shortName: 'D&D 5e',
     description: 'Dungeons & Dragons 5th Edition (2024)',
     icon: '⚔',
-    defaultLayoutKey: 'dnd5e',
+    defaultLayoutKey: 'dnd5e2024',
   },
   {
     id: 'daggerheart',
@@ -18,7 +18,7 @@ export const SYSTEMS = [
   },
 ];
 
-export const DEFAULT_SYSTEM = 'dnd5e';
+export const DEFAULT_SYSTEM = 'dnd5e2024';
 
 export function getSystem(id) {
   return SYSTEMS.find(s => s.id === id) || SYSTEMS[0];

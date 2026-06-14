@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DND_CONDITIONS as CONDITIONS } from '../data/systems/dnd5e/conditions';
+import { DND_CONDITIONS as CONDITIONS } from '../data/systems/dnd5e2024/conditions';
 import { Icon, useIconMode, EMOJI_TO_LUCIDE } from '../config/icons';
 import { useUnits } from '../hooks/useUnits';
 
