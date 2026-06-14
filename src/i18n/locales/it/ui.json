@@ -251,8 +251,9 @@
     "filterAllLevels": "All levels",
     "filterAllSchools": "All schools",
     "filterAllClasses": "All classes",
-    "foundSingular": "{{count}} spell found",
-    "foundPlural": "{{count}} spells found",
+    "foundSingular": "{{count}} spell trovato",
+    "foundPlural": "{{count}} spell trovati",
+    "foundZeroClass": "Nessun incantesimo trovato per il {{class}}",
     "noSpells": "No spells. Click ＋ SRD to browse or ✏ to add a custom one.",
     "concentration": "Concentration",
     "ritual": "Ritual",
@@ -285,7 +286,7 @@
     "browseTitle": "🔍 Browse SRD",
     "customFormTitle": "✏ Custom spell",
     "castSlot": "Slot Lv. {{level}}",
-    "noSpells2": "No spells. Click ＋ to add one.",
+    "noSpells2": "Nessun incantesimo aggiunto. Clicca \"+\" per aggiungerne uno.",
     "descEditLabel": "Description",
     "alwaysPrepared": "Always prepared",
     "filterLevel": "Livello",
@@ -334,7 +335,7 @@
     "nameEditLabel": "Name",
     "descEditLabel": "Description",
     "descAddPlaceholder": "E.g. Heals 2d4+2 HP. (@ for bonuses)",
-    "empty2": "No items. Enable ✏ mode and click \"+ Add item\".",
+    "empty2": "Nessun oggetto aggiunto. Clicca \"+\" per aggiungerne uno.",
     "carried": "Carried weight",
     "coinWeight": "(incl. {{n}} {{unit}} from coins)"
   },
@@ -447,7 +448,8 @@
     }
   },
   "weapons": {
-    "noWeapons": "No weapons added. Click \"+\" to add one.",
+    "noWeapons": "Nessuna arma aggiunta. Clicca \"+\" per aggiungerne una.",
+    "noArmor": "Nessuna armatura aggiunta. Clicca \"+\" per aggiungerne una.",
     "addBtn": "+ Add weapon",
     "presetSRD": "SRD Preset",
     "custom": "Custom",
@@ -485,6 +487,29 @@
     "presetDmg1h": "damage (1 hand): {{dmg}}+[STR]",
     "presetDmg2h": "damage (2 hands): {{dmg}}+[STR]",
     "presetFinesseNote": "This weapon uses Strength by default. You can also use Dexterity (edit the weapon stat from STR to DEX)."
+  },
+  "armor": {
+    "nameLabel": "Nome",
+    "shieldNamePlaceholder": "Es. Scudo di legno",
+    "armorNamePlaceholder": "Es. Corazza di mithral",
+    "typeLabel": "Tipo",
+    "typeArmor": "Armatura",
+    "typeShield": "Scudo",
+    "armorTypeLabel": "Categoria",
+    "acBonusLabel": "Bonus CA",
+    "acTotalLabel": "CA base",
+    "descPlaceholder": "Es. Richiede competenza in armature pesanti...",
+    "proficiencyLabel": "Competenza:",
+    "proficiencyPlaceholder": "Es. Armature leggere, medie, pesanti, scudi...",
+    "equip": "Indossa",
+    "unequip": "Rimuovi",
+    "strReq": "FOR {{val}}+",
+    "strReqNotMet": "Requisito di Forza non soddisfatto — Velocità −{{penalty}}",
+    "noDex": "No DES",
+    "maxDex": "DES +{{val}} max",
+    "calculatedAC": "Calcolata dall'armatura equipaggiata",
+    "overrideAC": "Modifica",
+    "dexBonus": "Bonus DES: {{effective}} (max +{{max}})"
   },
   "conditions": {
     "title": "Condizioni",
@@ -649,7 +674,14 @@
     "customSpeciesTraits": "Species traits",
     "customSpeciesAddTrait": "+ Add trait",
     "customSpeciesTraitName": "Trait name",
-    "customSpeciesTraitDesc": "Description"
+    "customSpeciesTraitDesc": "Description",
+    "chooseLineage": "Scegli il tuo {{lineageLabel}}",
+    "lineageSpellStat": "Caratteristica incantatore per gli incantesimi di lignaggio:",
+    "speciesSpells": "Incantesimi di specie",
+    "speciesSpellAlways": "sempre",
+    "speciesSpellAtLevel": "al livello {{level}}",
+    "tieflingFixedNote": "Tutti i Tiefling conoscono Thaumaturgy indipendentemente dal lignaggio.",
+    "lineageLevel1Trait": "Livello 1:"
   },
   "common": {
     "edit": "Edit",
@@ -900,6 +932,11 @@
       "psychic": "Psychic",
       "force": "Force"
     },
+    "armorTypes": {
+      "light": "Leggera",
+      "medium": "Media",
+      "heavy": "Pesante"
+    },
     "stats": {
       "AC": "Armor Class (AC)",
       "INIT": "Initiative",
@@ -1083,7 +1120,8 @@
     "epicBoonRecommended": "Boon of Combat Prowess recommended",
     "asiPlus2": "+2 to one ability",
     "asiPlus1": "+1 to two abilities",
-    "spellsToLearn": "Choose {{count}} spell(s) to learn"
+    "spellsToLearn": "Choose {{count}} spell(s) to learn",
+    "newSpeciesSpell": "Nuovo incantesimo di specie: {{name}} ({{level}}, sempre preparato)"
   },
   "levelDown": {
     "title": "Go back to level {{level}}?",
