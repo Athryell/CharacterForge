@@ -27,6 +27,32 @@ No test suite. No linter script — ESLint runs via react-scripts.
 - Font: Cinzel (display/label) + Crimson Pro (body) — Google Fonts
 - Analytics: `window.umami?.track(event, payload)` — optional chaining, no crash se bloccato
 
+## Units & measurements — REGOLA OBBLIGATORIA
+
+L'app supporta tre sistemi di misura per velocità/distanza, configurabili nei Settings:
+- `ft` — piedi (default D&D)
+- `m` — metri
+- `sq` — squares (quadrati, simbolo `□`)
+
+`useUnits()` (da `src/hooks/useUnits.js`) espone:
+- `speedUnit` — `'ft' | 'm' | 'sq'`
+- `toDisplaySpeed(valueFt)` — converte da piedi al sistema scelto (arrotondato)
+- `fromDisplaySpeed(displayVal)` — inverso
+- `weightUnit` — `'kg' | 'lbs'`
+- `toDisplayWeight(valueKg)` — converte il peso
+
+**Quando scrivi qualsiasi stringa che include velocità o distanza (penalità alla velocità, gittate, range, ecc.):**
+1. Non hardcodare mai "10 ft", "5 ft", "30 ft" come testo statico.
+2. Usa `toDisplaySpeed(valueFt)` per il numero e `speedUnit === 'sq' ? '□' : speedUnit` per l'unità.
+3. Nelle chiavi i18n usa interpolazione `{{penalty}}` e calcola il valore lato componente o App.jsx.
+4. I componenti che non hanno accesso a `useUnits` ricevono la stringa già formattata come prop da App.jsx.
+
+Esempio pattern corretto in App.jsx:
+```js
+const strPenaltyText = `${toDisplaySpeed(10)} ${speedUnit === 'sq' ? '□' : speedUnit}`;
+// poi passato come prop: strPenaltyText={strPenaltyText}
+```
+
 ## Architecture
 
 ### Multi-character storage — `src/chars.js`

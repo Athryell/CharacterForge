@@ -2,6 +2,7 @@
 import { useTranslation } from 'react-i18next';
 import { DND_CLASSES, SUBCLASS_DATA } from '../data/systems/dnd5e/classes';
 import { ABILITIES } from '../data/systems/dnd5e/mechanics';
+import { getSpeciesData } from '../data/systems/dnd5e/species';
 import { Icon } from '../config/icons';
 
 const ABILITY_LABELS = { STR: 'STR', DEX: 'DEX', CON: 'CON', INT: 'INT', WIS: 'WIS', CHA: 'CHA' };
@@ -45,18 +46,31 @@ export default function LevelUpModal({ currentLevel, charClass, charState, onCom
   }, [ld, subclassLevelFeatures, customSubclassFeatures]);
   const choiceFeatures = useMemo(() => (ld.features || []).filter(f => !f.auto), [ld]);
   const isSpellcaster = !!classData?.spellcasting;
+
+  // Species spells that unlock at this level
+  const newSpeciesSpells = useMemo(() => {
+    const speciesData = charState.charRace ? getSpeciesData(charState.charRace) : null;
+    if (!speciesData?.legacies && !speciesData?.fixedSpells) return [];
+    const chosenLegacy = speciesData?.legacies?.find(l => l.id === charState.speciesLegacy);
+    const allSpeciesSpells = [
+      ...(speciesData?.fixedSpells || []),
+      ...(chosenLegacy?.spells || []),
+    ];
+    const existing = new Set((charState.spells || []).map(s => s.name));
+    return allSpeciesSpells.filter(s => s.unlockLevel === targetLevel && !existing.has(s.name));
+  }, [charState.charRace, charState.speciesLegacy, charState.spells, targetLevel]);
   const spellsToLearn = ld.spellsToLearn || 0;
 
   // Build step list, skipping empty steps
   const STEPS = useMemo(() => {
     const s = ['hp'];
-    if (autoFeatures.length > 0) s.push('features');
+    if (autoFeatures.length > 0 || newSpeciesSpells.length > 0) s.push('features');
     if (choiceFeatures.length > 0) s.push('choices');
     if (ld.asi || ld.epicBoon) s.push('asi');
     if (isSpellcaster && spellsToLearn > 0) s.push('spells');
     s.push('summary');
     return s;
-  }, [autoFeatures.length, choiceFeatures.length, ld.asi, ld.epicBoon, isSpellcaster, spellsToLearn]);
+  }, [autoFeatures.length, choiceFeatures.length, ld.asi, ld.epicBoon, isSpellcaster, spellsToLearn, newSpeciesSpells.length]);
 
   const STEP_LABELS = {
     hp: t('levelUp.stepHp'),
@@ -136,11 +150,29 @@ export default function LevelUpModal({ currentLevel, charClass, charState, onCom
       epicBoonObj = epicBoonName;
     }
 
-    return { hpGained, features, spells: [], asi: asiObj, feat: featObj, epicBoon: epicBoonObj };
+    const speciesData = charState.charRace ? getSpeciesData(charState.charRace) : null;
+    const chosenLegacy = speciesData?.legacies?.find(l => l.id === charState.speciesLegacy);
+    const speciesDisplayName = charState.charRace
+      ? charState.charRace.charAt(0).toUpperCase() + charState.charRace.slice(1)
+      : '';
+    const spellsGained = newSpeciesSpells.map(s => ({
+      name: s.name,
+      level: s.level,
+      prepared: true,
+      alwaysPrepared: true,
+      source: 'species',
+      sourceLabel: chosenLegacy
+        ? `${speciesDisplayName} (${chosenLegacy.name})`
+        : speciesDisplayName,
+      spellStat: charState.speciesSpellStat || 'INT',
+      acquiredAtLevel: targetLevel,
+    }));
+
+    return { hpGained, features, spells: spellsGained, asi: asiObj, feat: featObj, epicBoon: epicBoonObj };
   }
 
   const changes = useMemo(buildChanges, // eslint-disable-next-line react-hooks/exhaustive-deps
-    [hpGained, autoFeatures, choiceFeatures, choices, asiType, asiMode, asiPlus2, asiPlus1A, asiPlus1B, featName, epicBoonName, ld, subclassName]);
+    [hpGained, autoFeatures, choiceFeatures, choices, asiType, asiMode, asiPlus2, asiPlus1A, asiPlus1B, featName, epicBoonName, ld, subclassName, newSpeciesSpells]);
 
   function handleComplete() {
     window.umami?.track('level-up', { class: charClass, level: targetLevel });
@@ -205,6 +237,26 @@ export default function LevelUpModal({ currentLevel, charClass, charState, onCom
                   <ExpandableFeature key={i} feature={f} noted={t('levelUp.noted')} subclass={f._subclass} />
                 ))}
               </div>
+              {newSpeciesSpells.length > 0 && (
+                <div style={{ marginTop: autoFeatures.length > 0 ? 12 : 0 }}>
+                  {autoFeatures.length > 0 && (
+                    <div style={{ fontWeight: 600, fontSize: '0.8rem', color: 'var(--c-muted)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      {t('creator.speciesSpells')}
+                    </div>
+                  )}
+                  {newSpeciesSpells.map(s => {
+                    const lvlLabel = s.level === 0 ? 'cantrip' : ['','1st','2nd','3rd'][s.level] + ' level';
+                    return (
+                      <div key={s.name} className="feature-item expanded">
+                        <div className="feature-source-dot" style={{ background: 'var(--c-accent-light)', border: '1.5px solid var(--c-accent)' }} />
+                        <div style={{ flex: 1, fontSize: '0.867rem' }}>
+                          {t('levelUp.newSpeciesSpell', { name: s.name, level: lvlLabel })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 

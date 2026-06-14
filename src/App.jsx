@@ -18,7 +18,7 @@ import LevelDownModal from './components/LevelDownModal';
 import ConditionTracker from './components/ConditionTracker';
 import WeaponManager from './components/WeaponManager';
 import ArmorManager from './components/ArmorManager';
-import { calcArmorAC } from './data/systems/dnd5e/armors';
+import { calcArmorAC, DND_ARMOR_PRESETS } from './data/systems/dnd5e/armors';
 import TabBar from './components/TabBar';
 import SpellManager from './components/SpellManager';
 import InventoryManager from './components/InventoryManager';
@@ -42,6 +42,7 @@ import { useTheme, ACCENT_PRESETS } from './hooks/useTheme';
 import { useUnits, parseSpeedFt } from './hooks/useUnits';
 import { useAccessibility } from './hooks/useAccessibility';
 import { Icon, useIconMode } from './config/icons';
+import { Shield as ShieldIcon } from 'lucide-react';
 import './App.css';
 
 
@@ -384,10 +385,10 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
   const [addOpenFor, setAddOpenFor] = useState(null);
   const [homebrewVersion, setHomebrewVersion] = useState(0);
   const [showSources, setShowSources] = useState(false);
-  const [speedInputVal, setSpeedInputVal] = useState(null);
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [showLevelDown, setShowLevelDown] = useState(false);
   const [concentrationCheck, setConcentrationCheck] = useState(null);
+  const [editingCombat, setEditingCombat] = useState(false);
   const { mode: themeMode, accentId, setThemeMode, setAccent } = useTheme();
   const { iconMode, setIconMode, iconAccent, setIconAccent } = useIconMode();
   const { weightUnit, speedUnit, setPref: setUnitPref, toDisplayWeight, toDisplaySpeed, fromDisplaySpeed } = useUnits();
@@ -488,6 +489,34 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
     ABILITIES.forEach(attr => { result[attr] = (state.abilities[attr] || 10) + (equipBonuses[attr] || 0); });
     return result;
   }, [state.abilities, equipBonuses]);
+
+  const acDerivedData = useMemo(() => {
+    const dexMod = getMod(effectiveAbilities.DEX);
+    const armors = activeSystem === 'dnd5e' ? (state.armors || []) : [];
+    const ea = armors.find(a => a.type === 'armor' && a.equipped);
+    const preset = ea?.presetId ? DND_ARMOR_PRESETS.find(p => p.id === ea.presetId) : null;
+    const dexContrib = preset
+      ? (preset.type === 'heavy' ? 0 : Math.min(dexMod, preset.maxDex ?? 100))
+      : ea
+        ? (ea.armorType === 'heavy' ? 0 : ea.armorType === 'medium' ? Math.min(dexMod, 2) : dexMod)
+        : dexMod;
+    const shields = armors.filter(a => a.type === 'shield' && a.equipped);
+    const shieldBonus = shields.reduce((s, sh) => s + (sh.acValue || 2), 0);
+    return { dexContrib, shieldBonus, hasShield: shields.length > 0, preset, ea, shields };
+  }, [state.armors, effectiveAbilities, activeSystem]);
+
+  // STR speed penalty: 10 ft if equipped preset armor has strReq and STR < strReq
+  const strSpeedPenaltyFt = useMemo(() => {
+    if (activeSystem !== 'dnd5e') return 0;
+    const armors = state.armors || [];
+    const ea = armors.find(a => a.type === 'armor' && a.equipped && a.presetId);
+    if (!ea) return 0;
+    const preset = DND_ARMOR_PRESETS.find(p => p.id === ea.presetId);
+    if (!preset || !preset.strReq) return 0;
+    return (effectiveAbilities.STR || 10) < preset.strReq ? 10 : 0;
+  }, [state.armors, effectiveAbilities.STR, activeSystem]);
+
+  const strPenaltyText = `${toDisplaySpeed(10)} ${speedUnit === 'sq' ? '□' : speedUnit}`;
 
   const { currentWeightKg, maxWeightKg, coinWeightKg } = useMemo(() => {
     const strScore = state.abilities?.STR || 10;
@@ -645,6 +674,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
     identity: editingIdentity,
     abilities: editingAbilities,
     hp: editingHP,
+    combatStats: editingCombat,
   };
   function renderWidget(id) {
     const ce = contentEditMap[id] ? ' content-editing' : '';
@@ -974,27 +1004,58 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
         </div>
       );
 
-      case 'combatStats': return (
-        <div className="card">
-          <div className="card-title"><Icon id="widget.combatStats" /> {t('widgets.combatStats')}</div>
+      case 'combatStats': {
+        const _acBase = state.ac ?? 10;
+        const _equipAC = equipBonuses.AC || 0;
+        const _totalAC = _acBase + acDerivedData.dexContrib + acDerivedData.shieldBonus + _equipAC;
+        const _dexMod = getMod(effectiveAbilities.DEX);
+        const _initMod = _dexMod + (equipBonuses.INIT || 0);
+        const _isDexCapped = acDerivedData.ea && acDerivedData.dexContrib < _dexMod;
+        return (
+        <div className={`card${ce}`}>
+          <div className="card-title" style={{ justifyContent:'space-between' }}>
+            <span><Icon id="widget.combatStats" /> {t('widgets.combatStats')}</span>
+            <button className={`icon-btn ${editingCombat ? 'active' : ''}`} onClick={() => setEditingCombat(v => !v)}>
+              {editingCombat ? <Icon id="action.done" size={14} /> : <Icon id="action.edit" size={14} />}
+            </button>
+          </div>
           <div className="grid-3">
             <div className="stat-pill">
               <div className="stat-pill-label">{t('combat.ac')}</div>
-              <input className="stat-pill-input" type="number"
-                value={state.ac + (equipBonuses.AC || 0)}
-                onChange={e => update({ ac: (parseInt(e.target.value)||10) - (equipBonuses.AC||0) })} />
-              {equipBonuses.AC ? (
-                <span className="equip-bonus-badge"
-                  title={(equipBonusesDetailed.AC||[]).map(s=>`${s.name}: ${s.value>=0?'+':''}${s.value}`).join(', ')}>
-                  🎒
-                </span>
-              ) : null}
+              {editingCombat ? (
+                <div className="ability-score-row">
+                  <button className="mod-btn" onClick={() => update({ ac: Math.max(0, _acBase - 1) })}>−</button>
+                  <input className="ability-score-input" type="number" min="0"
+                    value={_acBase}
+                    onChange={e => update({ ac: parseInt(e.target.value) || 0 })} />
+                  <button className="mod-btn" onClick={() => update({ ac: _acBase + 1 })}>+</button>
+                </div>
+              ) : (
+                <div className="stat-pill-val">{_totalAC}</div>
+              )}
+              <div className="stat-info-btn-wrap">
+                <button className="stat-info-btn" tabIndex={0}>i</button>
+                <div className="stat-info-tooltip">
+                  {acDerivedData.ea
+                    ? <div>{acDerivedData.ea.name || t('armor.label')}: {_acBase}</div>
+                    : <div>Base: {_acBase}</div>
+                  }
+                  <div>DEX: {acDerivedData.dexContrib >= 0 ? '+' : ''}{acDerivedData.dexContrib}{_isDexCapped ? ' (max)' : ''}</div>
+                  {acDerivedData.shields.map((s, si) => (
+                    <div key={si}><ShieldIcon size={9} /> {s.name}: +{s.acValue || 2}</div>
+                  ))}
+                  {(equipBonusesDetailed.AC || []).map((s, si) => (
+                    <div key={si}>+ {s.name}: {s.value >= 0 ? '+' : ''}{s.value}</div>
+                  ))}
+                  <div className="stat-info-total">= {_totalAC}</div>
+                </div>
+              </div>
             </div>
-            <div className="stat-pill clickable-stat"
-              onClick={() => { const im = getMod(effectiveAbilities.DEX) + (equipBonuses.INIT || 0); handleRoll(`1d20${im >= 0 ? '+' : ''}${im}`, 'Iniziativa'); }}
-              title={`Tira iniziativa: 1d20${fmtMod(getMod(effectiveAbilities.DEX) + (equipBonuses.INIT || 0))}`}>
+            <div className={`stat-pill${!editingCombat ? ' clickable-stat' : ''}`}
+              onClick={!editingCombat ? () => handleRoll(`1d20${_initMod >= 0 ? '+' : ''}${_initMod}`, 'Iniziativa') : undefined}
+              title={!editingCombat ? `Tira iniziativa: 1d20${fmtMod(_initMod)}` : undefined}>
               <div className="stat-pill-label">{t('combat.initiative')}</div>
-              <div className="stat-pill-val">{fmtMod(getMod(effectiveAbilities.DEX) + (equipBonuses.INIT || 0))}</div>
+              <div className="stat-pill-val">{fmtMod(_initMod)}</div>
               {equipBonuses.INIT ? (
                 <span className="equip-bonus-badge"
                   title={(equipBonusesDetailed.INIT||[]).map(s=>`${s.name}: ${s.value>=0?'+':''}${s.value}`).join(', ')}>
@@ -1004,50 +1065,75 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
             </div>
             <div className="stat-pill">
               <div className="stat-pill-label">{t('combat.speed')}</div>
-              <div style={{ display:'flex', alignItems:'center', gap:2 }}>
-                {(() => {
-                  const spdUnit = speedUnit === 'sq' ? '□' : speedUnit;
-                  const rawDisplay = toDisplaySpeed(parseSpeedFt(state.speed));
-                  const spdBonus = equipBonuses.SPD || 0;
-                  const baseDisplay = rawDisplay + spdBonus;
-                  const exhLvl = state.exhaustionLevel || 0;
-                  const exhPenaltyDisplay = exhLvl >= 5 ? baseDisplay : Math.min(baseDisplay, toDisplaySpeed(exhLvl * 5));
-                  const effectiveDisplay = Math.max(0, baseDisplay - exhPenaltyDisplay);
-                  return (<>
-                    <input className="stat-pill-input" type="text" inputMode="decimal"
-                      style={exhPenaltyDisplay > 0 ? { color: 'var(--c-warn)' } : undefined}
-                      value={speedInputVal !== null ? speedInputVal : String(effectiveDisplay)}
-                      onFocus={() => setSpeedInputVal(String(rawDisplay))}
-                      onChange={e => setSpeedInputVal(e.target.value)}
-                      onBlur={() => { update({ speed: String(fromDisplaySpeed(speedInputVal ?? '0')) }); setSpeedInputVal(null); }}
-                      onKeyDown={e => { if (e.key === 'Enter') { update({ speed: String(fromDisplaySpeed(speedInputVal ?? '0')) }); setSpeedInputVal(null); e.target.blur(); } }} />
+              {(() => {
+                const spdUnit = speedUnit === 'sq' ? '□' : speedUnit;
+                const rawDisplay = toDisplaySpeed(parseSpeedFt(state.speed));
+                const spdBonus = equipBonuses.SPD || 0;
+                const baseDisplay = rawDisplay + spdBonus;
+                const exhLvl = state.exhaustionLevel || 0;
+                const exhPenaltyDisplay = exhLvl >= 5 ? baseDisplay : Math.min(baseDisplay, toDisplaySpeed(exhLvl * 5));
+                const strPenDisplay = toDisplaySpeed(strSpeedPenaltyFt);
+                const effectiveDisplay = Math.max(0, baseDisplay - exhPenaltyDisplay - strPenDisplay);
+                const anySpeedPenalty = exhPenaltyDisplay > 0 || strPenDisplay > 0;
+                const speedInfoBtn = (
+                  <div className="stat-info-btn-wrap">
+                    <button className="stat-info-btn" tabIndex={0}>i</button>
+                    <div className="stat-info-tooltip">
+                      <div>Base: {rawDisplay} {spdUnit}</div>
+                      {(equipBonusesDetailed.SPD || []).map((s, si) => (
+                        <div key={si}>+ {s.name}: {s.value >= 0 ? '+' : ''}{s.value} {spdUnit}</div>
+                      ))}
+                      {exhPenaltyDisplay > 0 && (
+                        <div><Icon id="game.exhaustion" size={9} /> {t('combat.exhaustionShort')}: −{exhPenaltyDisplay} {spdUnit}</div>
+                      )}
+                      {strPenDisplay > 0 && (
+                        <div>⚠ STR: −{strPenDisplay} {spdUnit}</div>
+                      )}
+                      {(spdBonus !== 0 || exhPenaltyDisplay > 0 || strPenDisplay > 0) && (
+                        <div className="stat-info-total">= {effectiveDisplay} {spdUnit}</div>
+                      )}
+                    </div>
+                  </div>
+                );
+                if (editingCombat) {
+                  return (
+                    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:2 }}>
+                      <div className="ability-score-row">
+                        <button className="mod-btn" onClick={() => update({ speed: String(Math.max(0, parseSpeedFt(state.speed) - 5)) })}>−</button>
+                        <input className="ability-score-input" type="number" min="0"
+                          value={rawDisplay}
+                          onChange={e => update({ speed: String(fromDisplaySpeed(e.target.value || '0')) })} />
+                        <button className="mod-btn" onClick={() => update({ speed: String(parseSpeedFt(state.speed) + 5) })}>+</button>
+                      </div>
+                      <div style={{ display:'flex', alignItems:'center', gap:2 }}>
+                        <span style={{ fontSize:10, color:'var(--c-muted)' }}>{spdUnit}</span>
+                        {speedInfoBtn}
+                      </div>
+                    </div>
+                  );
+                }
+                return (
+                  <div style={{ display:'flex', alignItems:'center', gap:2 }}>
+                    <span className="stat-pill-val" style={{ fontSize:'1.4rem', ...(anySpeedPenalty ? { color:'var(--c-warn)' } : {}) }}>
+                      {effectiveDisplay}
+                    </span>
                     <span style={{ fontSize:10, color:'var(--c-muted)', whiteSpace:'nowrap' }}>{spdUnit}</span>
-                    {spdBonus !== 0 && (
-                      <span className="equip-bonus-badge"
-                        title={(equipBonusesDetailed.SPD||[]).map(s=>`${s.name}: ${s.value>=0?'+':''}${s.value}`).join(', ')}>
-                        🎒
-                      </span>
-                    )}
-                    {exhPenaltyDisplay > 0 && (
-                      <span className="exhaustion-speed-badge"
-                        title={`${t('combat.exhaustionSpeedPenalty', 'Base speed')}: ${rawDisplay}${spdBonus ? ` + ${Math.abs(spdBonus)}` : ''} ${spdUnit}`}>
-                        <Icon id="game.exhaustion" size={10} />−{exhPenaltyDisplay}
-                      </span>
-                    )}
-                  </>);
-                })()}
-              </div>
+                    {speedInfoBtn}
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </div>
       );
+      }
 
       case 'inspiration': return (
         <div className="card">
           <div className="card-title" style={{ marginBottom:12 }}><Icon id="widget.inspiration" /> {t('widgets.inspiration')}</div>
           <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-            <button className={`inspiration-btn ${state.inspiration ? 'active' : ''}`} onClick={() => update({ inspiration:!state.inspiration })}><Icon id="game.inspiration" size={20} /></button>
-            <span className="toggle-label" style={{ color: state.inspiration ? '#856404' : 'var(--c-hint)' }}>
+            <button className={`icon-btn${state.inspiration ? ' active' : ''}`} onClick={() => update({ inspiration:!state.inspiration })}><Icon id="game.inspiration" size={14} /></button>
+            <span className="toggle-label" style={{ color: state.inspiration ? 'var(--c-accent)' : 'var(--c-hint)' }}>
               {state.inspiration ? t('combat.inspiration') : t('combat.noInspiration')}
             </span>
           </div>
@@ -1160,7 +1246,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
             id: state.equippedArmor.id || 'migrated_armor',
             name: state.equippedArmor.name, type: 'armor',
             armorType: state.equippedArmor.type || 'medium',
-            acValue: calcArmorAC(state.equippedArmor, char.abilityMod('DES')),
+            acValue: calcArmorAC(state.equippedArmor, getMod(effectiveAbilities.DEX)),
             isProficient: true, equipped: true, desc: '', weight: '', tags: [],
           });
           if (state.hasShield) armorList.push({
@@ -1170,9 +1256,14 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
         }
         function onArmorUpdate(next) {
           const ea = next.find(a => a.type === 'armor' && a.equipped);
-          const shieldBonus = next.filter(a => a.type === 'shield' && a.equipped).reduce((s, sh) => s + (sh.acValue || 2), 0);
-          const armorAC = ea ? ea.acValue : (10 + char.abilityMod('DES'));
-          update({ armors: next, ac: armorAC + shieldBonus });
+          let acBase;
+          if (ea?.presetId) {
+            const preset = DND_ARMOR_PRESETS.find(p => p.id === ea.presetId);
+            acBase = preset ? preset.ac : ea.acValue;
+          } else {
+            acBase = ea ? ea.acValue : 10;
+          }
+          update({ armors: next, ac: acBase });
         }
         return (
           <div className="card">
@@ -1183,13 +1274,14 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
             </div>
             <ArmorManager
               armors={armorList}
-              desMod={char.abilityMod('DES')}
+              desMod={getMod(effectiveAbilities.DEX)}
               onUpdate={onArmorUpdate}
               proficiency={state.armorProficiency||''} onUpdateProficiency={v => update({ armorProficiency: v })}
               allTags={allTags} weightUnit={weightUnit}
               onUpdateTags={(id, tags) => update({ armors: armorList.map(a => a.id===id ? {...a,tags} : a) })}
               onCreateTag={createTag}
               addOpen={addOpenFor === 'armor'} onAddClose={() => setAddOpenFor(null)}
+              strPenaltyText={strPenaltyText}
             />
           </div>
         );
@@ -1206,10 +1298,9 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
             </div>
           ) : <p className="hint-text">{t('spells.noSpellcaster')}</p>}
           <div style={{ display:'flex', alignItems:'center', gap:10, marginTop:10, paddingTop:8, borderTop:'0.5px solid var(--c-border)' }}>
-            <button className={`inspiration-btn ${state.concentrating ? 'active' : ''}`}
-              style={state.concentrating ? { borderColor:'#185FA5', background:'#E6F1FB', boxShadow:'0 0 12px rgba(24,95,165,.35)' } : {}}
-              onClick={() => update({ concentrating:!state.concentrating, concentratingSpell: state.concentrating ? null : state.concentratingSpell })}><Icon id="game.concentration" size={20} /></button>
-            <span className="toggle-label" style={{ color: state.concentrating ? '#185FA5' : 'var(--c-hint)' }}>
+            <button className={`icon-btn${state.concentrating ? ' active' : ''}`}
+              onClick={() => update({ concentrating:!state.concentrating, concentratingSpell: state.concentrating ? null : state.concentratingSpell })}><Icon id="game.concentration" size={14} /></button>
+            <span className="toggle-label" style={{ color: state.concentrating ? 'var(--c-accent)' : 'var(--c-hint)' }}>
               {state.concentrating
                 ? (state.concentratingSpell ? `${t('combat.concentrating')} (${state.concentratingSpell})` : t('combat.concentrating'))
                 : t('combat.noConcentration')}

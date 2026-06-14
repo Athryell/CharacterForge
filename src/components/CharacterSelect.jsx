@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Icon } from '../config/icons';
 
 const CLASS_ICON = {
   Barbarian:'⚔', Bard:'🎵', Cleric:'✝', Druid:'🌿', Fighter:'🛡',
@@ -51,7 +52,7 @@ export default function CharacterSelect({ chars, onSelect, onCreate, onDelete, s
                   }
                 }}
                 title={t('charSelect.deleteTitle', 'Delete character')}
-              >🗑</button>
+              ><Icon id="action.delete" size={15} /></button>
             </div>
           ))}
         </div>

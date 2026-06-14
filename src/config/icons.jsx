@@ -3,7 +3,7 @@ import {
   Sword, Shield, Heart, Star, Zap, BookOpen, Scroll,
   Package, StickyNote, User, Users, Dices, Flame, Skull,
   Link, ArrowDownToLine, EarOff, PersonStanding, Handshake, Shell, Stone,
-  Settings, Plus, X, Pencil, SquarePen, Check,
+  Settings, Plus, X, Pencil, SquarePen, Check, Trash2,
   Moon, Sun, RefreshCw, Download, Upload, HelpCircle,
   Coffee, MessageSquare, Tag, Eye, EyeClosed, Grip,
   AlertTriangle, Sparkles,
@@ -80,11 +80,12 @@ export const ICON_MAP = {
   'widget.activityLog': { emoji: '📋', lucide: Activity,     label: 'Activity'     },
 
   // ── Actions ───────────────────────────────────────────────────────────────
-  'action.edit':     { emoji: '✏',  lucide: SquarePen,    label: 'Edit'         },
-  'action.editItem': { emoji: '✏',  lucide: Pencil,       label: 'Edit item'    },
-  'action.done':     { emoji: '✓',  lucide: Check,        label: 'Done'         },
-  'action.add':      { emoji: '+',  lucide: Plus,         label: 'Add'          },
+  'action.edit':     { emoji: '✏',  lucide: SquarePen,    label: 'Edit',          alwaysLucide: true },
+  'action.editItem': { emoji: '✏',  lucide: Pencil,       label: 'Edit item',     alwaysLucide: true },
+  'action.done':     { emoji: '✓',  lucide: Check,        label: 'Done',          alwaysLucide: true },
+  'action.add':      { emoji: '+',  lucide: Plus,         label: 'Add',           alwaysLucide: true },
   'action.remove':   { emoji: '✕',  lucide: X,            label: 'Remove'       },
+  'action.delete':   { emoji: '🗑',  lucide: Trash2,       label: 'Delete',        alwaysLucide: true },
   'action.download': { emoji: '⬇',  lucide: Download,     label: 'Export'       },
   'action.upload':   { emoji: '⬆',  lucide: Upload,       label: 'Import'       },
   'action.reset':    { emoji: '↺',  lucide: RefreshCw,    label: 'Reset'        },
@@ -94,14 +95,14 @@ export const ICON_MAP = {
   'action.tag':      { emoji: '🏷',  lucide: Tag,          label: 'Tag'          },
   'action.show':     { emoji: '👁',  lucide: Eye,          label: 'Show'         },
   'action.hide':     { emoji: '🚫', lucide: EyeClosed,    label: 'Hide'         },
-  'action.allChars': { emoji: '👥', lucide: Users,        label: 'All characters' },
+  'action.allChars': { emoji: '👥', lucide: Users,        label: 'All characters', alwaysLucide: true },
 
   // ── Game ──────────────────────────────────────────────────────────────────
   'game.longRest':      { emoji: '🛏',  lucide: Moon,        label: 'Long Rest'    },
   'game.shortRest':     { emoji: '🌙',  lucide: Sun,         label: 'Short Rest'   },
   'game.roll':          { emoji: '🎲',  lucide: Dices,       label: 'Roll'         },
-  'game.inspiration':   { emoji: '⭐',  lucide: Star,        label: 'Inspiration'  },
-  'game.concentration': { emoji: '🎯',  lucide: Target,      label: 'Concentration'},
+  'game.inspiration':   { emoji: '⭐',  lucide: Star,        label: 'Inspiration', alwaysLucide: true },
+  'game.concentration': { emoji: '🎯',  lucide: Target,      label: 'Concentration', alwaysLucide: true },
   'game.hope':          { emoji: '⭐',  lucide: Star,        label: 'Hope'         },
   'game.fear':          { emoji: '💀',  lucide: Skull,       label: 'Fear'         },
   'game.exhaustion':    { emoji: '😓',  lucide: Activity,    label: 'Exhaustion'   },
@@ -179,6 +180,21 @@ export function Icon({ id, size = 16, className = '', fallback }) {
   const entry = ICON_MAP[id];
 
   if (!entry) return fallback != null ? <span>{fallback}</span> : null;
+
+  // alwaysLucide entries render as Lucide regardless of iconMode
+  if (entry.alwaysLucide) {
+    const LucideIcon = entry.lucide;
+    if (LucideIcon) {
+      return (
+        <LucideIcon
+          size={size}
+          className={`icon-lucide ${className}`}
+          aria-label={entry.label}
+          style={iconAccent ? { color: 'var(--c-accent)' } : undefined}
+        />
+      );
+    }
+  }
 
   // action.* are UI controls — always visible; in 'none' mode show a small dot
   if (id.startsWith('action.')) {

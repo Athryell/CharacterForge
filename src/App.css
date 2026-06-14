@@ -695,6 +695,7 @@ body.high-contrast *:focus-visible {
 
 /* COMBAT STATS */
 .stat-pill {
+  position: relative;
   display: flex; flex-direction: column; align-items: center; gap: 4px;
   background: var(--c-surface); border: 0.5px solid var(--c-border-mid);
   border-radius: var(--rl); padding: 12px 6px;
@@ -1017,17 +1018,17 @@ body.high-contrast *:focus-visible {
   justify-content: center;
   gap: 6px;
   padding: 6px 12px;
-  background: #A32D2D;
-  border: none;
+  background: transparent;
+  border: 0.5px solid #c0392b;
   border-radius: var(--r);
-  color: #fff;
+  color: #c0392b;
   font-size: 0.867rem;
-  font-weight: 600;
+  font-weight: 500;
   font-family: var(--font-body);
   cursor: pointer;
-  transition: background .12s;
+  transition: background .12s, color .12s;
 }
-.death-save-roll-btn:hover { background: #8a2222; }
+.death-save-roll-btn:hover { background: #c0392b; color: #fff; }
 
 /* INVENTORY */
 .equip-item {
@@ -2625,6 +2626,67 @@ input[type=number] {
   display: block; text-align: center; margin-top: 2px;
 }
 
+/* ── Stat info button & tooltip ──────────────────────────────── */
+.stat-info-btn-wrap {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+}
+.stat-info-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 4px;
+  min-width: 16px;
+  border: 1px solid var(--c-border-mid);
+  border-radius: var(--r);
+  background: none;
+  color: var(--c-hint);
+  font-size: 11px;
+  font-style: italic;
+  font-family: Georgia, serif;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.stat-info-btn:hover {
+  color: var(--c-accent);
+  border-color: var(--c-accent);
+}
+.stat-info-btn:focus {
+  outline: 2px solid var(--c-accent);
+  outline-offset: 2px;
+}
+.stat-info-tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 4px);
+  right: 0;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border-mid);
+  border-radius: var(--r);
+  box-shadow: var(--shadow-card);
+  padding: 8px 12px;
+  font-size: 11px;
+  white-space: nowrap;
+  z-index: 200;
+  text-align: left;
+  color: var(--c-ink);
+  min-width: 120px;
+  pointer-events: none;
+}
+.stat-info-btn-wrap:hover .stat-info-tooltip,
+.stat-info-btn-wrap:focus-within .stat-info-tooltip {
+  display: block;
+}
+.stat-info-total {
+  border-top: 1px solid var(--c-border);
+  margin-top: 4px;
+  padding-top: 4px;
+  font-weight: 600;
+  color: var(--c-accent);
+}
+
 /* ── BonusEditor ─────────────────────────────────────────────── */
 .bonus-editor { margin-top: 8px; }
 .bonus-editor > label { font-size: 0.733rem; font-weight: 600; color: var(--c-muted); text-transform: uppercase; letter-spacing: .04em; }
@@ -3609,4 +3671,50 @@ button.corner-btn:hover {
   font-style: italic;
   text-align: center;
   line-height: 1.4;
+}
+
+/* ── ARMOR REQUIREMENT BADGES ──────────────────────────────────── */
+.armor-req-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.6rem;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 3px;
+  line-height: 1.4;
+}
+.armor-req-badge.str-req {
+  background: rgba(133, 79, 11, 0.12);
+  color: #854F0B;
+  border: 0.5px solid rgba(133, 79, 11, 0.3);
+}
+.armor-req-badge.str-req.unmet {
+  background: rgba(192, 57, 43, 0.12);
+  color: #c0392b;
+  border-color: rgba(192, 57, 43, 0.3);
+}
+.armor-req-badge.dex-limit {
+  background: var(--c-surface);
+  color: var(--c-muted);
+  border: 0.5px solid var(--c-border-mid);
+}
+.armor-str-warning {
+  font-size: 0.8rem;
+  color: var(--c-warn-text);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+/* ── AC AUTO BADGE (combatStats widget) ────────────────────────── */
+.ac-auto-badge {
+  font-size: 0.467rem;
+  font-weight: 600;
+  color: var(--c-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  align-self: flex-end;
+  margin-bottom: 2px;
 }

@@ -4,17 +4,102 @@
 export const DND_SPECIES = [
   { id: 'dragonborn', speed: 30 },
   { id: 'dwarf',      speed: 30 },
-  { id: 'elf',        speed: 30 },
-  { id: 'gnome',      speed: 30 },
-  { id: 'goliath',    speed: 35 },
-  { id: 'halfling',   speed: 30 },
-  { id: 'human',      speed: 30 },
-  { id: 'orc',        speed: 30 },
-  { id: 'tiefling',   speed: 30 },
+  {
+    id: 'elf',
+    speed: 30,
+    legacyLabel: 'Elven Lineage',
+    legacySpellStat: true,
+    legacies: [
+      {
+        id: 'drow',
+        name: 'Drow',
+        level1Trait: 'Darkvision range increases to 120 feet.',
+        spells: [
+          { name: 'Dancing Lights', level: 0, unlockLevel: 1 },
+          { name: 'Faerie Fire',    level: 1, unlockLevel: 3 },
+          { name: 'Darkness',       level: 2, unlockLevel: 5 },
+        ],
+      },
+      {
+        id: 'high-elf',
+        name: 'High Elf',
+        level1Trait: 'You know the Prestidigitation cantrip. You can replace it with another Wizard cantrip after each Long Rest.',
+        spells: [
+          { name: 'Prestidigitation', level: 0, unlockLevel: 1, replaceable: true },
+          { name: 'Detect Magic',     level: 1, unlockLevel: 3 },
+          { name: 'Misty Step',       level: 2, unlockLevel: 5 },
+        ],
+      },
+      {
+        id: 'wood-elf',
+        name: 'Wood Elf',
+        level1Trait: 'Your Speed increases to 35 feet.',
+        speedOverride: 35,
+        spells: [
+          { name: 'Druidcraft',       level: 0, unlockLevel: 1 },
+          { name: 'Longstrider',      level: 1, unlockLevel: 3 },
+          { name: 'Pass without Trace', level: 2, unlockLevel: 5 },
+        ],
+      },
+    ],
+  },
+  { id: 'gnome',    speed: 30 },
+  { id: 'goliath',  speed: 35 },
+  { id: 'halfling', speed: 30 },
+  { id: 'human',    speed: 30 },
+  { id: 'orc',      speed: 30 },
+  {
+    id: 'tiefling',
+    speed: 30,
+    fixedSpells: [
+      { name: 'Thaumaturgy', level: 0, unlockLevel: 1 },
+    ],
+    legacyLabel: 'Fiendish Legacy',
+    legacySpellStat: true,
+    legacies: [
+      {
+        id: 'abyssal',
+        name: 'Abyssal',
+        resistance: 'poison',
+        level1Trait: 'Resistance to Poison damage.',
+        spells: [
+          { name: 'Poison Spray',  level: 0, unlockLevel: 1 },
+          { name: 'Ray of Sickness', level: 1, unlockLevel: 3 },
+          { name: 'Hold Person',   level: 2, unlockLevel: 5 },
+        ],
+      },
+      {
+        id: 'chthonic',
+        name: 'Chthonic',
+        resistance: 'necrotic',
+        level1Trait: 'Resistance to Necrotic damage.',
+        spells: [
+          { name: 'Chill Touch',        level: 0, unlockLevel: 1 },
+          { name: 'False Life',         level: 1, unlockLevel: 3 },
+          { name: 'Ray of Enfeeblement', level: 2, unlockLevel: 5 },
+        ],
+      },
+      {
+        id: 'infernal',
+        name: 'Infernal',
+        resistance: 'fire',
+        level1Trait: 'Resistance to Fire damage.',
+        spells: [
+          { name: 'Fire Bolt',      level: 0, unlockLevel: 1 },
+          { name: 'Hellish Rebuke', level: 1, unlockLevel: 3 },
+          { name: 'Darkness',       level: 2, unlockLevel: 5 },
+        ],
+      },
+    ],
+  },
 ];
 
 // Backward-compat alias
 export const SRD_SPECIES = DND_SPECIES;
+
+export function getSpeciesData(raceId) {
+  return DND_SPECIES.find(s => s.id === raceId) || null;
+}
 
 export const SPECIES_FEATURES = {
   'human': [

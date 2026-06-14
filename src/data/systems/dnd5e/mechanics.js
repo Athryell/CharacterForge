@@ -136,5 +136,8 @@ export function createDefaultState() {
     charSubclass: '',
     subclassFeatures: [],
     customConditions: [],
+    speciesLegacy: null,
+    speciesSpellStat: 'INT',
+    resistances: [],
   };
 }

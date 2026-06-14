@@ -4,7 +4,7 @@ import { Icon } from '../../config/icons';
 import { ABILITIES, SKILLS, HIT_DICE, SPELLCASTING_CLASS } from '../../data/systems/dnd5e/mechanics';
 import AlignmentPicker from '../AlignmentPicker';
 import { CLASS_FEATURES, CLASS_SAVE_PROFS, CLASS_SKILL_COUNT, CLASS_SKILL_OPTIONS } from '../../data/systems/dnd5e/classes';
-import { SPECIES_FEATURES, getAutoFeatures } from '../../data/systems/dnd5e/species';
+import { SPECIES_FEATURES, getAutoFeatures, getSpeciesData } from '../../data/systems/dnd5e/species';
 import { BACKGROUND_FEATURES } from '../../data/systems/dnd5e/backgrounds';
 import dataManager from '../../data/dataManager';
 
@@ -63,6 +63,8 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
     customBgFeat: '',
     customBgEquipOption: 'gold',
     customBgEquipItems: '',
+    speciesLegacy: null,
+    speciesSpellStat: 'INT',
     customClass: '',
     customClassHitDie: 'd8',
     customClassSpellStat: '',
@@ -80,6 +82,8 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
 
   const selectedBg  = data.charBackground === CUSTOM_SENTINEL ? null : allBackgrounds.find(b => (b.id || b.name) === data.charBackground);
   const selectedCls = data.charClass === CUSTOM_SENTINEL ? data.customClass : data.charClass;
+
+  const selectedSpeciesData = (data.charRace && data.charRace !== CUSTOM_SENTINEL) ? getSpeciesData(data.charRace) : null;
 
   const isCustomCls    = data.charClass === CUSTOM_SENTINEL;
   const effectiveHitDie     = isCustomCls ? data.customClassHitDie : (HIT_DICE[selectedCls] || 'd8');
@@ -222,6 +226,50 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
       }
     }
 
+    // Species legacy spells
+    const speciesData = data.charRace !== CUSTOM_SENTINEL ? getSpeciesData(data.charRace) : null;
+    const chosenLegacy = speciesData?.legacies?.find(l => l.id === data.speciesLegacy);
+    const spellStat = data.speciesSpellStat || 'INT';
+    const speciesDisplayName = SPECIES_SRD.find(s => s.id === data.charRace)?.name || data.charRace;
+
+    const fixedSpells = (speciesData?.fixedSpells || []).map(s => ({
+      name: s.name,
+      level: s.level,
+      prepared: true,
+      alwaysPrepared: true,
+      source: 'species',
+      sourceLabel: speciesDisplayName,
+      spellStat,
+      acquiredAtLevel: s.unlockLevel,
+    }));
+
+    const legacySpells = (chosenLegacy?.spells || [])
+      .filter(s => s.unlockLevel <= 1)
+      .map(s => ({
+        name: s.name,
+        level: s.level,
+        prepared: true,
+        alwaysPrepared: true,
+        source: 'species',
+        sourceLabel: chosenLegacy ? `${speciesDisplayName} (${chosenLegacy.name})` : speciesDisplayName,
+        spellStat,
+        acquiredAtLevel: s.unlockLevel,
+      }));
+
+    const allSpeciesSpells = [
+      ...fixedSpells,
+      ...legacySpells.filter(ls => !fixedSpells.find(fs => fs.name === ls.name)),
+    ];
+
+    // Speed: base from species data, overridden by lineage speedOverride
+    let finalSpeed;
+    if (data.charRace === CUSTOM_SENTINEL) {
+      finalSpeed = `${data.customSpeciesSpeed || 30}ft`;
+    } else {
+      finalSpeed = `${speciesData?.speed || 30}ft`;
+      if (chosenLegacy?.speedOverride) finalSpeed = `${chosenLegacy.speedOverride}ft`;
+    }
+
     return {
       system: 'dnd5e',
       charName: data.charName,
@@ -238,9 +286,13 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
       hpCurrent: calcHP(finalAbs, selectedCls, effectiveHitDie),
       hpMax: calcHP(finalAbs, selectedCls, effectiveHitDie),
       ac: 10 + Math.floor((finalAbs.DEX - 10) / 2),
-      speed: data.charRace === CUSTOM_SENTINEL ? `${data.customSpeciesSpeed || 30}ft` : '30ft',
+      speed: finalSpeed,
       equipment: startEquipment,
       currency: { GP: startGp, SP: 0, CP: 0, PP: 0 },
+      spells: allSpeciesSpells,
+      speciesLegacy: data.speciesLegacy,
+      speciesSpellStat: spellStat,
+      resistances: chosenLegacy?.resistance ? [chosenLegacy.resistance] : [],
     };
   }
 
@@ -251,7 +303,8 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
   const canNextStep = [
     data.charName && data.charRace && data.charBackground &&
       (data.charRace !== CUSTOM_SENTINEL || data.customSpecies) &&
-      (data.charBackground !== CUSTOM_SENTINEL || data.customBackground),
+      (data.charBackground !== CUSTOM_SENTINEL || data.customBackground) &&
+      (!selectedSpeciesData?.legacies || data.speciesLegacy),
     data.charClass && (data.charClass !== CUSTOM_SENTINEL || data.customClass),
     true, true, true,
   ][step];
@@ -294,7 +347,7 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
                   const isCustom = (r.id || r.name) === CUSTOM_SENTINEL;
                   const selected = data.charRace === (r.id || r.name);
                   return (
-                    <div key={r.name} className={`creator-card ${selected ? 'selected' : ''}`} onClick={() => patch({ charRace: r.id || r.name })}>
+                    <div key={r.name} className={`creator-card ${selected ? 'selected' : ''}`} onClick={() => patch({ charRace: r.id || r.name, speciesLegacy: null, speciesSpellStat: 'INT' })}>
                       <div className="creator-card-name">{isCustom ? r.label : t(`data.species.${r.id || r.name}`, r.name)}</div>
                       {isCustom && selected && (
                         <div className="creator-custom-form" onClick={e => e.stopPropagation()}>
@@ -366,6 +419,70 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
                   );
                 })}
               </div>
+
+              {/* LINEAGE — shown when selected species has legacies */}
+              {selectedSpeciesData?.legacies && (
+                <div className="creator-info-box" style={{ marginTop: 12 }}>
+                  <strong>{t('creator.chooseLineage', { lineageLabel: selectedSpeciesData.legacyLabel })}</strong>
+
+                  {selectedSpeciesData.fixedSpells?.length > 0 && (
+                    <div className="hint-text" style={{ marginTop: 6, marginBottom: 4 }}>
+                      {t('creator.tieflingFixedNote')}
+                    </div>
+                  )}
+
+                  <div className="creator-grid" style={{ marginTop: 8 }}>
+                    {selectedSpeciesData.legacies.map(legacy => {
+                      const legSelected = data.speciesLegacy === legacy.id;
+                      return (
+                        <div key={legacy.id}
+                          className={`creator-card ${legSelected ? 'selected' : ''}`}
+                          onClick={() => patch({ speciesLegacy: legacy.id })}>
+                          <div className="creator-card-name">{legacy.name}</div>
+                          <div className="creator-traits">
+                            <div className="creator-trait" style={{ marginBottom: 4 }}>
+                              <strong>{t('creator.lineageLevel1Trait')}</strong> {legacy.level1Trait}
+                            </div>
+                            <div style={{ fontSize: '0.8rem', fontWeight: 600, marginTop: 6, marginBottom: 2 }}>
+                              {t('creator.speciesSpells')}
+                            </div>
+                            {legacy.spells.map(s => (
+                              <div key={s.name} className="creator-trait"
+                                style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+                                <span>
+                                  {s.level === 0 ? 'Cantrip' : ['','1st','2nd','3rd'][s.level] + ' level'} — {s.name}
+                                </span>
+                                <span style={{ color: 'var(--c-muted)', flexShrink: 0 }}>
+                                  {s.unlockLevel === 1
+                                    ? t('creator.speciesSpellAlways')
+                                    : t('creator.speciesSpellAtLevel', { level: s.unlockLevel })}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {selectedSpeciesData.legacySpellStat && (
+                    <div style={{ marginTop: 12 }}>
+                      <div style={{ fontSize: '0.8rem', fontWeight: 500, marginBottom: 6, color: 'var(--c-muted)' }}>
+                        {t('creator.lineageSpellStat')}
+                      </div>
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        {['INT', 'WIS', 'CHA'].map(stat => (
+                          <button key={stat}
+                            className={`filter-chip ${data.speciesSpellStat === stat ? 'active' : ''}`}
+                            onClick={e => { e.stopPropagation(); patch({ speciesSpellStat: stat }); }}>
+                            {stat}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* BACKGROUND */}
               <div className="creator-subtitle" style={{ marginTop: 16 }}>{t('creator.backgroundTitle')}</div>

@@ -547,9 +547,11 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
               </select>
             </div>
             <div className="hint-text" style={{ marginTop: 4 }}>
-              {browsedSpells.length === 1
-                ? t('spells.foundSingular', { count: browsedSpells.length })
-                : t('spells.foundPlural', { count: browsedSpells.length })}
+              {browsedSpells.length === 0 && filterClass
+                ? t('spells.foundZeroClass', { class: t(`data.classes.${filterClass}`, filterClass) })
+                : browsedSpells.length === 1
+                  ? t('spells.foundSingular', { count: browsedSpells.length })
+                  : t('spells.foundPlural', { count: browsedSpells.length })}
             </div>
           </div>
           <div className="spell-browser-list">

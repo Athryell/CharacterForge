@@ -4,6 +4,7 @@ import { DND_ARMOR_PRESETS as ARMOR_PRESETS, TYPE_LABEL, calcArmorAC } from '../
 import { TagPill, TagSelector } from './Tags';
 import { KeywordText } from './Tooltip';
 import NotationTextarea from './NotationTextarea';
+import { useCharContext } from './CharContext';
 
 const BLANK_FORM = { name: '', type: 'armor', armorType: 'medium', acValue: 14, isProficient: true, equipped: false, desc: '', weight: '' };
 
@@ -97,8 +98,10 @@ function ArmorEditForm({ form, onChange, onSave, onCancel, onDelete, allTags, it
   );
 }
 
-export default function ArmorManager({ armors = [], desMod = 0, onUpdate, proficiency = '', onUpdateProficiency, allTags = [], onUpdateTags, onCreateTag, addOpen, onAddClose, weightUnit = 'kg' }) {
+export default function ArmorManager({ armors = [], desMod = 0, onUpdate, proficiency = '', onUpdateProficiency, allTags = [], onUpdateTags, onCreateTag, addOpen, onAddClose, weightUnit = 'kg', strPenaltyText = '' }) {
   const { t } = useTranslation();
+  const { abilities } = useCharContext();
+  const strScore = abilities?.STR || 10;
   const [addMode, setAddMode] = useState('preset');
   const [addForm, setAddForm] = useState(BLANK_FORM);
   const [editingId, setEditingId] = useState(null);
@@ -119,13 +122,14 @@ export default function ArmorManager({ armors = [], desMod = 0, onUpdate, profic
   function addPreset(preset) {
     const acValue = preset.type === 'shield'
       ? preset.acValue
-      : calcArmorAC(preset, desMod);
+      : preset.ac;
     onUpdate([...armors, {
       id: Date.now().toString(),
       name: preset.name,
       type: preset.type || 'armor',
       armorType: preset.type === 'armor' ? (preset.armorType || 'medium') : undefined,
       acValue,
+      presetId: preset.id,
       isProficient: true,
       equipped: false,
       desc: '',
@@ -195,12 +199,25 @@ export default function ArmorManager({ armors = [], desMod = 0, onUpdate, profic
                   </div>
                   {items.map(p => {
                     const displayAC = p.type === 'shield' ? `+${p.acValue}` : calcArmorAC(p, desMod);
+                    const strNotMet = p.strReq > 0 && strScore < p.strReq;
                     return (
                       <div key={p.id} className="weapon-preset-item" onClick={() => addPreset(p)}>
                         <div className="weapon-name">{p.name}</div>
                         <div className="weapon-meta">
-                          <span className="weapon-prop">CA {displayAC}</span>
-                          {p.strReq > 0 && <span className="weapon-prop">FOR {p.strReq}+</span>}
+                          <span className="weapon-prop">AC {displayAC}</span>
+                          {p.strReq > 0 && (
+                            <span
+                              className={`armor-req-badge str-req${strNotMet ? ' unmet' : ''}`}
+                              title={strNotMet ? t('armor.strReqNotMet', { penalty: strPenaltyText }) : undefined}>
+                              {t('armor.strReq', { val: p.strReq })}
+                            </span>
+                          )}
+                          {p.maxDex === 0 && (
+                            <span className="armor-req-badge dex-limit">{t('armor.noDex')}</span>
+                          )}
+                          {p.maxDex === 2 && (
+                            <span className="armor-req-badge dex-limit">{t('armor.maxDex', { val: 2 })}</span>
+                          )}
                         </div>
                       </div>
                     );
@@ -218,7 +235,7 @@ export default function ArmorManager({ armors = [], desMod = 0, onUpdate, profic
       )}
 
       {armors.length === 0 && !addOpen && (
-        <div className="hint-text" style={{ padding: '8px 0' }}>{t('armor.noArmor', 'Nessuna armatura. Attiva ✏ e clicca + per aggiungere.')}</div>
+        <div className="hint-text" style={{ padding: '8px 0' }}>{t('weapons.noArmor')}</div>
       )}
 
       {armors.map(a => {
@@ -264,6 +281,25 @@ export default function ArmorManager({ armors = [], desMod = 0, onUpdate, profic
 
             {isExpanded && !isEditing && (
               <div className="weapon-expanded-section" onClick={e => e.stopPropagation()}>
+                {!isShield && a.presetId && (() => {
+                  const preset = ARMOR_PRESETS.find(p => p.id === a.presetId);
+                  if (!preset) return null;
+                  const strNotMet = preset.strReq > 0 && strScore < preset.strReq;
+                  const effDex = Math.min(desMod, preset.maxDex ?? 2);
+                  const effDexStr = effDex >= 0 ? `+${effDex}` : String(effDex);
+                  return (
+                    <div style={{ marginBottom: 4 }}>
+                      {strNotMet && (
+                        <div className="armor-str-warning">⚠ {t('armor.strReqNotMet', { penalty: strPenaltyText })}</div>
+                      )}
+                      {preset.type === 'medium' && (
+                        <div className="hint-text">
+                          {t('armor.dexBonus', { effective: effDexStr, max: preset.maxDex ?? 2 })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
                 {a.desc && (
                   <div style={{ fontSize: '0.8rem', color: 'var(--c-muted)', marginBottom: 4 }}>
                     <KeywordText text={a.desc} />
