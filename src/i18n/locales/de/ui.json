@@ -251,9 +251,9 @@
     "filterAllLevels": "All levels",
     "filterAllSchools": "All schools",
     "filterAllClasses": "All classes",
-    "foundSingular": "{{count}} Zauber gefunden",
-    "foundPlural": "{{count}} Zauber gefunden",
-    "foundZeroClass": "Keine Zauber für {{class}} gefunden",
+    "foundSingular": "{{count}} spell found",
+    "foundPlural": "{{count}} spells found",
+    "foundZeroClass": "No spells found for the {{class}}",
     "noSpells": "No spells. Click ＋ SRD to browse or ✏ to add a custom one.",
     "concentration": "Concentration",
     "ritual": "Ritual",
@@ -286,7 +286,7 @@
     "browseTitle": "🔍 Browse SRD",
     "customFormTitle": "✏ Custom spell",
     "castSlot": "Slot Lv. {{level}}",
-    "noSpells2": "Keine Zauber hinzugefügt. Klicke auf \"+\", um einen hinzuzufügen.",
+    "noSpells2": "No spells added. Click \"+\" to add one.",
     "descEditLabel": "Description",
     "alwaysPrepared": "Always prepared",
     "filterLevel": "Level",
@@ -335,7 +335,7 @@
     "nameEditLabel": "Name",
     "descEditLabel": "Description",
     "descAddPlaceholder": "E.g. Heals 2d4+2 HP. (@ for bonuses)",
-    "empty2": "Keine Gegenstände hinzugefügt. Klicke auf \"+\", um einen hinzuzufügen.",
+    "empty2": "No items added. Click \"+\" to add one.",
     "carried": "Carried weight",
     "coinWeight": "(incl. {{n}} {{unit}} from coins)"
   },
@@ -448,8 +448,8 @@
     }
   },
   "weapons": {
-    "noWeapons": "Keine Waffen hinzugefügt. Klicke auf \"+\", um eine hinzuzufügen.",
-    "noArmor": "Keine Rüstung hinzugefügt. Klicke auf \"+\", um eine hinzuzufügen.",
+    "noWeapons": "No weapons added. Click \"+\" to add one.",
+    "noArmor": "No armor added. Click \"+\" to add one.",
     "addBtn": "+ Add weapon",
     "presetSRD": "SRD Preset",
     "custom": "Custom",
@@ -490,26 +490,26 @@
   },
   "armor": {
     "nameLabel": "Name",
-    "shieldNamePlaceholder": "Z. B. Holzschild",
-    "armorNamePlaceholder": "Z. B. Mithral-Brustpanzer",
-    "typeLabel": "Typ",
-    "typeArmor": "Rüstung",
-    "typeShield": "Schild",
-    "armorTypeLabel": "Kategorie",
-    "acBonusLabel": "RK-Bonus",
-    "acTotalLabel": "Basis-RK",
-    "descPlaceholder": "Z. B. Erfordert Kenntnis schwerer Rüstungen...",
-    "proficiencyLabel": "Rüstungskenntnis:",
-    "proficiencyPlaceholder": "Z. B. Leichte Rüstung, mittlere Rüstung, Schilde...",
-    "equip": "Anlegen",
-    "unequip": "Ablegen",
+    "shieldNamePlaceholder": "E.g. Wooden Shield",
+    "armorNamePlaceholder": "E.g. Mithral Breastplate",
+    "typeLabel": "Type",
+    "typeArmor": "Armor",
+    "typeShield": "Shield",
+    "armorTypeLabel": "Category",
+    "acBonusLabel": "AC Bonus",
+    "acTotalLabel": "Base AC",
+    "descPlaceholder": "E.g. Requires proficiency in heavy armor...",
+    "proficiencyLabel": "Armor proficiency:",
+    "proficiencyPlaceholder": "E.g. Light armor, medium armor, shields...",
+    "equip": "Equip",
+    "unequip": "Unequip",
     "strReq": "STR {{val}}+",
-    "strReqNotMet": "Stärke-Anforderung nicht erfüllt — Bewegung −{{penalty}}",
-    "noDex": "Kein GES",
-    "maxDex": "GES +{{val}} max",
-    "calculatedAC": "Berechnet aus getragener Rüstung",
-    "overrideAC": "Überschreiben",
-    "dexBonus": "GES-Bonus: {{effective}} (max +{{max}})"
+    "strReqNotMet": "STR requirement not met — Speed −{{penalty}}",
+    "noDex": "No DEX",
+    "maxDex": "DEX +{{val}} max",
+    "calculatedAC": "Calculated from equipped armor",
+    "overrideAC": "Override",
+    "dexBonus": "DEX bonus: {{effective}} (max +{{max}})"
   },
   "conditions": {
     "title": "Conditions",
@@ -674,7 +674,14 @@
     "customSpeciesTraits": "Species traits",
     "customSpeciesAddTrait": "+ Add trait",
     "customSpeciesTraitName": "Trait name",
-    "customSpeciesTraitDesc": "Description"
+    "customSpeciesTraitDesc": "Description",
+    "chooseLineage": "Choose your {{lineageLabel}}",
+    "lineageSpellStat": "Spellcasting ability for lineage spells:",
+    "speciesSpells": "Species Spells",
+    "speciesSpellAlways": "always",
+    "speciesSpellAtLevel": "at level {{level}}",
+    "tieflingFixedNote": "All Tieflings know Thaumaturgy regardless of legacy.",
+    "lineageLevel1Trait": "Level 1:"
   },
   "common": {
     "edit": "Edit",
@@ -926,9 +933,9 @@
       "force": "Force"
     },
     "armorTypes": {
-      "light": "Leicht",
-      "medium": "Mittel",
-      "heavy": "Schwer"
+      "light": "Light",
+      "medium": "Medium",
+      "heavy": "Heavy"
     },
     "stats": {
       "AC": "Armor Class (AC)",
@@ -1113,7 +1120,8 @@
     "epicBoonRecommended": "Boon of Combat Prowess recommended",
     "asiPlus2": "+2 to one ability",
     "asiPlus1": "+1 to two abilities",
-    "spellsToLearn": "Choose {{count}} spell(s) to learn"
+    "spellsToLearn": "Choose {{count}} spell(s) to learn",
+    "newSpeciesSpell": "New species spell: {{name}} ({{level}}, always prepared)"
   },
   "levelDown": {
     "title": "Go back to level {{level}}?",

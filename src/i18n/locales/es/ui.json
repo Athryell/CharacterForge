@@ -251,9 +251,9 @@
     "filterAllLevels": "All levels",
     "filterAllSchools": "All schools",
     "filterAllClasses": "All classes",
-    "foundSingular": "{{count}} hechizo encontrado",
-    "foundPlural": "{{count}} hechizos encontrados",
-    "foundZeroClass": "No se encontraron hechizos para el {{class}}",
+    "foundSingular": "{{count}} spell found",
+    "foundPlural": "{{count}} spells found",
+    "foundZeroClass": "No spells found for the {{class}}",
     "noSpells": "No spells. Click ＋ SRD to browse or ✏ to add a custom one.",
     "concentration": "Concentration",
     "ritual": "Ritual",
@@ -286,7 +286,7 @@
     "browseTitle": "🔍 Browse SRD",
     "customFormTitle": "✏ Custom spell",
     "castSlot": "Slot Lv. {{level}}",
-    "noSpells2": "No se han añadido hechizos. Haz clic en \"+\" para añadir uno.",
+    "noSpells2": "No spells added. Click \"+\" to add one.",
     "descEditLabel": "Description",
     "alwaysPrepared": "Always prepared",
     "filterLevel": "Level",
@@ -335,7 +335,7 @@
     "nameEditLabel": "Name",
     "descEditLabel": "Description",
     "descAddPlaceholder": "E.g. Heals 2d4+2 HP. (@ for bonuses)",
-    "empty2": "No se han añadido objetos. Haz clic en \"+\" para añadir uno.",
+    "empty2": "No items added. Click \"+\" to add one.",
     "carried": "Carried weight",
     "coinWeight": "(incl. {{n}} {{unit}} from coins)"
   },
@@ -448,8 +448,8 @@
     }
   },
   "weapons": {
-    "noWeapons": "No se han añadido armas. Haz clic en \"+\" para añadir una.",
-    "noArmor": "No se ha añadido armadura. Haz clic en \"+\" para añadir una.",
+    "noWeapons": "No weapons added. Click \"+\" to add one.",
+    "noArmor": "No armor added. Click \"+\" to add one.",
     "addBtn": "+ Add weapon",
     "presetSRD": "SRD Preset",
     "custom": "Custom",
@@ -489,27 +489,27 @@
     "presetFinesseNote": "This weapon uses Strength by default. You can also use Dexterity (edit the weapon stat from STR to DEX)."
   },
   "armor": {
-    "nameLabel": "Nombre",
-    "shieldNamePlaceholder": "Ej. Escudo de madera",
-    "armorNamePlaceholder": "Ej. Coraza de mithral",
-    "typeLabel": "Tipo",
-    "typeArmor": "Armadura",
-    "typeShield": "Escudo",
-    "armorTypeLabel": "Categoría",
-    "acBonusLabel": "Bono CA",
-    "acTotalLabel": "CA base",
-    "descPlaceholder": "Ej. Requiere competencia en armaduras pesadas...",
-    "proficiencyLabel": "Competencia:",
-    "proficiencyPlaceholder": "Ej. Armadura ligera, media, pesada, escudos...",
-    "equip": "Equipar",
-    "unequip": "Desequipar",
-    "strReq": "FUE {{val}}+",
-    "strReqNotMet": "Requisito de Fuerza no cumplido — Velocidad −{{penalty}}",
-    "noDex": "Sin DES",
-    "maxDex": "DES +{{val}} máx",
-    "calculatedAC": "Calculada desde la armadura equipada",
-    "overrideAC": "Modificar",
-    "dexBonus": "Bono DES: {{effective}} (máx +{{max}})"
+    "nameLabel": "Name",
+    "shieldNamePlaceholder": "E.g. Wooden Shield",
+    "armorNamePlaceholder": "E.g. Mithral Breastplate",
+    "typeLabel": "Type",
+    "typeArmor": "Armor",
+    "typeShield": "Shield",
+    "armorTypeLabel": "Category",
+    "acBonusLabel": "AC Bonus",
+    "acTotalLabel": "Base AC",
+    "descPlaceholder": "E.g. Requires proficiency in heavy armor...",
+    "proficiencyLabel": "Armor proficiency:",
+    "proficiencyPlaceholder": "E.g. Light armor, medium armor, shields...",
+    "equip": "Equip",
+    "unequip": "Unequip",
+    "strReq": "STR {{val}}+",
+    "strReqNotMet": "STR requirement not met — Speed −{{penalty}}",
+    "noDex": "No DEX",
+    "maxDex": "DEX +{{val}} max",
+    "calculatedAC": "Calculated from equipped armor",
+    "overrideAC": "Override",
+    "dexBonus": "DEX bonus: {{effective}} (max +{{max}})"
   },
   "conditions": {
     "title": "Conditions",
@@ -674,7 +674,14 @@
     "customSpeciesTraits": "Species traits",
     "customSpeciesAddTrait": "+ Add trait",
     "customSpeciesTraitName": "Trait name",
-    "customSpeciesTraitDesc": "Description"
+    "customSpeciesTraitDesc": "Description",
+    "chooseLineage": "Choose your {{lineageLabel}}",
+    "lineageSpellStat": "Spellcasting ability for lineage spells:",
+    "speciesSpells": "Species Spells",
+    "speciesSpellAlways": "always",
+    "speciesSpellAtLevel": "at level {{level}}",
+    "tieflingFixedNote": "All Tieflings know Thaumaturgy regardless of legacy.",
+    "lineageLevel1Trait": "Level 1:"
   },
   "common": {
     "edit": "Edit",
@@ -926,9 +933,9 @@
       "force": "Force"
     },
     "armorTypes": {
-      "light": "Ligera",
-      "medium": "Media",
-      "heavy": "Pesada"
+      "light": "Light",
+      "medium": "Medium",
+      "heavy": "Heavy"
     },
     "stats": {
       "AC": "Armor Class (AC)",
@@ -1113,7 +1120,8 @@
     "epicBoonRecommended": "Boon of Combat Prowess recommended",
     "asiPlus2": "+2 to one ability",
     "asiPlus1": "+1 to two abilities",
-    "spellsToLearn": "Choose {{count}} spell(s) to learn"
+    "spellsToLearn": "Choose {{count}} spell(s) to learn",
+    "newSpeciesSpell": "New species spell: {{name}} ({{level}}, always prepared)"
   },
   "levelDown": {
     "title": "Go back to level {{level}}?",
