@@ -82,21 +82,21 @@ export function useCharacter(charId) {
 
   function toggleSaveProficiency(attr) {
     update(prev => {
-      const has = prev.saveProficiencies.includes(attr);
-      return {
-        ...prev,
-        saveProficiencies: has
-          ? prev.saveProficiencies.filter(a => a !== attr)
-          : [...prev.saveProficiencies, attr],
-      };
+      const half = (prev.saveHalfProficiency || []).includes(attr);
+      const prof = prev.saveProficiencies.includes(attr);
+      if (!half && !prof) return { ...prev, saveHalfProficiency: [...(prev.saveHalfProficiency || []), attr] };
+      if (half) return { ...prev, saveHalfProficiency: (prev.saveHalfProficiency || []).filter(a => a !== attr), saveProficiencies: [...prev.saveProficiencies, attr] };
+      return { ...prev, saveProficiencies: prev.saveProficiencies.filter(a => a !== attr) };
     });
   }
 
   function toggleSkillProficiency(skillName) {
     update(prev => {
+      const half = (prev.skillHalfProficiency || []).includes(skillName);
       const prof = prev.skillProficiencies.includes(skillName);
       const exp = prev.skillExpertise.includes(skillName);
-      if (!prof) return { ...prev, skillProficiencies: [...prev.skillProficiencies, skillName] };
+      if (!half && !prof) return { ...prev, skillHalfProficiency: [...(prev.skillHalfProficiency || []), skillName] };
+      if (half) return { ...prev, skillHalfProficiency: (prev.skillHalfProficiency || []).filter(s => s !== skillName), skillProficiencies: [...prev.skillProficiencies, skillName] };
       if (!exp)  return { ...prev, skillExpertise: [...prev.skillExpertise, skillName] };
       return {
         ...prev,

@@ -408,9 +408,12 @@ Mai hardcodare emoji direttamente nei componenti — aggiungere prima la voce in
 
 | Sintassi | Effetto |
 |----------|---------|
-| `[STR]` `[DEX]` … `[PRO]` | Modificatore caratteristica o bonus competenza (risolto dinamicamente) |
-| `[LVL:1d6,5:1d8]` | Valore scalante per livello |
-| `+2@[AC]` | Badge bonus equipaggiamento inline |
+| `[STR]` `[DEX]` … `[PRO]` `[LVL]` `[LVL/2]` | Modificatore caratteristica, bonus competenza, livello (risolto dinamicamente) |
+| `[LVL=1:1d6,5:1d8]` | Valore scalante per livello (da lv 1 → 1d6, da lv 5 → 1d8) |
+| `+2@[AC]` | Badge bonus equipaggiamento inline (valore statico) |
+| `+[PRO]@[AC]` | Badge bonus dinamico — il valore si risolve da formula |
+| `+1@[SAV-STR]` | Bonus al tiro salvezza Forza |
+| `+1@[SK-ATH]` | Bonus all'abilità Atletica |
 | `[3]` | Counter statico: 3 pip cliccabili |
 | `[countCHA]` | Counter dinamico: numero di pip = mod. CHA (min 1) |
 | `[countPRO]` | Counter dinamico: pip = bonus competenza |

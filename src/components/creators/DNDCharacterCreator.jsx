@@ -1,11 +1,12 @@
 ﻿import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Icon } from '../../config/icons';
-import { ABILITIES, SKILLS, HIT_DICE, SPELLCASTING_CLASS } from '../../data/systems/dnd5e2024/mechanics';
+import { ABILITIES, SKILLS, HIT_DICE, SPELLCASTING_CLASS, SLOT_TABLE } from '../../data/systems/dnd5e2024/mechanics';
 import AlignmentPicker from '../AlignmentPicker';
 import { CLASS_FEATURES, CLASS_SAVE_PROFS, CLASS_SKILL_COUNT, CLASS_SKILL_OPTIONS } from '../../data/systems/dnd5e2024/classes';
 import { SPECIES_FEATURES, getAutoFeatures, getSpeciesData } from '../../data/systems/dnd5e2024/species';
 import { BACKGROUND_FEATURES } from '../../data/systems/dnd5e2024/backgrounds';
+import { ORIGIN_FEATS } from '../../data/systems/dnd5e2024/feats';
 import dataManager from '../../data/dataManager';
 
 // SRD 5.5e (2024) — specie: solo tratti, nessun bonus caratteristica
@@ -31,7 +32,7 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
   const { t } = useTranslation();
   const STEPS = [
     t('creator.steps.identity'),
-    t('creator.steps.class'),
+    t('creator.steps.classAndBg', 'Class & BG'),
     t('creator.steps.stats'),
     t('creator.steps.proficiencies'),
     t('creator.steps.summary'),
@@ -61,6 +62,7 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
     customBgTool: '',
     customBgLanguage: '',
     customBgFeat: '',
+    customBgFeatId: '',
     customBgEquipOption: 'gold',
     customBgEquipItems: '',
     speciesLegacy: null,
@@ -200,10 +202,11 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
     }
     let bgFeats = bgName ? getAutoFeatures('background', bgName, BACKGROUND_FEATURES) : [];
     if (data.charBackground === CUSTOM_SENTINEL && data.customBgFeat) {
+      const knownFeat = ORIGIN_FEATS.find(f => f.name === data.customBgFeat);
       bgFeats = [...bgFeats, {
         id: 'bg_custom_feat',
         name: data.customBgFeat,
-        desc: '',
+        desc: knownFeat?.desc || '',
         source: data.customBackground,
         sourceType: 'background',
       }];
@@ -293,6 +296,9 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
       speciesLegacy: data.speciesLegacy,
       speciesSpellStat: spellStat,
       resistances: chosenLegacy?.resistance ? [chosenLegacy.resistance] : [],
+      spellSlots: SPELLCASTING_CLASS[selectedCls]
+        ? (SLOT_TABLE[1] || []).map(max => ({ max, used: 0 }))
+        : [],
     };
   }
 
@@ -301,11 +307,12 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
   const charClsDisplay  = data.charClass === CUSTOM_SENTINEL ? (data.customClass || '') : (data.charClass ? t(`data.classes.${data.charClass}`, data.charClass) : '');
 
   const canNextStep = [
-    data.charName && data.charRace && data.charBackground &&
+    data.charName && data.charRace &&
       (data.charRace !== CUSTOM_SENTINEL || data.customSpecies) &&
-      (data.charBackground !== CUSTOM_SENTINEL || data.customBackground) &&
       (!selectedSpeciesData?.legacies || data.speciesLegacy),
-    data.charClass && (data.charClass !== CUSTOM_SENTINEL || data.customClass),
+    data.charClass && (data.charClass !== CUSTOM_SENTINEL || data.customClass) &&
+      data.charBackground &&
+      (data.charBackground !== CUSTOM_SENTINEL || data.customBackground),
     true, true, true,
   ][step];
 
@@ -333,7 +340,7 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
             <div className="creator-section">
               <div className="field" style={{ marginBottom: 12 }}>
                 <label>{t('creator.nameLabel')}</label>
-                <input value={data.charName} onChange={e => patch({ charName: e.target.value })} placeholder="Es. Aldric Voss" autoFocus />
+                <input value={data.charName} onChange={e => patch({ charName: e.target.value })} placeholder={t('creator.charNamePlaceholder')} autoFocus />
               </div>
               <div className="field" style={{ marginBottom: 16 }}>
                 <label>{t('identity.alignment')}</label>
@@ -355,7 +362,7 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
                             <label>{t('creator.customSpeciesName', 'Species name')}</label>
                             <input value={data.customSpecies} autoFocus
                               onChange={e => patch({ customSpecies: e.target.value })}
-                              placeholder="Es. Mezzelfo, Genasi…" />
+                              placeholder={t('creator.customSpeciesNamePlaceholder')} />
                           </div>
                           <div className="field-row" style={{ marginTop: 8, alignItems: 'flex-end', gap: 8 }}>
                             <div className="field" style={{ flex: '0 0 90px' }}>
@@ -387,7 +394,7 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
                                     <label>{t('creator.customSpeciesTraitName', 'Trait name')}</label>
                                     <input value={trait.name}
                                       onChange={e => patch({ customSpeciesTraits: data.customSpeciesTraits.map((tr, j) => j === ti ? { ...tr, name: e.target.value } : tr) })}
-                                      placeholder="Es. Passo fatato…" />
+                                      placeholder={t('creator.customSpeciesTraitNamePlaceholder')} />
                                   </div>
                                   <button className="dh-wm-remove-btn" style={{ marginTop: 18, flexShrink: 0 }}
                                     onClick={() => patch({ customSpeciesTraits: data.customSpeciesTraits.filter((_, j) => j !== ti) })}>
@@ -399,7 +406,7 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
                                   <textarea className="notes-area" style={{ minHeight: 44, fontSize: '0.8rem' }}
                                     value={trait.desc}
                                     onChange={e => patch({ customSpeciesTraits: data.customSpeciesTraits.map((tr, j) => j === ti ? { ...tr, desc: e.target.value } : tr) })}
-                                    placeholder="Descrizione del tratto…" />
+                                    placeholder={t('creator.customSpeciesTraitDescPlaceholder')} />
                                 </div>
                               </div>
                             ))}
@@ -484,255 +491,10 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
                 </div>
               )}
 
-              {/* BACKGROUND */}
-              <div className="creator-subtitle" style={{ marginTop: 16 }}>{t('creator.backgroundTitle')}</div>
-              <div className="creator-grid">
-                {bgList.map(b => {
-                  const isCustom = (b.id || b.name) === CUSTOM_SENTINEL;
-                  const selected = data.charBackground === (b.id || b.name);
-                  return (
-                    <div key={b.id || b.name} className={`creator-card ${selected ? 'selected' : ''}`}
-                      onClick={() => patch({ charBackground: b.id || b.name, bgAsi: { STR:0, DEX:0, CON:0, INT:0, WIS:0, CHA:0 }, bgEquipmentChoice: null })}>
-                      <div className="creator-card-name">{isCustom ? b.label : t(`data.backgrounds.${b.id || b.name}`, b.name)}</div>
-                      {!isCustom && (
-                        <div className="creator-card-sub">
-                          {b.skills.map(s => t(`data.skills.${s}`, s)).join(', ')} · {b.feat}
-                        </div>
-                      )}
-                      {isCustom && selected && (
-                        <div className="creator-custom-form" onClick={e => e.stopPropagation()}>
-                          <div className="field" style={{ marginTop: 6 }}>
-                            <label>{t('creator.customBgName', 'Background name')}</label>
-                            <input value={data.customBackground} autoFocus
-                              onChange={e => patch({ customBackground: e.target.value })}
-                              placeholder="Es. Pirata, Cacciatore di mostri…" />
-                          </div>
-
-                          {/* ASI */}
-                          <div style={{ marginTop: 10 }}>
-                            <div style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: 6 }}>
-                              {t('creator.customBgAsiLabel', 'Ability Score Improvements')}
-                            </div>
-                            <div style={{ display: 'flex', gap: 12, marginBottom: 8 }}>
-                              {[['A', t('creator.customBgAsiOptionA', '+2 / +1')], ['B', t('creator.customBgAsiOptionB', '+1 / +1 / +1')]].map(([opt, lbl]) => (
-                                <label key={opt} style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', fontSize: '0.8rem' }}>
-                                  <input type="radio" name="bg-asi-opt" value={opt}
-                                    checked={data.customBgAsiOption === opt}
-                                    onChange={() => patch({
-                                      customBgAsiOption: opt,
-                                      bgAsi: { STR:0, DEX:0, CON:0, INT:0, WIS:0, CHA:0 },
-                                      customBgAsiA2: '', customBgAsiA1: '',
-                                      customBgAsiB: ['', '', ''],
-                                    })} />
-                                  {lbl}
-                                </label>
-                              ))}
-                            </div>
-                            {data.customBgAsiOption === 'A' ? (
-                              <div className="field-row" style={{ gap: 8 }}>
-                                <div className="field">
-                                  <label style={{ fontSize: '0.733rem' }}>{t('creator.customBgAsiPlus2', '+2 ability')}</label>
-                                  <select value={data.customBgAsiA2} onChange={e => {
-                                    const a2 = e.target.value;
-                                    const a1 = a2 === data.customBgAsiA1 ? '' : data.customBgAsiA1;
-                                    const asi = { STR:0, DEX:0, CON:0, INT:0, WIS:0, CHA:0 };
-                                    if (a2) asi[a2] = 2;
-                                    if (a1) asi[a1] = 1;
-                                    patch({ customBgAsiA2: a2, customBgAsiA1: a1, bgAsi: asi });
-                                  }}>
-                                    <option value="">—</option>
-                                    {ABILITIES.map(a => <option key={a} value={a}>{t(`data.abilityAbbr.${a}`, a)}</option>)}
-                                  </select>
-                                </div>
-                                <div className="field">
-                                  <label style={{ fontSize: '0.733rem' }}>{t('creator.customBgAsiPlus1', '+1 ability')}</label>
-                                  <select value={data.customBgAsiA1} onChange={e => {
-                                    const a1 = e.target.value;
-                                    const a2 = data.customBgAsiA2;
-                                    const asi = { STR:0, DEX:0, CON:0, INT:0, WIS:0, CHA:0 };
-                                    if (a2) asi[a2] = 2;
-                                    if (a1 && a1 !== a2) asi[a1] = 1;
-                                    patch({ customBgAsiA1: a1, bgAsi: asi });
-                                  }}>
-                                    <option value="">—</option>
-                                    {ABILITIES.map(a => <option key={a} value={a} disabled={a === data.customBgAsiA2}>{t(`data.abilityAbbr.${a}`, a)}</option>)}
-                                  </select>
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="field-row" style={{ gap: 8 }}>
-                                {[0, 1, 2].map(idx => (
-                                  <div key={idx} className="field">
-                                    <label style={{ fontSize: '0.733rem' }}>+1 {t(`data.abilityAbbr.${['STR','DEX','CON'][idx]}`, '')} #{idx + 1}</label>
-                                    <select value={data.customBgAsiB[idx] || ''} onChange={e => {
-                                      const nextB = [...data.customBgAsiB];
-                                      nextB[idx] = e.target.value;
-                                      const asi = { STR:0, DEX:0, CON:0, INT:0, WIS:0, CHA:0 };
-                                      [...new Set(nextB.filter(Boolean))].forEach(a => { asi[a] = 1; });
-                                      patch({ customBgAsiB: nextB, bgAsi: asi });
-                                    }}>
-                                      <option value="">—</option>
-                                      {ABILITIES.map(a => (
-                                        <option key={a} value={a} disabled={data.customBgAsiB.includes(a) && data.customBgAsiB[idx] !== a}>
-                                          {t(`data.abilityAbbr.${a}`, a)}
-                                        </option>
-                                      ))}
-                                    </select>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Skill proficiencies */}
-                          <div style={{ marginTop: 10 }}>
-                            <div style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: 4 }}>
-                              {t('creator.customBgSkillsLabel', 'Skill Proficiencies')}
-                            </div>
-                            <div className="field-row" style={{ gap: 8 }}>
-                              {[0, 1].map(si => (
-                                <div key={si} className="field">
-                                  <label style={{ fontSize: '0.733rem' }}>Skill {si + 1}</label>
-                                  <select value={data.customBgSkills[si] || ''} onChange={e => {
-                                    const next = [data.customBgSkills[0] || '', data.customBgSkills[1] || ''];
-                                    next[si] = e.target.value;
-                                    patch({ customBgSkills: next.filter(Boolean) });
-                                  }}>
-                                    <option value="">—</option>
-                                    {SKILLS.map(sk => (
-                                      <option key={sk.id} value={sk.id}
-                                        disabled={data.customBgSkills.includes(sk.id) && data.customBgSkills[si] !== sk.id}>
-                                        {t(`data.skills.${sk.id}`, sk.id)}
-                                      </option>
-                                    ))}
-                                  </select>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-
-                          {/* Tool, Language, Feat */}
-                          <div className="field-row" style={{ marginTop: 8, gap: 8 }}>
-                            <div className="field">
-                              <label>{t('creator.customBgTool', 'Tool Proficiency')}</label>
-                              <input value={data.customBgTool}
-                                onChange={e => patch({ customBgTool: e.target.value })}
-                                placeholder="Es. Attrezzi da ladro…" />
-                            </div>
-                            <div className="field">
-                              <label>{t('creator.customBgLanguage', 'Language')}</label>
-                              <input value={data.customBgLanguage}
-                                onChange={e => patch({ customBgLanguage: e.target.value })}
-                                placeholder="Es. Elfico…" />
-                            </div>
-                          </div>
-                          <div className="field" style={{ marginTop: 6 }}>
-                            <label>{t('creator.customBgFeat', 'Origin Feat')}</label>
-                            <input value={data.customBgFeat}
-                              onChange={e => patch({ customBgFeat: e.target.value })}
-                              placeholder="Es. Alert, Magic Initiate…" />
-                          </div>
-
-                          {/* Equipment */}
-                          <div style={{ marginTop: 10 }}>
-                            <div style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: 6 }}>
-                              {t('creator.customBgEquipLabel', 'Equipment')}
-                            </div>
-                            {[['gold', t('creator.customBgEquipGold', '50 GP to spend')], ['items', t('creator.customBgEquipItems', 'List specific items')]].map(([opt, lbl]) => (
-                              <label key={opt} style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: '0.8rem', marginBottom: 4 }}>
-                                <input type="radio" name="bg-equip-opt" value={opt}
-                                  checked={data.customBgEquipOption === opt}
-                                  onChange={() => patch({ customBgEquipOption: opt })} />
-                                {lbl}
-                              </label>
-                            ))}
-                            {data.customBgEquipOption === 'items' && (
-                              <textarea className="notes-area" style={{ minHeight: 44, fontSize: '0.8rem', marginTop: 4 }}
-                                value={data.customBgEquipItems}
-                                onChange={e => patch({ customBgEquipItems: e.target.value })}
-                                placeholder="Es. Piede di porco, 2 torce, 15 GP…" />
-                            )}
-                          </div>
-                        </div>
-                      )}
-                      {!isCustom && selected && (
-                        <div className="creator-traits">
-                          <div className="creator-trait" style={{ fontStyle:'italic', marginBottom:4 }}>{b.desc}</div>
-                          <div className="creator-trait">🗡 Strumento: {b.tool}</div>
-                          <div className="creator-trait">🎒 A: {b.equipA}</div>
-                          <div className="creator-trait">🎒 B: {b.equipB}</div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Equipment choice */}
-              {data.charBackground && data.charBackground !== CUSTOM_SENTINEL && selectedBg?.equipA && (
-                <div className="creator-info-box" style={{ marginTop: 12 }}>
-                  <strong>{t('creator.bgEquipTitle')}</strong>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 8 }}>
-                    {[['A', selectedBg.equipA], ['B', selectedBg.equipB]].map(([opt, desc]) => (
-                      <div key={opt}
-                        className={`creator-card ${data.bgEquipmentChoice === opt ? 'selected' : ''}`}
-                        style={{ padding: '8px 10px', cursor: 'pointer' }}
-                        onClick={() => patch({ bgEquipmentChoice: opt })}>
-                        <div className="creator-card-name" style={{ marginBottom: 2 }}>
-                          {t('creator.bgEquipOption', { opt })}
-                        </div>
-                        <div className="creator-card-sub">{desc}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* ASI dal background */}
-              {data.charBackground && data.charBackground !== CUSTOM_SENTINEL && (
-                <div className="creator-info-box" style={{ marginTop: 12 }}>
-                  <strong>{t('creator.bgAsiLabel')}</strong>
-                  {selectedBg?.abilityScores && (
-                    <span style={{ color:'var(--c-muted)', marginLeft:6 }}>
-                      {t('creator.bgAsiRecommended')} {selectedBg.abilityScores.map(a => t(`data.abilities.${a}`)).join(', ')}
-                    </span>
-                  )}
-                  {(() => {
-                    const total = Object.values(data.bgAsi).reduce((s,v) => s+v, 0);
-                    return (
-                      <div style={{ marginTop:8 }}>
-                        <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'6px 12px' }}>
-                          {ABILITIES.map(a => {
-                            const val = data.bgAsi[a];
-                            const recommended = selectedBg?.abilityScores?.includes(a);
-                            return (
-                              <div key={a} style={{ display:'flex', alignItems:'center', gap:4 }}>
-                                <span style={{ fontSize:11, minWidth:32, color: recommended ? 'var(--c-accent)' : 'var(--c-muted)', fontWeight: recommended ? 600 : 400 }}>
-                                  {t(`data.abilityAbbr.${a}`, a)}{recommended ? '★' : ''}
-                                </span>
-                                <button className="mod-btn" style={{ fontSize:11, padding:'1px 6px' }}
-                                  onClick={() => val > 0 && patch({ bgAsi: { ...data.bgAsi, [a]: val - 1 } })}>−</button>
-                                <span style={{ minWidth:22, textAlign:'center', fontSize:12, fontWeight:600, color: val > 0 ? 'var(--c-accent)' : 'var(--c-muted)' }}>
-                                  {val > 0 ? `+${val}` : '0'}
-                                </span>
-                                <button className="mod-btn" style={{ fontSize:11, padding:'1px 6px' }}
-                                  onClick={() => (val < 2 && total < 3) && patch({ bgAsi: { ...data.bgAsi, [a]: val + 1 } })}>+</button>
-                              </div>
-                            );
-                          })}
-                        </div>
-                        <div style={{ marginTop:6, fontSize:11, color: total === 3 ? 'var(--c-accent)' : 'var(--c-muted)' }}>
-                          {t('creator.bgAsiTotal', { total })} {total === 3 ? '✓' : ''}
-                        </div>
-                      </div>
-                    );
-                  })()}
-                </div>
-              )}
             </div>
           )}
 
-          {/* ── STEP 1 — Classe ── */}
+          {/* ── STEP 1 — Classe & BG ── */}
           {step === 1 && (
             <div className="creator-section">
               <div className="creator-subtitle">{t('creator.classTitle')}</div>
@@ -754,7 +516,7 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
                             <label>{t('creator.customClsName', 'Class name')}</label>
                             <input value={data.customClass} autoFocus
                               onChange={e => patch({ customClass: e.target.value })}
-                              placeholder="Es. Cavaliere, Alchimista…" />
+                              placeholder={t('creator.customClsNamePlaceholder')} />
                           </div>
                           <div className="field-row" style={{ marginTop: 8, gap: 8 }}>
                             <div className="field">
@@ -847,13 +609,253 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
                       {!isCustom && selected && (
                         <div className="creator-traits">
                           <div className="creator-trait">• {t('creator.summarySavingThrows')}: {(CLASS_SAVE_PROFS[cls] || []).map(a => t(`data.abilityAbbr.${a}`, a)).join(', ')}</div>
-                          <div className="creator-trait">• Abilità: {CLASS_SKILL_COUNT[cls] || 2} a scelta</div>
+                          <div className="creator-trait">{t('creator.clsSkillsInfo', { count: CLASS_SKILL_COUNT[cls] || 2 })}</div>
                         </div>
                       )}
                     </div>
                   );
                 })}
               </div>
+
+              {/* BACKGROUND */}
+              <div className="creator-subtitle" style={{ marginTop: 16 }}>{t('creator.backgroundTitle')}</div>
+              <div className="creator-grid">
+                {bgList.map(b => {
+                  const isCustom = (b.id || b.name) === CUSTOM_SENTINEL;
+                  const selected = data.charBackground === (b.id || b.name);
+                  return (
+                    <div key={b.id || b.name} className={`creator-card ${selected ? 'selected' : ''}`}
+                      onClick={() => patch({ charBackground: b.id || b.name, bgAsi: { STR:0, DEX:0, CON:0, INT:0, WIS:0, CHA:0 }, bgEquipmentChoice: null })}>
+                      <div className="creator-card-name">{isCustom ? b.label : t(`data.backgrounds.${b.id || b.name}`, b.name)}</div>
+                      {!isCustom && (
+                        <div className="creator-card-sub">
+                          {b.skills.map(s => t(`data.skills.${s}`, s)).join(', ')} · {b.feat}
+                        </div>
+                      )}
+                      {isCustom && selected && (
+                        <div className="creator-custom-form" onClick={e => e.stopPropagation()}>
+                          <div className="field" style={{ marginTop: 6 }}>
+                            <label>{t('creator.customBgName', 'Background name')}</label>
+                            <input value={data.customBackground} autoFocus
+                              onChange={e => patch({ customBackground: e.target.value })}
+                              placeholder={t('creator.customBgNamePlaceholder')} />
+                          </div>
+                          <div style={{ marginTop: 10 }}>
+                            <div style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: 4 }}>
+                              {t('creator.customBgSkillsLabel', 'Skill Proficiencies')}
+                            </div>
+                            <div className="field-row" style={{ gap: 8 }}>
+                              {[0, 1].map(si => (
+                                <div key={si} className="field">
+                                  <label style={{ fontSize: '0.733rem' }}>Skill {si + 1}</label>
+                                  <select value={data.customBgSkills[si] || ''} onChange={e => {
+                                    const next = [data.customBgSkills[0] || '', data.customBgSkills[1] || ''];
+                                    next[si] = e.target.value;
+                                    patch({ customBgSkills: next.filter(Boolean) });
+                                  }}>
+                                    <option value="">—</option>
+                                    {SKILLS.map(sk => (
+                                      <option key={sk.id} value={sk.id}
+                                        disabled={data.customBgSkills.includes(sk.id) && data.customBgSkills[si] !== sk.id}>
+                                        {t(`data.skills.${sk.id}`, sk.id)}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="field-row" style={{ marginTop: 8, gap: 8 }}>
+                            <div className="field">
+                              <label>{t('creator.customBgTool', 'Tool Proficiency')}</label>
+                              <input value={data.customBgTool}
+                                onChange={e => patch({ customBgTool: e.target.value })}
+                                placeholder={t('creator.customBgToolPlaceholder')} />
+                            </div>
+                            <div className="field">
+                              <label>{t('creator.customBgLanguage', 'Language')}</label>
+                              <input value={data.customBgLanguage}
+                                onChange={e => patch({ customBgLanguage: e.target.value })}
+                                placeholder={t('creator.customBgLanguagePlaceholder')} />
+                            </div>
+                          </div>
+                          <div style={{ marginTop: 8 }}>
+                            <label style={{ fontSize: 12, fontWeight: 500, color: 'var(--c-muted)', display: 'block', marginBottom: 4 }}>
+                              {t('creator.customBgFeat', 'Origin Feat')}
+                            </label>
+                            <select value={data.customBgFeatId} onChange={e => {
+                              const id = e.target.value;
+                              const feat = ORIGIN_FEATS.find(f => f.id === id);
+                              patch({ customBgFeatId: id, customBgFeat: feat ? feat.name : '' });
+                            }}>
+                              <option value="">—</option>
+                              {ORIGIN_FEATS.map(feat => (
+                                <option key={feat.id} value={feat.id}>{feat.name}</option>
+                              ))}
+                              <option value={CUSTOM_SENTINEL}>{t('creator.customBgFeatCustom', 'Custom…')}</option>
+                            </select>
+                            {data.customBgFeatId && data.customBgFeatId !== CUSTOM_SENTINEL && (() => {
+                              const feat = ORIGIN_FEATS.find(f => f.id === data.customBgFeatId);
+                              return feat ? <span className="feat-inline-desc" style={{ marginTop: 4 }}>{feat.desc}</span> : null;
+                            })()}
+                            {data.customBgFeatId === CUSTOM_SENTINEL && (
+                              <input style={{ marginTop: 6 }}
+                                value={data.customBgFeat}
+                                onChange={e => patch({ customBgFeat: e.target.value })}
+                                placeholder={t('creator.customBgFeatCustomPlaceholder')}
+                                autoFocus />
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      {!isCustom && selected && (
+                        <div className="creator-traits">
+                          <div className="creator-trait" style={{ fontStyle:'italic', marginBottom:4 }}>{b.desc}</div>
+                          {b.feat && (() => {
+                            const knownFeat = ORIGIN_FEATS.find(f => b.feat.startsWith(f.name));
+                            return (
+                              <div className="creator-trait">
+                                ✨ {t('creator.originFeatLabel', 'Origin Feat')}: <strong>{b.feat}</strong>
+                                {knownFeat && <span className="feat-inline-desc">{knownFeat.desc}</span>}
+                              </div>
+                            );
+                          })()}
+                          <div className="creator-trait">🗡 {t('creator.profBgTool')} {b.tool}</div>
+                          <div className="creator-trait">🎒 {t('creator.bgEquipOption', { opt: 'A' })} {b.equipA}</div>
+                          <div className="creator-trait">🎒 {t('creator.bgEquipOption', { opt: 'B' })} {b.equipB}</div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Custom background — Starting Equipment */}
+              {data.charBackground === CUSTOM_SENTINEL && (
+                <div className="creator-info-box" style={{ marginTop: 12 }}>
+                  <strong>{t('creator.bgEquipTitle')}</strong>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 8 }}>
+                    {[['gold', t('creator.customBgEquipGold', '50 GP to spend')], ['items', t('creator.customBgEquipItems', 'List specific items')]].map(([opt, lbl]) => (
+                      <div key={opt}
+                        className={`creator-card ${data.customBgEquipOption === opt ? 'selected' : ''}`}
+                        style={{ padding: '8px 10px', cursor: 'pointer' }}
+                        onClick={() => patch({ customBgEquipOption: opt })}>
+                        <div className="creator-card-name">{lbl}</div>
+                      </div>
+                    ))}
+                    {data.customBgEquipOption === 'items' && (
+                      <textarea className="notes-area" style={{ minHeight: 44, fontSize: '0.8rem', marginTop: 4 }}
+                        value={data.customBgEquipItems}
+                        onChange={e => patch({ customBgEquipItems: e.target.value })}
+                        placeholder={t('creator.customBgEquipItemsPlaceholder')} />
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Custom background — ASI */}
+              {data.charBackground === CUSTOM_SENTINEL && (
+                <div className="creator-info-box" style={{ marginTop: 12 }}>
+                  <strong>{t('creator.bgAsiLabel')}</strong>
+                  {(() => {
+                    const total = Object.values(data.bgAsi).reduce((s, v) => s + v, 0);
+                    return (
+                      <>
+                        <p className="hint-text" style={{ margin: '6px 0 8px' }}>
+                          {t('levelUp.asiPointsLeft', { spent: total, total: 3 })}
+                          {total === 3 && ' ✓'}
+                        </p>
+                        <div className="creator-abilities">
+                          {ABILITIES.map(a => {
+                            const val = data.bgAsi[a];
+                            const canIncrease = val < 2 && total < 3;
+                            const canDecrease = val > 0;
+                            return (
+                              <div key={a} className="creator-ability-row">
+                                <div className="creator-ability-name">{t(`data.abilities.${a}`)}</div>
+                                <div className="creator-ability-controls">
+                                  <button className="mod-btn" disabled={!canDecrease}
+                                    onClick={() => canDecrease && patch({ bgAsi: { ...data.bgAsi, [a]: val - 1 } })}>−</button>
+                                  <span className="creator-ability-val">{val > 0 ? `+${val}` : '0'}</span>
+                                  <button className="mod-btn" disabled={!canIncrease}
+                                    onClick={() => canIncrease && patch({ bgAsi: { ...data.bgAsi, [a]: val + 1 } })}>+</button>
+                                </div>
+                                {val > 0 && <div className="creator-race-bonus">+{val}</div>}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {/* Equipment choice */}
+              {data.charBackground && data.charBackground !== CUSTOM_SENTINEL && selectedBg?.equipA && (
+                <div className="creator-info-box" style={{ marginTop: 12 }}>
+                  <strong>{t('creator.bgEquipTitle')}</strong>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 8 }}>
+                    {[['A', selectedBg.equipA], ['B', selectedBg.equipB]].map(([opt, desc]) => (
+                      <div key={opt}
+                        className={`creator-card ${data.bgEquipmentChoice === opt ? 'selected' : ''}`}
+                        style={{ padding: '8px 10px', cursor: 'pointer' }}
+                        onClick={() => patch({ bgEquipmentChoice: opt })}>
+                        <div className="creator-card-name" style={{ marginBottom: 2 }}>
+                          {t('creator.bgEquipOption', { opt })}
+                        </div>
+                        <div className="creator-card-sub">{desc}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* ASI dal background */}
+              {data.charBackground && data.charBackground !== CUSTOM_SENTINEL && (
+                <div className="creator-info-box" style={{ marginTop: 12 }}>
+                  <strong>{t('creator.bgAsiLabel')}</strong>
+                  {selectedBg?.abilityScores && (
+                    <span style={{ color: 'var(--c-muted)', marginLeft: 6 }}>
+                      {t('creator.bgAsiRecommended')} {selectedBg.abilityScores.map(a => t(`data.abilities.${a}`)).join(', ')}
+                    </span>
+                  )}
+                  {(() => {
+                    const total = Object.values(data.bgAsi).reduce((s, v) => s + v, 0);
+                    return (
+                      <>
+                        <p className="hint-text" style={{ margin: '6px 0 8px' }}>
+                          {t('levelUp.asiPointsLeft', { spent: total, total: 3 })}
+                          {total === 3 && ' ✓'}
+                        </p>
+                        <div className="creator-abilities">
+                          {ABILITIES.map(a => {
+                            const val = data.bgAsi[a];
+                            const recommended = selectedBg?.abilityScores?.includes(a);
+                            const canIncrease = val < 2 && total < 3;
+                            const canDecrease = val > 0;
+                            return (
+                              <div key={a} className="creator-ability-row">
+                                <div className="creator-ability-name" style={{ color: recommended ? 'var(--c-accent)' : undefined, fontWeight: recommended ? 600 : undefined }}>
+                                  {t(`data.abilities.${a}`)}{recommended ? ' ★' : ''}
+                                </div>
+                                <div className="creator-ability-controls">
+                                  <button className="mod-btn" disabled={!canDecrease}
+                                    onClick={() => canDecrease && patch({ bgAsi: { ...data.bgAsi, [a]: val - 1 } })}>−</button>
+                                  <span className="creator-ability-val">{val > 0 ? `+${val}` : '0'}</span>
+                                  <button className="mod-btn" disabled={!canIncrease}
+                                    onClick={() => canIncrease && patch({ bgAsi: { ...data.bgAsi, [a]: val + 1 } })}>+</button>
+                                </div>
+                                {val > 0 && <div className="creator-race-bonus">+{val}</div>}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+              )}
             </div>
           )}
 
@@ -926,9 +928,10 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
             <div className="creator-section">
               {selectedBg && (
                 <div className="creator-info-box">
-                  <strong>{selectedBg ? t(`data.backgrounds.${data.charBackground}`, data.charBackground) : data.charBackground}:</strong> comp. automatiche in {selectedBg.skills.map(s => t(`data.skills.${s}`, s)).join(' e ')}.
-                  {selectedBg.tool && <> · Strumento: {selectedBg.tool}.</>}
-                  {selectedBg.feat && <> · Talento Origin: <strong>{selectedBg.feat}</strong>.</>}
+                  <strong>{t(`data.backgrounds.${data.charBackground}`, data.charBackground)}:</strong>{' '}
+                  {t('creator.profBgAutoSkills', { skills: selectedBg.skills.map(s => t(`data.skills.${s}`, s)).join(', ') })}
+                  {selectedBg.tool && <> · {t('creator.profBgTool')} {selectedBg.tool}.</>}
+                  {selectedBg.feat && <> · {t('creator.profBgFeat')} <strong>{selectedBg.feat}</strong>.</>}
                 </div>
               )}
               <div className="creator-subtitle">

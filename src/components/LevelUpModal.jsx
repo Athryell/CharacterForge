@@ -1,11 +1,25 @@
 ﻿import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DND_CLASSES, SUBCLASS_DATA } from '../data/systems/dnd5e2024/classes';
-import { ABILITIES } from '../data/systems/dnd5e2024/mechanics';
+import { ABILITIES, SKILLS } from '../data/systems/dnd5e2024/mechanics';
 import { getSpeciesData } from '../data/systems/dnd5e2024/species';
+import { ALL_DND_FEATS } from '../data/systems/dnd5e2024/feats';
 import { Icon } from '../config/icons';
 
 const ABILITY_LABELS = { STR: 'STR', DEX: 'DEX', CON: 'CON', INT: 'INT', WIS: 'WIS', CHA: 'CHA' };
+
+const FIGHTING_STYLE_CLASSES = ['Fighter', 'Paladin', 'Ranger'];
+
+function getAvailableFeats(targetLevel, charClass, existingFeatIds, isSpellcaster) {
+  return ALL_DND_FEATS.filter(feat => {
+    if (feat.id === 'ability_score_improvement') return false;
+    if (feat.category === 'epicBoon' && targetLevel < 19) return false;
+    if (feat.category === 'fightingStyle' && !FIGHTING_STYLE_CLASSES.includes(charClass)) return false;
+    if (feat.id === 'boon_spell_recall' && !isSpellcaster) return false;
+    if (!feat.repeatable && existingFeatIds.has(feat.id)) return false;
+    return true;
+  });
+}
 
 export default function LevelUpModal({ currentLevel, charClass, charState, onComplete, onCancel }) {
   const { t } = useTranslation();
@@ -46,6 +60,15 @@ export default function LevelUpModal({ currentLevel, charClass, charState, onCom
   }, [ld, subclassLevelFeatures, customSubclassFeatures]);
   const choiceFeatures = useMemo(() => (ld.features || []).filter(f => !f.auto), [ld]);
   const isSpellcaster = !!classData?.spellcasting;
+
+  const existingFeatIds = useMemo(
+    () => new Set((charState.feats || []).map(f => f.id)),
+    [charState.feats]
+  );
+  const availableFeats = useMemo(
+    () => getAvailableFeats(targetLevel, charClass, existingFeatIds, isSpellcaster),
+    [targetLevel, charClass, existingFeatIds, isSpellcaster]
+  );
 
   // Species spells that unlock at this level
   const newSpeciesSpells = useMemo(() => {
@@ -93,11 +116,11 @@ export default function LevelUpModal({ currentLevel, charClass, charState, onCom
 
   // ASI step
   const [asiType, setAsiType] = useState('asi');
-  const [asiMode, setAsiMode] = useState('plus2');
-  const [asiPlus2, setAsiPlus2] = useState('STR');
-  const [asiPlus1A, setAsiPlus1A] = useState('STR');
-  const [asiPlus1B, setAsiPlus1B] = useState('DEX');
-  const [featName, setFeatName] = useState('');
+  const [asiDeltas, setAsiDeltas] = useState({ STR: 0, DEX: 0, CON: 0, INT: 0, WIS: 0, CHA: 0 });
+  const [selectedFeat, setSelectedFeat] = useState(null);
+  const [customFeatName, setCustomFeatName] = useState('');
+  const [featAsiChoice, setFeatAsiChoice] = useState('');
+  const [featChoices, setFeatChoices] = useState({});
   const [epicBoonName, setEpicBoonName] = useState('');
 
   function rollDie() {
@@ -117,6 +140,12 @@ export default function LevelUpModal({ currentLevel, charClass, charState, onCom
         }
         return c.selected || c.custom?.trim();
       });
+    }
+    if (currentStep === 'asi' && asiType === 'feat') {
+      if (!selectedFeat) return false;
+      if (selectedFeat.id === '__custom__' && !customFeatName.trim()) return false;
+      if (selectedFeat.asi && typeof selectedFeat.asi === 'object' && !featAsiChoice) return false;
+      return true;
     }
     return true;
   }
@@ -161,9 +190,15 @@ export default function LevelUpModal({ currentLevel, charClass, charState, onCom
 
     let asiObj = null, featObj = null, epicBoonObj = null;
     if (ld.asi) {
-      if (asiType === 'feat') { featObj = featName; }
-      else if (asiMode === 'plus2') { asiObj = { [asiPlus2]: 2 }; }
-      else { asiObj = { [asiPlus1A]: (asiPlus1A === asiPlus1B ? 2 : 1), ...(asiPlus1A !== asiPlus1B ? { [asiPlus1B]: 1 } : {}) }; }
+      if (asiType === 'feat') {
+        const name = selectedFeat?.id === '__custom__'
+          ? customFeatName.trim()
+          : (selectedFeat?.name || '');
+        if (name) featObj = name;
+      } else {
+        const nonZero = Object.fromEntries(Object.entries(asiDeltas).filter(([, v]) => v > 0));
+        if (Object.keys(nonZero).length > 0) asiObj = nonZero;
+      }
     } else if (ld.epicBoon) {
       epicBoonObj = epicBoonName;
     }
@@ -190,7 +225,7 @@ export default function LevelUpModal({ currentLevel, charClass, charState, onCom
   }
 
   const changes = useMemo(buildChanges, // eslint-disable-next-line react-hooks/exhaustive-deps
-    [hpGained, autoFeatures, choiceFeatures, choices, asiType, asiMode, asiPlus2, asiPlus1A, asiPlus1B, featName, epicBoonName, ld, subclassName, newSpeciesSpells]);
+    [hpGained, autoFeatures, choiceFeatures, choices, asiType, asiDeltas, selectedFeat, customFeatName, featAsiChoice, epicBoonName, ld, subclassName, newSpeciesSpells]);
 
   function handleComplete() {
     window.umami?.track('level-up', { class: charClass, level: targetLevel });
@@ -383,58 +418,119 @@ export default function LevelUpModal({ currentLevel, charClass, charState, onCom
                     ))}
                   </div>
 
-                  {asiType === 'asi' && (
-                    <>
-                      <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
-                        {['plus2', 'plus1'].map(opt => (
-                          <label key={opt} style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
-                            <input type="radio" checked={asiMode === opt} onChange={() => setAsiMode(opt)} />
-                            {opt === 'plus2' ? t('levelUp.asiPlus2') : t('levelUp.asiPlus1')}
-                          </label>
-                        ))}
-                      </div>
-                      {asiMode === 'plus2' && (
-                        <div className="field">
-                          <label>Ability (+2)</label>
-                          <select value={asiPlus2} onChange={e => setAsiPlus2(e.target.value)}>
-                            {ABILITIES.map(a => (
-                              <option key={a} value={a}>{ABILITY_LABELS[a]} ({charState.abilities?.[a] || 10} → {Math.min(20, (charState.abilities?.[a] || 10) + 2)})</option>
-                            ))}
-                          </select>
+                  {asiType === 'asi' && (() => {
+                    const totalDelta = Object.values(asiDeltas).reduce((s, v) => s + v, 0);
+                    return (
+                      <>
+                        <p className="hint-text" style={{ marginBottom: 10 }}>
+                          {t('levelUp.asiPointsLeft', { spent: totalDelta, total: 2 })}
+                          {totalDelta === 2 && ' ✓'}
+                        </p>
+                        <div className="creator-abilities">
+                          {ABILITIES.map(attr => {
+                            const current = charState.abilities?.[attr] || 10;
+                            const delta = asiDeltas[attr];
+                            const newVal = Math.min(20, current + delta);
+                            const mod = Math.floor((newVal - 10) / 2);
+                            const canIncrease = totalDelta < 2 && newVal < 20;
+                            const canDecrease = delta > 0;
+                            return (
+                              <div key={attr} className="creator-ability-row">
+                                <div className="creator-ability-name">{t(`data.abilities.${attr}`)}</div>
+                                <div className="creator-ability-controls">
+                                  <button className="mod-btn" disabled={!canDecrease}
+                                    onClick={() => canDecrease && setAsiDeltas(prev => ({ ...prev, [attr]: prev[attr] - 1 }))}>−</button>
+                                  <span className="creator-ability-val">{current}</span>
+                                  <button className="mod-btn" disabled={!canIncrease}
+                                    onClick={() => canIncrease && setAsiDeltas(prev => ({ ...prev, [attr]: prev[attr] + 1 }))}>+</button>
+                                </div>
+                                {delta > 0 && <div className="creator-race-bonus">+{delta}</div>}
+                                <div className="creator-ability-final">
+                                  <span className="creator-ability-total">{newVal}</span>
+                                  <span className="creator-ability-mod">{mod >= 0 ? `+${mod}` : `${mod}`}</span>
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
-                      )}
-                      {asiMode === 'plus1' && (
-                        <div className="grid-2">
-                          <div className="field">
-                            <label>First ability (+1)</label>
-                            <select value={asiPlus1A} onChange={e => setAsiPlus1A(e.target.value)}>
-                              {ABILITIES.map(a => (
-                                <option key={a} value={a}>{ABILITY_LABELS[a]} ({charState.abilities?.[a] || 10} → {Math.min(20, (charState.abilities?.[a] || 10) + (a === asiPlus1B ? 2 : 1))})</option>
-                              ))}
-                            </select>
-                          </div>
-                          <div className="field">
-                            <label>Second ability (+1)</label>
-                            <select value={asiPlus1B} onChange={e => setAsiPlus1B(e.target.value)}>
-                              {ABILITIES.map(a => (
-                                <option key={a} value={a}>{ABILITY_LABELS[a]} ({charState.abilities?.[a] || 10} → {Math.min(20, (charState.abilities?.[a] || 10) + (a === asiPlus1A ? 2 : 1))})</option>
-                              ))}
-                            </select>
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  )}
+                      </>
+                    );
+                  })()}
 
                   {asiType === 'feat' && (
-                    <>
-                      <div className="field">
-                        <label>{t('levelUp.featPlaceholder')}</label>
-                        <input value={featName} onChange={e => setFeatName(e.target.value)}
-                          placeholder="War Caster, Alert, Lucky..." autoFocus />
+                    <div className="feat-selector">
+                      {availableFeats.map(feat => {
+                        const isSelected = selectedFeat?.id === feat.id;
+                        return (
+                          <div key={feat.id}
+                            className={`feat-card${isSelected ? ' selected' : ''}`}
+                            onClick={() => { setSelectedFeat(feat); setFeatAsiChoice(''); setFeatChoices({}); }}>
+                            <div className="feat-card-header">
+                              <span className="feat-name">{feat.name}</span>
+                              <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+                                {feat.repeatable && (
+                                  <span className="feat-badge">{t('feats.repeatable', 'Repeatable')}</span>
+                                )}
+                                {feat.asi && typeof feat.asi === 'object' && (
+                                  <span className="feat-badge asi">
+                                    +{feat.asi.amount} {feat.asi.options === 'any' ? t('feats.anyAbility', 'any') : feat.asi.options.join('/')}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            {feat.prerequisite && (
+                              <div className="feat-prereq">{t('feats.requires', 'Requires')}: {feat.prerequisite}</div>
+                            )}
+                            <div className="feat-desc">{feat.desc}</div>
+
+                            {isSelected && feat.asi && typeof feat.asi === 'object' && (
+                              <div className="feat-asi-picker" onClick={e => e.stopPropagation()}>
+                                <div className="feat-asi-label">{t('levelUp.featAsiLabel', 'Choose ability to increase:')}</div>
+                                <div className="feat-asi-options">
+                                  {(feat.asi.options === 'any' ? ABILITIES : feat.asi.options).map(attr => {
+                                    const current = charState.abilities?.[attr] || 10;
+                                    const max = feat.asi.max || 20;
+                                    const disabled = current >= max;
+                                    return (
+                                      <button key={attr}
+                                        className={`ability-chip${featAsiChoice === attr ? ' selected' : ''}${disabled ? ' disabled' : ''}`}
+                                        disabled={disabled}
+                                        onClick={() => !disabled && setFeatAsiChoice(attr)}>
+                                        {attr} {current}→{Math.min(max, current + feat.asi.amount)}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+
+                            {isSelected && feat.choices && (
+                              <div onClick={e => e.stopPropagation()}>
+                                <FeatChoiceForm feat={feat} choices={featChoices} onChange={setFeatChoices} t={t} />
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+
+                      <div
+                        className={`feat-card feat-card-custom${selectedFeat?.id === '__custom__' ? ' selected' : ''}`}
+                        onClick={() => { setSelectedFeat({ id: '__custom__' }); setFeatAsiChoice(''); setFeatChoices({}); }}>
+                        <div className="feat-card-header">
+                          <span className="feat-name">+ {t('levelUp.featCustom', 'Custom feat')}</span>
+                        </div>
+                        <div className="feat-desc">{t('levelUp.featCustomDesc', 'Enter a feat not in the SRD')}</div>
+                        {selectedFeat?.id === '__custom__' && (
+                          <input
+                            className="feat-custom-input"
+                            placeholder={t('levelUp.featCustomPlaceholder', 'Feat name (refer to your PHB)')}
+                            value={customFeatName}
+                            onChange={e => setCustomFeatName(e.target.value)}
+                            onClick={e => e.stopPropagation()}
+                            autoFocus />
+                        )}
                       </div>
-                      <p className="hint-text" style={{ marginTop: 4 }}>{t('levelUp.featCategories')}</p>
-                    </>
+                    </div>
                   )}
                 </>
               )}
@@ -510,4 +606,71 @@ function ExpandableFeature({ feature, noted, subclass }) {
       </div>
     </div>
   );
+}
+
+function FeatChoiceForm({ feat, choices, onChange, t }) {
+  if (feat.choices?.spellList) {
+    return (
+      <div className="feat-choices-form">
+        <div className="field" style={{ marginBottom: 8 }}>
+          <label style={{ fontSize: '0.733rem' }}>{t('feats.choiceSpellList', 'Spell list')}</label>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {feat.choices.spellList.map(list => (
+              <button key={list}
+                className={`filter-chip${choices.spellList === list ? ' active' : ''}`}
+                onClick={() => onChange(prev => ({ ...prev, spellList: list }))}>
+                {list}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="field">
+          <label style={{ fontSize: '0.733rem' }}>{t('feats.choiceSpellStat', 'Spellcasting ability')}</label>
+          <div style={{ display: 'flex', gap: 6 }}>
+            {['INT', 'WIS', 'CHA'].map(stat => (
+              <button key={stat}
+                className={`filter-chip${choices.spellcastingStat === stat ? ' active' : ''}`}
+                onClick={() => onChange(prev => ({ ...prev, spellcastingStat: stat }))}>
+                {stat}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (feat.choices?.skills) {
+    const selected = choices.skills || [];
+    const needed = feat.choices.skills;
+    return (
+      <div className="feat-choices-form">
+        <div style={{ fontSize: '0.733rem', color: 'var(--c-muted)', marginBottom: 6 }}>
+          {t('feats.choiceSkills', 'Choose {{n}} skills or tools', { n: needed })} — {selected.length}/{needed}
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 8px' }}>
+          {SKILLS.map(sk => {
+            const isSelected = selected.includes(sk.id);
+            const maxed = selected.length >= needed && !isSelected;
+            return (
+              <button key={sk.id}
+                className={`filter-chip${isSelected ? ' active' : ''}${maxed ? ' disabled' : ''}`}
+                disabled={maxed}
+                onClick={() => {
+                  if (maxed) return;
+                  onChange(prev => ({
+                    ...prev,
+                    skills: isSelected
+                      ? (prev.skills || []).filter(s => s !== sk.id)
+                      : [...(prev.skills || []), sk.id],
+                  }));
+                }}>
+                {t(`data.skills.${sk.id}`, sk.id)}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+  return null;
 }

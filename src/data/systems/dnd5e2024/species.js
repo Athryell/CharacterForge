@@ -2,6 +2,7 @@
 // Mechanical data — translatable strings in i18n/species.{lang}.json
 
 export const DND_SPECIES = [
+  { id: 'aasimar',    speed: 30 },
   { id: 'dragonborn', speed: 30 },
   { id: 'dwarf',      speed: 30 },
   {

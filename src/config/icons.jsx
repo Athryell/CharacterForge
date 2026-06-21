@@ -101,6 +101,7 @@ export const ICON_MAP = {
   'action.allChars': { emoji: '👥', lucide: Users,        label: 'All characters', alwaysLucide: true },
 
   // ── Game ──────────────────────────────────────────────────────────────────
+  'game.rest':          { emoji: '☕',  lucide: Coffee,      label: 'Rest'         },
   'game.longRest':      { emoji: '🛏',  lucide: Moon,        label: 'Long Rest'    },
   'game.shortRest':     { emoji: '🌙',  lucide: Sun,         label: 'Short Rest'   },
   'game.roll':          { emoji: '🎲',  lucide: Dices,       label: 'Roll'         },

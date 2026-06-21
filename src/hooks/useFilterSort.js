@@ -1,13 +1,40 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 // activeFilters: { [filterId]: string[] }  — empty array = "all" (no filter)
 // OR within a category, AND across categories
-export function useFilterSort({ filters = [], sorts = [], items = [], filterFn, sortFn }) {
-  const [activeFilters, setActiveFilters] = useState(() =>
-    Object.fromEntries(filters.map(f => [f.id, []]))
-  );
-  const [activeSort, setActiveSort] = useState(sorts[0]?.value || 'default');
-  const [activePanel, setActivePanel] = useState(null); // null | 'filter' | 'sort'
+// storageKey: optional string — when set, persists filter/sort state in sessionStorage
+const SESSION_PREFIX = 'cf_filtersort_';
+
+export function useFilterSort({ filters = [], sorts = [], items = [], filterFn, sortFn, storageKey }) {
+  const defaultSort = sorts[0]?.value || 'default';
+
+  const [activeFilters, setActiveFilters] = useState(() => {
+    const base = Object.fromEntries(filters.map(f => [f.id, []]));
+    if (!storageKey) return base;
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(SESSION_PREFIX + storageKey));
+      if (saved?.filters) return Object.fromEntries(filters.map(f => [f.id, saved.filters[f.id] || []]));
+    } catch {}
+    return base;
+  });
+
+  const [activeSort, setActiveSort] = useState(() => {
+    if (!storageKey) return defaultSort;
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(SESSION_PREFIX + storageKey));
+      if (saved?.sort && sorts.some(s => s.value === saved.sort)) return saved.sort;
+    } catch {}
+    return defaultSort;
+  });
+
+  const [activePanel, setActivePanel] = useState(null);
+
+  useEffect(() => {
+    if (!storageKey) return;
+    try {
+      sessionStorage.setItem(SESSION_PREFIX + storageKey, JSON.stringify({ filters: activeFilters, sort: activeSort }));
+    } catch {}
+  }, [storageKey, activeFilters, activeSort]);
 
   const hasActiveFilters = Object.values(activeFilters).some(arr => arr.length > 0);
   const hasActiveSort = activeSort !== (sorts[0]?.value || 'default');

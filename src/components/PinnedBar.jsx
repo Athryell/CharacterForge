@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Icon, ICON_MAP, useIconMode } from '../config/icons';
 import { useUnits } from '../hooks/useUnits';
@@ -48,6 +48,17 @@ export default function PinnedBar({ state, editMode, pinned, onTogglePin, onUpda
   const { iconMode } = useIconMode();
   const showRestBtns = !editMode && system === 'dnd5e2024';
   const pinnedResources = (state?.resources || []).filter(r => r.pinned);
+  const [restMenuOpen, setRestMenuOpen] = useState(false);
+  const restRef = useRef(null);
+
+  useEffect(() => {
+    if (!restMenuOpen) return;
+    function handleClick(e) {
+      if (restRef.current && !restRef.current.contains(e.target)) setRestMenuOpen(false);
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [restMenuOpen]);
 
   if (!editMode && pinned.length === 0 && !showRestBtns && pinnedResources.length === 0) return null;
 
@@ -94,17 +105,28 @@ export default function PinnedBar({ state, editMode, pinned, onTogglePin, onUpda
         </div>
       ))}
       {showRestBtns && (
-        <div className="pinned-rest-group">
-          <button className="pinned-rest-btn" onClick={onShortRest} aria-label={t('rest.short')} title={t('rest.short')}>
-            <Icon id="game.shortRest" size={13} />
-            <span className="rest-label">{t('rest.short')}</span>
-            <span className="rest-abbr">SR</span>
+        <div className="pinned-rest-group" ref={restRef}>
+          <button
+            className={`pinned-rest-btn${restMenuOpen ? ' active' : ''}`}
+            onClick={() => setRestMenuOpen(v => !v)}
+            aria-label={t('rest.rest', 'Rest')}
+            title={t('rest.rest', 'Rest')}
+          >
+            <Icon id="game.rest" size={13} />
+            <span>{t('rest.rest', 'Rest')}</span>
           </button>
-          <button className="pinned-rest-btn primary" onClick={onLongRest} aria-label={t('rest.long')} title={t('rest.long')}>
-            <Icon id="game.longRest" size={13} />
-            <span className="rest-label">{t('rest.long')}</span>
-            <span className="rest-abbr">LR</span>
-          </button>
+          {restMenuOpen && (
+            <div className="rest-dropdown">
+              <button className="rest-dropdown-item" onClick={() => { onShortRest(); setRestMenuOpen(false); }}>
+                <Icon id="game.shortRest" size={14} />
+                {t('rest.short', 'Short Rest')}
+              </button>
+              <button className="rest-dropdown-item" onClick={() => { onLongRest(); setRestMenuOpen(false); }}>
+                <Icon id="game.longRest" size={14} />
+                {t('rest.long', 'Long Rest')}
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

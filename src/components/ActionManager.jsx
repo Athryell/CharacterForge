@@ -7,6 +7,7 @@ import FilterSortBar from './FilterSortBar';
 import { useFilterSort } from '../hooks/useFilterSort';
 import { useUnits, parseSpeedFt } from '../hooks/useUnits';
 import { SCHOOLS } from '../data/systems/dnd5e2024/spells';
+import NotationTextarea from './NotationTextarea';
 
 const ACTION_TYPE_KEYS = ['action', 'bonus', 'reaction', 'free'];
 
@@ -88,7 +89,6 @@ function buildSorts(t) {
 function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag, onRemove, onEdit, onToggleHide }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
-  const [editingTags, setEditingTags] = useState(false);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState(null);
   const badgeClass = { action:'badge-action', bonus:'badge-bonus', reaction:'badge-reaction', free:'badge-free' }[action.type] || 'badge-free';
@@ -98,7 +98,7 @@ function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag, o
 
   function startEdit(e) {
     e.stopPropagation();
-    setForm({ name: action.name, type: action.type||'action', desc: action.desc||'', dice: action.dice||'' });
+    setForm({ name: action.name, type: action.type||'action', desc: action.desc||'' });
     setEditing(true);
   }
   function saveEdit(e) {
@@ -119,18 +119,14 @@ function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag, o
         <div className="action-content" style={{ flex:1 }}>
           <input value={form.name} onChange={e => setForm(f => ({...f, name: e.target.value}))}
             style={{ width:'100%', marginBottom:4, fontSize:13, fontWeight:600, background:'var(--c-bg)', color:'var(--c-ink)', border:'0.5px solid var(--c-border-mid)', borderRadius:'var(--r)', padding:'5px 8px' }} placeholder={t('actions.addFormNamePlaceholder')} autoFocus />
-          <textarea value={form.desc} onChange={e => setForm(f => ({...f, desc: e.target.value}))}
+          <NotationTextarea value={form.desc} onChange={e => setForm(f => ({...f, desc: e.target.value}))}
             className="notes-area" style={{ minHeight:48, marginBottom:4 }} placeholder={t('actions.addFormDescPlaceholder')} />
-          <input value={form.dice} onChange={e => setForm(f => ({...f, dice: e.target.value}))}
-            style={{ width:'100%', fontSize:11, background:'var(--c-bg)', color:'var(--c-ink)', border:'0.5px solid var(--c-border-mid)', borderRadius:'var(--r)', padding:'5px 8px' }} placeholder={t('actions.addFormDicePlaceholder')} />
+          <div style={{ marginTop:6 }}>
+            <TagSelector selected={action.tags||[]} allTags={allTags}
+              onChange={tags => onUpdateTags && onUpdateTags(action.id, tags)} onCreateTag={onCreateTag} />
+          </div>
           <div style={{ display:'flex', gap:6, marginTop:8, justifyContent:'space-between', alignItems:'center' }}>
             <div style={{ display:'flex', gap:6 }}>
-              {onToggleHide && (
-                <button className="icon-btn" title={isHidden ? 'Mostra' : 'Nascondi'}
-                  onClick={e => { e.stopPropagation(); onToggleHide(action.id); }}>
-                  <Icon id={isHidden ? 'action.show' : 'action.hide'} size={14} />
-                </button>
-              )}
               {onRemove && (
                 <button className="io-btn danger" onClick={e => { e.stopPropagation(); onRemove(action.id); setEditing(false); }}>{t('actions.deleteBtn')}</button>
               )}
@@ -147,13 +143,12 @@ function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag, o
 
   return (
     <div className={`action-item ${expanded ? 'expanded' : ''}${isHidden ? ' action-hidden' : ''}`}
-      onClick={() => { if (editingTags) return; setExpanded(e => !e); }}>
+      onClick={() => setExpanded(e => !e)}>
       <div className={`action-badge ${badgeClass}`}>{typeLabel}</div>
       <div className="action-content">
         <div style={{ display:'flex', alignItems:'center', gap:6 }}>
           <div className="action-name" style={{ flex:1 }}>{action.name}</div>
           {(action.tags||[]).map(tag => <TagPill key={tag} tag={tag} allTags={allTags} small />)}
-          {isHidden && <span style={{ opacity:0.5 }} title="Nascosta"><Icon id="action.hide" size={12} /></span>}
         </div>
         {expanded && (
           <div className="action-desc-full" onClick={e => e.stopPropagation()}>
@@ -163,20 +158,6 @@ function ActionItem({ action, allTags = [], onRoll, onUpdateTags, onCreateTag, o
                 {t('actions.rollLabel')} {action.dice}
               </div>
             )}
-            <div style={{ marginTop:8 }}>
-              {editingTags ? (
-                <>
-                  <TagSelector selected={action.tags||[]} allTags={allTags}
-                    onChange={tags => onUpdateTags && onUpdateTags(action.id, tags)}
-                    onCreateTag={onCreateTag} />
-                  <button className="tag-edit-btn" style={{ marginLeft:6 }} onClick={e => { e.stopPropagation(); setEditingTags(false); }}><Icon id="action.done" size={13} /> {t('actions.tagDone')}</button>
-                </>
-              ) : (
-                <button className="tag-edit-btn" onClick={e => { e.stopPropagation(); setEditingTags(true); }}>
-                  <Icon id="action.tag" size={13} /> {(action.tags||[]).length === 0 ? t('actions.addTagBtn') : t('actions.editTagBtn')}
-                </button>
-              )}
-            </div>
             <div className="item-edit-actions">
               <button className="io-btn" onClick={startEdit}><Icon id="action.editItem" size={13} /> {t('common.edit')}</button>
             </div>
@@ -276,6 +257,7 @@ export default function ActionManager({ actions = [], spells = [], allTags = [],
         (TYPE_ORDER[a.type] ?? 4) - (TYPE_ORDER[b.type] ?? 4) || a.name.localeCompare(b.name));
       return items;
     },
+    storageKey: 'actions',
   });
 
   const typeLabels = {
@@ -335,15 +317,10 @@ export default function ActionManager({ actions = [], spells = [], allTags = [],
                 {ACTION_TYPE_KEYS.map(v => <option key={v} value={v}>{typeLabels[v]}</option>)}
               </select>
             </div>
-            <div className="field">
-              <label>{t('actions.addFormDice')}</label>
-              <input value={addForm.dice} onChange={e => setAddForm(f => ({...f, dice: e.target.value}))}
-                placeholder={t('actions.addFormDicePlaceholder')} />
-            </div>
           </div>
           <div className="field" style={{ marginTop: 6 }}>
             <label>{t('actions.addFormDesc')}</label>
-            <textarea className="notes-area" style={{ minHeight: 48 }}
+            <NotationTextarea className="notes-area" style={{ minHeight: 48 }}
               value={addForm.desc} onChange={e => setAddForm(f => ({...f, desc: e.target.value}))}
               placeholder={t('actions.addFormDescPlaceholder')} />
           </div>

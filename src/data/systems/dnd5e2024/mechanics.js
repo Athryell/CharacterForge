@@ -54,9 +54,9 @@ export const SLOT_TABLE = {
 export const DEFAULT_ACTIONS = [
   {
     id: 'default_action',
-    name: 'Action',
+    name: 'Basic Actions',
     type: 'action',
-    desc: "On your turn you can: **Attack** – make a melee or ranged attack. **Dash** – gain extra movement equal to your speed. **Disengage** – your movement doesn't provoke opportunity attacks. **Dodge** – attacks against you have disadvantage; you have advantage on DEX saves. **Help** – grant an ally advantage on their next check or attack. **Hide** – make a Stealth (DEX) check. **Ready** – prepare a reaction to a trigger. **Use an Object** – interact with an item in your inventory.",
+    desc: "**Attack** – make a melee or ranged attack.\n**Dash** – gain extra movement equal to your speed.\n**Disengage** – your movement doesn't provoke opportunity attacks.\n**Dodge** – attacks against you have disadvantage; you have advantage on DEX saves.\n**Help** – grant an ally advantage on their next check or attack.\n**Hide** – make a Stealth (DEX) check.\n**Ready** – prepare a reaction to a trigger.\n**Use an Object** – interact with an item in your inventory.",
     dice: '',
   },
 ];
@@ -101,12 +101,6 @@ export function resolveResourceFormula(formula, abilities, charLevel, profBonus)
     for (const [t, v] of pairs) { if (charLevel >= t) result = v; }
     return result;
   }
-  // [ATTR+N] pattern — e.g. [CHA+1] = max(1, mod + 1)
-  const attrPlusMatch = formula.match(/^\[(STR|DEX|CON|INT|WIS|CHA)\+(\d+)\]$/);
-  if (attrPlusMatch) {
-    const mod = Math.floor(((abilities[attrPlusMatch[1]] || 10) - 10) / 2);
-    return Math.max(1, mod + parseInt(attrPlusMatch[2]));
-  }
   // [ATTR] pattern — e.g. [CHA] = max(1, mod)
   const attrMatch = formula.match(/^\[(STR|DEX|CON|INT|WIS|CHA)\]$/);
   if (attrMatch) {
@@ -130,7 +124,9 @@ export function createDefaultState() {
     charAlignment: 'Lawful Good',
     abilities: { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 },
     saveProficiencies: [],
+    saveHalfProficiency: [],
     skillProficiencies: [],
+    skillHalfProficiency: [],
     skillExpertise: [],
     hpCurrent: 10,
     hpMax: 10,

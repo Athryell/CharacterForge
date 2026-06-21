@@ -88,7 +88,7 @@ export default function DHCharacterCreator({ onComplete, onCancel }) {
             <div className="creator-section">
               <div className="field" style={{ marginBottom:12 }}>
                 <label>{t('creator.nameLabel')}</label>
-                <input value={data.charName} onChange={e => patch({ charName:e.target.value })} placeholder="Es. Rael Ashborn" autoFocus />
+                <input value={data.charName} onChange={e => patch({ charName:e.target.value })} placeholder={t('creator.charNameDHPlaceholder')} autoFocus />
               </div>
               <div className="creator-subtitle">Class</div>
               <div className="creator-grid">
@@ -184,7 +184,7 @@ export default function DHCharacterCreator({ onComplete, onCancel }) {
                   <div className="field" style={{ flex:1 }}>
                     <label>Experience {i+1}</label>
                     <input value={exp.name} onChange={e => patch({ experiences: data.experiences.map((x,j) => j===i?{...x,name:e.target.value}:x) })}
-                      placeholder="e.g. Former soldier, Herbalist..." />
+                      placeholder={t('creator.dhBgDescPlaceholder')} />
                   </div>
                   <div className="field" style={{ width:70 }}>
                     <label>Modifier</label>

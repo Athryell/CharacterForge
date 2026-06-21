@@ -43,6 +43,7 @@ import { useTheme, ACCENT_PRESETS } from './hooks/useTheme';
 import { useUnits, parseSpeedFt } from './hooks/useUnits';
 import { useAccessibility } from './hooks/useAccessibility';
 import { Icon, ICON_MAP, useIconMode } from './config/icons';
+import { getNotationMenu } from './config/notationMenus';
 import { Shield as ShieldIcon } from 'lucide-react';
 import './App.css';
 
@@ -346,6 +347,18 @@ function ResourceIcon({ icon, size = 16 }) {
   return <span>{entry.emoji}</span>;
 }
 
+function updateFavicon(accentColor = '#6aaa2a') {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+    <path d="m 102.53 26.063 l 90 345.75 l 289.22 23.25 l -90.03 -345.72 l -289.19 -23.28 Z m -18.968 1.406 c -30.44 11.894 -55.62 53.07 -49.687 75.28 l 3.25 11.813 c 0.654 -1.722 1.345 -3.44 2.063 -5.157 C 49.102 85.688 65.734 62.636 89.56 50.5 l -6 -23.03 Z M 94.44 69.187 c -16.66 10.016 -29.916 28.1 -38 47.437 c -5.2 12.44 -8 25.417 -8.75 36.25 v 0.03 L 112.56 388.5 c 0.305 -0.572 0.593 -1.148 0.907 -1.72 c 10.585 -19.223 27.804 -37.623 51.06 -48.405 L 94.438 69.187 Z M 154 107.968 l 239.78 16.188 l -1.28 18.625 l -239.75 -16.155 L 154 107.97 Z m 46.03 34.407 l 5.657 8.875 l 14.188 22.313 l 39.03 -15.25 l 7.595 -2.938 l 3.97 7.094 l 16.28 29.124 l 4.313 7.72 l -7.438 4.717 c -10.267 6.524 -17.392 12.284 -21.75 16.782 c -3.03 3.13 -4.247 5.232 -4.906 6.594 c 1.38 0.303 3.433 0.577 6.624 0.28 c 18.268 -1.69 56.285 -19.964 79 -61.592 l 5.47 -10.03 l 8.748 7.374 l 46 38.812 l 11.532 9.72 l -13.844 6 l -33.28 14.374 c 5.447 4.925 11.436 5.916 18.436 5.406 c 9.95 -0.724 21.427 -6.07 29.125 -11.063 l 10.158 15.657 c -9.41 6.1 -22.867 12.934 -37.938 14.03 c -15.07 1.098 -32.27 -5.296 -42.594 -23.155 l -5.25 -9.095 l 9.625 -4.156 l 30.44 -13.157 l -26.033 -22 c -25.716 40.294 -62.68 59.168 -87.843 61.5 c -6.78 0.628 -12.945 0.26 -18.594 -2.688 c -5.65 -2.95 -9.984 -10.6 -9 -17.406 c 0.984 -6.806 4.838 -12.4 10.688 -18.44 c 4.385 -4.526 10.612 -9.367 17.875 -14.436 l -8.188 -14.656 L 219.5 193.75 l -7.156 2.78 l -4.125 -6.468 L 196 170.875 c -6.308 7.158 -9.485 14.528 -9 21.406 c 0.654 9.28 7.854 21.054 30.594 33.69 l -9.094 16.343 c -25.688 -14.273 -38.877 -31.016 -40.125 -48.72 c -1.248 -17.703 9.393 -33.013 23.5 -44.562 l 8.156 -6.655 Z m -5.968 118.188 l 239.782 16.156 l -1.25 18.655 l -239.78 -16.188 l 1.25 -18.625 Z m -24.75 96.25 c -17.637 9.072 -31.065 23.708 -39.468 38.968 c -4.49 8.153 -7.307 16.452 -8.72 23.876 l 11.626 42.156 l 1.688 0.157 c -3.824 -27.514 11.358 -60.383 41.187 -80.97 l -6.313 -24.188 Z m 26.22 34 c -32.403 17.28 -46.273 52.303 -41.657 72.78 l 289.78 24.532 c -5.298 -7.743 -8.625 -17.827 -8.592 -28.313 l -22.47 -9.03 l 46.626 -7.313 l -13.69 -13.064 c 5.552 -6.838 13.54 -12.915 24.47 -17.53 l -274.47 -22.063 Z" fill="${accentColor}"/>
+  </svg>`;
+  const blob = new Blob([svg], { type: 'image/svg+xml' });
+  const url = URL.createObjectURL(blob);
+  let link = document.querySelector('link[rel="icon"]');
+  if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
+  if (link.href.startsWith('blob:')) URL.revokeObjectURL(link.href);
+  link.href = url;
+}
+
 // ── Character App (single character) ────────────────────────────
 function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSystemChange }) {
   const { t, i18n } = useTranslation();
@@ -422,14 +435,23 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
   const [addOpenFor, setAddOpenFor] = useState(null);
   const [homebrewVersion, setHomebrewVersion] = useState(0);
   const [showSources, setShowSources] = useState(false);
+  const [showNotations, setShowNotations] = useState(false);
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [showLevelDown, setShowLevelDown] = useState(false);
   const [concentrationCheck, setConcentrationCheck] = useState(null);
   const [editingCombat, setEditingCombat] = useState(false);
   const [editingResources, setEditingResources] = useState(false);
+  const [condOpen, setCondOpen] = useState(() => localStorage.getItem('characterforge_conditions_open') !== 'false');
   const [addingResource, setAddingResource] = useState(false);
   const [newResource, setNewResource] = useState({ name:'', icon:'d6', formula:'fixed:1', resetOn:'long', pinned:false });
   const { mode: themeMode, accentId, setThemeMode, setAccent } = useTheme();
+
+  useEffect(() => {
+    const style = getComputedStyle(document.documentElement);
+    const accent = style.getPropertyValue('--c-accent').trim();
+    updateFavicon(accent || '#6aaa2a');
+  }, [accentId, themeMode]);
+
   const { iconMode, setIconMode, iconAccent, setIconAccent } = useIconMode();
   const { weightUnit, speedUnit, setPref: setUnitPref, toDisplayWeight, toDisplaySpeed, fromDisplaySpeed } = useUnits();
   const { prefs: a11y, setPref: setA11y } = useAccessibility();
@@ -519,10 +541,11 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
     };
     [...(state.weapons||[]), ...(state.equipment||[])].forEach(item => {
       (item.bonuses||[]).forEach(({ stat, value }) => add(stat, value, item.name));
-      parseTextBonuses(item.desc).forEach(({ stat, value }) => add(stat, value, item.name));
+      const resolvedDesc = resolveNotations(item.desc, state.abilities, state.charLevel, char.profBonus);
+      parseTextBonuses(resolvedDesc).forEach(({ stat, value }) => add(stat, value, item.name));
     });
     return { equipBonuses: totals, equipBonusesDetailed: detailed };
-  }, [state.weapons, state.equipment]);
+  }, [state.weapons, state.equipment, state.abilities, state.charLevel, char.profBonus]);
 
   const effectiveAbilities = useMemo(() => {
     const result = {};
@@ -811,8 +834,20 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                 const knownClasses = dataManager.getClasses();
                 const isCustomClass = !state.charClass ? false : !knownClasses.includes(state.charClass);
                 const classSelectVal = isCustomClass ? '__custom__' : (state.charClass || '');
+                const knownSpeciesIds = new Set(dataManager.getSpecies().map(r => r.id));
+                const isCustomRace = !!(state.charRace && state.charRace !== '__custom__' && !knownSpeciesIds.has(state.charRace));
+                const raceSelectVal = isCustomRace ? '__custom__' : (state.charRace || '');
+                const knownBgIds = new Set(dataManager.getBackgrounds().map(b => b.id || b.name));
+                const isCustomBg = !!(state.charBackground && state.charBackground !== '__custom__' && !knownBgIds.has(state.charBackground));
+                const bgSelectVal = isCustomBg ? '__custom__' : (state.charBackground || '');
                 return (
                   <div className="grid-2" style={{ flex:1 }}>
+                    <div style={{ gridColumn: 'span 2' }}>
+                      <Field label={t('identity.imageUrl')}>
+                        <input value={state.charImage||''} onChange={e => update({ charImage: e.target.value })}
+                          placeholder="https://..." />
+                      </Field>
+                    </div>
                     <Field label={t('identity.name')}>
                       <input value={state.charName} onChange={e => update({ charName: e.target.value })} placeholder="Es. Aldric Voss" />
                     </Field>
@@ -843,7 +878,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                     </Field>
                     <SubclassSection state={state} update={update} t={t} />
                     <Field label={t('identity.species')}>
-                      <select value={state.charRace} onChange={e => {
+                      <select value={raceSelectVal} onChange={e => {
                         const race = e.target.value;
                         if (race && race !== '__custom__') {
                           const kept = (state.features||[]).filter(f => f.sourceType !== 'species');
@@ -856,12 +891,15 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                         {dataManager.getSpecies().slice().sort((a, b) => t(`data.species.${a.id}`, a.name).localeCompare(t(`data.species.${b.id}`, b.name))).map(r => <option key={r.id} value={r.id}>{t(`data.species.${r.id}`, r.name)}</option>)}
                         <option value="__custom__">{t('identity.speciesCustom')}</option>
                       </select>
-                      {state.charRace === '__custom__' && (
-                        <input style={{ marginTop:4 }} value={state.charRaceCustom||''} onChange={e => update({ charRaceCustom: e.target.value })} placeholder={t('identity.speciesCustomPlaceholder')} />
+                      {(state.charRace === '__custom__' || isCustomRace) && (
+                        <input style={{ marginTop:4 }}
+                          value={isCustomRace ? state.charRace : (state.charRaceCustom||'')}
+                          onChange={e => isCustomRace ? update({ charRace: e.target.value }) : update({ charRaceCustom: e.target.value })}
+                          placeholder={t('identity.speciesCustomPlaceholder')} />
                       )}
                     </Field>
                     <Field label={t('identity.background')}>
-                      <select value={state.charBackground} onChange={e => {
+                      <select value={bgSelectVal} onChange={e => {
                         const bg = e.target.value;
                         if (bg && bg !== '__custom__') {
                           const kept = (state.features||[]).filter(f => f.sourceType !== 'background');
@@ -874,8 +912,11 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                         {dataManager.getBackgrounds().slice().sort((a, b) => t(`data.backgrounds.${a.id || a.name}`, a.name).localeCompare(t(`data.backgrounds.${b.id || b.name}`, b.name))).map(b => <option key={b.id || b.name} value={b.id || b.name}>{t(`data.backgrounds.${b.id || b.name}`, b.name)}</option>)}
                         <option value="__custom__">{t('identity.backgroundCustom')}</option>
                       </select>
-                      {state.charBackground === '__custom__' && (
-                        <input style={{ marginTop:4 }} value={state.charBackgroundCustom||''} onChange={e => update({ charBackgroundCustom: e.target.value })} placeholder={t('identity.backgroundCustomPlaceholder')} />
+                      {(state.charBackground === '__custom__' || isCustomBg) && (
+                        <input style={{ marginTop:4 }}
+                          value={isCustomBg ? state.charBackground : (state.charBackgroundCustom||'')}
+                          onChange={e => isCustomBg ? update({ charBackground: e.target.value }) : update({ charBackgroundCustom: e.target.value })}
+                          placeholder={t('identity.backgroundCustomPlaceholder')} />
                       )}
                     </Field>
                     <Field label={t('identity.level')}>
@@ -924,12 +965,6 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
               </div>
             )}
           </div>
-          {editingIdentity && (
-            <Field label={t('identity.imageUrl')}>
-              <input value={state.charImage||''} onChange={e => update({ charImage: e.target.value })}
-                placeholder="https://..." style={{ marginTop:6 }} />
-            </Field>
-          )}
         </div>
       );
 
@@ -960,18 +995,20 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
           <div className="card-title"><Icon id="widget.saves" /> {t('widgets.saves')}</div>
           <div className="check-list">
             {ABILITIES.map(attr => {
+              const saveHalf = (state.saveHalfProficiency || []).includes(attr);
               const prof = state.saveProficiencies.includes(attr);
-              const effMod = getMod(effectiveAbilities[attr]) + (prof ? char.profBonus : 0) + (equipBonuses[`TS-${attr}`] || 0);
-              const tsBonus = equipBonuses[`TS-${attr}`] || 0;
+              const saveProfMod = prof ? char.profBonus : saveHalf ? Math.floor(char.profBonus / 2) : 0;
+              const effMod = getMod(effectiveAbilities[attr]) + saveProfMod + (equipBonuses[`SAV-${attr}`] || 0);
+              const tsBonus = equipBonuses[`SAV-${attr}`] || 0;
               return (
                 <div key={attr} className={`check-item ${hoveredAttr === attr ? 'attr-highlight' : ''}`}
                   onClick={() => handleRoll(`1d20${effMod >= 0 ? '+' : ''}${effMod}`, t(`data.abilities.${attr}`))}>
-                  <div className={`check-dot ${prof ? 'proficient' : ''}`}
+                  <div className={`check-dot ${prof ? 'proficient' : saveHalf ? 'half-prof' : ''}`}
                     onClick={e => { e.stopPropagation(); char.toggleSaveProficiency(attr); }} />
                   <span className="check-val">{fmtMod(effMod)}</span>
                   <span className="check-name">{t(`data.abilities.${attr}`)}</span>
                   {tsBonus ? <span className="equip-bonus-badge" style={{ marginLeft:'auto' }}
-                    title={(equipBonusesDetailed[`TS-${attr}`]||[]).map(s=>`${s.name}: ${s.value>=0?'+':''}${s.value}`).join(', ')}>🎒</span> : null}
+                    title={(equipBonusesDetailed[`SAV-${attr}`]||[]).map(s=>`${s.name}: ${s.value>=0?'+':''}${s.value}`).join(', ')}>🎒</span> : null}
                 </div>
               );
             })}
@@ -984,13 +1021,15 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
           <div className="card-title"><Icon id="widget.skills" /> {t('widgets.skills')}</div>
           <div className="check-list">
             {SKILLS.map(sk => {
+              const skillHalf = (state.skillHalfProficiency || []).includes(sk.id);
               const prof = state.skillProficiencies.includes(sk.id);
               const exp = state.skillExpertise.includes(sk.id);
-              const effSkMod = getMod(effectiveAbilities[sk.attr]) + (exp ? char.profBonus*2 : prof ? char.profBonus : 0);
+              const skillProfMod = exp ? char.profBonus*2 : prof ? char.profBonus : skillHalf ? Math.floor(char.profBonus / 2) : 0;
+              const effSkMod = getMod(effectiveAbilities[sk.attr]) + skillProfMod;
               return (
                 <div key={sk.id} className={`check-item ${hoveredAttr === sk.attr ? 'attr-highlight' : ''}`}
                   onClick={() => handleRoll(`1d20${effSkMod >= 0 ? '+' : ''}${effSkMod}`, t(`data.skills.${sk.id}`))}>
-                  <div className={`check-dot ${exp ? 'expertise' : prof ? 'proficient' : ''}`}
+                  <div className={`check-dot ${exp ? 'expertise' : prof ? 'proficient' : skillHalf ? 'half-prof' : ''}`}
                     onClick={e => { e.stopPropagation(); char.toggleSkillProficiency(sk.id); }} />
                   <span className="check-val">{fmtMod(effSkMod)}</span>
                   <span className="check-name">{t(`data.skills.${sk.id}`)}</span>
@@ -1403,24 +1442,58 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
         </div>
       );
 
-      case 'conditions': return (
-        <div className="card">
-          <div className="card-title"><Icon id="widget.conditions" /> {t('widgets.conditions')}</div>
-          <ConditionTracker
-            active={state.conditions||[]}
-            onChange={conditions => update({ conditions })}
-            exhaustionLevel={state.exhaustionLevel||0}
-            onExhaustionChange={level => update({ exhaustionLevel: level })}
-            conditions={[...DND_CONDITIONS, ...(state.customConditions || [])]}
-            onAddCustom={cond => update({ customConditions: [...(state.customConditions || []), cond] })}
-            onRemoveCustom={id => update(prev => ({
-              ...prev,
-              customConditions: (prev.customConditions || []).filter(c => c.id !== id),
-              conditions: (prev.conditions || []).filter(c => c !== id),
-            }))}
-          />
-        </div>
-      );
+      case 'conditions': {
+        const activeConds = state.conditions || [];
+        const exhLvl = state.exhaustionLevel || 0;
+        const customConds = state.customConditions || [];
+        const allActive = [
+          ...activeConds.map(cid => cid.startsWith('custom_')
+            ? (customConds.find(c => c.id === cid)?.name ?? cid)
+            : t(`data.conditions.${cid}.name`, cid)
+          ),
+          ...(exhLvl > 0 ? [`${t('pinned.exhaustionShort', 'Exh.')}${exhLvl}`] : []),
+        ];
+        const MAX_PILLS = 3;
+        const visiblePills = allActive.slice(0, MAX_PILLS);
+        const extraCount = allActive.length - MAX_PILLS;
+        return (
+          <div className="card">
+            <button
+              className="card-title cond-collapse-header"
+              onClick={() => {
+                const next = !condOpen;
+                setCondOpen(next);
+                localStorage.setItem('characterforge_conditions_open', String(next));
+              }}
+              aria-expanded={condOpen}
+            >
+              <Icon id="widget.conditions" /> {t('widgets.conditions')}
+              {!condOpen && allActive.length > 0 && (
+                <span className="cond-pills-inline">
+                  {visiblePills.map((name, i) => <span key={i} className="cond-pill-inline">{name}</span>)}
+                  {extraCount > 0 && <span className="cond-pill-inline cond-pill-more">+{extraCount}</span>}
+                </span>
+              )}
+              <span className="cond-chevron">{condOpen ? '▲' : '▾'}</span>
+            </button>
+            <div className={`cond-collapsible${condOpen ? ' open' : ''}`}>
+              <ConditionTracker
+                active={activeConds}
+                onChange={conditions => update({ conditions })}
+                exhaustionLevel={exhLvl}
+                onExhaustionChange={level => update({ exhaustionLevel: level })}
+                conditions={[...DND_CONDITIONS, ...customConds]}
+                onAddCustom={cond => update({ customConditions: [...customConds, cond] })}
+                onRemoveCustom={id => update(prev => ({
+                  ...prev,
+                  customConditions: (prev.customConditions || []).filter(c => c.id !== id),
+                  conditions: (prev.conditions || []).filter(c => c !== id),
+                }))}
+              />
+            </div>
+          </div>
+        );
+      }
 
       case 'actions': return (
         <div className="card">
@@ -1458,7 +1531,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
             onUpdate={weapons => update({ weapons })} onRoll={handleRoll}
             proficiency={state.weaponProficiency||''} onUpdateProficiency={v => update({ weaponProficiency: v })}
             actionNames={actionNames} addOpen={addOpenFor === 'weapons'} onAddClose={() => setAddOpenFor(null)}
-            allTags={allTags} weightUnit={weightUnit}
+            allTags={allTags} weightUnit={weightUnit} toDisplayWeight={toDisplayWeight}
             onUpdateTags={(id, tags) => {
               const weapon = (state.weapons||[]).find(w => w.id===id);
               const upd = { weapons: (state.weapons||[]).map(w => w.id===id ? {...w,tags} : w) };
@@ -1511,7 +1584,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
               desMod={getMod(effectiveAbilities.DEX)}
               onUpdate={onArmorUpdate}
               proficiency={state.armorProficiency||''} onUpdateProficiency={v => update({ armorProficiency: v })}
-              allTags={allTags} weightUnit={weightUnit}
+              allTags={allTags} weightUnit={weightUnit} toDisplayWeight={toDisplayWeight}
               onUpdateTags={(id, tags) => update({ armors: armorList.map(a => a.id===id ? {...a,tags} : a) })}
               onCreateTag={createTag}
               addOpen={addOpenFor === 'armor'} onAddClose={() => setAddOpenFor(null)}
@@ -1705,7 +1778,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
               <button className="icon-btn" onClick={() => {
                 setActivityLog([]);
                 try { localStorage.removeItem('characterforge_log'); } catch {}
-              }}>{t('activityLog.clearBtn')}</button>
+              }}><Icon id="action.delete" size={13} /> {t('activityLog.clearBtn')}</button>
             )}
           </div>
           {activityLog.length === 0
@@ -2229,6 +2302,38 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
         </div>
       )}
 
+      {showNotations && (() => {
+        const menu = getNotationMenu(activeSystem || DEFAULT_SYSTEM);
+        return (
+          <div className="creator-overlay" onClick={() => setShowNotations(false)}>
+            <div className="sources-modal" style={{ maxWidth: 520 }} onClick={e => e.stopPropagation()}>
+              <div className="sources-modal-header">
+                <span>📖 {t('menu.notationsTitle')}</span>
+                <button className="io-btn" onClick={() => setShowNotations(false)}>✕</button>
+              </div>
+              <div className="sources-modal-body" style={{ padding: '12px 16px' }}>
+                {menu.map(group => (
+                  <div key={group.group} style={{ marginBottom: 14 }}>
+                    <div className="feature-group-header" style={{ marginBottom: 6 }}>{t(group.group)}</div>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
+                      <tbody>
+                        {group.items.map(item => (
+                          <tr key={item.insert} style={{ borderBottom: '1px solid var(--c-border)' }}>
+                            <td style={{ fontFamily: 'monospace', color: 'var(--c-accent)', padding: '4px 10px 4px 0', whiteSpace: 'nowrap', width: 1 }}>{item.preview}</td>
+                            <td style={{ padding: '4px 8px 4px 0', fontWeight: 600 }}>{t(item.label)}</td>
+                            <td style={{ padding: '4px 0', color: 'var(--c-muted)' }}>{t(item.desc)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Top bar */}
       <div className="top-bar">
         <div className="top-bar-system-name">⚔ CharacterForge</div>
@@ -2421,6 +2526,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
               <button className="hmenu-item" onClick={() => { handleExport(); setShowMenu(false); }}>{t('menu.exportChar')}</button>
               <button className="hmenu-item" onClick={() => { fileInputRef.current?.click(); setShowMenu(false); }}>{t('menu.importChar')}</button>
               <button className="hmenu-item" onClick={() => { setShowSources(true); setShowMenu(false); }}><Icon id="tab.sources" /> {t('menu.sources')}</button>
+              <button className="hmenu-item" onClick={() => { setShowNotations(true); setShowMenu(false); }}>📖 {t('menu.notations')}</button>
             </div>
           </div>
         </>

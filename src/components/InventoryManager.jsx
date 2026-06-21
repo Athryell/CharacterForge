@@ -13,8 +13,6 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState(null);
   const [expandedId, setExpandedId] = useState(null);
-  const [editingTagsFor, setEditingTagsFor] = useState(null);
-
   function patchAdd(obj) { setAddForm(f => ({ ...f, ...obj })); }
   function patchEdit(obj) { setEditForm(f => ({ ...f, ...obj })); }
 
@@ -135,7 +133,7 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
                 <div className="inventory-info">
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
                     <div className="inventory-name">{item.name}</div>
-                    {added && <span className="action-added-badge" title={t('common.inAction', 'In azioni')}>⚡</span>}
+                    {added && <span className="action-added-badge" title={t('common.inAction', 'In azioni')}><Icon id="widget.actions" size={12} /></span>}
                     {item.acquiredAtLevel && <span className="level-badge">Lv. {item.acquiredAtLevel}</span>}
                     {(item.tags||[]).map(tag => <TagPill key={tag} tag={tag} allTags={allTags} small />)}
                   </div>
@@ -185,28 +183,11 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
                       value={editForm.desc || ''} onChange={e => patchEdit({ desc: e.target.value })} />
                   </div>
                   <div style={{ marginTop: 6 }}>
-                    {editingTagsFor === item.id ? (
-                      <>
-                        <TagSelector selected={item.tags || []} allTags={allTags}
-                          onChange={tags => onUpdateTags && onUpdateTags(item.id, tags)} onCreateTag={onCreateTag} />
-                        <button className="tag-edit-btn" style={{ marginTop: 4 }} onClick={() => setEditingTagsFor(null)}><Icon id="action.done" size={13} /> {t('common.tagDone')}</button>
-                      </>
-                    ) : (
-                      <button className="tag-edit-btn" onClick={() => setEditingTagsFor(item.id)}>
-                        <Icon id="action.tag" size={13} /> {(item.tags||[]).length === 0 ? t('common.addTag') : t('common.editTags')}
-                      </button>
-                    )}
+                    <TagSelector selected={item.tags || []} allTags={allTags}
+                      onChange={tags => onUpdateTags && onUpdateTags(item.id, tags)} onCreateTag={onCreateTag} />
                   </div>
                   <div style={{ display: 'flex', gap: 8, marginTop: 8, justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', gap: 6 }}>
-                      {onAddAction && (
-                        <button className={`icon-btn add-to-action-btn ${added ? 'added' : ''}`}
-                          title={added ? t('common.removeFromAction') : t('common.addToAction')}
-                          onClick={() => {
-                            if (added) { onRemoveAction && onRemoveAction(item.name); }
-                            else { onAddAction({ id: `item_${item.id}_${Date.now()}`, name: item.name, type: 'action', desc: item.desc || '', dice: '' }); }
-                          }}>{added ? <Icon id="action.done" size={13} /> : '⚡'}</button>
-                      )}
                       <button className="io-btn danger" onClick={() => removeItem(item.id)}>{t('common.deleteBtn')}</button>
                     </div>
                     <div style={{ display: 'flex', gap: 8 }}>
@@ -230,6 +211,13 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
                     </div>
                   )}
                   <div className="item-edit-actions">
+                    {onAddAction && (
+                      <button className={`icon-btn add-to-action-btn ${added ? 'added' : ''}`}
+                        title={added ? t('common.removeFromAction') : t('common.addToAction')}
+                        onClick={e => { e.stopPropagation(); if (added) { onRemoveAction && onRemoveAction(item.name); } else { onAddAction({ id: `item_${item.id}_${Date.now()}`, name: item.name, type: 'action', desc: item.desc || '', dice: '' }); } }}>
+                        {added ? <Icon id="action.done" size={13} /> : <Icon id="widget.actions" size={13} />}
+                      </button>
+                    )}
                     <button className="io-btn" onClick={() => startEdit(item)}><Icon id="action.editItem" size={13} /> {t('common.edit')}</button>
                   </div>
                 </div>

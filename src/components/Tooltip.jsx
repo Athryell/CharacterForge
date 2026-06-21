@@ -4,16 +4,15 @@ import { useCharContext } from './CharContext';
 import { BONUS_STAT_OPTIONS } from '../data/bonuses';
 
 // Hook: returns the keyword glossary for the active language.
-// Keys and values are both in the active language (EN: "blinded"→EN desc, IT: "accecato"→IT desc).
 export function useKeywordGlossary() {
   const { t } = useTranslation('game');
   const glossary = t('glossary', { returnObjects: true });
   return (glossary && typeof glossary === 'object') ? glossary : {};
 }
 
-// Extracts +N@[STAT] bonus notations from text (e.g. "+2@[CA]" → [{stat:'CA', value:2}])
+// Extracts +N@[STAT] bonus notations from text (called AFTER resolveNotations)
 export function parseTextBonuses(text = '') {
-  const re = /([+-]\d+)@\[([A-Z-]+)\]/g;
+  const re = /([+-]\d+)@\[([A-Z0-9-]+)\]/g;
   const results = [];
   let m;
   while ((m = re.exec(text)) !== null) {
@@ -21,9 +20,6 @@ export function parseTextBonuses(text = '') {
   }
   return results;
 }
-
-// IT→EN ability abbreviation map for backward-compat notation resolution
-const IT_TO_EN_ABBR = { FOR:'STR', DES:'DEX', COS:'CON', SAG:'WIS', CAR:'CHA', INT:'INT' };
 
 // Resolve a [countX] formula to a numeric pip count
 function resolveCountFormula(formula, abilities, charLevel, profBonus) {
@@ -33,51 +29,83 @@ function resolveCountFormula(formula, abilities, charLevel, profBonus) {
   if (formula === 'LVL/2') return Math.max(1, Math.floor((charLevel ?? 1) / 2));
   const lvlMultMatch = formula.match(/^LVL\*(\d+)$/);
   if (lvlMultMatch) return (charLevel ?? 1) * parseInt(lvlMultMatch[1]);
-  const score = (abilities || {})[formula.toUpperCase()] ?? 10;
+  // Ability modifier — with IT→EN map
+  const IT_TO_EN = { FOR: 'STR', DES: 'DEX', COS: 'CON', SAG: 'WIS', CAR: 'CHA' };
+  const key = IT_TO_EN[formula.toUpperCase()] || formula.toUpperCase();
+  const score = (abilities || {})[key] ?? 10;
   return Math.max(1, Math.floor((score - 10) / 2));
 }
 
 const COUNT_NOTATION_RE = /\[count(CHA|STR|DEX|CON|INT|WIS|PRO|LVL\/2|LVL\*\d+|LVL|\d+)\]/gi;
 
-// Resolve [ATTR], [PRO], and [LVL:...] notations in a text string
+// Resolve [ATTR], [PRO], [LVL], [LVL/2], [LVL=N:...] and +[PRO]@[STAT] notations.
 // Supports D&D ([STR],[FOR],...) and DH ([AGI],[FIN],...) traits via optional traitMap.
-// traitMap: { AGI: mod, FIN: mod, ... } — DH modifiers already resolved, no score conversion needed.
 export function resolveNotations(text, abilities, charLevel, profBonus, traitMap = null) {
   if (!text) return text;
 
-  // [countX] → [N] static counter with dynamically computed size
-  const resolved0 = text.replace(COUNT_NOTATION_RE, (_, formula) => {
+  // Helper: resolve a bracketed value token
+  function resolveValue(token) {
+    const upper = token.toUpperCase();
+    if (upper === 'PRO') return String(profBonus ?? 2);
+    if (upper === 'LVL') return String(charLevel ?? 1);
+    if (upper === 'LVL/2') return String(Math.max(1, Math.floor((charLevel ?? 1) / 2)));
+    if (traitMap && upper in traitMap) return String(traitMap[upper] ?? 0);
+    const IT_TO_EN = { FOR: 'STR', DES: 'DEX', COS: 'CON', SAG: 'WIS', CAR: 'CHA', INT: 'INT' };
+    const key = IT_TO_EN[upper] || upper;
+    if (['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'].includes(key)) {
+      const score = (abilities || {})[key] ?? 10;
+      return String(Math.floor((score - 10) / 2));
+    }
+    return token;
+  }
+
+  // 0. [countX] → [N]
+  let result = text.replace(COUNT_NOTATION_RE, (_, formula) => {
     const n = resolveCountFormula(formula, abilities, charLevel, profBonus);
     return `[${n}]`;
   });
 
-  const resolved1 = resolved0.replace(/(?<!@)\[(STR|DEX|CON|INT|WIS|CHA|FOR|DES|COS|SAG|CAR|PRO|AGI|FIN|INS|PRE|KNO)\]/gi, (_, attr) => {
-    if (attr.toUpperCase() === 'PRO') return String(profBonus ?? 2);
-    const upper = attr.toUpperCase();
-    if (traitMap && upper in traitMap) return String(traitMap[upper] ?? 0);
-    const key = IT_TO_EN_ABBR[upper] || upper;
-    const score = (abilities || {})[key] ?? 10;
-    const mod = Math.floor((score - 10) / 2);
-    return String(mod);
-  });
+  // 1. [STR], [PRO], [LVL], [LVL/2], trait modifiers
+  result = result.replace(
+    /(?<!@)\[(STR|DEX|CON|INT|WIS|CHA|FOR|DES|COS|SAG|CAR|PRO|LVL\/2|LVL|AGI|FIN|INS|PRE|KNO)\]/gi,
+    (_, token) => resolveValue(token)
+  );
 
-  const resolved2 = resolved1.replace(/\[LVL:([^\]]+)\]/gi, (_, spec) => {
+  // 2. [LVL=N:val,N:val,...] — scaling with level; below first threshold → empty string
+  result = result.replace(/\[LVL=(\d+):([^\]]+)\]/gi, (_, startStr, spec) => {
+    const level = charLevel ?? 1;
     const parts = spec.split(',');
-    let result = parts[0].trim();
+    const thresholds = [{ level: parseInt(startStr), value: parts[0].trim() }];
     for (let i = 1; i < parts.length; i++) {
       const colonIdx = parts[i].indexOf(':');
       if (colonIdx === -1) continue;
-      const threshold = parseInt(parts[i].substring(0, colonIdx).trim());
-      const value = parts[i].substring(colonIdx + 1).trim();
-      if ((charLevel || 1) >= threshold) result = value;
+      thresholds.push({
+        level: parseInt(parts[i].substring(0, colonIdx).trim()),
+        value: parts[i].substring(colonIdx + 1).trim(),
+      });
     }
-    return result;
+    let resolved = '';
+    for (const t of thresholds) {
+      if (level >= t.level) resolved = t.value;
+    }
+    return resolved;
   });
 
-  return resolved2.replace(/\+-/g, '-').replace(/--/g, '+');
+  // 3. Dynamic bonuses — +[PRO]@[AC], +[STR]@[ATK], +[LVL/2]@[AC] → numeric
+  result = result.replace(
+    /([+-])\[(PRO|LVL\/2|LVL|STR|DEX|CON|INT|WIS|CHA|AGI|FIN|INS|PRE|KNO)\]@\[([A-Z0-9-]+)\]/gi,
+    (_, sign, valueToken, stat) => {
+      const val = parseInt(resolveValue(valueToken));
+      const signed = sign === '+' ? val : -val;
+      return `${signed >= 0 ? '+' : ''}${signed}@[${stat.toUpperCase()}]`;
+    }
+  );
+
+  // 4. Cleanup double signs
+  return result.replace(/\+-/g, '-').replace(/--/g, '+');
 }
 
-// Small hint bar for description textareas — shows notation syntax
+// Small hint bar shown below description textareas
 export function NotationHelpBar() {
   const { t } = useTranslation();
   const { systemId } = useCharContext();
@@ -88,27 +116,18 @@ export function NotationHelpBar() {
       <span>{t('notation.slashHint')}</span>
       <span className="notation-help-sep">·</span>
       {isDH ? (
-        <>
-          <span><strong>[AGI]</strong> <strong>[FIN]</strong>… {t('notation.attrHelp')}</span>
-          <span className="notation-help-sep">·</span>
-        </>
+        <span><strong>[AGI]</strong> <strong>[FIN]</strong>… {t('notation.attrHelp')}</span>
       ) : (
         <>
-          <span><strong>[STR]</strong> <strong>[DEX]</strong>… <strong>[PRO]</strong> {t('notation.attrHelp')}</span>
+          <span><strong>[STR]</strong>… <strong>[PRO]</strong> <strong>[LVL]</strong> {t('notation.attrHelp')}</span>
           <span className="notation-help-sep">·</span>
-          <span><strong>[LVL:1d6,5:1d8]</strong> {t('notation.lvlHelp')}</span>
+          <span><strong>[LVL=1:1d6,5:1d8]</strong> {t('notation.lvlHelp')}</span>
           <span className="notation-help-sep">·</span>
-          <span><strong>+1@[AC]</strong> {t('notation.bonusHelp')}</span>
+          <span><strong>+[PRO]@[AC]</strong> {t('notation.bonusHelp')}</span>
           <span className="notation-help-sep">·</span>
         </>
       )}
-      <span><strong>[3]</strong> {t('notation.counterHelp')}</span>
-      {!isDH && (
-        <>
-          <span className="notation-help-sep">·</span>
-          <span><strong>[countCHA]</strong> {t('notation.countHelp')}</span>
-        </>
-      )}
+      <span><strong>[count3]</strong> <strong>[countCHA]</strong> {t('notation.counterHelp')}</span>
     </div>
   );
 }
@@ -150,11 +169,11 @@ function Tooltip({ text, children }) {
   );
 }
 
-// Renders text with keyword tooltips applied automatically
-// Supports [ATTR], [LVL:...], and +N@[STAT] notations resolved from CharContext
-const DYNAMIC_NOTATION_RE = /\[(STR|DEX|CON|INT|WIS|CHA|FOR|DES|COS|SAG|CAR|PRO|AGI|FIN|INS|PRE|KNO)\]|\[LVL:|[+-]\d+@\[[A-Z-]+\]|\[count/i;
-const BONUS_NOTATION_SPLIT = /([+-]\d+@\[[A-Z-]+\])/gi;
-const BONUS_NOTATION_PARSE = /^([+-]\d+)@\[([A-Z-]+)\]$/i;
+// Renders text with keyword tooltips, dice buttons, bonus badges, and counter pips.
+// Dynamic notations ([STR], [LVL=...], +[PRO]@[AC]) are resolved before rendering.
+const DYNAMIC_NOTATION_RE = /\[(STR|DEX|CON|INT|WIS|CHA|FOR|DES|COS|SAG|CAR|PRO|LVL\/2|LVL|AGI|FIN|INS|PRE|KNO)\]|\[LVL=|[+-](?:\d+|\[[A-Z/]+\])@\[[A-Z0-9-]+\]|\[count/i;
+const BONUS_NOTATION_SPLIT = /([+-]\d+@\[[A-Z0-9-]+\])/gi;
+const BONUS_NOTATION_PARSE = /^([+-]\d+)@\[([A-Z0-9-]+)\]$/i;
 const COUNTER_NOTATION_SPLIT = /(\[\d+\])/g;
 const COUNTER_NOTATION_PARSE = /^\[(\d+)\]$/;
 

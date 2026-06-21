@@ -27,8 +27,6 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
   const [addForm, setAddForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState(null);
-  const [editingTagsFor, setEditingTagsFor] = useState(null);
-
   function startEdit(f) {
     setEditingId(f.id);
     setEditForm({ name: f.name, desc: f.desc || '' });
@@ -118,6 +116,7 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
                         <div className="feature-name">{feature.name}</div>
+                        {added && <span className="action-added-badge" title={t('common.inAction', 'In azioni')}><Icon id="widget.actions" size={12} /></span>}
                         {(feature.tags||[]).map(tag => <TagPill key={tag} tag={tag} allTags={allTags} small />)}
                       </div>
                       {feature.source && feature.sourceType !== 'custom' && (
@@ -139,29 +138,11 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
                               value={editForm.desc} onChange={e => setEditForm(f => ({ ...f, desc: e.target.value }))} />
                           </div>
                           <div style={{ marginTop: 6 }}>
-                            {editingTagsFor === feature.id ? (
-                              <>
-                                <TagSelector selected={feature.tags || []} allTags={allTags}
-                                  onChange={tags => onUpdateTags && onUpdateTags(feature.id, tags)} onCreateTag={onCreateTag} />
-                                <button className="tag-edit-btn" style={{ marginTop: 4 }} onClick={() => setEditingTagsFor(null)}><Icon id="action.done" size={13} /> {t('common.done', 'Done')}</button>
-                              </>
-                            ) : (
-                              <button className="tag-edit-btn" onClick={() => setEditingTagsFor(feature.id)}>
-                                <Icon id="action.tag" size={13} /> {(feature.tags||[]).length === 0 ? t('tags.add', 'Add tag') : t('tags.edit', 'Edit tags')}
-                              </button>
-                            )}
+                            <TagSelector selected={feature.tags || []} allTags={allTags}
+                              onChange={tags => onUpdateTags && onUpdateTags(feature.id, tags)} onCreateTag={onCreateTag} />
                           </div>
                           <div style={{ display: 'flex', gap: 8, marginTop: 8, justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ display: 'flex', gap: 6 }}>
-                              {onAddAction && (
-                                <button className={`icon-btn add-to-action-btn ${added ? 'added' : ''}`}
-                                  title={added ? t('features.removeFromActions', 'Remove from actions') : t('features.addToActions', 'Add to actions')}
-                                  onClick={e => {
-                                    e.stopPropagation();
-                                    if (added) { onRemoveAction && onRemoveAction(feature.name); }
-                                    else { onAddAction({ id: `feature_${feature.id}_${Date.now()}`, name: feature.name, type: feature.actionType || detectActionType(feature.desc), desc: feature.desc || '', dice: '' }); }
-                                  }}>{added ? <Icon id="action.done" size={13} /> : '⚡'}</button>
-                              )}
                               <button className="io-btn danger" onClick={e => { e.stopPropagation(); removeFeature(feature.id); }}><Icon id="action.remove" size={13} /> {t('common.delete', 'Delete')}</button>
                             </div>
                             <div style={{ display: 'flex', gap: 8 }}>
@@ -176,23 +157,19 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
                         <div onClick={e => e.stopPropagation()}>
                           {feature.desc && (
                             <div className="feature-desc">
-                              <KeywordText text={feature.desc} onRoll={onRoll} label={feature.name} />
+                              <KeywordText text={feature.desc} onRoll={onRoll} label={feature.name}
+                                counters={feature.counters}
+                                onCounterChange={(idx, vals) => onUpdate(features.map(f => f.id === feature.id ? { ...f, counters: { ...(f.counters || {}), [idx]: vals } } : f))} />
                             </div>
                           )}
-                          <div style={{ marginTop: 6 }}>
-                            {editingTagsFor === feature.id ? (
-                              <>
-                                <TagSelector selected={feature.tags || []} allTags={allTags}
-                                  onChange={tags => onUpdateTags && onUpdateTags(feature.id, tags)} onCreateTag={onCreateTag} />
-                                <button className="tag-edit-btn" style={{ marginTop: 4 }} onClick={() => setEditingTagsFor(null)}><Icon id="action.done" size={13} /> {t('common.done', 'Done')}</button>
-                              </>
-                            ) : (
-                              <button className="tag-edit-btn" onClick={() => setEditingTagsFor(feature.id)}>
-                                <Icon id="action.tag" size={13} /> {(feature.tags||[]).length === 0 ? t('tags.add', 'Add tag') : t('tags.edit', 'Edit tags')}
+                          <div className="item-edit-actions">
+                            {onAddAction && (
+                              <button className={`icon-btn add-to-action-btn ${added ? 'added' : ''}`}
+                                title={added ? t('features.removeFromActions', 'Remove from actions') : t('features.addToActions', 'Add to actions')}
+                                onClick={e => { e.stopPropagation(); if (added) { onRemoveAction && onRemoveAction(feature.name); } else { onAddAction({ id: `feature_${feature.id}_${Date.now()}`, name: feature.name, type: feature.actionType || detectActionType(feature.desc), desc: feature.desc || '', dice: '' }); } }}>
+                                {added ? <Icon id="action.done" size={13} /> : <Icon id="widget.actions" size={13} />}
                               </button>
                             )}
-                          </div>
-                          <div className="item-edit-actions">
                             <button className="io-btn" onClick={e => { e.stopPropagation(); startEdit(feature); }}><Icon id="action.editItem" size={13} /> {t('common.edit', 'Edit')}</button>
                           </div>
                         </div>

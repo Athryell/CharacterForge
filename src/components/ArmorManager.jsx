@@ -8,7 +8,13 @@ import { useCharContext } from './CharContext';
 
 const BLANK_FORM = { name: '', type: 'armor', armorType: 'medium', acValue: 14, isProficient: true, equipped: false, desc: '', weight: '' };
 
-const SHIELD_PRESET = { id: 'shield', name: 'Scudo', type: 'shield', acValue: 2 };
+const SHIELD_PRESET = { id: 'shield', name: 'Scudo', type: 'shield', acValue: 2, weightKg: 3 };
+
+function toWeightInUnit(kg, weightUnit) {
+  if (kg == null) return '';
+  const val = weightUnit === 'lbs' ? Math.round(kg * 2.205 * 10) / 10 : kg;
+  return String(val);
+}
 
 function ArmorEditForm({ form, onChange, onSave, onCancel, onDelete, allTags, itemId, onUpdateTags, onCreateTag }) {
   const { t } = useTranslation();
@@ -98,12 +104,13 @@ function ArmorEditForm({ form, onChange, onSave, onCancel, onDelete, allTags, it
   );
 }
 
-export default function ArmorManager({ armors = [], desMod = 0, onUpdate, proficiency = '', onUpdateProficiency, allTags = [], onUpdateTags, onCreateTag, addOpen, onAddClose, weightUnit = 'kg', strPenaltyText = '' }) {
+export default function ArmorManager({ armors = [], desMod = 0, onUpdate, proficiency = '', onUpdateProficiency, allTags = [], onUpdateTags, onCreateTag, addOpen, onAddClose, weightUnit = 'kg', toDisplayWeight, strPenaltyText = '' }) {
   const { t } = useTranslation();
   const { abilities } = useCharContext();
   const strScore = abilities?.STR || 10;
   const [addMode, setAddMode] = useState('preset');
   const [addForm, setAddForm] = useState(BLANK_FORM);
+  const [presetSearch, setPresetSearch] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState(null);
   const [expandedId, setExpandedId] = useState(null);
@@ -133,7 +140,7 @@ export default function ArmorManager({ armors = [], desMod = 0, onUpdate, profic
       isProficient: true,
       equipped: false,
       desc: '',
-      weight: '',
+      weight: toWeightInUnit(preset.weightKg, weightUnit),
       tags: [],
     }]);
     onAddClose && onAddClose();
@@ -191,45 +198,60 @@ export default function ArmorManager({ armors = [], desMod = 0, onUpdate, profic
             <button className={`filter-chip ${addMode === 'custom' ? 'active' : ''}`} onClick={() => setAddMode('custom')}>{t('weapons.custom', 'Personalizzata')}</button>
           </div>
           {addMode === 'preset' ? (
-            <div className="weapon-preset-list">
-              {Object.entries(grouped).map(([grp, items]) => items.length === 0 ? null : (
-                <div key={grp}>
-                  <div style={{ fontSize: '0.667rem', color: 'var(--c-muted)', fontWeight: 600, marginBottom: 3, marginTop: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                    {grp === 'shield' ? t('armor.typeShield', 'Scudo') : t('data.armorTypes.' + grp, TYPE_LABEL[grp] || grp)}
-                  </div>
-                  {items.map(p => {
-                    const displayAC = p.type === 'shield' ? `+${p.acValue}` : calcArmorAC(p, desMod);
-                    const strNotMet = p.strReq > 0 && strScore < p.strReq;
-                    return (
-                      <div key={p.id} className="weapon-preset-item" onClick={() => addPreset(p)}>
-                        <div className="weapon-name">{p.name}</div>
-                        <div className="weapon-meta">
-                          <span className="weapon-prop">AC {displayAC}</span>
-                          {p.strReq > 0 && (
-                            <span
-                              className={`armor-req-badge str-req${strNotMet ? ' unmet' : ''}`}
-                              title={strNotMet ? t('armor.strReqNotMet', { penalty: strPenaltyText }) : undefined}>
-                              {t('armor.strReq', { val: p.strReq })}
-                            </span>
-                          )}
-                          {p.maxDex === 0 && (
-                            <span className="armor-req-badge dex-limit">{t('armor.noDex')}</span>
-                          )}
-                          {p.maxDex === 2 && (
-                            <span className="armor-req-badge dex-limit">{t('armor.maxDex', { val: 2 })}</span>
-                          )}
-                        </div>
+            <>
+              <input
+                className="spell-search"
+                placeholder={t('spells.searchPlaceholder', '🔍 Search by name...')}
+                value={presetSearch}
+                onChange={e => setPresetSearch(e.target.value)}
+                style={{ marginBottom: 8 }}
+              />
+              <div className="weapon-preset-list">
+                {Object.entries(grouped).map(([grp, items]) => {
+                  const filtered = presetSearch
+                    ? items.filter(p => p.name.toLowerCase().includes(presetSearch.toLowerCase()))
+                    : items;
+                  return filtered.length === 0 ? null : (
+                    <div key={grp}>
+                      <div style={{ fontSize: '0.667rem', color: 'var(--c-muted)', fontWeight: 600, marginBottom: 3, marginTop: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                        {grp === 'shield' ? t('armor.typeShield', 'Scudo') : t('data.armorTypes.' + grp, TYPE_LABEL[grp] || grp)}
                       </div>
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
+                      {filtered.map(p => {
+                        const displayAC = p.type === 'shield' ? `+${p.acValue}` : calcArmorAC(p, desMod);
+                        const strNotMet = p.strReq > 0 && strScore < p.strReq;
+                        return (
+                          <div key={p.id} className="weapon-preset-item" onClick={() => addPreset(p)}>
+                            <div className="weapon-name">{p.name}</div>
+                            <div className="weapon-meta">
+                              <span className="weapon-prop">AC {displayAC}</span>
+                              {p.strReq > 0 && (
+                                <span
+                                  className={`armor-req-badge str-req${strNotMet ? ' unmet' : ''}`}
+                                  title={strNotMet ? t('armor.strReqNotMet', { penalty: strPenaltyText }) : undefined}>
+                                  {t('armor.strReq', { val: p.strReq })}
+                                </span>
+                              )}
+                              {p.maxDex === 0 && (
+                                <span className="armor-req-badge dex-limit">{t('armor.noDex')}</span>
+                              )}
+                              {p.maxDex === 2 && (
+                                <span className="armor-req-badge dex-limit">{t('armor.maxDex', { val: 2 })}</span>
+                              )}
+                              {p.weightKg != null && (
+                                <span className="weapon-prop" style={{ fontSize: '0.667rem' }}>{toWeightInUnit(p.weightKg, weightUnit)} {weightUnit}</span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
+              </div>
+              <button className="io-btn" style={{ marginTop: 8 }} onClick={onAddClose}>{t('common.cancel', 'Annulla')}</button>
+            </>
           ) : (
             <ArmorEditForm form={addForm} onChange={setAddForm} onSave={addCustom} onCancel={onAddClose} />
-          )}
-          {addMode === 'preset' && (
-            <button className="io-btn" style={{ marginTop: 8 }} onClick={onAddClose}>{t('common.cancel', 'Annulla')}</button>
           )}
         </div>
       )}

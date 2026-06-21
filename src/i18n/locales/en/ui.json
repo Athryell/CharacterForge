@@ -176,6 +176,7 @@
     "failed": "Failed — concentration lost"
   },
   "rest": {
+    "rest": "Rest",
     "short": "Short Rest",
     "long": "Long Rest"
   },
@@ -349,7 +350,8 @@
   "tags": {
     "add": "Add tag",
     "edit": "Edit tags",
-    "addPlaceholder": "Add tag..."
+    "addPlaceholder": "Add tag...",
+    "filterAll": "All"
   },
   "notation": {
     "dynamicTitle": "Dynamic value — original:",
@@ -367,7 +369,10 @@
       "traits": "Trait modifiers",
       "scaling": "Scaling",
       "counters": "Counters",
-      "bonuses": "Equipment bonuses"
+      "bonuses": "Equipment bonuses",
+      "saves": "Saving throw bonuses",
+      "skills": "Skill bonuses",
+      "dynamic": "Dynamic bonuses"
     },
     "item": {
       "diceRoll": "Dice roll",
@@ -378,8 +383,12 @@
       "wis": "Wisdom (WIS)",
       "cha": "Charisma (CHA)",
       "pro": "Proficiency bonus",
+      "lvlNum": "Character level",
+      "lvlHalf": "Half level",
       "lvl": "Scales with level",
       "counter": "Counter / charges",
+      "counterPRO": "Counter (proficiency)",
+      "counterCHA": "Counter (Charisma)",
       "bonusAC": "Armor Class bonus",
       "bonusINIT": "Initiative bonus",
       "bonusSPD": "Speed bonus",
@@ -390,12 +399,33 @@
       "bonusINT": "INT bonus",
       "bonusWIS": "WIS bonus",
       "bonusCHA": "CHA bonus",
-      "bonusTSSTR": "STR save bonus",
-      "bonusTSDEX": "DEX save bonus",
-      "bonusTSCON": "CON save bonus",
-      "bonusTSINT": "INT save bonus",
-      "bonusTSWIS": "WIS save bonus",
-      "bonusTSCHA": "CHA save bonus"
+      "savSTR": "STR save bonus",
+      "savDEX": "DEX save bonus",
+      "savCON": "CON save bonus",
+      "savINT": "INT save bonus",
+      "savWIS": "WIS save bonus",
+      "savCHA": "CHA save bonus",
+      "skACR": "Acrobatics bonus",
+      "skANH": "Animal Handling bonus",
+      "skARC": "Arcana bonus",
+      "skATH": "Athletics bonus",
+      "skDEC": "Deception bonus",
+      "skHIS": "History bonus",
+      "skINS": "Insight bonus",
+      "skITM": "Intimidation bonus",
+      "skINV": "Investigation bonus",
+      "skMED": "Medicine bonus",
+      "skNAT": "Nature bonus",
+      "skPER": "Perception bonus",
+      "skPRF": "Performance bonus",
+      "skPRS": "Persuasion bonus",
+      "skREL": "Religion bonus",
+      "skSLH": "Sleight of Hand bonus",
+      "skSTL": "Stealth bonus",
+      "skSUR": "Survival bonus",
+      "dynPROAC": "Prof bonus → AC",
+      "dynLVL2AC": "½ Level → AC",
+      "dynSTRAC": "STR mod → AC"
     },
     "dh": {
       "agi": "Agility (AGI)",
@@ -409,9 +439,13 @@
       "diceRoll": "Clickable die — rolls automatically",
       "modifier": "Character ability modifier",
       "proficiency": "Proficiency bonus",
+      "lvlNum": "Resolves to the character's current level as a number",
+      "lvlHalf": "Resolves to half the character's level (min 1)",
       "lvl": "Changes value based on character level",
       "counter": "Toggleable pips (e.g. spell charges)",
-      "bonus": "Passive bonus applied to this stat"
+      "counterDyn": "Counter whose size resolves from a formula",
+      "bonus": "Passive bonus applied to this stat",
+      "dynamic": "Bonus whose value resolves from a formula (e.g. proficiency)"
     }
   },
   "weapons": {
@@ -437,6 +471,7 @@
     "masteryLabel": "Mastery",
     "customMasteryLabel": "Custom mastery",
     "customMasteryPlaceholder": "E.g. Cleave, Push...",
+    "throwableLabel": "Range",
     "profLabel": "Proficiency",
     "propsAndMasteryLabel": "Properties & Mastery",
     "descLabel": "Description / Notes",
@@ -529,7 +564,7 @@
   },
   "activityLog": {
     "empty": "No activity recorded.",
-    "clearBtn": "🗑 Clear"
+    "clearBtn": "Clear"
   },
   "menu": {
     "character": "Character",
@@ -547,6 +582,8 @@
     "exportChar": "⬇ Export character",
     "importChar": "⬆ Import character",
     "sources": "Data Sources",
+    "notations": "Notation reference",
+    "notationsTitle": "Notation reference",
     "uiLang": "Language",
     "iconMode": "Icons",
     "iconEmoji": "Emoji",
@@ -607,6 +644,7 @@
     "steps": {
       "identity": "Identity",
       "class": "Class",
+      "classAndBg": "Class & BG",
       "stats": "Stats",
       "proficiencies": "Proficiencies",
       "summary": "Summary"
@@ -666,6 +704,8 @@
     "customBgTool": "Tool Proficiency",
     "customBgLanguage": "Language",
     "customBgFeat": "Origin Feat",
+    "customBgFeatCustom": "Custom…",
+    "originFeatLabel": "Origin Feat",
     "customBgEquipLabel": "Equipment",
     "customBgEquipGold": "50 GP to spend on starting equipment",
     "customBgEquipItems": "List specific items",
@@ -682,7 +722,21 @@
     "speciesSpellAlways": "always",
     "speciesSpellAtLevel": "at level {{level}}",
     "tieflingFixedNote": "All Tieflings know Thaumaturgy regardless of legacy.",
-    "lineageLevel1Trait": "Level 1:"
+    "lineageLevel1Trait": "Level 1:",
+    "charNamePlaceholder": "E.g. Aldric Voss",
+    "charNameDHPlaceholder": "E.g. Rael Ashborn",
+    "customSpeciesNamePlaceholder": "E.g. Half-Elf, Genasi…",
+    "customSpeciesTraitNamePlaceholder": "E.g. Fey Step…",
+    "customSpeciesTraitDescPlaceholder": "Trait description…",
+    "customBgNamePlaceholder": "E.g. Pirate, Monster Hunter…",
+    "customBgToolPlaceholder": "E.g. Thieves' tools…",
+    "customBgLanguagePlaceholder": "E.g. Elvish…",
+    "customBgFeatCustomPlaceholder": "E.g. War Caster, Sentinel…",
+    "customBgEquipItemsPlaceholder": "E.g. Crowbar, 2 torches, 15 GP…",
+    "customClsNamePlaceholder": "E.g. Knight, Alchemist…",
+    "clsSkillsInfo": "• Skills: {{count}} of your choice",
+    "profBgAutoSkills": "Automatic proficiency in {{skills}}.",
+    "dhBgDescPlaceholder": "e.g. Former soldier, Herbalist…"
   },
   "common": {
     "edit": "Edit",
@@ -949,12 +1003,30 @@
       "INT": "Intelligence (INT)",
       "WIS": "Wisdom (WIS)",
       "CHA": "Charisma (CHA)",
-      "TS-STR": "ST Strength",
-      "TS-DEX": "ST Dexterity",
-      "TS-CON": "ST Constitution",
-      "TS-INT": "ST Intelligence",
-      "TS-WIS": "ST Wisdom",
-      "TS-CHA": "ST Charisma"
+      "SAV-STR": "ST Strength",
+      "SAV-DEX": "ST Dexterity",
+      "SAV-CON": "ST Constitution",
+      "SAV-INT": "ST Intelligence",
+      "SAV-WIS": "ST Wisdom",
+      "SAV-CHA": "ST Charisma",
+      "SK-ACR": "Acrobatics",
+      "SK-ANH": "Animal Handling",
+      "SK-ARC": "Arcana",
+      "SK-ATH": "Athletics",
+      "SK-DEC": "Deception",
+      "SK-HIS": "History",
+      "SK-INS": "Insight",
+      "SK-ITM": "Intimidation",
+      "SK-INV": "Investigation",
+      "SK-MED": "Medicine",
+      "SK-NAT": "Nature",
+      "SK-PER": "Perception",
+      "SK-PRF": "Performance",
+      "SK-PRS": "Persuasion",
+      "SK-REL": "Religion",
+      "SK-SLH": "Sleight of Hand",
+      "SK-STL": "Stealth",
+      "SK-SUR": "Survival"
     }
   },
   "pinned": {
@@ -1105,10 +1177,15 @@
     "featOption": "Feat",
     "featPlaceholder": "Feat name",
     "featCategories": "Categories: Origin / General / Fighting Style / Epic Boon",
+    "featCustom": "Custom feat",
+    "featCustomDesc": "Enter a feat not in the SRD",
+    "featCustomPlaceholder": "Feat name (refer to your PHB)",
+    "featAsiLabel": "Choose ability to increase:",
     "epicBoonPlaceholder": "Epic Boon name",
     "epicBoonRecommended": "Boon of Combat Prowess recommended",
     "asiPlus2": "+2 to one ability",
     "asiPlus1": "+1 to two abilities",
+    "asiPointsLeft": "Points: {{spent}}/{{total}}",
     "spellsToLearn": "Choose {{count}} spell(s) to learn",
     "newSpeciesSpell": "New species spell: {{name}} ({{level}}, always prepared)",
     "chooseProgress": "{{picked}}/{{total}} selected"
@@ -1120,5 +1197,20 @@
     "noHistory": "No level data recorded — only spell slots and level will be adjusted.",
     "confirm": "Confirm",
     "cancel": "Cancel"
+  },
+  "feats": {
+    "requires": "Requires",
+    "repeatable": "Repeatable",
+    "anyAbility": "any",
+    "choiceSpellList": "Spell list",
+    "choiceSpellStat": "Spellcasting ability",
+    "choiceSkills": "Choose {{n}} skills or tools",
+    "category": {
+      "origin": "Origin",
+      "general": "General",
+      "fightingStyle": "Fighting Style",
+      "epicBoon": "Epic Boon",
+      "custom": "Custom"
+    }
   }
 }

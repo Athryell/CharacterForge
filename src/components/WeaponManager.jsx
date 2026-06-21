@@ -6,10 +6,34 @@ import { TagPill, TagSelector } from './Tags';
 import { KeywordText } from './Tooltip';
 import NotationTextarea from './NotationTextarea';
 import { Icon } from '../config/icons';
+import { useUnits } from '../hooks/useUnits';
 
 const BLANK_FORM = {
-  name: '', isProficient: true, desc: '', properties: [], mastery: 'none', isMasteryActive: false, weight: '',
+  name: '', isProficient: true, desc: '', properties: [], mastery: 'none', isMasteryActive: false, weight: '', throwable: '',
 };
+
+// Converts a feet string '20/60' to the display unit — returns 'X/Y' (no suffix)
+function convertThrowableToUnit(ftStr, toDisplaySpeed) {
+  if (!ftStr) return '';
+  const parts = ftStr.split('/');
+  if (parts.length !== 2) return ftStr;
+  const [n, l] = parts.map(s => parseInt(s.trim(), 10));
+  if (isNaN(n) || isNaN(l)) return ftStr;
+  return `${toDisplaySpeed(n)}/${toDisplaySpeed(l)}`;
+}
+
+// Formats a stored throwable value (already in display unit) for the chip in the preset list
+function formatPresetThrowable(ftStr, toDisplaySpeed, speedUnit) {
+  const converted = convertThrowableToUnit(ftStr, toDisplaySpeed);
+  if (!converted) return null;
+  return `${converted} ${speedUnit === 'sq' ? '□' : speedUnit}`;
+}
+
+function toWeightInUnit(kg, weightUnit) {
+  if (kg == null) return '';
+  const val = weightUnit === 'lbs' ? Math.round(kg * 2.205 * 10) / 10 : kg;
+  return String(val);
+}
 
 function PropertyMasteryPicker({ properties, mastery, onChangeProperties, onChangeMastery }) {
   const { t } = useTranslation();
@@ -90,10 +114,11 @@ function PropertyMasteryPicker({ properties, mastery, onChangeProperties, onChan
   );
 }
 
-function WeaponEditForm({ form, onChange, onSave, onCancel, onDelete, added, onToggleAction, allTags, onUpdateTags, onCreateTag, weaponId, wasNotProficient }) {
+function WeaponEditForm({ form, onChange, onSave, onCancel, onDelete, allTags, onUpdateTags, onCreateTag, weaponId, wasNotProficient, speedUnit = 'ft' }) {
   const { t } = useTranslation();
   function patch(obj) { onChange(f => ({ ...f, ...obj })); }
   const hasMastery = form.mastery && form.mastery !== 'none';
+  const rangeUnitLabel = speedUnit === 'sq' ? '□' : speedUnit;
 
   return (
     <div className="weapon-edit-form" onClick={e => e.stopPropagation()}>
@@ -106,6 +131,10 @@ function WeaponEditForm({ form, onChange, onSave, onCancel, onDelete, added, onT
         <div className="field" style={{ flex: '0 0 70px' }}>
           <label>{t('inventory.weight', 'Peso')}</label>
           <input type="text" value={form.weight || ''} onChange={e => patch({ weight: e.target.value })} placeholder="0" />
+        </div>
+        <div className="field" style={{ flex: '0 0 90px' }}>
+          <label>{t('weapons.throwableLabel', 'Gittata')} ({rangeUnitLabel})</label>
+          <input type="text" value={form.throwable || ''} onChange={e => patch({ throwable: e.target.value })} placeholder="es. 20/60" />
         </div>
         <div className="field" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
           <label>{t('weapons.profLabel')}</label>
@@ -151,13 +180,6 @@ function WeaponEditForm({ form, onChange, onSave, onCancel, onDelete, added, onT
       )}
       <div style={{ display: 'flex', gap: 8, marginTop: 8, justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', gap: 6 }}>
-          {onToggleAction && (
-            <button className={`icon-btn add-to-action-btn ${added ? 'added' : ''}`}
-              title={added ? t('common.removeFromAction') : t('common.addToAction')}
-              onClick={e => { e.stopPropagation(); onToggleAction(); }}>
-              {added ? <Icon id="action.done" size={13} /> : <Icon id="widget.actions" size={13} />}
-            </button>
-          )}
           {onDelete && (
             <button className="io-btn danger" onClick={e => { e.stopPropagation(); onDelete(); }}>{t('common.deleteBtn')}</button>
           )}
@@ -171,10 +193,12 @@ function WeaponEditForm({ form, onChange, onSave, onCancel, onDelete, added, onT
   );
 }
 
-export default function WeaponManager({ weapons = [], abilities, profBonus, onUpdate, onRoll, proficiency = '', onUpdateProficiency, onAddAction, onRemoveAction, actionNames, addOpen, onAddClose, allTags = [], onUpdateTags, onCreateTag, weightUnit = 'kg' }) {
+export default function WeaponManager({ weapons = [], abilities, profBonus, onUpdate, onRoll, proficiency = '', onUpdateProficiency, onAddAction, onRemoveAction, actionNames, addOpen, onAddClose, allTags = [], onUpdateTags, onCreateTag, weightUnit = 'kg', toDisplayWeight }) {
   const { t } = useTranslation();
+  const { toDisplaySpeed, speedUnit } = useUnits();
   const [addMode, setAddMode] = useState('preset');
   const [addForm, setAddForm] = useState(BLANK_FORM);
+  const [presetSearch, setPresetSearch] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState(null);
   const [expandedId, setExpandedId] = useState(null);
@@ -223,6 +247,8 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
       mastery: preset.mastery || 'none',
       isMasteryActive: pendingMastery,
       desc: lines.join('\n'),
+      weight: toWeightInUnit(preset.weightKg, weightUnit),
+      throwable: convertThrowableToUnit(preset.throwable, toDisplaySpeed),
       id: Date.now().toString(),
     }]);
     setSelectedPreset(null);
@@ -280,8 +306,17 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
               </div>
             ) : (
               <>
+                <input
+                  className="spell-search"
+                  placeholder={t('spells.searchPlaceholder', '🔍 Search by name...')}
+                  value={presetSearch}
+                  onChange={e => setPresetSearch(e.target.value)}
+                  style={{ marginBottom: 8 }}
+                />
                 <div className="weapon-preset-list">
-                  {[...dataManager.getWeapons()].sort((a, b) => a.name.localeCompare(b.name)).map(p => (
+                  {[...dataManager.getWeapons()]
+                    .filter(p => !presetSearch || p.name.toLowerCase().includes(presetSearch.toLowerCase()))
+                    .sort((a, b) => a.name.localeCompare(b.name)).map(p => (
                     <div key={p.name} className="weapon-preset-item" onClick={() => selectPreset(p)}>
                       <div className="weapon-name">{p.name}</div>
                       <div className="weapon-meta">
@@ -290,6 +325,12 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
                         ))}
                         {p.mastery && p.mastery !== 'none' && (
                           <span className="weapon-prop">{t("data.masteries." + p.mastery, WEAPON_MASTERIES[p.mastery]?.label || p.mastery)}</span>
+                        )}
+                        {p.weightKg != null && (
+                          <span className="weapon-prop" style={{ fontSize: '0.667rem' }}>{toWeightInUnit(p.weightKg, weightUnit)} {weightUnit}</span>
+                        )}
+                        {p.throwable && (
+                          <span className="weapon-prop" style={{ fontSize: '0.667rem' }}>🏹 {formatPresetThrowable(p.throwable, toDisplaySpeed, speedUnit)}</span>
                         )}
                       </div>
                     </div>
@@ -300,7 +341,7 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
             )
           ) : (
             <WeaponEditForm form={addForm} onChange={setAddForm} onSave={addCustom}
-              onCancel={onAddClose} />
+              onCancel={onAddClose} speedUnit={speedUnit} />
           )}
         </div>
       )}
@@ -337,12 +378,13 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
                 {predefinedProps.map(p => <span key={p} className="weapon-prop" title={WEAPON_PROPERTY_DESCS[p]}>{t("data.weaponProps." + p, WEAPON_PROPERTIES[p])}</span>)}
                 {customProps.map(p => <span key={p} className="weapon-prop">{p}</span>)}
                 {w.weight && <span className="weapon-prop" style={{ fontSize: '0.667rem' }}>{w.weight} {weightUnit || 'kg'}</span>}
+                {w.throwable && <span className="weapon-prop" style={{ fontSize: '0.667rem' }}>🏹 {w.throwable} {speedUnit === 'sq' ? '□' : speedUnit}</span>}
               </div>
             </div>
 
             {isEditing && editForm && (
               <WeaponEditForm form={editForm} onChange={setEditForm} onSave={saveEdit} onCancel={cancelEdit}
-                wasNotProficient={!w.isProficient}
+                wasNotProficient={!w.isProficient} speedUnit={speedUnit}
                 allTags={allTags} weaponId={w.id}
                 onUpdateTags={(id, tags) => {
                   onUpdateTags && onUpdateTags(id, tags);
@@ -350,11 +392,6 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
                 }}
                 onCreateTag={onCreateTag}
                 onDelete={() => { removeWeapon(w.id); cancelEdit(); }}
-                added={added}
-                onToggleAction={() => {
-                  if (added) { onRemoveAction && onRemoveAction(w.name); }
-                  else { onAddAction && onAddAction({ id: `weapon_${w.id}_${Date.now()}`, name: w.name, type: 'action', desc: w.desc || '', dice: '' }); }
-                }}
               />
             )}
 
@@ -386,6 +423,13 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
                   </div>
                 )}
                 <div className="item-edit-actions">
+                  {onAddAction && (
+                    <button className={`icon-btn add-to-action-btn ${added ? 'added' : ''}`}
+                      title={added ? t('common.removeFromAction') : t('common.addToAction')}
+                      onClick={e => { e.stopPropagation(); if (added) { onRemoveAction && onRemoveAction(w.name); } else { onAddAction({ id: `weapon_${w.id}_${Date.now()}`, name: w.name, type: 'action', desc: w.desc || '', dice: '' }); } }}>
+                      {added ? <Icon id="action.done" size={13} /> : <Icon id="widget.actions" size={13} />}
+                    </button>
+                  )}
                   <button className="io-btn" onClick={e => { e.stopPropagation(); startEdit(w); }}><Icon id="action.editItem" size={13} /> {t('common.edit')}</button>
                 </div>
               </div>

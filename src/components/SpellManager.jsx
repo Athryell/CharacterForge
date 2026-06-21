@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SCHOOLS, SPELL_CLASSES, filterSpells } from '../data/systems/dnd5e2024/spells';
 import dataManager from '../data/dataManager';
@@ -47,7 +47,7 @@ function detectActionType(text) {
   return 'action';
 }
 
-function SpellEditForm({ spell, srd, onSave, onCancel, onDelete, added, onToggleAction, allTags, onUpdateTags, onCreateTag }) {
+function SpellEditForm({ spell, srd, onSave, onCancel, onDelete, allTags, onUpdateTags, onCreateTag }) {
   const { t } = useTranslation();
   const actionTypesSpell = [
     ['action', t('actions.typeAction')],
@@ -135,13 +135,6 @@ function SpellEditForm({ spell, srd, onSave, onCancel, onDelete, added, onToggle
       )}
       <div style={{ display: 'flex', gap: 8, marginTop: 10, justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', gap: 6 }}>
-          {onToggleAction && (
-            <button className={`icon-btn add-to-action-btn ${added ? 'added' : ''}`}
-              title={added ? t('common.removeFromAction') : t('common.addToAction')}
-              onClick={e => { e.stopPropagation(); onToggleAction(); }}>
-              {added ? <Icon id="action.done" size={13} /> : '⚡'}
-            </button>
-          )}
           {onDelete && (
             <button className="io-btn danger" onClick={e => { e.stopPropagation(); onDelete(); }}>{t('common.deleteBtn')}</button>
           )}
@@ -221,8 +214,9 @@ const SPELL_SORTS = (t) => [
 export default function SpellManager({ spells = [], charClass, onUpdate, onRoll, allTags = [], onUpdateTags, onCreateTag, spellSlots = [], concentratingSpell = null, onCast, onAddAction, onRemoveAction, actionNames, homebrewKey = 0 }) {
   const { t } = useTranslation();
   const { toDisplaySpeed, speedUnit } = useUnits();
-  const [view, setView] = useState('list');
-  const [showAddMenu, setShowAddMenu] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
+  const [addMode, setAddMode] = useState('srd');
+  const [browsedExpanded, setBrowsedExpanded] = useState(null);
   const [castMenu, setCastMenu] = useState(null);
   const [filterLevel, setFilterLevel] = useState('');
   const [filterSchool, setFilterSchool] = useState('');
@@ -293,6 +287,7 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
       if (sort === 'school') return items.sort((a, b) => (a.school || '').localeCompare(b.school || '') || a.name.localeCompare(b.name));
       return items;
     },
+    storageKey: 'spells',
   });
 
   const actionTypesSpell = [
@@ -338,7 +333,7 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
     if (!customForm.name.trim() || knownNames.has(customForm.name.trim())) return;
     onUpdate([...spells, { ...customForm, name: customForm.name.trim(), prepared: false }]);
     setCustomForm(EMPTY_CUSTOM);
-    setView('list');
+    setAddOpen(false);
   }
 
   function handleSpellClick(spellName) {
@@ -358,294 +353,284 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
     <div>
       {/* ── HEADER BAR ── */}
       <div className="section-header-bar">
-        {view === 'list' ? (
-          <>
-            <div style={{ flex: 1 }}>
-              <FilterSortBar
-                filters={spellFilters}
-                sorts={spellSorts}
-                activeFilters={activeFilters}
-                activeSort={activeSort}
-                activePanel={activePanel}
-                hasActiveFilters={hasActiveFilters}
-                hasActiveSort={hasActiveSort}
-                onFilterToggle={toggleFilter}
-                onSortChange={setActiveSort}
-                onPanelToggle={togglePanel}
-                onReset={resetFilters}
-              />
-            </div>
-            <div style={{ position: 'relative' }}>
-              <button className="add-icon-btn" onClick={() => setShowAddMenu(v => !v)} title={t('spells.addTitle')}>＋</button>
-              {showAddMenu && (
-                <div className="spell-add-menu">
-                  <button className="spell-add-menu-item" onClick={() => { setView('srd'); setShowAddMenu(false); }}>🔍 {t('spells.browseSRD').replace('＋ ', '').replace('Browse SRD', 'Browse SRD')}</button>
-                  <button className="spell-add-menu-item" onClick={() => { setView('custom'); setShowAddMenu(false); }}>{t('spells.custom')}</button>
-                </div>
-              )}
-            </div>
-          </>
-        ) : (
-          <>
-            <span className="section-header-title">
-              {view === 'srd' ? t('spells.browseTitle') : t('spells.customFormTitle')}
-            </span>
-            <button className="add-icon-btn" onClick={() => setView('list')}>{t('spells.close')}</button>
-          </>
-        )}
+        <div style={{ flex: 1 }}>
+          <FilterSortBar
+            filters={spellFilters}
+            sorts={spellSorts}
+            activeFilters={activeFilters}
+            activeSort={activeSort}
+            activePanel={activePanel}
+            hasActiveFilters={hasActiveFilters}
+            hasActiveSort={hasActiveSort}
+            onFilterToggle={toggleFilter}
+            onSortChange={setActiveSort}
+            onPanelToggle={togglePanel}
+            onReset={resetFilters}
+          />
+        </div>
+        <button className={`add-icon-btn ${addOpen ? 'active' : ''}`} onClick={() => setAddOpen(v => !v)} title={t('spells.addTitle')}>＋</button>
       </div>
 
-      {view === 'list' && allTags.length > 0 && (
-        <TagFilterBar allTags={allTags} activeTag={spellTagFilter} onSelect={setSpellTagFilter} />
-      )}
+      {/* ── ADD PANEL ── */}
+      {addOpen && (
+        <div className="weapon-add-panel" style={{ marginBottom: 12 }}>
+          <div className="creator-method-bar" style={{ marginBottom: 10 }}>
+            <button className={`filter-chip ${addMode === 'srd' ? 'active' : ''}`} onClick={() => setAddMode('srd')}>{t('spells.browseSRD')}</button>
+            <button className={`filter-chip ${addMode === 'custom' ? 'active' : ''}`} onClick={() => setAddMode('custom')}>{t('spells.custom')}</button>
+          </div>
 
-      {/* ── LIST VIEW ── */}
-      {view === 'list' && (
-        <>
-          {spells.length === 0 && (
-            <div className="hint-text" style={{ padding: '12px 0' }}>
-              {t('spells.noSpells2')}
-            </div>
-          )}
-          {Object.keys(byLevel).sort((a, b) => a - b).map(lvl => (
-            <div key={lvl} style={{ marginBottom: 10 }}>
-              <div className="spell-level-header">{LEVEL_LABELS[lvl] || `Liv. ${lvl}`}</div>
-              <div className="spell-list">
-                {byLevel[lvl].map(spell => {
-                  const isCantrip = spell.level === 0;
-                  const srd = srdByName[spell.name] || {};
-                  const actionType = spell.actionType || srd.actionType || detectActionType(spell.desc);
-                  const duration = spell.duration || srd.duration || null;
-                  const range = spell.range || srd.range || null;
-                  const rangeDisplay = convertRangeText(range, toDisplaySpeed, speedUnit);
-                  const ab = ACTION_BADGE[actionType] || ACTION_BADGE.action;
-                  const isEditing = editingSpellName === spell.name;
-                  const isExpanded = expanded === spell.name;
-                  const added = actionNames?.has(spell.name);
-                  const isEffectivePrepared = spell.prepared || spell.alwaysPrepared || isCantrip;
-
+          {addMode === 'srd' ? (
+            <>
+              <div className="spell-browser-filters">
+                <input className="spell-search" placeholder={t('spells.searchPlaceholder')}
+                  value={filterSearch} onChange={e => setFilterSearch(e.target.value)} autoFocus />
+                <div className="filter-bar" style={{ marginTop: 6 }}>
+                  <select className="spell-filter-select" value={filterLevel} onChange={e => setFilterLevel(e.target.value)}>
+                    <option value="">{t('spells.filterAllLevels')}</option>
+                    {Object.entries(LEVEL_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                  </select>
+                  <select className="spell-filter-select" value={filterSchool} onChange={e => setFilterSchool(e.target.value)}>
+                    <option value="">{t('spells.filterAllSchools')}</option>
+                    {SCHOOLS.map(s => <option key={s} value={s}>{t(`data.schools.${s}`, s)}</option>)}
+                  </select>
+                  <select className="spell-filter-select" value={filterClass} onChange={e => setFilterClass(e.target.value)}>
+                    <option value="">{t('spells.filterAllClasses')}</option>
+                    {SPELL_CLASSES.map(c => <option key={c} value={c}>{t(`data.classes.${c}`, c)}</option>)}
+                  </select>
+                </div>
+                <div className="hint-text" style={{ marginTop: 4 }}>
+                  {browsedSpells.length === 0 && filterClass
+                    ? t('spells.foundZeroClass', { class: t(`data.classes.${filterClass}`, filterClass) })
+                    : browsedSpells.length === 1
+                      ? t('spells.foundSingular', { count: browsedSpells.length })
+                      : t('spells.foundPlural', { count: browsedSpells.length })}
+                </div>
+              </div>
+              <div className="spell-browser-list" style={{ maxHeight: 220, overflowY: 'auto' }}>
+                {browsedSpells.map(spell => {
+                  const already = knownNames.has(spell.name);
+                  const isExp = browsedExpanded === spell.name;
                   return (
                     <div key={spell.name}
-                      className={`spell-item ${isEffectivePrepared ? 'prepared' : ''} ${isExpanded || isEditing ? 'expanded' : ''} ${isCantrip ? 'cantrip' : ''}`}
-                      onClick={() => handleSpellClick(spell.name)}
-                    >
-                      <div
-                        className={`spell-prepared-dot ${isEffectivePrepared ? 'on' : ''} ${isCantrip ? 'cantrip-dot' : ''} ${spell.alwaysPrepared ? 'always-prepared-dot' : ''}`}
-                        title={spell.alwaysPrepared ? t('spells.alwaysPrepared', 'Sempre preparata') : undefined}
-                        onClick={e => { e.stopPropagation(); if (!isCantrip && !spell.alwaysPrepared) togglePrepared(spell.name); }}
-                      />
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
-                          <div className="spell-name">{spell.name}</div>
-                          {added && <span className="action-added-badge" title={t('common.inAction', 'In azioni')}>⚡</span>}
-                          {spell.acquiredAtLevel && <span className="level-badge">Lv. {spell.acquiredAtLevel}</span>}
-                          {(spell.tags || []).map(tag => <TagPill key={tag} tag={tag} allTags={allTags} small />)}
+                      className={`spell-browser-item ${already ? 'already-known' : ''} ${isExp ? 'expanded' : ''}`}
+                      onClick={() => setBrowsedExpanded(isExp ? null : spell.name)}>
+                      <div className="spell-browser-main">
+                        <div className="spell-browser-name">{spell.name}</div>
+                        <div className="spell-browser-tags">
+                          <span className="spell-level-badge">{spell.level === 0 ? t('spells.filterCantrips') : t('spells.levelLabel', { level: spell.level })}</span>
+                          {spell.school && <span className="spell-school-badge">{t(`data.schools.${spell.school}`, spell.school)}</span>}
+                          {spell.c && <span className="spell-conc" title={t('spells.concentration')}>C</span>}
+                          {spell.r && <span className="spell-ritual" title={t('spells.ritual')}>R</span>}
                         </div>
-                        {!isExpanded && !isEditing && (rangeDisplay || duration) && (
-                          <div style={{ fontSize:10, color:'var(--c-muted)', marginTop:1, display:'flex', gap:8 }}>
-                            {rangeDisplay && <span>{rangeDisplay}</span>}
-                            {duration && <span>{duration}</span>}
-                          </div>
-                        )}
-
-                        {isEditing && (
-                          <SpellEditForm
-                            spell={spell} srd={srd}
-                            onSave={saveSpellEdit}
-                            onCancel={() => setEditingSpellName(null)}
-                            onDelete={() => { removeSpell(spell.name); setEditingSpellName(null); }}
-                            added={added}
-                            onToggleAction={onAddAction ? () => {
-                              if (added) { onRemoveAction && onRemoveAction(spell.name); }
-                              else { onAddAction({ id: `spell_${spell.name}_${Date.now()}`, name: spell.name, type: actionType, desc: spell.desc || '', dice: '' }); }
-                            } : null}
-                            allTags={allTags}
-                            onUpdateTags={onUpdateTags}
-                            onCreateTag={onCreateTag}
-                          />
-                        )}
-
-                        {isExpanded && !isEditing && (
-                          <>
-                            {(range || duration) && (
-                              <div style={{ display:'flex', gap:10, marginTop:4, fontSize:11, color:'var(--c-muted)' }}>
-                                {rangeDisplay && <span>📍 {rangeDisplay}</span>}
-                                {duration && <span>⏱ {duration}</span>}
-                              </div>
-                            )}
-                            {spell.desc && (
-                              <div className="spell-desc">
-                                <KeywordText text={spell.desc} onRoll={onRoll} label={spell.name}
-                                  counters={spell.counters}
-                                  onCounterChange={(idx, vals) => onUpdate(spells.map(s2 => s2.name === spell.name ? { ...s2, counters: { ...(s2.counters || {}), [idx]: vals } } : s2))} />
-                              </div>
-                            )}
-                            <div className="item-edit-actions" onClick={e => e.stopPropagation()}>
-                              <button className="io-btn" onClick={() => { setEditingSpellName(spell.name); setExpanded(null); }}>{t('common.edit')}</button>
-                            </div>
-                          </>
-                        )}
+                        {spell.classes?.length > 0 && <div className="spell-browser-classes">{spell.classes.map(cl => t(`data.classes.${cl}`, cl)).join(', ')}</div>}
+                        {isExp && <div className="spell-browser-desc"><KeywordText text={spell.desc} onRoll={onRoll} label={spell.name} /></div>}
                       </div>
-
-                      <div className="spell-action-badge" style={{ background: ab.bg, color: ab.color }}>{ab.label}</div>
-                      {spell.school && <div className="spell-school">{t(`data.schools.${spell.school}`, spell.school)}</div>}
-                      <div className="spell-level-badge">{isCantrip ? t('spells.filterCantrips') : t('spells.levelLabel', { level: spell.level })}</div>
-                      {spell.concentration && <div className="spell-conc" title={t('spells.concentration')}>C</div>}
-                      {spell.ritual && <div className="spell-ritual" title={t('spells.ritual')}>R</div>}
-
-                      {onCast && (
-                        <div style={{ position: 'relative' }} onClick={e => e.stopPropagation()}>
-                          <button className={`spell-cast-btn ${castMenu === spell.name ? 'active' : ''}`} title={t('actions.rollLabel')}
-                            onClick={() => {
-                              if (isCantrip) { onCast(spell, 0); return; }
-                              setCastMenu(castMenu === spell.name ? null : spell.name);
-                            }}>🎯</button>
-                          {castMenu === spell.name && (
-                            <div className="spell-cast-menu">
-                              {Array.from({ length: 9 - spell.level + 1 }, (_, i) => spell.level + i).map(lvl => {
-                                const slot = (spellSlots || [])[lvl - 1];
-                                const avail = slot ? slot.max - slot.used : 0;
-                                return (
-                                  <button key={lvl} className="spell-cast-menu-item" disabled={avail <= 0}
-                                    onClick={() => { onCast(spell, lvl); setCastMenu(null); }}>
-                                    <span>{t('spells.castSlot', { level: lvl })}</span>
-                                    <span className={`spell-cast-slot-count ${avail <= 0 ? 'empty' : ''}`}>{avail}/{slot?.max ?? 0}</span>
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </div>
-                      )}
+                      <button className={`spell-add-btn ${already ? 'known' : ''}`}
+                        onClick={e => { e.stopPropagation(); if (!already) addSRDSpell(spell); }}
+                        disabled={already}>{already ? <Icon id="action.done" size={13} /> : <Icon id="action.add" size={13} />}</button>
                     </div>
                   );
                 })}
               </div>
-            </div>
-          ))}
-        </>
-      )}
-
-      {/* ── SRD BROWSER ── */}
-      {view === 'srd' && (
-        <>
-          <div className="spell-browser-filters">
-            <input className="spell-search" placeholder={t('spells.searchPlaceholder')}
-              value={filterSearch} onChange={e => setFilterSearch(e.target.value)} autoFocus />
-            <div className="filter-bar" style={{ marginTop: 6 }}>
-              <select className="spell-filter-select" value={filterLevel} onChange={e => setFilterLevel(e.target.value)}>
-                <option value="">{t('spells.filterAllLevels')}</option>
-                {Object.entries(LEVEL_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-              </select>
-              <select className="spell-filter-select" value={filterSchool} onChange={e => setFilterSchool(e.target.value)}>
-                <option value="">{t('spells.filterAllSchools')}</option>
-                {SCHOOLS.map(s => <option key={s} value={s}>{t(`data.schools.${s}`, s)}</option>)}
-              </select>
-              <select className="spell-filter-select" value={filterClass} onChange={e => setFilterClass(e.target.value)}>
-                <option value="">{t('spells.filterAllClasses')}</option>
-                {SPELL_CLASSES.map(c => <option key={c} value={c}>{t(`data.classes.${c}`, c)}</option>)}
-              </select>
-            </div>
-            <div className="hint-text" style={{ marginTop: 4 }}>
-              {browsedSpells.length === 0 && filterClass
-                ? t('spells.foundZeroClass', { class: t(`data.classes.${filterClass}`, filterClass) })
-                : browsedSpells.length === 1
-                  ? t('spells.foundSingular', { count: browsedSpells.length })
-                  : t('spells.foundPlural', { count: browsedSpells.length })}
-            </div>
-          </div>
-          <div className="spell-browser-list">
-            {browsedSpells.map(spell => {
-              const already = knownNames.has(spell.name);
-              const isExp = expanded === spell.name;
-              return (
-                <div key={spell.name}
-                  className={`spell-browser-item ${already ? 'already-known' : ''} ${isExp ? 'expanded' : ''}`}
-                  onClick={() => setExpanded(isExp ? null : spell.name)}>
-                  <div className="spell-browser-main">
-                    <div className="spell-browser-name">{spell.name}</div>
-                    <div className="spell-browser-tags">
-                      <span className="spell-level-badge">{spell.level === 0 ? t('spells.filterCantrips') : t('spells.levelLabel', { level: spell.level })}</span>
-                      {spell.school && <span className="spell-school-badge">{t(`data.schools.${spell.school}`, spell.school)}</span>}
-                      {spell.c && <span className="spell-conc" title={t('spells.concentration')}>C</span>}
-                      {spell.r && <span className="spell-ritual" title={t('spells.ritual')}>R</span>}
-                    </div>
-                    {spell.classes?.length > 0 && <div className="spell-browser-classes">{spell.classes.map(cl => t(`data.classes.${cl}`, cl)).join(', ')}</div>}
-                    {isExp && <div className="spell-browser-desc"><KeywordText text={spell.desc} onRoll={onRoll} label={spell.name} /></div>}
-                  </div>
-                  <button className={`spell-add-btn ${already ? 'known' : ''}`}
-                    onClick={e => { e.stopPropagation(); if (!already) addSRDSpell(spell); }}
-                    disabled={already}>{already ? <Icon id="action.done" size={13} /> : <Icon id="action.add" size={13} />}</button>
+              <button className="io-btn" style={{ marginTop: 8 }} onClick={() => setAddOpen(false)}>{t('common.cancel')}</button>
+            </>
+          ) : (
+            <div>
+              <div className="field-row">
+                <div className="field" style={{ flex: 2 }}>
+                  <label>{t('spells.customName')}</label>
+                  <input value={customForm.name} onChange={e => setCustomForm(f => ({ ...f, name: e.target.value }))}
+                    placeholder="Es. Fiamma della Vendetta" autoFocus />
                 </div>
-              );
-            })}
-          </div>
-        </>
-      )}
-
-      {/* ── CUSTOM FORM ── */}
-      {view === 'custom' && (
-        <div className="weapon-add-panel">
-          <div className="field-row">
-            <div className="field" style={{ flex: 2 }}>
-              <label>{t('spells.customName')}</label>
-              <input value={customForm.name} onChange={e => setCustomForm(f => ({ ...f, name: e.target.value }))}
-                placeholder="Es. Fiamma della Vendetta" autoFocus />
+                <div className="field">
+                  <label>{t('spells.customLevel')}</label>
+                  <select value={customForm.level} onChange={e => setCustomForm(f => ({ ...f, level: parseInt(e.target.value) }))}>
+                    {Object.entries(LEVEL_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                  </select>
+                </div>
+                <div className="field">
+                  <label>{t('spells.customSchool')}</label>
+                  <select value={customForm.school} onChange={e => setCustomForm(f => ({ ...f, school: e.target.value }))}>
+                    <option value="">—</option>
+                    {SCHOOLS.map(s => <option key={s} value={s}>{t(`data.schools.${s}`, s)}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div className="field-row" style={{ marginTop: 6 }}>
+                <div className="field">
+                  <label>{t('spells.actionTypeLabel')}</label>
+                  <select value={customForm.actionType} onChange={e => setCustomForm(f => ({ ...f, actionType: e.target.value }))}>
+                    {actionTypesSpell.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                  </select>
+                </div>
+                <div className="field">
+                  <label>{t('spells.durationLabel')}</label>
+                  <input value={customForm.duration} onChange={e => setCustomForm(f => ({ ...f, duration: e.target.value }))} placeholder="Es. 1 minuto" />
+                </div>
+                <div className="field">
+                  <label>{t('spells.rangeLabel')}</label>
+                  <input value={customForm.range} onChange={e => setCustomForm(f => ({ ...f, range: e.target.value }))} placeholder="Es. 18m" />
+                </div>
+              </div>
+              <div className="field" style={{ marginTop: 8 }}>
+                <label>{t('spells.customDesc')}</label>
+                <textarea className="notes-area" style={{ minHeight: 64 }}
+                  value={customForm.desc} onChange={e => setCustomForm(f => ({ ...f, desc: e.target.value }))}
+                  placeholder={t('spells.customDescPlaceholder')} />
+              </div>
+              <div style={{ display: 'flex', gap: 16, marginTop: 8, alignItems: 'center' }}>
+                <label className="toggle-box">
+                  <input type="checkbox" checked={customForm.concentration}
+                    onChange={e => setCustomForm(f => ({ ...f, concentration: e.target.checked }))} />
+                  <span className="toggle-label">{t('spells.customConcentration')}</span>
+                </label>
+                <label className="toggle-box">
+                  <input type="checkbox" checked={customForm.ritual}
+                    onChange={e => setCustomForm(f => ({ ...f, ritual: e.target.checked }))} />
+                  <span className="toggle-label">{t('spells.customRitual')}</span>
+                </label>
+                <div style={{ flex: 1 }} />
+                <button className="io-btn" onClick={() => { setAddOpen(false); setCustomForm(EMPTY_CUSTOM); }}>{t('common.cancel')}</button>
+                <button className={`io-btn primary ${!customForm.name.trim() ? 'disabled' : ''}`}
+                  onClick={submitCustom} disabled={!customForm.name.trim()}>{t('spells.customAdd')}</button>
+              </div>
             </div>
-            <div className="field">
-              <label>{t('spells.customLevel')}</label>
-              <select value={customForm.level} onChange={e => setCustomForm(f => ({ ...f, level: parseInt(e.target.value) }))}>
-                {Object.entries(LEVEL_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-              </select>
-            </div>
-            <div className="field">
-              <label>{t('spells.customSchool')}</label>
-              <select value={customForm.school} onChange={e => setCustomForm(f => ({ ...f, school: e.target.value }))}>
-                <option value="">—</option>
-                {SCHOOLS.map(s => <option key={s} value={s}>{t(`data.schools.${s}`, s)}</option>)}
-              </select>
-            </div>
-          </div>
-          <div className="field-row" style={{ marginTop: 6 }}>
-            <div className="field">
-              <label>{t('spells.actionTypeLabel')}</label>
-              <select value={customForm.actionType} onChange={e => setCustomForm(f => ({ ...f, actionType: e.target.value }))}>
-                {actionTypesSpell.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-              </select>
-            </div>
-            <div className="field">
-              <label>{t('spells.durationLabel')}</label>
-              <input value={customForm.duration} onChange={e => setCustomForm(f => ({ ...f, duration: e.target.value }))} placeholder="Es. 1 minuto" />
-            </div>
-            <div className="field">
-              <label>{t('spells.rangeLabel')}</label>
-              <input value={customForm.range} onChange={e => setCustomForm(f => ({ ...f, range: e.target.value }))} placeholder="Es. 18m" />
-            </div>
-          </div>
-          <div className="field" style={{ marginTop: 8 }}>
-            <label>{t('spells.customDesc')}</label>
-            <textarea className="notes-area" style={{ minHeight: 64 }}
-              value={customForm.desc} onChange={e => setCustomForm(f => ({ ...f, desc: e.target.value }))}
-              placeholder={t('spells.customDescPlaceholder')} />
-          </div>
-          <div style={{ display: 'flex', gap: 16, marginTop: 8, alignItems: 'center' }}>
-            <label className="toggle-box">
-              <input type="checkbox" checked={customForm.concentration}
-                onChange={e => setCustomForm(f => ({ ...f, concentration: e.target.checked }))} />
-              <span className="toggle-label">{t('spells.customConcentration')}</span>
-            </label>
-            <label className="toggle-box">
-              <input type="checkbox" checked={customForm.ritual}
-                onChange={e => setCustomForm(f => ({ ...f, ritual: e.target.checked }))} />
-              <span className="toggle-label">{t('spells.customRitual')}</span>
-            </label>
-            <div style={{ flex: 1 }} />
-            <button className="io-btn" onClick={() => { setView('list'); setCustomForm(EMPTY_CUSTOM); }}>{t('common.cancel')}</button>
-            <button className={`io-btn primary ${!customForm.name.trim() ? 'disabled' : ''}`}
-              onClick={submitCustom} disabled={!customForm.name.trim()}>{t('spells.customAdd')}</button>
-          </div>
+          )}
         </div>
       )}
+
+      {allTags.length > 0 && (
+        <TagFilterBar allTags={allTags} activeTag={spellTagFilter} onSelect={setSpellTagFilter} />
+      )}
+
+      {/* ── LIST VIEW ── */}
+      <>
+        {spells.length === 0 && (
+          <div className="hint-text" style={{ padding: '12px 0' }}>
+            {t('spells.noSpells2')}
+          </div>
+        )}
+        {Object.keys(byLevel).sort((a, b) => a - b).map(lvl => (
+          <div key={lvl} style={{ marginBottom: 10 }}>
+            <div className="spell-level-header">{LEVEL_LABELS[lvl] || `Liv. ${lvl}`}</div>
+            <div className="spell-list">
+              {byLevel[lvl].map(spell => {
+                const isCantrip = spell.level === 0;
+                const srd = srdByName[spell.name] || {};
+                const actionType = spell.actionType || srd.actionType || detectActionType(spell.desc);
+                const duration = spell.duration || srd.duration || null;
+                const range = spell.range || srd.range || null;
+                const rangeDisplay = convertRangeText(range, toDisplaySpeed, speedUnit);
+                const ab = ACTION_BADGE[actionType] || ACTION_BADGE.action;
+                const isEditing = editingSpellName === spell.name;
+                const isExpanded = expanded === spell.name;
+                const added = actionNames?.has(spell.name);
+                const isEffectivePrepared = spell.prepared || spell.alwaysPrepared || isCantrip;
+
+                return (
+                  <div key={spell.name}
+                    className={`spell-item ${isEffectivePrepared ? 'prepared' : ''} ${isExpanded || isEditing ? 'expanded' : ''} ${isCantrip ? 'cantrip' : ''}`}
+                    onClick={() => handleSpellClick(spell.name)}
+                  >
+                    <div
+                      className={`spell-prepared-dot ${isEffectivePrepared ? 'on' : ''} ${isCantrip ? 'cantrip-dot' : ''} ${spell.alwaysPrepared ? 'always-prepared-dot' : ''}`}
+                      title={spell.alwaysPrepared ? t('spells.alwaysPrepared', 'Sempre preparata') : undefined}
+                      onClick={e => { e.stopPropagation(); if (!isCantrip && !spell.alwaysPrepared) togglePrepared(spell.name); }}
+                    />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
+                        <div className="spell-name">
+                          {spell.name}
+                          {added && <span className="action-added-badge" style={{ marginLeft: 4 }} title={t('common.inAction', 'In azioni')}><Icon id="widget.actions" size={12} /></span>}
+                        </div>
+                        {spell.acquiredAtLevel && <span className="level-badge">Lv. {spell.acquiredAtLevel}</span>}
+                        {(spell.tags || []).map(tag => <TagPill key={tag} tag={tag} allTags={allTags} small />)}
+                      </div>
+                      {!isExpanded && !isEditing && (rangeDisplay || duration) && (
+                        <div style={{ fontSize:10, color:'var(--c-muted)', marginTop:1, display:'flex', gap:8 }}>
+                          {rangeDisplay && <span>{rangeDisplay}</span>}
+                          {duration && <span>{duration}</span>}
+                        </div>
+                      )}
+
+                      {isEditing && (
+                        <SpellEditForm
+                          spell={spell} srd={srd}
+                          onSave={saveSpellEdit}
+                          onCancel={() => setEditingSpellName(null)}
+                          onDelete={() => { removeSpell(spell.name); setEditingSpellName(null); }}
+                          allTags={allTags}
+                          onUpdateTags={onUpdateTags}
+                          onCreateTag={onCreateTag}
+                        />
+                      )}
+
+                      {isExpanded && !isEditing && (
+                        <>
+                          {(range || duration) && (
+                            <div style={{ display:'flex', gap:10, marginTop:4, fontSize:11, color:'var(--c-muted)' }}>
+                              {rangeDisplay && <span>📍 {rangeDisplay}</span>}
+                              {duration && <span>⏱ {duration}</span>}
+                            </div>
+                          )}
+                          {spell.desc && (
+                            <div className="spell-desc">
+                              <KeywordText text={spell.desc} onRoll={onRoll} label={spell.name}
+                                counters={spell.counters}
+                                onCounterChange={(idx, vals) => onUpdate(spells.map(s2 => s2.name === spell.name ? { ...s2, counters: { ...(s2.counters || {}), [idx]: vals } } : s2))} />
+                            </div>
+                          )}
+                          <div className="item-edit-actions" onClick={e => e.stopPropagation()}>
+                            {onAddAction && (
+                              <button className={`icon-btn add-to-action-btn ${added ? 'added' : ''}`}
+                                title={added ? t('common.removeFromAction') : t('common.addToAction')}
+                                onClick={e => { e.stopPropagation(); if (added) { onRemoveAction && onRemoveAction(spell.name); } else { onAddAction({ id: `spell_${spell.name}_${Date.now()}`, name: spell.name, type: actionType, desc: spell.desc || '', dice: '' }); } }}>
+                                {added ? <Icon id="action.done" size={13} /> : <Icon id="widget.actions" size={13} />}
+                              </button>
+                            )}
+                            <button className="io-btn" onClick={() => { setEditingSpellName(spell.name); setExpanded(null); }}>{t('common.edit')}</button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    <div className="spell-action-badge" style={{ background: ab.bg, color: ab.color }}>{ab.label}</div>
+                    {spell.school && <div className="spell-school">{t(`data.schools.${spell.school}`, spell.school)}</div>}
+                    <div className="spell-level-badge">{isCantrip ? t('spells.filterCantrips') : t('spells.levelLabel', { level: spell.level })}</div>
+                    {spell.concentration && <div className="spell-conc" title={t('spells.concentration')}>C</div>}
+                    {spell.ritual && <div className="spell-ritual" title={t('spells.ritual')}>R</div>}
+
+                    {onCast && (
+                      <div style={{ position: 'relative' }} onClick={e => e.stopPropagation()}>
+                        <button className={`spell-cast-btn ${castMenu === spell.name ? 'active' : ''}`} title={t('actions.rollLabel')}
+                          onClick={() => {
+                            if (isCantrip) { onCast(spell, 0); return; }
+                            setCastMenu(castMenu === spell.name ? null : spell.name);
+                          }}>🎯</button>
+                        {castMenu === spell.name && (
+                          <div className="spell-cast-menu">
+                            {Array.from({ length: 9 - spell.level + 1 }, (_, i) => spell.level + i).map(lvl => {
+                              const slot = (spellSlots || [])[lvl - 1];
+                              const avail = slot ? slot.max - slot.used : 0;
+                              return (
+                                <button key={lvl} className="spell-cast-menu-item" disabled={avail <= 0}
+                                  onClick={() => { onCast(spell, lvl); setCastMenu(null); }}>
+                                  <span>{t('spells.castSlot', { level: lvl })}</span>
+                                  <span className={`spell-cast-slot-count ${avail <= 0 ? 'empty' : ''}`}>{avail}/{slot?.max ?? 0}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </>
     </div>
   );
 }
