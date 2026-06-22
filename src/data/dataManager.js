@@ -10,6 +10,8 @@ import { DND_SPELLS }      from './systems/dnd5e2024/spells';
 import { DND_WEAPONS }     from './systems/dnd5e2024/weapons';
 import { DND_CONDITIONS }  from './systems/dnd5e2024/conditions';
 import { DND_CLASS_NAMES } from './systems/dnd5e2024/classes';
+import { DND_ARMOR_PRESETS } from './systems/dnd5e2024/armors';
+import { SRD_ITEMS }        from './systems/dnd5e2024/items';
 import { DND_SPECIES }     from './systems/dnd5e2024/species';
 import { DND_BACKGROUNDS } from './systems/dnd5e2024/backgrounds';
 
@@ -172,10 +174,38 @@ const dataManager = {
     return [...srd, ...hbExtra];
   },
 
+  // ── Armature ─────────────────────────────────────────────────────────────
+  getArmors() {
+    const srdIds = DND_ARMOR_PRESETS.map(a => a.id);
+    const hbExtra = loadHomebrew()
+      .flatMap(s => s.armors || [])
+      .filter(a => !srdIds.includes(a.id || a.name))
+      .map(a => ({ ...a, id: a.id || a.name, _homebrew: true }));
+    return [...DND_ARMOR_PRESETS, ...hbExtra];
+  },
+
+  // ── Oggetti ──────────────────────────────────────────────────────────────
+  getItems() {
+    const srdIds = SRD_ITEMS.map(i => i.id);
+    const hbExtra = loadHomebrew()
+      .flatMap(s => s.items || [])
+      .filter(i => !srdIds.includes(i.id || i.name))
+      .map(i => ({ ...i, id: i.id || i.name, _homebrew: true }));
+    return [...SRD_ITEMS, ...hbExtra];
+  },
+
   // ── Sottoclassi ──────────────────────────────────────────────────────────
   getSubclasses(cls) {
     return loadHomebrew()
       .flatMap(s => (s.subclasses || []).filter(sc => sc.class === cls).map(sc => sc.name));
+  },
+
+  getSubclassDetails(charClass, subclassName) {
+    for (const src of loadHomebrew()) {
+      const sc = (src.subclasses || []).find(s => s.class === charClass && s.name === subclassName);
+      if (sc) return sc;
+    }
+    return null;
   },
 
   // ── Sorgenti ─────────────────────────────────────────────────────────────
@@ -188,6 +218,7 @@ const dataManager = {
       species:     DND_SPECIES.length,
       backgrounds: DND_BACKGROUNDS.length,
       conditions:  DND_CONDITIONS.length,
+      items:       SRD_ITEMS.length,
     };
     return [
       { id: 'srd', name: 'SRD 5.2.1', author: 'Wizards of the Coast', type: 'srd', counts: srdCounts },

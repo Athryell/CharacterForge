@@ -7,6 +7,8 @@ import { KeywordText } from './Tooltip';
 import NotationTextarea from './NotationTextarea';
 import { Icon } from '../config/icons';
 import { useUnits } from '../hooks/useUnits';
+import { useCharContext } from './CharContext';
+import { syncCustomToDraft } from '../utils/homebrewSync';
 
 const BLANK_FORM = {
   name: '', isProficient: true, desc: '', properties: [], mastery: 'none', isMasteryActive: false, weight: '', throwable: '',
@@ -81,7 +83,7 @@ function PropertyMasteryPicker({ properties, mastery, onChangeProperties, onChan
             placeholder={t('weapons.customPropPlaceholder')}
             style={{ flex: 1, fontSize: '0.8rem' }}
             onKeyDown={e => e.key === 'Enter' && addCustom()} />
-          <button className="io-btn" onClick={addCustom}>+</button>
+          <button className="io-btn" onClick={addCustom}><Icon id="action.add" size={12} /></button>
         </div>
       </div>
       <div className="prop-picker-section" style={{ marginTop: 6 }}>
@@ -196,6 +198,7 @@ function WeaponEditForm({ form, onChange, onSave, onCancel, onDelete, allTags, o
 export default function WeaponManager({ weapons = [], abilities, profBonus, onUpdate, onRoll, proficiency = '', onUpdateProficiency, onAddAction, onRemoveAction, actionNames, addOpen, onAddClose, allTags = [], onUpdateTags, onCreateTag, weightUnit = 'kg', toDisplayWeight }) {
   const { t } = useTranslation();
   const { toDisplaySpeed, speedUnit } = useUnits();
+  const { systemId } = useCharContext();
   const [addMode, setAddMode] = useState('preset');
   const [addForm, setAddForm] = useState(BLANK_FORM);
   const [presetSearch, setPresetSearch] = useState('');
@@ -257,6 +260,7 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
   function addCustom() {
     if (!addForm.name) return;
     onUpdate([...weapons, { ...addForm, id: Date.now().toString() }]);
+    syncCustomToDraft('weapons', addForm, systemId);
     setAddForm(BLANK_FORM);
     onAddClose && onAddClose();
   }
@@ -266,6 +270,10 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
     if (editingId === w.id) return;
     if (editingId) cancelEdit();
     setExpandedId(expandedId === w.id ? null : w.id);
+  }
+
+  function toggleEquip(id) {
+    onUpdate(weapons.map(w => w.id === id ? { ...w, equipped: !w.equipped } : w));
   }
 
   const predefinedKeys = Object.keys(WEAPON_PROPERTIES);
@@ -283,7 +291,7 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
         <div className="weapon-add-panel" style={{ marginBottom: 12 }}>
           <div className="creator-method-bar" style={{ marginBottom: 10 }}>
             <button className={`filter-chip ${addMode === 'preset' ? 'active' : ''}`} onClick={() => setAddMode('preset')}>{t('weapons.presetSRD')}</button>
-            <button className={`filter-chip ${addMode === 'custom' ? 'active' : ''}`} onClick={() => setAddMode('custom')}>{t('weapons.custom')}</button>
+            <button className={`filter-chip ${addMode === 'custom' ? 'active' : ''}`} onClick={() => setAddMode('custom')}><Icon id="action.custom" size={12} /> {t('weapons.custom')}</button>
           </div>
           {addMode === 'preset' ? (
             selectedPreset ? (
@@ -362,6 +370,11 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
           <div key={w.id} className={`weapon-item ${isExpanded || isEditing ? 'expanded' : ''}`}>
             <div className="weapon-main" onClick={() => handleRowClick(w)} style={{ cursor: 'pointer' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                <button
+                  className={`armor-equip-dot ${w.equipped ? 'equipped' : ''}`}
+                  title={w.equipped ? t('weapons.unequip') : t('weapons.equip')}
+                  onClick={e => { e.stopPropagation(); toggleEquip(w.id); }}
+                />
                 <div className="weapon-name">{w.name}</div>
                 {added && <span className="action-added-badge" title={t('common.inAction', 'In azioni')}><Icon id="widget.actions" size={12} /></span>}
                 {w.acquiredAtLevel && <span className="level-badge">Lv. {w.acquiredAtLevel}</span>}

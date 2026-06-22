@@ -1,5 +1,6 @@
 ﻿import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Icon } from '../config/icons';
 import { DH_WEAPONS } from '../data/systems/daggerheart/weapons';
 
 const RANGES = ['Melee', 'Very Close', 'Close', 'Far', 'Very Far'];
@@ -118,7 +119,7 @@ export default function DHWeaponManager({ weapons = [], proficiency = 1, onUpdat
                         {t('dh.weapons.secondary', 'SEC')}
                       </span>
                     )}
-                    <button className="dh-wm-preset-add" onClick={() => handleAddPreset(p)}>+</button>
+                    <button className="dh-wm-preset-add" onClick={() => handleAddPreset(p)}><Icon id="action.add" size={12} /></button>
                   </div>
                 ))}
               </div>

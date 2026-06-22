@@ -6,6 +6,8 @@ import { TagPill, TagSelector, TagFilterBar } from './Tags';
 import { KeywordText } from './Tooltip';
 import { Icon } from '../config/icons';
 import FilterSortBar from './FilterSortBar';
+import { useCharContext } from './CharContext';
+import { syncCustomToDraft } from '../utils/homebrewSync';
 import { useFilterSort } from '../hooks/useFilterSort';
 import { useUnits, parseSpeedFt } from '../hooks/useUnits';
 
@@ -214,6 +216,7 @@ const SPELL_SORTS = (t) => [
 export default function SpellManager({ spells = [], charClass, onUpdate, onRoll, allTags = [], onUpdateTags, onCreateTag, spellSlots = [], concentratingSpell = null, onCast, onAddAction, onRemoveAction, actionNames, homebrewKey = 0 }) {
   const { t } = useTranslation();
   const { toDisplaySpeed, speedUnit } = useUnits();
+  const { systemId } = useCharContext();
   const [addOpen, setAddOpen] = useState(false);
   const [addMode, setAddMode] = useState('srd');
   const [browsedExpanded, setBrowsedExpanded] = useState(null);
@@ -312,7 +315,7 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
   function addSRDSpell(spell) {
     if (knownNames.has(spell.name)) return;
     onUpdate([...spells, {
-      name: spell.name, level: spell.level, school: spell.school,
+      name: spell.name, level: parseInt(spell.level) || 0, school: spell.school,
       concentration: spell.c, ritual: spell.r, prepared: false, desc: spell.desc,
       actionType: spell.actionType, duration: spell.duration, range: spell.range,
     }]);
@@ -332,6 +335,7 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
   function submitCustom() {
     if (!customForm.name.trim() || knownNames.has(customForm.name.trim())) return;
     onUpdate([...spells, { ...customForm, name: customForm.name.trim(), prepared: false }]);
+    syncCustomToDraft('spells', { ...customForm, name: customForm.name.trim() }, systemId);
     setCustomForm(EMPTY_CUSTOM);
     setAddOpen(false);
   }
@@ -376,7 +380,7 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
         <div className="weapon-add-panel" style={{ marginBottom: 12 }}>
           <div className="creator-method-bar" style={{ marginBottom: 10 }}>
             <button className={`filter-chip ${addMode === 'srd' ? 'active' : ''}`} onClick={() => setAddMode('srd')}>{t('spells.browseSRD')}</button>
-            <button className={`filter-chip ${addMode === 'custom' ? 'active' : ''}`} onClick={() => setAddMode('custom')}>{t('spells.custom')}</button>
+            <button className={`filter-chip ${addMode === 'custom' ? 'active' : ''}`} onClick={() => setAddMode('custom')}><Icon id="action.custom" size={12} /> {t('spells.custom')}</button>
           </div>
 
           {addMode === 'srd' ? (
@@ -417,7 +421,7 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
                       <div className="spell-browser-main">
                         <div className="spell-browser-name">{spell.name}</div>
                         <div className="spell-browser-tags">
-                          <span className="spell-level-badge">{spell.level === 0 ? t('spells.filterCantrips') : t('spells.levelLabel', { level: spell.level })}</span>
+                          <span className="spell-level-badge">{parseInt(spell.level) === 0 ? t('spells.filterCantrips') : t('spells.levelLabel', { level: spell.level })}</span>
                           {spell.school && <span className="spell-school-badge">{t(`data.schools.${spell.school}`, spell.school)}</span>}
                           {spell.c && <span className="spell-conc" title={t('spells.concentration')}>C</span>}
                           {spell.r && <span className="spell-ritual" title={t('spells.ritual')}>R</span>}
@@ -426,8 +430,9 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
                         {isExp && <div className="spell-browser-desc"><KeywordText text={spell.desc} onRoll={onRoll} label={spell.name} /></div>}
                       </div>
                       <button className={`spell-add-btn ${already ? 'known' : ''}`}
-                        onClick={e => { e.stopPropagation(); if (!already) addSRDSpell(spell); }}
-                        disabled={already}>{already ? <Icon id="action.done" size={13} /> : <Icon id="action.add" size={13} />}</button>
+                        onClick={e => { e.stopPropagation(); if (already) removeSpell(spell.name); else addSRDSpell(spell); }}>
+                        {already ? <Icon id="action.done" size={13} /> : <Icon id="action.add" size={13} />}
+                      </button>
                     </div>
                   );
                 })}
@@ -515,7 +520,7 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
             <div className="spell-level-header">{LEVEL_LABELS[lvl] || `Liv. ${lvl}`}</div>
             <div className="spell-list">
               {byLevel[lvl].map(spell => {
-                const isCantrip = spell.level === 0;
+                const isCantrip = parseInt(spell.level) === 0;
                 const srd = srdByName[spell.name] || {};
                 const actionType = spell.actionType || srd.actionType || detectActionType(spell.desc);
                 const duration = spell.duration || srd.duration || null;
@@ -534,7 +539,7 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
                   >
                     <div
                       className={`spell-prepared-dot ${isEffectivePrepared ? 'on' : ''} ${isCantrip ? 'cantrip-dot' : ''} ${spell.alwaysPrepared ? 'always-prepared-dot' : ''}`}
-                      title={spell.alwaysPrepared ? t('spells.alwaysPrepared', 'Sempre preparata') : undefined}
+                      title={spell.alwaysPrepared ? t('spells.alwaysPrepared') : isCantrip ? undefined : spell.prepared ? t('spells.prepared') : t('spells.notPrepared')}
                       onClick={e => { e.stopPropagation(); if (!isCantrip && !spell.alwaysPrepared) togglePrepared(spell.name); }}
                     />
                     <div style={{ flex: 1, minWidth: 0 }}>
@@ -609,7 +614,7 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
                           }}>🎯</button>
                         {castMenu === spell.name && (
                           <div className="spell-cast-menu">
-                            {Array.from({ length: 9 - spell.level + 1 }, (_, i) => spell.level + i).map(lvl => {
+                            {Array.from({ length: 9 - parseInt(spell.level) + 1 }, (_, i) => parseInt(spell.level) + i).map(lvl => {
                               const slot = (spellSlots || [])[lvl - 1];
                               const avail = slot ? slot.max - slot.used : 0;
                               return (

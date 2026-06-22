@@ -300,7 +300,7 @@ export default function ActionManager({ actions = [], spells = [], allTags = [],
             setAddForm(f => ({ ...f, type: defaultType }));
             setAddOpen(v => !v);
           }}
-        >+</button>
+        ><Icon id="action.add" size={13} /></button>
       </div>
 
       {addOpen && (

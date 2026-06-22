@@ -2,7 +2,6 @@
 // Mechanical data — translatable strings in i18n/species.{lang}.json
 
 export const DND_SPECIES = [
-  { id: 'aasimar',    speed: 30 },
   { id: 'dragonborn', speed: 30 },
   { id: 'dwarf',      speed: 30 },
   {
@@ -183,12 +182,6 @@ export const SPECIES_FEATURES = {
     { name: 'Minaccioso', desc: 'Competenza nell\'abilità Intimidire.' },
     { name: 'Resistenza instancabile', desc: 'Quando scendi a 0 PF (ma non muori), puoi scendere a 1 invece. Usi: 1 (riposo lungo).' },
     { name: 'Attacchi selvaggi', desc: 'Con colpo critico in mischia, tira un dado di danno aggiuntivo.' },
-  ],
-  'aasimar': [
-    { name: 'Visione nel buio', desc: 'Vedi in luce fioca come piena luce, nell\'oscurità come luce fioca (18 m).' },
-    { name: 'Resistenza celestiale', desc: 'Resistenza ai danni necrotici e radiosi.' },
-    { name: 'Guarigione divina', desc: 'Azione: tocca una creatura e cura 2d4 + livello PF (non su te stesso). Usi: 1 (riposo lungo).' },
-    { name: 'Portare la luce', desc: 'Azione: irradi luce intensa 6 m, fioca altri 6 m. Azione bonus per spegnerla.' },
   ],
 };
 

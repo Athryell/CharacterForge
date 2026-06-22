@@ -1,6 +1,8 @@
 ﻿import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DND_ARMOR_PRESETS as ARMOR_PRESETS, TYPE_LABEL, calcArmorAC } from '../data/systems/dnd5e2024/armors';
+import { Icon } from '../config/icons';
+import { TYPE_LABEL, calcArmorAC } from '../data/systems/dnd5e2024/armors';
+import dataManager from '../data/dataManager';
 import { TagPill, TagSelector } from './Tags';
 import { KeywordText } from './Tooltip';
 import NotationTextarea from './NotationTextarea';
@@ -173,7 +175,7 @@ export default function ArmorManager({ armors = [], desMod = 0, onUpdate, profic
     setExpandedId(expandedId === a.id ? null : a.id);
   }
 
-  const armorPresets = ARMOR_PRESETS.map(p => ({ ...p, type: 'armor', armorType: p.type }));
+  const armorPresets = dataManager.getArmors().map(p => ({ ...p, type: 'armor', armorType: p.armorType || p.type }));
   const allPresets = [...armorPresets, { ...SHIELD_PRESET }];
   const grouped = {
     light: allPresets.filter(p => p.type === 'armor' && p.armorType === 'light'),
@@ -195,7 +197,7 @@ export default function ArmorManager({ armors = [], desMod = 0, onUpdate, profic
         <div className="weapon-add-panel" style={{ marginBottom: 12 }}>
           <div className="creator-method-bar" style={{ marginBottom: 10 }}>
             <button className={`filter-chip ${addMode === 'preset' ? 'active' : ''}`} onClick={() => setAddMode('preset')}>{t('weapons.presetSRD', 'Preset SRD')}</button>
-            <button className={`filter-chip ${addMode === 'custom' ? 'active' : ''}`} onClick={() => setAddMode('custom')}>{t('weapons.custom', 'Personalizzata')}</button>
+            <button className={`filter-chip ${addMode === 'custom' ? 'active' : ''}`} onClick={() => setAddMode('custom')}><Icon id="action.custom" size={12} /> {t('weapons.custom', 'Personalizzata')}</button>
           </div>
           {addMode === 'preset' ? (
             <>
@@ -304,7 +306,7 @@ export default function ArmorManager({ armors = [], desMod = 0, onUpdate, profic
             {isExpanded && !isEditing && (
               <div className="weapon-expanded-section" onClick={e => e.stopPropagation()}>
                 {!isShield && a.presetId && (() => {
-                  const preset = ARMOR_PRESETS.find(p => p.id === a.presetId);
+                  const preset = dataManager.getArmors().find(p => p.id === a.presetId);
                   if (!preset) return null;
                   const strNotMet = preset.strReq > 0 && strScore < preset.strReq;
                   const effDex = Math.min(desMod, preset.maxDex ?? 2);

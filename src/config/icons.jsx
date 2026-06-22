@@ -3,7 +3,7 @@ import {
   Sword, Shield, Heart, Star, Zap, BookOpen, Scroll,
   Package, StickyNote, User, Users, Dices, Flame, Skull,
   Link, ArrowDownToLine, EarOff, PersonStanding, Handshake, Shell, Stone,
-  Settings, Plus, X, Pencil, SquarePen, Check, Trash2,
+  Settings, Plus, X, Pencil, SquarePen, PenLine, Check, Trash2,
   Moon, Sun, RefreshCw, Download, Upload, HelpCircle,
   Coffee, MessageSquare, Tag, Eye, EyeClosed, Grip,
   AlertTriangle, Sparkles,
@@ -85,6 +85,7 @@ export const ICON_MAP = {
   // ── Actions ───────────────────────────────────────────────────────────────
   'action.edit':     { emoji: '✏',  lucide: SquarePen,    label: 'Edit',          alwaysLucide: true },
   'action.editItem': { emoji: '✏',  lucide: Pencil,       label: 'Edit item',     alwaysLucide: true },
+  'action.custom':   { emoji: '✏',  lucide: PenLine,      label: 'Custom',        alwaysLucide: true },
   'action.done':     { emoji: '✓',  lucide: Check,        label: 'Done',          alwaysLucide: true },
   'action.add':      { emoji: '+',  lucide: Plus,         label: 'Add',           alwaysLucide: true },
   'action.remove':   { emoji: '✕',  lucide: X,            label: 'Remove'       },

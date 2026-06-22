@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { DND_CONDITIONS as CONDITIONS } from '../data/systems/dnd5e2024/conditions';
 import { Icon, useIconMode, EMOJI_TO_LUCIDE } from '../config/icons';
 import { useUnits } from '../hooks/useUnits';
+import { useCharContext } from './CharContext';
+import { syncCustomToDraft } from '../utils/homebrewSync';
 
 const CUSTOM_CONDITION_ICONS = [
   '⚠️', '💀', '🔥', '❄️', '⚡', '💧', '🌀', '☠️',
@@ -22,6 +24,7 @@ function ConditionIcon({ icon, size = 14 }) {
 
 export default function ConditionTracker({ active = [], onChange, exhaustionLevel = 0, onExhaustionChange, conditions: conditionList, onAddCustom, onRemoveCustom }) {
   const { t } = useTranslation();
+  const { systemId } = useCharContext();
   const { iconMode } = useIconMode();
   const { toDisplaySpeed, speedUnit } = useUnits();
   const [tooltip, setTooltip] = useState(null);
@@ -59,6 +62,7 @@ export default function ConditionTracker({ active = [], onChange, exhaustionLeve
         desc: formDesc.trim(),
       });
     }
+    syncCustomToDraft('conditions', { name: trimmedName, icon: formIcon || '⚠️', desc: formDesc.trim() }, systemId);
     setShowForm(false);
     setFormName('');
     setFormIcon('⚠️');

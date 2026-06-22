@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Icon } from '../config/icons';
 import { BONUS_STAT_OPTIONS } from '../data/bonuses';
 
 export default function BonusEditor({ bonuses, onChange }) {
@@ -34,7 +35,7 @@ export default function BonusEditor({ bonuses, onChange }) {
         <input type="number" value={value}
           onChange={e => setValue(parseInt(e.target.value) || 0)}
           style={{ width: 52 }} />
-        <button className="io-btn" onClick={e => { e.stopPropagation(); addBonus(); }}>+</button>
+        <button className="io-btn" onClick={e => { e.stopPropagation(); addBonus(); }}><Icon id="action.add" size={12} /></button>
       </div>
     </div>
   );

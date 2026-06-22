@@ -59,7 +59,7 @@ export default function CharacterSelect({ chars, onSelect, onCreate, onDelete, s
 
         <div className="char-select-footer">
           <button className="io-btn primary" style={{ width: '100%' }} onClick={onCreate}>
-            + {t('charSelect.createNew', 'Create new character')}
+            <Icon id="action.add" size={13} /> {t('charSelect.createNew', 'Create new character')}
           </button>
         </div>
       </div>

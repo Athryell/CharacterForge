@@ -248,8 +248,8 @@
     "filterAll": "Tutti",
     "filterCantrips": "Trucchetti",
     "filterPrepared": "Preparati",
-    "browseSRD": "＋ SRD",
-    "custom": "✏ Personalizzato",
+    "browseSRD": "＋ Data",
+    "custom": "Personalizzato",
     "close": "✕ Chiudi",
     "searchPlaceholder": "🔍 Cerca per nome...",
     "filterAllLevels": "Tutti i livelli",
@@ -258,7 +258,7 @@
     "foundSingular": "{{count}} incantesimo trovato",
     "foundPlural": "{{count}} incantesimi trovati",
     "foundZeroClass": "No spells found for the {{class}}",
-    "noSpells": "Nessun incantesimo. Clicca ＋ SRD per sfogliare o ✏ per aggiungerne uno personalizzato.",
+    "noSpells": "Nessun incantesimo. Clicca ＋ Data per sfogliare o ✏ per aggiungerne uno personalizzato.",
     "concentration": "Concentrazione",
     "ritual": "Rituale",
     "cantripLabel": "Trucco",
@@ -287,12 +287,14 @@
     "durationLabel": "Durata",
     "rangeLabel": "Gittata",
     "addTitle": "Aggiungi incantesimo",
-    "browseTitle": "🔍 Sfoglia SRD",
+    "browseTitle": "🔍 Sfoglia dati",
     "customFormTitle": "✏ Incantesimo personalizzato",
     "castSlot": "Slot {{level}}°",
     "noSpells2": "No spells added. Click \"+\" to add one.",
     "descEditLabel": "Descrizione",
     "alwaysPrepared": "Sempre preparata",
+    "prepared": "Preparata",
+    "notPrepared": "Non preparata",
     "filterLevel": "Level",
     "filterSchool": "School",
     "filterPreparedOnly": "Prepared only",
@@ -340,8 +342,15 @@
     "descEditLabel": "Descrizione",
     "descAddPlaceholder": "Es. Cura 2d4+2 HP. (@ per bonus)",
     "empty2": "No items added. Click \"+\" to add one.",
+    "noDataItems": "Nessun oggetto nelle sorgenti dati. Aggiungine tramite Sorgenti.",
     "carried": "Peso trasportato",
-    "coinWeight": "(di cui {{n}} {{unit}} da monete)"
+    "coinWeight": "(di cui {{n}} {{unit}} da monete)",
+    "catAll": "Tutti",
+    "catGear": "Equipaggiamento",
+    "catTool": "Strumenti",
+    "catAmmunition": "Munizioni",
+    "catPack": "Kit",
+    "catFocus": "Focus"
   },
   "currency": {
     "gp": "MO",
@@ -489,7 +498,7 @@
     "noWeapons": "Nessuna arma aggiunta. Clicca \"+\" per aggiungerne una.",
     "noArmor": "No armor added. Click \"+\" to add one.",
     "addBtn": "+ Aggiungi arma",
-    "presetSRD": "Preset SRD",
+    "presetSRD": "＋ Data",
     "custom": "Personalizzata",
     "cancel": "Annulla",
     "add": "+ Aggiungi",
@@ -503,6 +512,8 @@
     "customRangePlaceholder": "Es. 6/18",
     "customProf": "Hai competenza",
     "noProf": "Senza competenza",
+    "equip": "Equipaggia",
+    "unequip": "Rimuovi",
     "propsLabel": "Proprietà",
     "customPropPlaceholder": "Proprietà personalizzata...",
     "masteryLabel": "Maestria",
@@ -826,7 +837,8 @@
     "removeFromAction": "Rimuovi dalle azioni",
     "inAction": "In azioni",
     "delete": "Elimina",
-    "done": "Fine"
+    "done": "Fine",
+    "back": "Annulla"
   },
   "data": {
     "abilities": {
@@ -984,7 +996,6 @@
       "rock-gnome": "Gnomo (Roccia)",
       "forest-gnome": "Gnomo (Foresta)",
       "half-orc": "Mezz'orco",
-      "aasimar": "Aasimar",
       "elf": "Elfo",
       "dwarf": "Nano",
       "halfling": "Halfling",
@@ -1271,7 +1282,8 @@
     "asiPointsLeft": "Punti: {{spent}}/{{total}}",
     "spellsToLearn": "Choose {{count}} spell(s) to learn",
     "newSpeciesSpell": "Nuovo incantesimo di specie: {{name}} ({{level}}, sempre preparato)",
-    "chooseProgress": "{{picked}}/{{total}} selezionati"
+    "chooseProgress": "{{picked}}/{{total}} selezionati",
+    "now": "Ora"
   },
   "levelDown": {
     "title": "Go back to level {{level}}?",
@@ -1295,5 +1307,29 @@
       "epicBoon": "Grazia epica",
       "custom": "Personalizzato"
     }
+  },
+  "sources": {
+    "addData": "Aggiungi dati",
+    "importPackage": "Importa pacchetto",
+    "emptyTemplate": "Schema JSON vuoto",
+    "exportData": "Esporta dati",
+    "editorTitle": "Aggiungi dati homebrew",
+    "publish": "Pubblica",
+    "publishConfirm": "Pubblica '{{name}}'?",
+    "clearDraft": "Cancella bozza",
+    "clearDraftConfirm": "Sei sicuro? Tutti i dati non pubblicati verranno eliminati.",
+    "editSource": "Modifica",
+    "draftSaved": "Bozza salvata automaticamente",
+    "noName": "Inserisci un nome per pubblicare",
+    "exportSelected": "Esporta selezionati",
+    "exportSeparate": "Esporta file separati",
+    "selectAll": "Seleziona tutti",
+    "deselectAll": "Deseleziona tutti",
+    "draftNotice": "Hai dati homebrew non pubblicati",
+    "openDraft": "Apri editor",
+    "nameLabel": "Nome sorgente",
+    "authorLabel": "Autore",
+    "descLabel": "Descrizione",
+    "systemLabel": "Sistema"
   }
 }

@@ -209,7 +209,7 @@ function DHDomainCardForm({ domains, onAdd, onCancel, t }) {
         <textarea rows={2} value={form.desc} onChange={e => setForm(f => ({...f, desc:e.target.value}))} placeholder="Card effect..." style={{ width:'100%' }} />
       </div>
       <div style={{ display:'flex', gap:6, marginTop:6 }}>
-        <button className="io-btn primary" onClick={() => form.name && onAdd(form)}>+ {t('common.add','Add')}</button>
+        <button className="io-btn primary" onClick={() => form.name && onAdd(form)}><Icon id="action.add" size={12} /> {t('common.add','Add')}</button>
         <button className="io-btn" onClick={onCancel}>{t('common.cancel','Cancel')}</button>
       </div>
     </div>
@@ -259,7 +259,7 @@ function SubclassFeaturesEditor({ features, currentLevel, onChange }) {
         </div>
       ))}
       <button className="io-btn" style={{ fontSize: '0.8rem', marginTop: 2 }} onClick={add}>
-        + {t('identity.addSubclassFeature')}
+        <Icon id="action.add" size={12} /> {t('identity.addSubclassFeature')}
       </button>
     </div>
   );
@@ -1525,7 +1525,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
           <div className="card-title" style={{ justifyContent:'space-between' }}>
             <span><Icon id="widget.weapons" /> {t('widgets.weapons')}</span>
             <button className={`icon-btn ${addOpenFor === 'weapons' ? 'active' : ''}`}
-              onClick={() => setAddOpenFor(v => v === 'weapons' ? null : 'weapons')}>+</button>
+              onClick={() => setAddOpenFor(v => v === 'weapons' ? null : 'weapons')}><Icon id="action.add" size={13} /></button>
           </div>
           <WeaponManager weapons={state.weapons||[]} abilities={state.abilities} profBonus={char.profBonus}
             onUpdate={weapons => update({ weapons })} onRoll={handleRoll}
@@ -1577,7 +1577,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
             <div className="card-title" style={{ justifyContent:'space-between' }}>
               <span><Icon id="widget.armor" /> {t('widgets.armor')}</span>
               <button className={`icon-btn ${addOpenFor === 'armor' ? 'active' : ''}`}
-                onClick={() => setAddOpenFor(v => v === 'armor' ? null : 'armor')}>+</button>
+                onClick={() => setAddOpenFor(v => v === 'armor' ? null : 'armor')}><Icon id="action.add" size={13} /></button>
             </div>
             <ArmorManager
               armors={armorList}
@@ -1694,7 +1694,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
           <div className="card-title" style={{ justifyContent:'space-between' }}>
             <span><Icon id="tab.inventory" /> {t('widgets.inventory')}</span>
             <button className={`icon-btn ${addOpenFor === 'inventory' ? 'active' : ''}`}
-              onClick={() => setAddOpenFor(v => v === 'inventory' ? null : 'inventory')}>+</button>
+              onClick={() => setAddOpenFor(v => v === 'inventory' ? null : 'inventory')}><Icon id="action.add" size={13} /></button>
           </div>
           <InventoryManager items={state.equipment||[]} onUpdate={equipment => update({ equipment })} onRoll={handleRoll}
             addOpen={addOpenFor === 'inventory'} onAddClose={() => setAddOpenFor(null)}
@@ -1753,7 +1753,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
           <div className="card-title" style={{ justifyContent:'space-between' }}>
             <span><Icon id="widget.spellStats" /> {t('widgets.classFeatures')}</span>
             <button className={`icon-btn ${addOpenFor === 'features' ? 'active' : ''}`}
-              onClick={() => setAddOpenFor(v => v === 'features' ? null : 'features')}>+</button>
+              onClick={() => setAddOpenFor(v => v === 'features' ? null : 'features')}><Icon id="action.add" size={13} /></button>
           </div>
           <FeatureManager features={state.features||[]} onUpdate={features => update({ features })} onRoll={handleRoll}
             actionNames={actionNames} addOpen={addOpenFor === 'features'} onAddClose={() => setAddOpenFor(null)}
@@ -1953,7 +1953,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
           <div className="card">
             <div className="card-title" style={{ justifyContent:'space-between' }}>
               <span><Icon id="widget.inspiration" /> {t('dh.experiences','Experiences')}</span>
-              <button className="icon-btn" onClick={() => update({ experiences:[...experiences,{ name:'', modifier:2 }] })}>+</button>
+              <button className="icon-btn" onClick={() => update({ experiences:[...experiences,{ name:'', modifier:2 }] })}><Icon id="action.add" size={13} /></button>
             </div>
             {experiences.map((exp, i) => (
               <div key={i} className="field-row" style={{ alignItems:'center', marginBottom:6 }}>
@@ -1982,7 +1982,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
             <div className="card-title" style={{ justifyContent:'space-between' }}>
               <span><Icon id="widget.spells" /> {t('dh.domains','Domain Cards')}</span>
               <button className={`icon-btn ${addOpenFor==='dh-domains'?'active':''}`}
-                onClick={() => setAddOpenFor(v => v==='dh-domains'?null:'dh-domains')}>+</button>
+                onClick={() => setAddOpenFor(v => v==='dh-domains'?null:'dh-domains')}><Icon id="action.add" size={13} /></button>
             </div>
             {classDomains.length > 0 && (
               <div style={{ marginBottom:8, paddingBottom:8, borderBottom:'0.5px solid var(--c-border)' }}>
@@ -2131,7 +2131,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
           <div className="card-title" style={{ justifyContent:'space-between' }}>
             <span><Icon id="widget.weapons" /> {t('dh.widgets.weapons','Weapons')}</span>
             <button className={`icon-btn ${addOpenFor==='dh-weapons'?'active':''}`}
-              onClick={() => setAddOpenFor(v => v==='dh-weapons'?null:'dh-weapons')}>+</button>
+              onClick={() => setAddOpenFor(v => v==='dh-weapons'?null:'dh-weapons')}><Icon id="action.add" size={13} /></button>
           </div>
           <DHWeaponManager
             weapons={state.weapons||[]}
@@ -2149,7 +2149,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
           <div className="card-title" style={{ justifyContent:'space-between' }}>
             <span><Icon id="tab.inventory" /> {t('dh.widgets.inventory','Inventory')}</span>
             <button className={`icon-btn ${addOpenFor==='dh-inventory'?'active':''}`}
-              onClick={() => setAddOpenFor(v => v==='dh-inventory'?null:'dh-inventory')}>+</button>
+              onClick={() => setAddOpenFor(v => v==='dh-inventory'?null:'dh-inventory')}><Icon id="action.add" size={13} /></button>
           </div>
           <InventoryManager
             items={state.equipment||[]}

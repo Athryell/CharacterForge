@@ -1,6 +1,7 @@
 ﻿import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DND_CLASSES, SUBCLASS_DATA } from '../data/systems/dnd5e2024/classes';
+import dataManager from '../data/dataManager';
 import { ABILITIES, SKILLS } from '../data/systems/dnd5e2024/mechanics';
 import { getSpeciesData } from '../data/systems/dnd5e2024/species';
 import { ALL_DND_FEATS } from '../data/systems/dnd5e2024/feats';
@@ -59,6 +60,7 @@ export default function LevelUpModal({ currentLevel, charClass, charState, onCom
     return [...withInitial, ...customSubclassFeatures];
   }, [ld, subclassLevelFeatures, customSubclassFeatures]);
   const choiceFeatures = useMemo(() => (ld.features || []).filter(f => !f.auto), [ld]);
+  const hbSubclasses = useMemo(() => dataManager.getSubclasses(charClass), [charClass]);
   const isSpellcaster = !!classData?.spellcasting;
 
   const existingFeatIds = useMemo(
@@ -320,6 +322,10 @@ export default function LevelUpModal({ currentLevel, charClass, charState, onCom
               {choiceFeatures.map((f, fi) => {
                 const c = choices[f.name] || {};
                 const isMulti = (f.choose || 1) > 1;
+                const isSubchoice = f.name?.toLowerCase().includes('subclass');
+                const effectiveChoices = isSubchoice
+                  ? [...(f.choices || []), ...hbSubclasses.filter(h => !(f.choices || []).includes(h))]
+                  : (f.choices || []);
 
                 if (isMulti) {
                   const selArr = Array.isArray(c.selected) ? c.selected : [];
@@ -332,7 +338,7 @@ export default function LevelUpModal({ currentLevel, charClass, charState, onCom
                         {f.desc} — <strong>{t('levelUp.chooseProgress', { picked, total: needed })}</strong>
                       </p>
                       <div className="creator-grid">
-                        {(f.choices || []).map(opt => {
+                        {effectiveChoices.map(opt => {
                           const isSelected = selArr.includes(opt);
                           const maxReached = picked >= needed && !isSelected;
                           return (
@@ -363,7 +369,7 @@ export default function LevelUpModal({ currentLevel, charClass, charState, onCom
                     <div style={{ fontWeight: 600, marginBottom: 4 }}>{f.name}</div>
                     <p className="hint-text" style={{ marginBottom: 8 }}>{f.desc}</p>
                     <div className="creator-grid">
-                      {(f.choices || []).map(opt => (
+                      {effectiveChoices.map(opt => (
                         <div key={opt}
                           className={`creator-card ${c.selected === opt && !c.custom?.trim() ? 'selected' : ''}`}
                           onClick={() => setChoices(prev => ({ ...prev, [f.name]: { selected: opt, custom: '' } }))}>
@@ -386,6 +392,9 @@ export default function LevelUpModal({ currentLevel, charClass, charState, onCom
                         placeholder={t('levelUp.customChoice')}
                         value=""
                         onChange={e => setChoices(prev => ({ ...prev, [f.name]: { selected: null, custom: e.target.value } }))} />
+                    )}
+                    {isSubchoice && c.selected && !c.custom?.trim() && (
+                      <SubclassFeaturePreview charClass={charClass} subclassName={c.selected} targetLevel={targetLevel} />
                     )}
                   </div>
                 );
@@ -517,7 +526,7 @@ export default function LevelUpModal({ currentLevel, charClass, charState, onCom
                         className={`feat-card feat-card-custom${selectedFeat?.id === '__custom__' ? ' selected' : ''}`}
                         onClick={() => { setSelectedFeat({ id: '__custom__' }); setFeatAsiChoice(''); setFeatChoices({}); }}>
                         <div className="feat-card-header">
-                          <span className="feat-name">+ {t('levelUp.featCustom', 'Custom feat')}</span>
+                          <span className="feat-name"><Icon id="action.add" size={12} /> {t('levelUp.featCustom', 'Custom feat')}</span>
                         </div>
                         <div className="feat-desc">{t('levelUp.featCustomDesc', 'Enter a feat not in the SRD')}</div>
                         {selectedFeat?.id === '__custom__' && (
@@ -604,6 +613,53 @@ function ExpandableFeature({ feature, noted, subclass }) {
         </div>
         {open && <div className="feature-desc" style={{ marginTop: 4 }}>{feature.desc}</div>}
       </div>
+    </div>
+  );
+}
+
+function SubclassFeaturePreview({ charClass, subclassName, targetLevel }) {
+  const { t } = useTranslation();
+
+  const srdByLevel = SUBCLASS_DATA[charClass]?.[subclassName] || {};
+
+  const hbByLevel = {};
+  const hbDetails = dataManager.getSubclassDetails(charClass, subclassName);
+  (hbDetails?.features || []).forEach(f => {
+    const lv = parseInt(f.level) || 0;
+    if (!lv || !f.name?.trim()) return;
+    if (!hbByLevel[lv]) hbByLevel[lv] = [];
+    hbByLevel[lv].push({ name: f.name.trim(), desc: f.desc || '' });
+  });
+
+  const allLevels = [...new Set([
+    ...Object.keys(srdByLevel).map(Number),
+    ...Object.keys(hbByLevel).map(Number),
+  ])].sort((a, b) => a - b);
+
+  if (allLevels.length === 0) return null;
+
+  return (
+    <div style={{ marginTop: 10, padding: '10px 12px', background: 'var(--c-surface)', borderRadius: 'var(--r)', border: '1px solid var(--c-border)' }}>
+      <div style={{ fontSize: '0.733rem', fontWeight: 700, color: 'var(--c-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
+        {subclassName}
+      </div>
+      {allLevels.map(lv => {
+        const features = [...(srdByLevel[lv] || []), ...(hbByLevel[lv] || [])];
+        const isCurrent = lv === targetLevel;
+        return (
+          <div key={lv} style={{ marginBottom: 8 }}>
+            <div style={{ fontSize: '0.733rem', fontWeight: 600, color: isCurrent ? 'var(--c-accent)' : 'var(--c-muted)', marginBottom: 3, display: 'flex', alignItems: 'center', gap: 6 }}>
+              Lv. {lv}
+              {isCurrent && <span style={{ fontSize: '0.6rem', background: 'var(--c-accent)', color: 'var(--c-accent-text)', borderRadius: 4, padding: '1px 5px', fontWeight: 700 }}>{t('levelUp.now', 'Now')}</span>}
+            </div>
+            <div className="feature-list">
+              {features.map((f, i) => (
+                <ExpandableFeature key={i} feature={f} noted={t('levelUp.noted')} subclass />
+              ))}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

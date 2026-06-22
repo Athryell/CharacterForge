@@ -4086,6 +4086,296 @@ button.corner-btn:hover {
 .feat-choices-form { margin-top: 10px; padding-top: 10px; border-top: 0.5px solid var(--c-border-mid); }
 .filter-chip.disabled { opacity: .35; cursor: not-allowed; pointer-events: none; }
 
+/* ── HOMEBREW EDITOR ────────────────────────────────────────────── */
+
+.hbe-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  display: flex;
+  align-items: stretch;
+  z-index: 2000;
+}
+
+.hbe-modal {
+  background: var(--c-bg);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+@media (min-width: 601px) {
+  .hbe-overlay {
+    padding: 24px;
+    align-items: center;
+    justify-content: center;
+  }
+  .hbe-modal {
+    border-radius: var(--rl);
+    max-width: 900px;
+    width: 100%;
+    height: calc(100vh - 48px);
+    max-height: 800px;
+  }
+}
+
+.hbe-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 0.5px solid var(--c-border-mid);
+  flex-shrink: 0;
+}
+
+.hbe-title {
+  flex: 1;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.hbe-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.hbe-sidebar {
+  width: 152px;
+  flex-shrink: 0;
+  border-right: 0.5px solid var(--c-border-mid);
+  overflow-y: auto;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.hbe-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  font-size: 0.8rem;
+  border-radius: var(--r);
+  border: none;
+  background: transparent;
+  color: var(--c-ink);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  font-family: var(--font-body);
+  transition: background .12s;
+}
+.hbe-nav-item:hover { background: var(--c-surface); }
+.hbe-nav-item.active {
+  background: var(--c-accent-light);
+  color: var(--c-accent-text);
+  font-weight: 500;
+}
+
+.hbe-nav-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hbe-nav-badge {
+  flex-shrink: 0;
+  font-size: 0.6rem;
+  font-weight: 600;
+  background: var(--c-accent);
+  color: #fff;
+  border-radius: 10px;
+  padding: 1px 5px;
+  min-width: 16px;
+  text-align: center;
+}
+
+.hbe-nav-divider {
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--c-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  padding: 8px 8px 2px;
+}
+
+.hbe-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.hbe-section { display: flex; flex-direction: column; gap: 10px; }
+
+.hbe-item-list { display: flex; flex-direction: column; gap: 4px; }
+
+.hbe-item-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  background: var(--c-surface);
+  border-radius: var(--r);
+  font-size: 0.8rem;
+}
+
+.hbe-item-name {
+  flex: 1;
+  font-weight: 500;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hbe-badge-sheet {
+  flex-shrink: 0;
+  font-size: 0.567rem;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: var(--c-warn);
+  color: var(--c-warn-text);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.hbe-form {
+  background: var(--c-surface);
+  border-radius: var(--r);
+  padding: 12px;
+  border: 0.5px solid var(--c-border-mid);
+}
+
+.hbe-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.hbe-form-grid .hbe-full-width { grid-column: span 2; }
+
+.hbe-multiselect {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 4px 0;
+}
+
+.hbe-multiselect-opt {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.hbe-checkbox-wrap {
+  display: flex;
+  align-items: center;
+  height: 30px;
+}
+
+.hbe-sublist { display: flex; flex-direction: column; gap: 8px; }
+
+.hbe-sublist-item {
+  padding: 8px;
+  border: 0.5px solid var(--c-border-mid);
+  border-radius: var(--r);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--c-bg);
+}
+
+.hbe-sublist-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.hbe-sublist-fields .hbe-full-width { grid-column: span 2; }
+
+.hbe-confirm-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 10;
+  border-radius: inherit;
+}
+
+.hbe-confirm-box {
+  background: var(--c-bg);
+  border-radius: var(--rl);
+  padding: 20px;
+  max-width: 380px;
+  width: 100%;
+  box-shadow: var(--shadow-card);
+}
+
+/* Highlighted variant for the primary "Add data" CTA */
+.io-btn.primary.highlighted {
+  box-shadow: 0 0 0 2px var(--c-accent-light), 0 0 0 3.5px var(--c-accent);
+}
+
+/* Draft notice in SourceManager */
+.source-draft-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--c-accent-light);
+  border-radius: var(--r);
+  font-size: 0.8rem;
+  color: var(--c-accent-text);
+  margin-top: 4px;
+}
+
+.source-draft-notice button {
+  background: none;
+  border: none;
+  color: var(--c-accent);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0;
+  text-decoration: underline;
+  font-family: var(--font-body);
+}
+
+/* Mobile: sidebar becomes horizontal scroll tab bar */
+@media (max-width: 600px) {
+  .hbe-body { flex-direction: column; }
+  .hbe-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 0.5px solid var(--c-border-mid);
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 4px 8px;
+    gap: 4px;
+    flex-shrink: 0;
+    -webkit-overflow-scrolling: touch;
+  }
+  .hbe-nav-divider { display: none; }
+  .hbe-nav-item { white-space: nowrap; flex-shrink: 0; width: auto; }
+  .hbe-form-grid { grid-template-columns: 1fr; }
+  .hbe-form-grid .hbe-full-width { grid-column: span 1; }
+  .hbe-sublist-fields { grid-template-columns: 1fr; }
+  .hbe-sublist-fields .hbe-full-width { grid-column: span 1; }
+}
+
 /* ── AC AUTO BADGE (combatStats widget) ────────────────────────── */
 .ac-auto-badge {
   font-size: 0.467rem;

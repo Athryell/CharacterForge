@@ -319,7 +319,7 @@ export const SPELL_CLASSES = [
 
 export function filterSpells({ spells, level, school, cls, search }) {
   return (spells || DND_SPELLS).filter(s => {
-    if (level !== undefined && level !== null && level !== '' && s.level !== parseInt(level)) return false;
+    if (level !== undefined && level !== null && level !== '' && parseInt(s.level) !== parseInt(level)) return false;
     if (school && s.school !== school) return false;
     if (cls && !s.classes.includes(cls)) return false;
     if (search && !(s.name || s.id || '').toLowerCase().includes(search.toLowerCase())) return false;

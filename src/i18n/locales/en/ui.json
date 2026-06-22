@@ -211,8 +211,8 @@
     "filterAll": "All",
     "filterCantrips": "Cantrips",
     "filterPrepared": "Prepared",
-    "browseSRD": "＋ SRD",
-    "custom": "✏ Custom",
+    "browseSRD": "＋ Data",
+    "custom": "Custom",
     "close": "✕ Close",
     "searchPlaceholder": "🔍 Search by name...",
     "filterAllLevels": "All levels",
@@ -221,7 +221,7 @@
     "foundSingular": "{{count}} spell found",
     "foundPlural": "{{count}} spells found",
     "foundZeroClass": "No spells found for the {{class}}",
-    "noSpells": "No spells. Click ＋ SRD to browse or ✏ to add a custom one.",
+    "noSpells": "No spells. Click ＋ Data to browse or ✏ to add a custom one.",
     "concentration": "Concentration",
     "ritual": "Ritual",
     "cantripLabel": "Cantrip",
@@ -250,12 +250,14 @@
     "durationLabel": "Duration",
     "rangeLabel": "Range",
     "addTitle": "Add spell",
-    "browseTitle": "🔍 Browse SRD",
+    "browseTitle": "🔍 Browse Data",
     "customFormTitle": "✏ Custom spell",
     "castSlot": "Slot Lv. {{level}}",
     "noSpells2": "No spells added. Click \"+\" to add one.",
     "descEditLabel": "Description",
     "alwaysPrepared": "Always prepared",
+    "prepared": "Prepared",
+    "notPrepared": "Not prepared",
     "filterLevel": "Level",
     "filterSchool": "School",
     "filterPreparedOnly": "Prepared only",
@@ -303,8 +305,15 @@
     "descEditLabel": "Description",
     "descAddPlaceholder": "E.g. Heals 2d4+2 HP. (@ for bonuses)",
     "empty2": "No items added. Click \"+\" to add one.",
+    "noDataItems": "No items in data sources. Add items via Sources.",
     "carried": "Carried weight",
-    "coinWeight": "(incl. {{n}} {{unit}} from coins)"
+    "coinWeight": "(incl. {{n}} {{unit}} from coins)",
+    "catAll": "All",
+    "catGear": "Gear",
+    "catTool": "Tools",
+    "catAmmunition": "Ammo",
+    "catPack": "Packs",
+    "catFocus": "Focus"
   },
   "currency": {
     "gp": "GP",
@@ -452,7 +461,7 @@
     "noWeapons": "No weapons added. Click \"+\" to add one.",
     "noArmor": "No armor added. Click \"+\" to add one.",
     "addBtn": "+ Add weapon",
-    "presetSRD": "SRD Preset",
+    "presetSRD": "＋ Data",
     "custom": "Custom",
     "cancel": "Cancel",
     "add": "+ Add",
@@ -466,6 +475,8 @@
     "customRangePlaceholder": "E.g. 20/60",
     "customProf": "Proficient",
     "noProf": "Not proficient",
+    "equip": "Equip",
+    "unequip": "Unequip",
     "propsLabel": "Properties",
     "customPropPlaceholder": "Custom property...",
     "masteryLabel": "Mastery",
@@ -755,7 +766,8 @@
     "removeFromAction": "Remove from actions",
     "inAction": "In actions",
     "delete": "Delete",
-    "done": "Done"
+    "done": "Done",
+    "back": "Cancel"
   },
   "data": {
     "abilities": {
@@ -913,7 +925,6 @@
       "rock-gnome": "Rock Gnome",
       "forest-gnome": "Forest Gnome",
       "half-orc": "Half-Orc",
-      "aasimar": "Aasimar",
       "elf": "Elf",
       "dwarf": "Dwarf",
       "halfling": "Halfling",
@@ -1188,7 +1199,8 @@
     "asiPointsLeft": "Points: {{spent}}/{{total}}",
     "spellsToLearn": "Choose {{count}} spell(s) to learn",
     "newSpeciesSpell": "New species spell: {{name}} ({{level}}, always prepared)",
-    "chooseProgress": "{{picked}}/{{total}} selected"
+    "chooseProgress": "{{picked}}/{{total}} selected",
+    "now": "Now"
   },
   "levelDown": {
     "title": "Go back to level {{level}}?",
@@ -1212,5 +1224,29 @@
       "epicBoon": "Epic Boon",
       "custom": "Custom"
     }
+  },
+  "sources": {
+    "addData": "Add data",
+    "importPackage": "Import package",
+    "emptyTemplate": "Empty JSON template",
+    "exportData": "Export data",
+    "editorTitle": "Add Homebrew Data",
+    "publish": "Publish",
+    "publishConfirm": "Publish '{{name}}'?",
+    "clearDraft": "Clear draft",
+    "clearDraftConfirm": "Are you sure? This will delete all unsaved data.",
+    "editSource": "Edit",
+    "draftSaved": "Draft saved automatically",
+    "noName": "Enter a source name to publish",
+    "exportSelected": "Export selected",
+    "exportSeparate": "Export as separate files",
+    "selectAll": "Select all",
+    "deselectAll": "Deselect all",
+    "draftNotice": "You have unpublished homebrew data",
+    "openDraft": "Open editor",
+    "nameLabel": "Source name",
+    "authorLabel": "Author",
+    "descLabel": "Description",
+    "systemLabel": "System"
   }
 }

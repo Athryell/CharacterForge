@@ -8,6 +8,7 @@ import { SPECIES_FEATURES, getAutoFeatures, getSpeciesData } from '../../data/sy
 import { BACKGROUND_FEATURES } from '../../data/systems/dnd5e2024/backgrounds';
 import { ORIGIN_FEATS } from '../../data/systems/dnd5e2024/feats';
 import dataManager from '../../data/dataManager';
+import { syncCustomToDraft } from '../../utils/homebrewSync';
 
 // SRD 5.5e (2024) — specie: solo tratti, nessun bonus caratteristica
 const SPECIES_SRD = [
@@ -18,7 +19,6 @@ const SPECIES_SRD = [
   { id: 'gnome',      name: 'Gnome',      traits: ['Visione nel buio 18 m', 'Furbizia gnoma (vantaggio TS INT/WIS/CHA contro magie)', 'Competenza con strumenti artigianali'] },
   { id: 'dragonborn', name: 'Dragonborn', traits: ['Soffio (azione, scala con livello)', 'Resistenza al danno del tipo draconico', 'Visione nel buio 18 m'] },
   { id: 'tiefling',   name: 'Tiefling',   traits: ['Visione nel buio 18 m', 'Resistenza al fuoco', 'Retaggio infernale: Thaumaturgia, Colpo infuocato (liv. 3), Oscurità (liv. 5)'] },
-  { id: 'aasimar',    name: 'Aasimar',    traits: ['Visione nel buio 18 m', 'Guarigione celeste (PF extra a riposo lungo = bonus prof.)', 'Forma celeste: ali luminose o forma fiamma (1 min, 1× riposo lungo)'] },
   { id: 'orc',        name: 'Orc',        traits: ['Visione nel buio 18 m', 'Spietato (azione bonus: vantaggio al prossimo attacco nel turno)', 'Resistenza (PF extra pari al livello)'] },
   { id: 'goliath',    name: 'Goliath',    traits: ['Resistenza al freddo', 'Possanza gigante (taglia Grande, oggetti extra-pesanti)', 'Forma gigante: STR o CON Primordiale (1× riposo lungo)'] },
 ];
@@ -1045,7 +1045,19 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
             <button className={`io-btn primary ${!canNextStep ? 'disabled' : ''}`}
               onClick={() => canNextStep && setStep(s => s + 1)}>{t('creator.next')}</button>
           ) : (
-            <button className="io-btn primary" onClick={() => { window.umami?.track('character-created', { system: 'dnd5e2024', class: data.charClass }); onComplete(buildFinalState()); }}>{t('creator.create')}</button>
+            <button className="io-btn primary" onClick={() => {
+              window.umami?.track('character-created', { system: 'dnd5e2024', class: data.charClass });
+              if (data.charClass === CUSTOM_SENTINEL && data.customClass) {
+                syncCustomToDraft('classes', { name: data.customClass, hitDie: data.customClassHitDie, spellcastingAbility: data.customClassSpellStat || 'none', savingThrows: data.customClassSaveProfs, skillCount: String(data.customClassSkillCount) }, 'dnd5e2024');
+              }
+              if (data.charRace === CUSTOM_SENTINEL && data.customSpecies) {
+                syncCustomToDraft('species', { name: data.customSpecies, speed: String(data.customSpeciesSpeed || 30), traits: data.customSpeciesTraits }, 'dnd5e2024');
+              }
+              if (data.charBackground === CUSTOM_SENTINEL && data.customBackground) {
+                syncCustomToDraft('backgrounds', { name: data.customBackground, skills: data.customBgSkills, tool: data.customBgTool, language: data.customBgLanguage }, 'dnd5e2024');
+              }
+              onComplete(buildFinalState());
+            }}>{t('creator.create')}</button>
           )}
         </div>
       </div>

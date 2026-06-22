@@ -4,6 +4,8 @@ import { KeywordText } from './Tooltip';
 import NotationTextarea from './NotationTextarea';
 import { TagPill, TagSelector } from './Tags';
 import { Icon } from '../config/icons';
+import { useCharContext } from './CharContext';
+import { syncCustomToDraft } from '../utils/homebrewSync';
 
 const SOURCE_BADGE = {
   class:      { labelKey: 'features.sourceClass',      color: '#3B6D11', bg: '#EAF3DE' },
@@ -23,6 +25,7 @@ function detectActionType(text) {
 
 export default function FeatureManager({ features = [], onUpdate, onRoll, onAddAction, onRemoveAction, actionNames, addOpen, onAddClose, allTags = [], onUpdateTags, onCreateTag }) {
   const { t } = useTranslation();
+  const { systemId } = useCharContext();
   const [expanded, setExpanded] = useState(null);
   const [addForm, setAddForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState(null);
@@ -55,6 +58,7 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
       source: t('features.sourceCustom', 'Custom'),
       sourceType: 'custom',
     }]);
+    syncCustomToDraft('feats', { name: addForm.name.trim(), desc: addForm.desc.trim() }, systemId);
     setAddForm(EMPTY_FORM);
     onAddClose && onAddClose();
   }
@@ -83,7 +87,7 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
           <div style={{ display: 'flex', gap: 8, marginTop: 8, justifyContent: 'flex-end' }}>
             <button className="io-btn" onClick={() => { onAddClose && onAddClose(); setAddForm(EMPTY_FORM); }}>{t('common.cancel', 'Cancel')}</button>
             <button className={`io-btn primary ${!addForm.name.trim() ? 'disabled' : ''}`}
-              onClick={submitCustom} disabled={!addForm.name.trim()}>+ {t('common.add', 'Add')}</button>
+              onClick={submitCustom} disabled={!addForm.name.trim()}><Icon id="action.add" size={12} /> {t('common.add', 'Add')}</button>
           </div>
         </div>
       )}

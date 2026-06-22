@@ -1,20 +1,48 @@
-﻿import React, { useState } from 'react';
+﻿import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { KeywordText } from './Tooltip';
 import NotationTextarea from './NotationTextarea';
 import { TagPill, TagSelector } from './Tags';
 import { Icon } from '../config/icons';
+import { useCharContext } from './CharContext';
+import { syncCustomToDraft } from '../utils/homebrewSync';
+import dataManager from '../data/dataManager';
 
 const EMPTY_FORM = { name: '', qty: 1, desc: '', weight: '' };
 
 export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen, onAddClose, allTags = [], onUpdateTags, onCreateTag, onAddAction, onRemoveAction, actionNames, currentWeightKg = 0, maxWeightKg, coinWeightKg = 0, weightUnit = 'kg', toDisplayWeight, hideWeight = false }) {
   const { t } = useTranslation();
+  const { systemId } = useCharContext();
   const [addForm, setAddForm] = useState(EMPTY_FORM);
+  const [addMode, setAddMode] = useState('data');
+  const [dataSearch, setDataSearch] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState(null);
   const [expandedId, setExpandedId] = useState(null);
   function patchAdd(obj) { setAddForm(f => ({ ...f, ...obj })); }
   function patchEdit(obj) { setEditForm(f => ({ ...f, ...obj })); }
+
+  const dataItems = useMemo(() => dataManager.getItems(), []);
+  const filteredDataItems = useMemo(() => {
+    let result = dataItems;
+    if (categoryFilter) result = result.filter(i => i.category === categoryFilter);
+    if (dataSearch.trim()) {
+      const q = dataSearch.toLowerCase();
+      result = result.filter(i => (i.name || '').toLowerCase().includes(q));
+    }
+    return result;
+  }, [dataItems, dataSearch, categoryFilter]);
+
+  function addFromData(item) {
+    const name = item.name;
+    const existing = items.findIndex(i => i.name.toLowerCase() === name.toLowerCase());
+    if (existing !== -1) {
+      onUpdate(items.map((it, idx) => idx === existing ? { ...it, qty: (it.qty || 1) + 1 } : it));
+    } else {
+      onUpdate([...items, { id: Date.now().toString(), name, qty: parseInt(item.qty) || 1, desc: item.desc || '', weight: item.weight || '' }]);
+    }
+  }
 
   function submitAdd() {
     if (!addForm.name.trim()) return;
@@ -26,6 +54,7 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
       ));
     } else {
       onUpdate([...items, { id: Date.now().toString(), name, qty: parseInt(addForm.qty) || 1, desc: addForm.desc, weight: addForm.weight }]);
+      syncCustomToDraft('items', { name, desc: addForm.desc, weight: addForm.weight }, systemId);
     }
     setAddForm(EMPTY_FORM);
     onAddClose && onAddClose();
@@ -81,39 +110,83 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
       )}
       {addOpen && (
         <div className="weapon-add-panel" style={{ marginBottom: 12 }}>
-          <div className="field-row">
-            <div className="field" style={{ flex: 2 }}>
-              <label>{t('inventory.nameLabel')}</label>
-              <input value={addForm.name} onChange={e => patchAdd({ name: e.target.value })}
-                placeholder={t('inventory.namePlaceholder')} autoFocus onKeyDown={e => e.key === 'Enter' && submitAdd()} />
-            </div>
-            <div className="field" style={{ flex: '0 0 80px' }}>
-              <label>{t('inventory.qty')}</label>
-              <div className="hp-stepper">
-                <button className="mod-btn" onClick={() => patchAdd({ qty: Math.max(1, (addForm.qty||1) - 1) })}>−</button>
-                <input type="number" min="1" value={addForm.qty}
-                  onChange={e => patchAdd({ qty: parseInt(e.target.value) || 1 })}
-                  style={{ width: 40, textAlign: 'center', border: '0.5px solid var(--c-border)', borderRadius: 'var(--r)', padding: '4px', background: 'var(--c-bg)', color: 'var(--c-ink)' }} />
-                <button className="mod-btn" onClick={() => patchAdd({ qty: (addForm.qty||1) + 1 })}>+</button>
+          <div className="creator-method-bar" style={{ marginBottom: 10 }}>
+            <button className={`filter-chip ${addMode === 'data' ? 'active' : ''}`} onClick={() => setAddMode('data')}>{t('weapons.presetSRD')}</button>
+            <button className={`filter-chip ${addMode === 'custom' ? 'active' : ''}`} onClick={() => setAddMode('custom')}><Icon id="action.custom" size={12} /> {t('weapons.custom')}</button>
+          </div>
+
+          {addMode === 'data' ? (
+            <>
+              <div className="creator-method-bar" style={{ marginBottom: 6, flexWrap: 'wrap' }}>
+                <button className={`filter-chip ${!categoryFilter ? 'active' : ''}`} onClick={() => setCategoryFilter('')}>{t('inventory.catAll')}</button>
+                {[['gear','catGear'],['tool','catTool'],['ammunition','catAmmunition'],['pack','catPack'],['focus','catFocus']].map(([cat, key]) => (
+                  <button key={cat} className={`filter-chip ${categoryFilter === cat ? 'active' : ''}`}
+                    onClick={() => setCategoryFilter(categoryFilter === cat ? '' : cat)}>
+                    {t(`inventory.${key}`)}
+                  </button>
+                ))}
               </div>
-            </div>
-            {!hideWeight && (
-            <div className="field" style={{ flex: '0 0 80px' }}>
-              <label>{t('inventory.weight')}</label>
-              <input type="text" value={addForm.weight} onChange={e => patchAdd({ weight: e.target.value })} placeholder="0.5" />
-            </div>
-            )}
-          </div>
-          <div className="field" style={{ marginTop: 8 }}>
-            <label>{t('inventory.descLabel')}</label>
-            <NotationTextarea className="notes-area" style={{ minHeight: 56 }} value={addForm.desc}
-              onChange={e => patchAdd({ desc: e.target.value })} placeholder={t('inventory.descAddPlaceholder')} />
-          </div>
-          <div style={{ display: 'flex', gap: 8, marginTop: 8, justifyContent: 'flex-end' }}>
-            <button className="io-btn" onClick={() => { onAddClose && onAddClose(); setAddForm(EMPTY_FORM); }}>{t('common.cancel')}</button>
-            <button className={`io-btn primary ${!addForm.name.trim() ? 'disabled' : ''}`}
-              onClick={submitAdd} disabled={!addForm.name.trim()}>{t('inventory.add')}</button>
-          </div>
+              <input
+                className="spell-search"
+                placeholder={t('spells.searchPlaceholder')}
+                value={dataSearch}
+                onChange={e => setDataSearch(e.target.value)}
+                style={{ marginBottom: 8 }}
+              />
+              {filteredDataItems.length === 0 ? (
+                <div className="hint-text" style={{ padding: '6px 0' }}>{t('inventory.noDataItems')}</div>
+              ) : (
+                <div className="weapon-preset-list">
+                  {filteredDataItems.map((item, i) => (
+                    <div key={i} className="weapon-preset-item" onClick={() => addFromData(item)}>
+                      <div className="weapon-name">{item.name}</div>
+                      <div className="weapon-meta">
+                        {item.desc && <span className="weapon-prop">{item.desc}</span>}
+                        {item.weight && item.weight !== '—' && <span className="weapon-prop" style={{ fontSize: '0.667rem' }}>{item.weight}</span>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <button className="io-btn" style={{ marginTop: 8 }} onClick={() => { onAddClose && onAddClose(); setDataSearch(''); setCategoryFilter(''); }}>{t('common.cancel')}</button>
+            </>
+          ) : (
+            <>
+              <div className="field-row">
+                <div className="field" style={{ flex: 2 }}>
+                  <label>{t('inventory.nameLabel')}</label>
+                  <input value={addForm.name} onChange={e => patchAdd({ name: e.target.value })}
+                    placeholder={t('inventory.namePlaceholder')} autoFocus onKeyDown={e => e.key === 'Enter' && submitAdd()} />
+                </div>
+                <div className="field" style={{ flex: '0 0 80px' }}>
+                  <label>{t('inventory.qty')}</label>
+                  <div className="hp-stepper">
+                    <button className="mod-btn" onClick={() => patchAdd({ qty: Math.max(1, (addForm.qty||1) - 1) })}>−</button>
+                    <input type="number" min="1" value={addForm.qty}
+                      onChange={e => patchAdd({ qty: parseInt(e.target.value) || 1 })}
+                      style={{ width: 40, textAlign: 'center', border: '0.5px solid var(--c-border)', borderRadius: 'var(--r)', padding: '4px', background: 'var(--c-bg)', color: 'var(--c-ink)' }} />
+                    <button className="mod-btn" onClick={() => patchAdd({ qty: (addForm.qty||1) + 1 })}>+</button>
+                  </div>
+                </div>
+                {!hideWeight && (
+                <div className="field" style={{ flex: '0 0 80px' }}>
+                  <label>{t('inventory.weight')}</label>
+                  <input type="text" value={addForm.weight} onChange={e => patchAdd({ weight: e.target.value })} placeholder="0.5" />
+                </div>
+                )}
+              </div>
+              <div className="field" style={{ marginTop: 8 }}>
+                <label>{t('inventory.descLabel')}</label>
+                <NotationTextarea className="notes-area" style={{ minHeight: 56 }} value={addForm.desc}
+                  onChange={e => patchAdd({ desc: e.target.value })} placeholder={t('inventory.descAddPlaceholder')} />
+              </div>
+              <div style={{ display: 'flex', gap: 8, marginTop: 8, justifyContent: 'flex-end' }}>
+                <button className="io-btn" onClick={() => { onAddClose && onAddClose(); setAddForm(EMPTY_FORM); }}>{t('common.cancel')}</button>
+                <button className={`io-btn primary ${!addForm.name.trim() ? 'disabled' : ''}`}
+                  onClick={submitAdd} disabled={!addForm.name.trim()}>{t('inventory.add')}</button>
+              </div>
+            </>
+          )}
         </div>
       )}
 
@@ -137,13 +210,6 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
                     {item.acquiredAtLevel && <span className="level-badge">Lv. {item.acquiredAtLevel}</span>}
                     {(item.tags||[]).map(tag => <TagPill key={tag} tag={tag} allTags={allTags} small />)}
                   </div>
-                  {item.desc && !isExpanded && !isEditing && (
-                    <div className="inventory-desc-preview">
-                      <KeywordText text={item.desc} onRoll={onRoll} label={item.name}
-                        counters={item.counters}
-                        onCounterChange={(idx, vals) => onUpdate(items.map(i => i.id === item.id ? { ...i, counters: { ...(i.counters || {}), [idx]: vals } } : i))} />
-                    </div>
-                  )}
                 </div>
 
                 {item.weight && <span className="inventory-weight">{displayW(parseFloat(item.weight) || 0)} {weightUnit}</span>}
