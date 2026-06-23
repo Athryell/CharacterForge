@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { WEAPON_PROPERTIES, WEAPON_PROPERTY_DESCS, WEAPON_MASTERIES } from '../data/systems/dnd5e2024/weapons';
 import dataManager from '../data/dataManager';
 import { TagPill, TagSelector } from './Tags';
 import { KeywordText } from './Tooltip';
@@ -39,7 +38,12 @@ function toWeightInUnit(kg, weightUnit) {
 
 function PropertyMasteryPicker({ properties, mastery, onChangeProperties, onChangeMastery }) {
   const { t } = useTranslation();
+  const { systemId } = useCharContext();
   const [custom, setCustom] = useState('');
+  const adapter = dataManager.getAdapter(systemId);
+  const WEAPON_PROPERTIES = adapter.getWeaponProperties();
+  const WEAPON_MASTERIES = adapter.getWeaponMasteries();
+  const WEAPON_PROPERTY_DESCS = adapter.getWeaponPropertyDescs?.() || {};
   const predefinedKeys = Object.keys(WEAPON_PROPERTIES);
   const customProps = properties.filter(p => !predefinedKeys.includes(p));
   const isCustomMastery = mastery && mastery !== 'none' && !WEAPON_MASTERIES[mastery];
@@ -199,6 +203,10 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
   const { t } = useTranslation();
   const { toDisplaySpeed, speedUnit } = useUnits();
   const { systemId } = useCharContext();
+  const adapter = dataManager.getAdapter(systemId);
+  const WEAPON_PROPERTIES = adapter.getWeaponProperties();
+  const WEAPON_MASTERIES = adapter.getWeaponMasteries();
+  const WEAPON_PROPERTY_DESCS = adapter.getWeaponPropertyDescs?.() || {};
   const [addMode, setAddMode] = useState('preset');
   const [addForm, setAddForm] = useState(BLANK_FORM);
   const [presetSearch, setPresetSearch] = useState('');

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DND_CONDITIONS as CONDITIONS } from '../data/systems/dnd5e2024/conditions';
+import dataManager from '../data/dataManager';
 import { Icon, useIconMode, EMOJI_TO_LUCIDE } from '../config/icons';
 import { useUnits } from '../hooks/useUnits';
 import { useCharContext } from './CharContext';
@@ -34,7 +34,9 @@ export default function ConditionTracker({ active = [], onChange, exhaustionLeve
   const [formDesc, setFormDesc] = useState('');
   const [nameError, setNameError] = useState(false);
 
-  const conditions = conditionList || CONDITIONS;
+  const adapter = dataManager.getAdapter(systemId);
+  const defaultConditions = adapter.getConditions?.() || [];
+  const conditions = conditionList || defaultConditions;
 
   function toggle(id) {
     if (active.includes(id)) onChange(active.filter(c => c !== id));

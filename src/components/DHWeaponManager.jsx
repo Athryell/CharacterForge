@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Icon } from '../config/icons';
-import { DH_WEAPONS } from '../data/systems/daggerheart/weapons';
+import dataManager from '../data/dataManager';
 
 const RANGES = ['Melee', 'Very Close', 'Close', 'Far', 'Very Far'];
 const TRAITS = ['AGI', 'STR', 'FIN', 'INS', 'PRE', 'KNO'];
@@ -36,6 +36,8 @@ function TypeBadge({ type, t }) {
 
 export default function DHWeaponManager({ weapons = [], proficiency = 1, onUpdate, onRoll, addOpen, onAddClose }) {
   const { t } = useTranslation();
+  const adapter = dataManager.getAdapter('daggerheart');
+  const DH_WEAPONS = adapter.getWeapons();
   const [expanded, setExpanded] = useState(null);
   const [addMode, setAddMode] = useState('preset');
   const [handsFilter, setHandsFilter] = useState(null);

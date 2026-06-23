@@ -108,35 +108,40 @@ Ogni file dati D&D esporta un alias `SRD_*` che punta all'array principale:
 
 ## 4. Import inconsistenti (bypass di dataManager)
 
-I seguenti file importano dati D&D o Daggerheart **direttamente** dai file sistema invece di passare per `dataManager.js` o i suoi adapter:
+I seguenti file importano dati D&D o Daggerheart **direttamente** dai file sistema invece di passare per `dataManager.js` o i suoi adapter.
 
-### Componenti
+### Risolti in Fase 3b ✓
+
+| File | Import rimosso | Metodo adapter |
+|------|---------------|---------------|
+| `AlignmentPicker.jsx` | `ALIGNMENTS` da `dnd5e2024/mechanics` | `adapter.getAlignments()` |
+| `ArmorManager.jsx` | `TYPE_LABEL`, `calcArmorAC` da `dnd5e2024/armors` | `adapter.getArmorTypeLabel()`, `adapter.calcArmorAC` |
+| `ConditionTracker.jsx` | `DND_CONDITIONS` da `dnd5e2024/conditions` | `adapter.getConditions()` |
+| `DHArmorManager.jsx` | `DH_ARMORS` da `daggerheart/armor` | `adapter.getArmors()` (daggerheart) |
+| `DHWeaponManager.jsx` | `DH_WEAPONS` da `daggerheart/weapons` | `adapter.getWeapons()` (daggerheart) |
+| `SpellManager.jsx` | `SCHOOLS`, `SPELL_CLASSES`, `filterSpells` da `dnd5e2024/spells` | `adapter.getSchools()`, `adapter.getSpellClasses()`, `adapter.filterSpells` |
+| `WeaponManager.jsx` | `WEAPON_PROPERTIES`, `WEAPON_PROPERTY_DESCS`, `WEAPON_MASTERIES` da `dnd5e2024/weapons` | `adapter.getWeaponProperties()`, `adapter.getWeaponPropertyDescs()`, `adapter.getWeaponMasteries()` |
+
+### Ancora diretti (non in scope Fase 3b)
 
 | File | Import | Path diretto |
 |------|--------|-------------|
-| `ActionManager.jsx:9` | `SCHOOLS` | `dnd5e2024/spells` |
-| `AlignmentPicker.jsx:3` | `ALIGNMENTS` | `dnd5e2024/mechanics` |
-| `ArmorManager.jsx:4` | `TYPE_LABEL`, `calcArmorAC` | `dnd5e2024/armors` |
-| `ConditionTracker.jsx:3` | `DND_CONDITIONS` | `dnd5e2024/conditions` |
-| `DHArmorManager.jsx:3` | `DH_ARMORS` | `daggerheart/armor` |
-| `DHWeaponManager.jsx:4` | `DH_WEAPONS` | `daggerheart/weapons` |
-| `LevelUpModal.jsx:3,5,6,7` | `DND_CLASSES`, `SUBCLASS_DATA`, `ABILITIES`, `SKILLS`, `getSpeciesData`, `ALL_DND_FEATS` | `dnd5e2024/classes`, `mechanics`, `species`, `feats` |
-| `SpellManager.jsx:3` | `SCHOOLS`, `SPELL_CLASSES`, `filterSpells` | `dnd5e2024/spells` |
-| `WeaponManager.jsx:3` | `WEAPON_PROPERTIES`, `WEAPON_PROPERTY_DESCS`, `WEAPON_MASTERIES` | `dnd5e2024/weapons` |
-| `creators/DNDCharacterCreator.jsx:4-9` | `ABILITIES`, `SKILLS`, `HIT_DICE`, `SPELLCASTING_CLASS`, `SLOT_TABLE`, `CLASS_FEATURES`, `CLASS_SAVE_PROFS`, `CLASS_SKILL_COUNT`, `CLASS_SKILL_OPTIONS`, `DND_SPECIES`, `SPECIES_FEATURES`, `getAutoFeatures`, `getSpeciesData`, `BACKGROUND_FEATURES`, `ORIGIN_FEATS` | `dnd5e2024/mechanics`, `classes`, `species`, `backgrounds`, `feats` |
+| `ActionManager.jsx` | `SCHOOLS` | `dnd5e2024/spells` |
+| `LevelUpModal.jsx` | `DND_CLASSES`, `SUBCLASS_DATA`, `ABILITIES`, `SKILLS`, `getSpeciesData`, `ALL_DND_FEATS` | `dnd5e2024/classes`, `mechanics`, `species`, `feats` |
+| `creators/DNDCharacterCreator.jsx` | `ABILITIES`, `SKILLS`, `HIT_DICE`, `SPELLCASTING_CLASS`, `SLOT_TABLE`, `CLASS_FEATURES`, `CLASS_SAVE_PROFS`, `CLASS_SKILL_COUNT`, `CLASS_SKILL_OPTIONS`, `DND_SPECIES`, `SPECIES_FEATURES`, `getAutoFeatures`, `getSpeciesData`, `BACKGROUND_FEATURES`, `ORIGIN_FEATS` | `dnd5e2024/mechanics`, `classes`, `species`, `backgrounds`, `feats` |
 
-### App.jsx (main component)
+### App.jsx (main component) — ancora diretto
 
 | Import | Path diretto |
 |--------|-------------|
-| `SLOT_TABLE`, `ABILITIES`, `SKILLS`, e altro | `dnd5e2024/mechanics:12` |
-| `DND_CONDITIONS` | `dnd5e2024/conditions:13` |
-| `calcArmorAC`, `DND_ARMOR_PRESETS` | `dnd5e2024/armors:22` |
-| `CLASS_FEATURES`, `DND_CLASSES`, `getSubclassesForClass` | `dnd5e2024/classes:35` |
-| `SPECIES_FEATURES`, `getAutoFeatures` | `dnd5e2024/species:36` |
-| `BACKGROUND_FEATURES` | `dnd5e2024/backgrounds:37` |
+| `SLOT_TABLE`, `ABILITIES`, `SKILLS`, e altro | `dnd5e2024/mechanics` |
+| `DND_CONDITIONS` | `dnd5e2024/conditions` |
+| `calcArmorAC`, `DND_ARMOR_PRESETS` | `dnd5e2024/armors` |
+| `CLASS_FEATURES`, `DND_CLASSES`, `getSubclassesForClass` | `dnd5e2024/classes` |
+| `SPECIES_FEATURES`, `getAutoFeatures` | `dnd5e2024/species` |
+| `BACKGROUND_FEATURES` | `dnd5e2024/backgrounds` |
 
-**Nota:** `dataManager` non espone `ALIGNMENTS`, `ABILITIES`, `SKILLS`, `SLOT_TABLE`, `HIT_DICE`, `CLASS_FEATURES`, `SPECIES_FEATURES`, `BACKGROUND_FEATURES`, `WEAPON_PROPERTIES`, `TYPE_LABEL`, `filterSpells` — questi non hanno endpoint nel manager e quindi il bypass è inevitabile con l'architettura attuale.
+**Nota:** Dopo Fase 2b+3b, `dnd5eAdapter` espone getter per `ALIGNMENTS`, `ABILITIES`, `SKILLS`, `SLOT_TABLE`, `HIT_DICE`, `CLASS_FEATURES`, `WEAPON_PROPERTIES`, `WEAPON_PROPERTY_DESCS`, `WEAPON_MASTERIES`, `TYPE_LABEL`, `filterSpells`, `SCHOOLS`, `SPELL_CLASSES`. I bypass rimanenti (App.jsx, LevelUpModal, DNDCharacterCreator) sono candidati per una Fase 4.
 
 ---
 

@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SCHOOLS, SPELL_CLASSES, filterSpells } from '../data/systems/dnd5e2024/spells';
 import dataManager from '../data/dataManager';
 import { TagPill, TagSelector, TagFilterBar } from './Tags';
 import { KeywordText } from './Tooltip';
@@ -49,7 +48,7 @@ function detectActionType(text) {
   return 'action';
 }
 
-function SpellEditForm({ spell, srd, onSave, onCancel, onDelete, allTags, onUpdateTags, onCreateTag }) {
+function SpellEditForm({ spell, srd, onSave, onCancel, onDelete, allTags, onUpdateTags, onCreateTag, schools = [] }) {
   const { t } = useTranslation();
   const actionTypesSpell = [
     ['action', t('actions.typeAction')],
@@ -88,7 +87,7 @@ function SpellEditForm({ spell, srd, onSave, onCancel, onDelete, allTags, onUpda
           <label>{t('spells.customSchool')}</label>
           <select value={form.school} onChange={e => patch({ school: e.target.value })}>
             <option value="">—</option>
-            {SCHOOLS.map(s => <option key={s} value={s}>{t(`data.schools.${s}`, s)}</option>)}
+            {schools.map(s => <option key={s} value={s}>{t(`data.schools.${s}`, s)}</option>)}
           </select>
         </div>
       </div>
@@ -150,7 +149,7 @@ function SpellEditForm({ spell, srd, onSave, onCancel, onDelete, allTags, onUpda
   );
 }
 
-const SPELL_FILTERS = (t, toDisplaySpeed, speedUnit) => [
+const SPELL_FILTERS = (t, toDisplaySpeed, speedUnit, schools = []) => [
   {
     id: 'level',
     label: t('spells.filterLevel'),
@@ -167,7 +166,7 @@ const SPELL_FILTERS = (t, toDisplaySpeed, speedUnit) => [
     label: t('spells.filterSchool'),
     options: [
       { value: 'all', label: t('filterSort.all') },
-      ...SCHOOLS.map(s => ({ value: s, label: SCHOOL_SHORT[s] || t(`data.schools.${s}`, s) })),
+      ...schools.map(s => ({ value: s, label: SCHOOL_SHORT[s] || t(`data.schools.${s}`, s) })),
     ],
   },
   {
@@ -217,6 +216,10 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
   const { t } = useTranslation();
   const { toDisplaySpeed, speedUnit } = useUnits();
   const { systemId } = useCharContext();
+  const adapter = dataManager.getAdapter(systemId);
+  const SCHOOLS = adapter.getSchools();
+  const SPELL_CLASSES = adapter.getSpellClasses();
+  const filterSpells = adapter.filterSpells;
   const [addOpen, setAddOpen] = useState(false);
   const [addMode, setAddMode] = useState('srd');
   const [browsedExpanded, setBrowsedExpanded] = useState(null);
@@ -230,7 +233,7 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
   const [customForm, setCustomForm] = useState(EMPTY_CUSTOM);
   const [editingSpellName, setEditingSpellName] = useState(null);
 
-  const spellFilters = useMemo(() => SPELL_FILTERS(t, toDisplaySpeed, speedUnit), [t, toDisplaySpeed, speedUnit]);
+  const spellFilters = useMemo(() => SPELL_FILTERS(t, toDisplaySpeed, speedUnit, SCHOOLS), [t, toDisplaySpeed, speedUnit, SCHOOLS]);
   const spellSorts = useMemo(() => SPELL_SORTS(t), [t]);
 
   const {
@@ -567,6 +570,7 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
                           allTags={allTags}
                           onUpdateTags={onUpdateTags}
                           onCreateTag={onCreateTag}
+                          schools={SCHOOLS}
                         />
                       )}
 

@@ -1,7 +1,7 @@
 // CharacterForge — D&D 5e adapter — API pubblica per dataManager e componenti
 
 import { DND_SPELLS, SCHOOLS, SPELL_CLASSES, filterSpells } from './spells';
-import { DND_WEAPONS, calcWeaponAttack, WEAPON_PROPERTIES, WEAPON_MASTERIES, ABILITY_OPTIONS } from './weapons';
+import { DND_WEAPONS, calcWeaponAttack, WEAPON_PROPERTIES, WEAPON_PROPERTY_DESCS, WEAPON_MASTERIES, ABILITY_OPTIONS } from './weapons';
 import { DND_CONDITIONS } from './conditions';
 import { DND_CLASSES, DND_CLASS_NAMES, CLASS_FEATURES } from './classes';
 import { DND_SPECIES } from './species';
@@ -86,8 +86,9 @@ const dnd5eAdapter = {
   getSpellcastingClass: () => SPELLCASTING_CLASS,
   getSchools:           () => SCHOOLS,
   getSpellClasses:      () => SPELL_CLASSES,
-  getWeaponProperties:  () => WEAPON_PROPERTIES,
-  getWeaponMasteries:   () => WEAPON_MASTERIES,
+  getWeaponProperties:     () => WEAPON_PROPERTIES,
+  getWeaponPropertyDescs:  () => WEAPON_PROPERTY_DESCS,
+  getWeaponMasteries:      () => WEAPON_MASTERIES,
   getAbilityOptions:    () => ABILITY_OPTIONS,
   getArmorTypeLabel:    () => TYPE_LABEL,
   filterSpells,

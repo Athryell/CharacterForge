@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Icon } from '../config/icons';
-import { TYPE_LABEL, calcArmorAC } from '../data/systems/dnd5e2024/armors';
 import dataManager from '../data/dataManager';
 import { TagPill, TagSelector } from './Tags';
 import { KeywordText } from './Tooltip';
@@ -108,8 +107,11 @@ function ArmorEditForm({ form, onChange, onSave, onCancel, onDelete, allTags, it
 
 export default function ArmorManager({ armors = [], desMod = 0, onUpdate, proficiency = '', onUpdateProficiency, allTags = [], onUpdateTags, onCreateTag, addOpen, onAddClose, weightUnit = 'kg', toDisplayWeight, strPenaltyText = '' }) {
   const { t } = useTranslation();
-  const { abilities } = useCharContext();
+  const { abilities, systemId } = useCharContext();
   const strScore = abilities?.STR || 10;
+  const adapter = dataManager.getAdapter(systemId);
+  const TYPE_LABEL = adapter.getArmorTypeLabel();
+  const calcArmorAC = adapter.calcArmorAC;
   const [addMode, setAddMode] = useState('preset');
   const [addForm, setAddForm] = useState(BLANK_FORM);
   const [presetSearch, setPresetSearch] = useState('');

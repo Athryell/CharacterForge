@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DH_ARMORS } from '../data/systems/daggerheart/armor';
+import dataManager from '../data/dataManager';
 
 function PipRow({ current, max, pipClass, onToggle, numeric }) {
   if (numeric) {
@@ -33,6 +33,8 @@ export default function DHArmorManager({
   armorSlotsMax, armorSlots, charLevel, numericMode, onUpdate,
 }) {
   const { t } = useTranslation();
+  const adapter = dataManager.getAdapter('daggerheart');
+  const DH_ARMORS = adapter.getArmors();
   const [changing, setChanging] = useState(false);
   const [changeMode, setChangeMode] = useState('preset');
   const [customForm, setCustomForm] = useState(BLANK_CUSTOM);

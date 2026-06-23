@@ -1,9 +1,13 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ALIGNMENTS } from '../data/systems/dnd5e2024/mechanics';
+import dataManager from '../data/dataManager';
+import { useCharContext } from './CharContext';
 
 export default function AlignmentPicker({ value, onChange }) {
   const { t } = useTranslation();
+  const { systemId } = useCharContext();
+  const adapter = dataManager.getAdapter(systemId);
+  const ALIGNMENTS = adapter.getAlignments?.() || [];
   const desc = value ? t(`data.alignments.desc.${value}`, '') : '';
   return (
     <div>
