@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Icon } from '../../config/icons';
 import { ABILITIES, SKILLS, HIT_DICE, SPELLCASTING_CLASS, SLOT_TABLE } from '../../data/systems/dnd5e2024/mechanics';
@@ -367,7 +367,7 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
                               {data.customSpeciesDarkvision && (
                                 <input style={{ width: 64, fontSize: '0.8rem' }} value={data.customSpeciesDarkvisionDist}
                                   onChange={e => patch({ customSpeciesDarkvisionDist: e.target.value })}
-                                  placeholder="18 m" />
+                                  placeholder={t('placeholders.creatorSpeed')} />
                               )}
                             </div>
                           </div>

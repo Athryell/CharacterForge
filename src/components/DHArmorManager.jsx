@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DH_ARMORS } from '../data/systems/daggerheart/armor';
 
@@ -175,7 +175,7 @@ export default function DHArmorManager({
                 <label>{t('dh.armor.name', 'Armor name')}</label>
                 <input value={customForm.name} autoFocus
                   onChange={e => patchCustom({ name: e.target.value })}
-                  placeholder="Es. Magic Leather…" />
+                  placeholder={t('placeholders.armorName')} />
               </div>
               <div className="field-row" style={{ marginTop: 6 }}>
                 <div className="field">
@@ -210,7 +210,7 @@ export default function DHArmorManager({
                 <textarea className="notes-area" style={{ minHeight: 40, fontSize: '0.8rem' }}
                   value={customForm.feature}
                   onChange={e => patchCustom({ feature: e.target.value })}
-                  placeholder="Flexible: +1 to Evasion…" />
+                  placeholder={t('placeholders.armorFeature')} />
               </div>
               <div style={{ display: 'flex', gap: 8, marginTop: 8, justifyContent: 'flex-end' }}>
                 <button className="io-btn" onClick={() => setChanging(false)}>

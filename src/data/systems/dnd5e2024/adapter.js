@@ -1,13 +1,13 @@
 // CharacterForge — D&D 5e adapter — API pubblica per dataManager e componenti
 
-import { DND_SPELLS } from './spells';
-import { DND_WEAPONS, calcWeaponAttack } from './weapons';
+import { DND_SPELLS, SCHOOLS, SPELL_CLASSES, filterSpells } from './spells';
+import { DND_WEAPONS, calcWeaponAttack, WEAPON_PROPERTIES, WEAPON_MASTERIES, ABILITY_OPTIONS } from './weapons';
 import { DND_CONDITIONS } from './conditions';
-import { DND_CLASSES, DND_CLASS_NAMES } from './classes';
+import { DND_CLASSES, DND_CLASS_NAMES, CLASS_FEATURES } from './classes';
 import { DND_SPECIES } from './species';
 import { DND_BACKGROUNDS } from './backgrounds';
-import { DND_ARMOR_PRESETS, calcArmorAC } from './armors';
-import { getMod, getProfBonus } from './mechanics';
+import { DND_ARMOR_PRESETS, calcArmorAC, TYPE_LABEL } from './armors';
+import { getMod, getProfBonus, ABILITIES, SKILLS, ALIGNMENTS, HIT_DICE, SLOT_TABLE, SPELLCASTING_CLASS, DEFAULT_ACTIONS } from './mechanics';
 
 function mergeByKey(srdList, hbList, keyFn = item => item.name) {
   const map = new Map(srdList.map(item => [keyFn(item), item]));
@@ -75,6 +75,24 @@ const dnd5eAdapter = {
   calcAttackBonus(weapon, abilities, profBonus, isProficient) {
     return calcWeaponAttack({ weapon, abilities, profBonus, isProficient });
   },
+
+  // ── Statici ──────────────────────────────────────────────────────────────
+
+  getAbilities:         () => ABILITIES,
+  getSkills:            () => SKILLS,
+  getAlignments:        () => ALIGNMENTS,
+  getHitDice:           () => HIT_DICE,
+  getSlotTable:         () => SLOT_TABLE,
+  getSpellcastingClass: () => SPELLCASTING_CLASS,
+  getSchools:           () => SCHOOLS,
+  getSpellClasses:      () => SPELL_CLASSES,
+  getWeaponProperties:  () => WEAPON_PROPERTIES,
+  getWeaponMasteries:   () => WEAPON_MASTERIES,
+  getAbilityOptions:    () => ABILITY_OPTIONS,
+  getArmorTypeLabel:    () => TYPE_LABEL,
+  filterSpells,
+  getDefaultActions:    () => DEFAULT_ACTIONS,
+  getClassFeatures:     (className) => CLASS_FEATURES[className] || [],
 
   // ── Homebrew merge ───────────────────────────────────────────────────────
 

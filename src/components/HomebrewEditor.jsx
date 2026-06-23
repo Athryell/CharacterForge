@@ -207,7 +207,7 @@ function InfoSection({ draft, updateDraft, onClear, t }) {
           type="text"
           value={draft.name}
           onChange={e => updateDraft({ name: e.target.value })}
-          placeholder="My Homebrew"
+          placeholder={t('placeholders.homebrewName')}
           autoFocus
         />
       </div>

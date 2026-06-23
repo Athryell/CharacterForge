@@ -101,11 +101,11 @@ function SpellEditForm({ spell, srd, onSave, onCancel, onDelete, allTags, onUpda
         </div>
         <div className="field">
           <label>{t('spells.durationLabel')}</label>
-          <input value={form.duration} onChange={e => patch({ duration: e.target.value })} placeholder="Es. 1 minuto, Istantaneo" />
+          <input value={form.duration} onChange={e => patch({ duration: e.target.value })} placeholder={t('placeholders.spellDuration')} />
         </div>
         <div className="field">
           <label>{t('spells.rangeLabel')}</label>
-          <input value={form.range} onChange={e => patch({ range: e.target.value })} placeholder="Es. 18m, Sé stessi" />
+          <input value={form.range} onChange={e => patch({ range: e.target.value })} placeholder={t('placeholders.spellRange')} />
         </div>
       </div>
       <div style={{ display: 'flex', gap: 16, marginTop: 8, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -445,7 +445,7 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
                 <div className="field" style={{ flex: 2 }}>
                   <label>{t('spells.customName')}</label>
                   <input value={customForm.name} onChange={e => setCustomForm(f => ({ ...f, name: e.target.value }))}
-                    placeholder="Es. Fiamma della Vendetta" autoFocus />
+                    placeholder={t('placeholders.spellName')} autoFocus />
                 </div>
                 <div className="field">
                   <label>{t('spells.customLevel')}</label>
@@ -470,11 +470,11 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
                 </div>
                 <div className="field">
                   <label>{t('spells.durationLabel')}</label>
-                  <input value={customForm.duration} onChange={e => setCustomForm(f => ({ ...f, duration: e.target.value }))} placeholder="Es. 1 minuto" />
+                  <input value={customForm.duration} onChange={e => setCustomForm(f => ({ ...f, duration: e.target.value }))} placeholder={t('placeholders.spellDuration')} />
                 </div>
                 <div className="field">
                   <label>{t('spells.rangeLabel')}</label>
-                  <input value={customForm.range} onChange={e => setCustomForm(f => ({ ...f, range: e.target.value }))} placeholder="Es. 18m" />
+                  <input value={customForm.range} onChange={e => setCustomForm(f => ({ ...f, range: e.target.value }))} placeholder={t('placeholders.spellRange')} />
                 </div>
               </div>
               <div className="field" style={{ marginTop: 8 }}>

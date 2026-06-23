@@ -1331,5 +1331,19 @@
     "authorLabel": "Autore",
     "descLabel": "Descrizione",
     "systemLabel": "Sistema"
+  },
+  "placeholders": {
+    "weaponName": "Es. Spada del nonno",
+    "weaponRange": "Es. 20/60",
+    "armorName": "Es. Magic Leather...",
+    "armorFeature": "Es. Flexible: +1 a Schivata...",
+    "dhWeaponName": "Es. Blade of the Moon...",
+    "dhWeaponDie": "d8",
+    "spellDuration": "Es. 1 minuto, Istantaneo",
+    "spellRange": "Es. 18m, Sé stessi",
+    "spellName": "Es. Fiamma della Vendetta",
+    "creatorSpeed": "18 m",
+    "homebrewName": "My Homebrew",
+    "epicBoonName": "Boon of Combat Prowess"
   }
 }

@@ -97,40 +97,47 @@ const dataManager = {
   },
 
   // ── Incantesimi ──────────────────────────────────────────────────────────
-  getSpells(lang = getCurrentLang()) {
+  getSpells(lang = getCurrentLang(), systemId = 'dnd5e2024') {
+    const adapter = this.getAdapter(systemId);
     const tr = loadI18n('spells', lang);
     const hb = loadHomebrew().flatMap(s => s.spells || []);
-    const srd = dnd5eAdapter.getSpells(lang, tr);
-    return dnd5eAdapter.mergeHomebrew(srd, hb, 'spells');
+    const srd = adapter.getSpells?.(lang, tr) || [];
+    return adapter.mergeHomebrew ? adapter.mergeHomebrew(srd, hb, 'spells') : srd;
   },
 
   // ── Armi ─────────────────────────────────────────────────────────────────
-  getWeapons(lang = getCurrentLang()) {
+  getWeapons(lang = getCurrentLang(), systemId = 'dnd5e2024') {
+    const adapter = this.getAdapter(systemId);
     const tr = loadI18n('weapons', lang);
     const hb = loadHomebrew().flatMap(s => s.weapons || []);
-    const srd = dnd5eAdapter.getWeapons(lang, tr);
-    return dnd5eAdapter.mergeHomebrew(srd, hb, 'weapons');
+    const srd = adapter.getWeapons?.(lang, tr) || [];
+    return adapter.mergeHomebrew ? adapter.mergeHomebrew(srd, hb, 'weapons') : srd;
   },
 
   // ── Condizioni ───────────────────────────────────────────────────────────
-  getConditions(lang = getCurrentLang()) {
+  getConditions(lang = getCurrentLang(), systemId = 'dnd5e2024') {
+    const adapter = this.getAdapter(systemId);
     const tr = loadI18n('conditions', lang);
     const hb = loadHomebrew().flatMap(s => s.conditions || []);
-    const srd = dnd5eAdapter.getConditions(lang, tr);
-    return dnd5eAdapter.mergeHomebrew(srd, hb, 'conditions');
+    const srd = adapter.getConditions?.(lang, tr) || [];
+    return adapter.mergeHomebrew ? adapter.mergeHomebrew(srd, hb, 'conditions') : srd;
   },
 
   // ── Classi ───────────────────────────────────────────────────────────────
-  getClasses(lang = getCurrentLang()) {
+  getClasses(lang = getCurrentLang(), systemId = 'dnd5e2024') {
+    const adapter = this.getAdapter(systemId);
+    if (systemId !== 'dnd5e2024') return adapter.getClasses?.() || [];
     const hbNames = loadHomebrew()
       .flatMap(s => (s.classes || []).map(c => c.name))
       .filter(n => !DND_CLASS_NAMES.includes(n));
-    return [...dnd5eAdapter.getClasses(), ...hbNames];
+    return [...adapter.getClasses(), ...hbNames];
   },
 
-  getClassData(name, lang = getCurrentLang()) {
+  getClassData(name, lang = getCurrentLang(), systemId = 'dnd5e2024') {
+    const adapter = this.getAdapter(systemId);
+    if (systemId !== 'dnd5e2024') return adapter.getClassData?.(name) || null;
     const tr = loadI18n('classes', lang);
-    const cls = dnd5eAdapter.getClassData(name, tr);
+    const cls = adapter.getClassData(name, tr);
     if (cls) return cls;
     for (const src of loadHomebrew()) {
       const hbCls = (src.classes || []).find(c => c.name === name);
@@ -175,7 +182,9 @@ const dataManager = {
   },
 
   // ── Armature ─────────────────────────────────────────────────────────────
-  getArmors() {
+  getArmors(systemId = 'dnd5e2024') {
+    const adapter = this.getAdapter(systemId);
+    if (systemId !== 'dnd5e2024') return adapter.getArmors?.() || [];
     const srdIds = DND_ARMOR_PRESETS.map(a => a.id);
     const hbExtra = loadHomebrew()
       .flatMap(s => s.armors || [])

@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { WEAPON_PROPERTIES, WEAPON_PROPERTY_DESCS, WEAPON_MASTERIES } from '../data/systems/dnd5e2024/weapons';
 import dataManager from '../data/dataManager';
@@ -128,7 +128,7 @@ function WeaponEditForm({ form, onChange, onSave, onCancel, onDelete, allTags, o
         <div className="field" style={{ flex: 2 }}>
           <label>{t('weapons.customName')}</label>
           <input value={form.name} onChange={e => patch({ name: e.target.value })}
-            placeholder="Es. Spada del nonno" autoFocus />
+            placeholder={t('placeholders.weaponName')} autoFocus />
         </div>
         <div className="field" style={{ flex: '0 0 70px' }}>
           <label>{t('inventory.weight', 'Peso')}</label>
@@ -136,7 +136,7 @@ function WeaponEditForm({ form, onChange, onSave, onCancel, onDelete, allTags, o
         </div>
         <div className="field" style={{ flex: '0 0 90px' }}>
           <label>{t('weapons.throwableLabel', 'Gittata')} ({rangeUnitLabel})</label>
-          <input type="text" value={form.throwable || ''} onChange={e => patch({ throwable: e.target.value })} placeholder="es. 20/60" />
+          <input type="text" value={form.throwable || ''} onChange={e => patch({ throwable: e.target.value })} placeholder={t('placeholders.weaponRange')} />
         </div>
         <div className="field" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
           <label>{t('weapons.profLabel')}</label>

@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DND_CLASSES, SUBCLASS_DATA } from '../data/systems/dnd5e2024/classes';
 import dataManager from '../data/dataManager';
@@ -7,7 +7,6 @@ import { getSpeciesData } from '../data/systems/dnd5e2024/species';
 import { ALL_DND_FEATS } from '../data/systems/dnd5e2024/feats';
 import { Icon } from '../config/icons';
 
-const ABILITY_LABELS = { STR: 'STR', DEX: 'DEX', CON: 'CON', INT: 'INT', WIS: 'WIS', CHA: 'CHA' };
 
 const FIGHTING_STYLE_CLASSES = ['Fighter', 'Paladin', 'Ranger'];
 
@@ -412,7 +411,7 @@ export default function LevelUpModal({ currentLevel, charClass, charState, onCom
                   <div className="field">
                     <label>{t('levelUp.epicBoonPlaceholder')}</label>
                     <input value={epicBoonName} onChange={e => setEpicBoonName(e.target.value)}
-                      placeholder="Boon of Combat Prowess" autoFocus />
+                      placeholder={t('placeholders.epicBoonName')} autoFocus />
                   </div>
                 </>
               ) : (

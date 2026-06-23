@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Icon } from '../config/icons';
 import { DH_WEAPONS } from '../data/systems/daggerheart/weapons';
@@ -134,7 +134,7 @@ export default function DHWeaponManager({ weapons = [], proficiency = 1, onUpdat
                   <label>{t('dh.weapons.name', 'Name')}</label>
                   <input value={customForm.name} autoFocus
                     onChange={e => patchCustom({ name: e.target.value })}
-                    placeholder="Es. Blade of the Moon…" />
+                    placeholder={t('placeholders.dhWeaponName')} />
                 </div>
                 <div className="field" style={{ flex: '0 0 80px' }}>
                   <label>{t('dh.weapons.trait', 'Trait')}</label>
@@ -154,7 +154,7 @@ export default function DHWeaponManager({ weapons = [], proficiency = 1, onUpdat
                   <label>{t('dh.weapons.dmgDie', 'Damage Die')}</label>
                   <input value={customForm.dmgDie}
                     onChange={e => patchCustom({ dmgDie: e.target.value })}
-                    placeholder="d8" />
+                    placeholder={t('placeholders.dhWeaponDie')} />
                 </div>
                 <div className="field" style={{ flex: '0 0 80px' }}>
                   <label>{t('dh.weapons.dmgType', 'Type')}</label>

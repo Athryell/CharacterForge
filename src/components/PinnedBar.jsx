@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Icon, ICON_MAP, useIconMode } from '../config/icons';
-import { useUnits } from '../hooks/useUnits';
 
 const DICE_ICONS = ['d4','d6','d8','d10','d12','d20'];
 
@@ -45,7 +44,6 @@ export function savePinned(pinned) {
 
 export default function PinnedBar({ state, editMode, pinned, onTogglePin, onUpdate, system, onShortRest, onLongRest, onToggleResourcePip }) {
   const { t } = useTranslation();
-  const { iconMode } = useIconMode();
   const showRestBtns = !editMode && system === 'dnd5e2024';
   const pinnedResources = (state?.resources || []).filter(r => r.pinned);
   const [restMenuOpen, setRestMenuOpen] = useState(false);
@@ -150,8 +148,6 @@ function DHPipRow({ icon, current, max, pipClass, onUpdate, stateKey, editMode }
 
 function PinContent({ id, labelKey, state, onUpdate, active, editMode }) {
   const { t } = useTranslation();
-  const { toDisplaySpeed, speedUnit } = useUnits();
-
   if (!active) {
     return <span className="pin-content-muted">{t(labelKey, id)}</span>;
   }

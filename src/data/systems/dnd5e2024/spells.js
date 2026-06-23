@@ -1,6 +1,8 @@
 // CharacterForge — D&D 5e SRD 5.2 Spells (CC BY 4.0 — Wizards of the Coast)
 // Mechanical data only — display strings (name, desc, range, duration) in i18n JSON files.
 
+import { SPELLCASTING_CLASS } from './mechanics';
+
 export const DND_SPELLS = [
   // ── Cantrips (0) ─────────────────────────────────────────────────────────
   {
@@ -3056,16 +3058,7 @@ export const SCHOOLS = [
   "abjuration",
 ];
 
-export const SPELL_CLASSES = [
-  "Bard",
-  "Cleric",
-  "Druid",
-  "Wizard",
-  "Paladin",
-  "Ranger",
-  "Sorcerer",
-  "Warlock",
-];
+export const SPELL_CLASSES = Object.keys(SPELLCASTING_CLASS);
 
 export function filterSpells({ spells, level, school, cls, search }) {
   return (spells || DND_SPELLS).filter((s) => {

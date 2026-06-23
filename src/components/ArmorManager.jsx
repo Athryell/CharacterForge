@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Icon } from '../config/icons';
 import { TYPE_LABEL, calcArmorAC } from '../data/systems/dnd5e2024/armors';

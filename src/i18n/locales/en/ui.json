@@ -1248,5 +1248,19 @@
     "authorLabel": "Author",
     "descLabel": "Description",
     "systemLabel": "System"
+  },
+  "placeholders": {
+    "weaponName": "E.g. Grandfather's Sword",
+    "weaponRange": "E.g. 20/60",
+    "armorName": "E.g. Magic Leather...",
+    "armorFeature": "E.g. Flexible: +1 to Evasion...",
+    "dhWeaponName": "E.g. Blade of the Moon...",
+    "dhWeaponDie": "d8",
+    "spellDuration": "E.g. 1 minute, Instantaneous",
+    "spellRange": "E.g. 18m, Self",
+    "spellName": "E.g. Flame of Vengeance",
+    "creatorSpeed": "18 m",
+    "homebrewName": "My Homebrew",
+    "epicBoonName": "Boon of Combat Prowess"
   }
 }
