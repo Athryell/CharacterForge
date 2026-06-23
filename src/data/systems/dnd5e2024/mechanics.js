@@ -61,10 +61,6 @@ export const DEFAULT_ACTIONS = [
   },
 ];
 
-export const CLASSES = [
-  'Barbarian', 'Bard', 'Cleric', 'Druid', 'Fighter',
-  'Monk', 'Paladin', 'Ranger', 'Rogue', 'Sorcerer', 'Warlock', 'Wizard',
-];
 
 export const ALIGNMENTS = [
   'Lawful Good', 'Neutral Good', 'Chaotic Good',

@@ -51,8 +51,6 @@ export const DND_WEAPONS = [
   { id: 'pistol',         category: 'martial-ranged', dmg: '1d10', properties: ['ammunition','loading'],             mastery: 'vex',    weightKg: 1.5,   cost: '250 GP', throwable: '30/90' },
 ];
 
-// Backward-compat alias
-export const SRD_WEAPONS = DND_WEAPONS;
 
 // ── Weapon Mechanics (from data/weapons.js) ──────────────────────────────────
 

@@ -13,6 +13,7 @@
   --c-accent: #2D6A0F;
   --c-accent-light: #E8F4DC;
   --c-accent-text: #1A4708;
+  --c-success: #3B6D11;
   --c-warn-text: #7A4A00;
   --c-text: #111827;
   --c-warn: #854F0B;
@@ -21,6 +22,7 @@
   --shadow-card: 0 1px 3px rgba(17,24,39,.06), 0 0 0 0.5px rgba(17,24,39,.07);
   --font-display: 'Cinzel', 'Palatino Linotype', serif;
   --font-body: 'Crimson Pro', Georgia, serif;
+  --font-mono: 'Consolas', 'Monaco', 'Courier New', monospace;
   font-size: 15px;
 }
 
@@ -505,7 +507,13 @@ body.high-contrast *:focus-visible {
   min-width: 0; max-width: 100%;
 }
 .tab-group::-webkit-scrollbar { display: none; }
-.tab-btn-wrapper { scroll-snap-align: start; flex-shrink: 0; }
+.tab-btn-wrapper {
+  scroll-snap-align: start;
+  flex-shrink: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
 .tab-btn {
   background: none; border: none;
   padding: 5px 12px;
@@ -1058,7 +1066,7 @@ body.high-contrast *:focus-visible {
   border: 1.5px solid var(--c-border-mid);
   cursor: pointer; transition: all .15s;
 }
-.save-pip.success-on { background: #3B6D11; border-color: #3B6D11; }
+.save-pip.success-on { background: var(--c-success); border-color: var(--c-success); }
 .save-pip.failure-on { background: #A32D2D; border-color: #A32D2D; }
 .death-save-roll-btn {
   margin-left: auto;
@@ -1672,11 +1680,6 @@ body.high-contrast *:focus-visible {
 .item-edit-actions { display: flex; gap: 8px; margin-top: 10px; padding-top: 8px; border-top: 0.5px solid var(--c-border); }
 
 /* ── TAB BAR REORDER ───────────────────────────────────────────── */
-.tab-btn-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
 .tab-btn-wrapper.edit-mode .tab-btn {
   cursor: grab;
   padding-left: 6px;
@@ -1736,8 +1739,8 @@ body.high-contrast *:focus-visible {
   background: var(--c-accent-light);
 }
 .add-to-action-btn.added {
-  border-color: #3B6D11;
-  color: #3B6D11;
+  border-color: var(--c-success);
+  color: var(--c-success);
   background: #EAF3DE;
 }
 .add-to-action-btn.added:hover { background: #d6ecbf; }
@@ -1913,7 +1916,7 @@ body.high-contrast *:focus-visible {
 /* ── TOUCH-FRIENDLY SIZING ─────────────────────────────────────── */
 
 /* Dot preparazione magia — più grande */
-.spell-prepared-dot {
+.large-targets .spell-prepared-dot {
   width: 18px !important;
   height: 18px !important;
   border-width: 2px !important;
@@ -1921,7 +1924,7 @@ body.high-contrast *:focus-visible {
 }
 
 /* Check dot abilità/tiri salvezza */
-.check-dot {
+.large-targets .check-dot {
   width: 16px !important;
   height: 16px !important;
   border-width: 2px !important;
@@ -1929,21 +1932,21 @@ body.high-contrast *:focus-visible {
 }
 
 /* Slot magie */
-.slot-pip {
+.large-targets .slot-pip {
   width: 20px !important;
   height: 20px !important;
   border-width: 2px !important;
 }
 
 /* Death save pips */
-.save-pip {
+.large-targets .save-pip {
   width: 22px !important;
   height: 22px !important;
   border-width: 2px !important;
 }
 
 /* Spell add button nel browser */
-.spell-add-btn {
+.large-targets .spell-add-btn {
   width: 34px !important;
   height: 34px !important;
   font-size: 1.2rem !important;
@@ -1956,7 +1959,6 @@ body.high-contrast *:focus-visible {
   height: 20px !important;
 }
 
-
 /* Bottoni rimozione ✕ */
 .equip-remove {
   padding: 4px 8px !important;
@@ -1966,7 +1968,7 @@ body.high-contrast *:focus-visible {
 }
 
 /* Condition chip */
-.condition-chip {
+.large-targets .condition-chip {
   padding: 6px 12px !important;
   font-size: 0.867rem !important;
 }
@@ -2535,8 +2537,14 @@ input[type=number] {
 .pin-death-group { display: flex; gap: 3px; }
 .pin-death-sep { color: var(--c-hint); font-size: 0.733rem; }
 .pin-pip {
-  width: 10px; height: 10px; border-radius: 50%; cursor: pointer;
-  border: 1.5px solid var(--c-border-mid); display: inline-block;
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid var(--c-border-mid);
+  background: transparent;
+  cursor: pointer;
+  vertical-align: middle;
   transition: all .15s;
 }
 .success-pip.on { background: var(--c-accent); border-color: var(--c-accent); }
@@ -2591,9 +2599,6 @@ input[type=number] {
   pointer-events: none;
   flex-shrink: 0;
   box-shadow: 0 0 6px rgba(59,109,17,.5);
-}
-.tab-btn-wrapper {
-  position: relative;
 }
 .tab-dragging {
   opacity: 0.35;
@@ -2986,18 +2991,6 @@ input[type=number] {
   font-family: var(--font-mono, monospace);
   color: var(--c-accent);
   letter-spacing: -0.02em;
-}
-/* Pin pip (inside pinned bar for resources) */
-.pin-pip {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  border: 1.5px solid var(--c-border-mid);
-  background: transparent;
-  cursor: pointer;
-  transition: background 0.12s;
-  vertical-align: middle;
 }
 .pin-pip.on {
   background: var(--c-accent);

@@ -18,8 +18,6 @@ export const DND_ARMOR_PRESETS = [
   { id: 'plate',       name: 'Plate',           type: 'heavy',  ac: 18, strReq: 15, maxDex: 0,    weightKg: 32.5 },
 ];
 
-// Backward-compat alias
-export const ARMOR_PRESETS = DND_ARMOR_PRESETS;
 
 export const TYPE_LABEL = { light: 'Light', medium: 'Medium', heavy: 'Heavy' };
 

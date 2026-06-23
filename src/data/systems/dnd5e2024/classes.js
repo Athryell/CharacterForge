@@ -967,9 +967,6 @@ export const CLASS_SKILL_OPTIONS = Object.fromEntries(DND_CLASSES.map(c => [c.na
 // Re-export class features for external use
 export { CLASS_FEATURES };
 
-// Backward-compat aliases
-export const SRD_CLASSES     = DND_CLASSES;
-export const SRD_CLASS_NAMES = DND_CLASS_NAMES;
 
 export const SUBCLASS_DATA = {
   Barbarian: {

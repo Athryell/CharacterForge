@@ -22,7 +22,10 @@ const dnd5eAdapter = {
 
   getSpells(lang, i18nData) {
     const tr = i18nData || {};
-    return DND_SPELLS.map(s => ({ ...s, ...(tr[s.id] || {}) }));
+    return DND_SPELLS.map(s => {
+      const t = tr[s.id] || {};
+      return { ...s, ...t, name: t.name || s.id };
+    });
   },
 
   getWeapons(lang, i18nData) {

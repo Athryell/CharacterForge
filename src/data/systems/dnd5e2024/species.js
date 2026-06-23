@@ -94,14 +94,44 @@ export const DND_SPECIES = [
   },
 ];
 
-// Backward-compat alias
-export const SRD_SPECIES = DND_SPECIES;
 
 export function getSpeciesData(raceId) {
   return DND_SPECIES.find(s => s.id === raceId) || null;
 }
 
 export const SPECIES_FEATURES = {
+  'dwarf': [
+    { name: 'Visione nel buio', desc: 'Vedi in luce fioca come piena luce, nell\'oscurità come luce fioca (18 m).' },
+    { name: 'Resilienza nanica', desc: 'Vantaggio ai tiri salvezza contro il veleno. Resistenza ai danni da veleno.' },
+    { name: 'Robustezza nanica', desc: 'I tuoi PF massimi aumentano di 1 a ogni livello.' },
+    { name: 'Senso della pietra', desc: 'Azione bonus: individua manufatti in pietra entro 18 m. Raddoppi il bonus di competenza nelle prove di Storia su pietra lavorata.' },
+  ],
+  'elf': [
+    { name: 'Visione nel buio', desc: 'Vedi in luce fioca come piena luce, nell\'oscurità come luce fioca (18 m).' },
+    { name: 'Sensi acuti', desc: 'Competenza nell\'abilità Percezione.' },
+    { name: 'Lignaggio fatato', desc: 'Vantaggio ai tiri salvezza contro l\'incantamento. Immunità al sonno magico.' },
+    { name: 'Trance', desc: 'Non dormi. Mediti per 4 ore al giorno (equivale a 8 ore di sonno).' },
+  ],
+  'gnome': [
+    { name: 'Visione nel buio', desc: 'Vedi in luce fioca come piena luce, nell\'oscurità come luce fioca (18 m).' },
+    { name: 'Astuzia gnomica', desc: 'Vantaggio ai tiri salvezza di Intelligenza, Saggezza e Carisma contro la magia.' },
+  ],
+  'goliath': [
+    { name: 'Antenato gigante', desc: 'Scegli un tipo di gigante. Ottieni una capacità soprannaturale corrispondente (Nuvola, Fuoco, Gelo, Collina, Pietra o Tempesta).' },
+    { name: 'Forma grande', desc: 'Azione bonus: diventa taglia Grande per 10 minuti. Usi: 1 (riposo lungo).' },
+    { name: 'Costituzione poderosa', desc: 'Conti come taglia Grande per la capacità di trasporto, spinta, tiro e sollevamento.' },
+  ],
+  'halfling': [
+    { name: 'Fortuna', desc: 'Quando ottieni 1 su un tiro per attacco, prova o tiro salvezza, puoi ritirare e usare il nuovo risultato.' },
+    { name: 'Coraggioso', desc: 'Vantaggio ai tiri salvezza contro la paura.' },
+    { name: 'Agilità halfling', desc: 'Puoi muoverti attraverso lo spazio di una creatura di taglia superiore.' },
+    { name: 'Invisibilità naturale', desc: 'Puoi tentare di nasconderti quando sei oscurato da una creatura Media o superiore.' },
+  ],
+  'orc': [
+    { name: 'Visione nel buio', desc: 'Vedi in luce fioca come piena luce, nell\'oscurità come luce fioca (18 m).' },
+    { name: 'Scatto adrenalinico', desc: 'Azione bonus: esegui l\'azione Scatto e guadagni PF temporanei pari al livello + mod. COS (min. 1). Usi: bonus di competenza (riposo lungo).' },
+    { name: 'Resistenza instancabile', desc: 'Quando scendi a 0 PF (ma non muori), puoi scendere a 1 invece. Usi: 1 (riposo lungo).' },
+  ],
   'human': [
     { name: 'Polivalenza', desc: 'Guadagni competenza in un\'abilità a scelta.' },
     { name: 'Talento bonus', desc: 'Guadagni un talento di primo livello a scelta.' },

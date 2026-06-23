@@ -34,6 +34,3 @@ export const DND_CONDITIONS = [
   },
 ];
 
-// Backward-compat aliases
-export const CONDITIONS = DND_CONDITIONS;
-export const SRD_CONDITIONS = DND_CONDITIONS;

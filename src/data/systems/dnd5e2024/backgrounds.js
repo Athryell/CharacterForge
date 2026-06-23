@@ -9,8 +9,6 @@ export const DND_BACKGROUNDS = [
   { id: 'soldier',  srd: true, abilityScores: ['STR', 'DEX', 'CON'], skills: ['athletics', 'intimidation'] },
 ];
 
-// Backward-compat alias
-export const SRD_BACKGROUNDS = DND_BACKGROUNDS;
 
 export const BACKGROUND_FEATURES = {
   'acolyte': [

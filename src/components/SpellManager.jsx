@@ -310,7 +310,7 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
     school: filterSchool || undefined,
     cls: filterClass || undefined,
     search: filterSearch || undefined,
-  }).sort((a, b) => a.name.localeCompare(b.name)), [filterLevel, filterSchool, filterClass, filterSearch, homebrewKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  }).sort((a, b) => (a.name || '').localeCompare(b.name || '')), [filterLevel, filterSchool, filterClass, filterSearch, homebrewKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function addSRDSpell(spell) {
     if (knownNames.has(spell.name)) return;

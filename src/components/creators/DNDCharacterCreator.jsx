@@ -4,24 +4,12 @@ import { Icon } from '../../config/icons';
 import { ABILITIES, SKILLS, HIT_DICE, SPELLCASTING_CLASS, SLOT_TABLE } from '../../data/systems/dnd5e2024/mechanics';
 import AlignmentPicker from '../AlignmentPicker';
 import { CLASS_FEATURES, CLASS_SAVE_PROFS, CLASS_SKILL_COUNT, CLASS_SKILL_OPTIONS } from '../../data/systems/dnd5e2024/classes';
-import { SPECIES_FEATURES, getAutoFeatures, getSpeciesData } from '../../data/systems/dnd5e2024/species';
+import { DND_SPECIES, SPECIES_FEATURES, getAutoFeatures, getSpeciesData } from '../../data/systems/dnd5e2024/species';
 import { BACKGROUND_FEATURES } from '../../data/systems/dnd5e2024/backgrounds';
 import { ORIGIN_FEATS } from '../../data/systems/dnd5e2024/feats';
 import dataManager from '../../data/dataManager';
 import { syncCustomToDraft } from '../../utils/homebrewSync';
 
-// SRD 5.5e (2024) — specie: solo tratti, nessun bonus caratteristica
-const SPECIES_SRD = [
-  { id: 'human',      name: 'Human',      traits: ['Versatile: 1 talento Origin a scelta al 1° livello', 'Eroico: vantaggio ai TS contro paura'] },
-  { id: 'elf',        name: 'Elf',        traits: ['Visione nel buio 18 m', 'Sensi acuti (comp. Percezione)', 'Ascendenza fatata (vantaggio TS contro magie)', 'Passo fatato (teletrasporto 9 m, usi = bonus comp.)'] },
-  { id: 'dwarf',      name: 'Dwarf',      traits: ['Visione nel buio 18 m', 'Resistenza nanica (vantaggio TS veleno, immunità avvelenamento)', 'Tempra nanica', 'Competenza armi da guerra e armature medie'] },
-  { id: 'halfling',   name: 'Halfling',   traits: ['Fortunato (ritira i risultati di 1)', 'Coraggioso (vantaggio TS contro paura)', 'Agilità halfling (muoversi nello spazio di creature più grandi)'] },
-  { id: 'gnome',      name: 'Gnome',      traits: ['Visione nel buio 18 m', 'Furbizia gnoma (vantaggio TS INT/WIS/CHA contro magie)', 'Competenza con strumenti artigianali'] },
-  { id: 'dragonborn', name: 'Dragonborn', traits: ['Soffio (azione, scala con livello)', 'Resistenza al danno del tipo draconico', 'Visione nel buio 18 m'] },
-  { id: 'tiefling',   name: 'Tiefling',   traits: ['Visione nel buio 18 m', 'Resistenza al fuoco', 'Retaggio infernale: Thaumaturgia, Colpo infuocato (liv. 3), Oscurità (liv. 5)'] },
-  { id: 'orc',        name: 'Orc',        traits: ['Visione nel buio 18 m', 'Spietato (azione bonus: vantaggio al prossimo attacco nel turno)', 'Resistenza (PF extra pari al livello)'] },
-  { id: 'goliath',    name: 'Goliath',    traits: ['Resistenza al freddo', 'Possanza gigante (taglia Grande, oggetti extra-pesanti)', 'Forma gigante: STR o CON Primordiale (1× riposo lungo)'] },
-];
 
 const POINT_BUY_COSTS = { 8:0,9:1,10:2,11:3,12:4,13:5,14:7,15:9 };
 const POINT_BUY_TOTAL = 27;
@@ -78,7 +66,7 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
   function patch(obj) { setData(prev => ({ ...prev, ...obj })); }
 
   const allBackgrounds = dataManager.getBackgrounds();
-  const speciesList = [...SPECIES_SRD, { id: CUSTOM_SENTINEL, name: CUSTOM_SENTINEL, label: t('identity.speciesCustom', 'Custom...') }];
+  const speciesList = [...DND_SPECIES, { id: CUSTOM_SENTINEL, name: CUSTOM_SENTINEL, label: t('identity.speciesCustom', 'Custom...') }];
   const bgList      = [...allBackgrounds, { id: CUSTOM_SENTINEL, name: CUSTOM_SENTINEL, label: t('identity.backgroundCustom', 'Custom...') }];
   const classList   = [...dataManager.getClasses(), CUSTOM_SENTINEL];
 
@@ -233,7 +221,7 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
     const speciesData = data.charRace !== CUSTOM_SENTINEL ? getSpeciesData(data.charRace) : null;
     const chosenLegacy = speciesData?.legacies?.find(l => l.id === data.speciesLegacy);
     const spellStat = data.speciesSpellStat || 'INT';
-    const speciesDisplayName = SPECIES_SRD.find(s => s.id === data.charRace)?.name || data.charRace;
+    const speciesDisplayName = data.charRace ? t(`data.species.${data.charRace}`, data.charRace) : data.charRace;
 
     const fixedSpells = (speciesData?.fixedSpells || []).map(s => ({
       name: s.name,
@@ -355,7 +343,7 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
                   const selected = data.charRace === (r.id || r.name);
                   return (
                     <div key={r.name} className={`creator-card ${selected ? 'selected' : ''}`} onClick={() => patch({ charRace: r.id || r.name, speciesLegacy: null, speciesSpellStat: 'INT' })}>
-                      <div className="creator-card-name">{isCustom ? r.label : t(`data.species.${r.id || r.name}`, r.name)}</div>
+                      <div className="creator-card-name">{isCustom ? r.label : t(`data.species.${r.id}`, r.id)}</div>
                       {isCustom && selected && (
                         <div className="creator-custom-form" onClick={e => e.stopPropagation()}>
                           <div className="field" style={{ marginTop: 6 }}>
@@ -417,9 +405,11 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
                           </div>
                         </div>
                       )}
-                      {!isCustom && selected && (
+                      {!isCustom && selected && (SPECIES_FEATURES[r.id] || []).length > 0 && (
                         <div className="creator-traits">
-                          {r.traits.map((tr, i) => <div key={i} className="creator-trait">• {tr}</div>)}
+                          {(SPECIES_FEATURES[r.id] || []).map((f, i) => (
+                            <div key={i} className="creator-trait">• <strong>{f.name}</strong>: {f.desc}</div>
+                          ))}
                         </div>
                       )}
                     </div>
