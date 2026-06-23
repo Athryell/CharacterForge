@@ -1738,5 +1738,245 @@
     "duration": "Instantaneous",
     "range": "Self",
     "desc": "Wish is the mightiest spell a mortal can cast. By simply speaking aloud, you can alter reality itself. The basic use of this spell is to duplicate any other spell of level 8 or lower."
+  },
+  "acid_splash": {
+    "name": "Acid Splash",
+    "duration": "Instantaneous",
+    "range": "60 feet",
+    "desc": "You create an acidic bubble at a point within range, where it explodes in a 5-foot-radius Sphere. Each creature in that Sphere must succeed on a Dexterity saving throw or take 1d6 Acid damage. The damage increases by 1d6 when you reach levels 5 (2d6), 11 (3d6), and 17 (4d6)."
+  },
+  "chill_touch": {
+    "name": "Chill Touch",
+    "duration": "Instantaneous",
+    "range": "Touch",
+    "desc": "Channeling the chill of the grave, make a melee spell attack against a target within reach. On a hit, the target takes 1d10 Necrotic damage, and it cannot regain Hit Points until the end of your next turn. The damage increases by 1d10 when you reach levels 5 (2d10), 11 (3d10), and 17 (4d10)."
+  },
+  "mending": {
+    "name": "Mending",
+    "duration": "Instantaneous",
+    "range": "Touch",
+    "desc": "This spell repairs a single break or tear in an object you touch, such as a broken chain link, two halves of a broken key, a torn cloak, or a leaking wineskin. As long as the break or tear is no longer than 1 foot in any dimension, you mend it, leaving no trace of the former damage. This spell can physically repair a magic item, but the spell cannot restore magic to such an object."
+  },
+  "message": {
+    "name": "Message",
+    "duration": "1 round",
+    "range": "120 feet",
+    "desc": "You point your finger toward a creature within range and whisper a message. The target (and only the target) hears the message and can reply in a whisper that only you can hear. You can cast this spell through solid objects if you are familiar with the target and know it is beyond the barrier. Magical silence, 1 foot of stone, 1 inch of common metal, a thin sheet of lead, or 3 feet of wood blocks the spell. The spell does not have to follow a straight line and can travel freely around corners or through openings."
+  },
+  "poison_spray": {
+    "name": "Poison Spray",
+    "duration": "Instantaneous",
+    "range": "30 feet",
+    "desc": "You spray a puff of noxious gas from your finger at a creature within range. The creature must succeed on a Constitution saving throw or take 1d12 Poison damage. The damage increases by 1d12 when you reach levels 5 (2d12), 11 (3d12), and 17 (4d12)."
+  },
+  "prestidigitation": {
+    "name": "Prestidigitation",
+    "duration": "Up to 1 hour",
+    "range": "10 feet",
+    "desc": "You create one of the following magical effects within range: a harmless sensory effect such as a shower of sparks, a puff of wind, faint musical notes, or an odd odor; light or snuff a candle, torch, or small campfire; clean or soil an object no larger than 1 cubic foot; chill, warm, or flavor up to 1 cubic foot of nonliving material for 1 hour; make a color, small mark, or symbol appear on an object or surface for 1 hour; or create a nonmagical trinket or an illusory image that fits in your hand and lasts until the end of your next turn. You can have up to three non-instantaneous effects active at a time."
+  },
+  "animal_friendship": {
+    "name": "Animal Friendship",
+    "duration": "24 hours",
+    "range": "30 feet",
+    "desc": "Target a Beast that you can see within range. The target must succeed on a Wisdom saving throw or have the Charmed condition for the duration. If you or one of your allies deals damage to the target, the spell ends. You can target one additional Beast for each spell slot level above 1."
+  },
+  "charm_person": {
+    "name": "Charm Person",
+    "duration": "1 hour",
+    "range": "30 feet",
+    "desc": "One Humanoid you can see within range makes a Wisdom saving throw. It does so with Advantage if you or your allies are fighting it. On a failed save, the target has the Charmed condition until the spell ends or until you or your allies damage it. The Charmed creature is Friendly to you. When the spell ends, the target knows it was Charmed by you. You can target one additional Humanoid for each spell slot level above 1."
+  },
+  "cure_wounds": {
+    "name": "Cure Wounds",
+    "duration": "Instantaneous",
+    "range": "Touch",
+    "desc": "A creature you touch regains a number of Hit Points equal to 2d8 plus your spellcasting ability modifier. The healing increases by 2d8 for each spell slot level above 1."
+  },
+  "detect_magic": {
+    "name": "Detect Magic",
+    "duration": "Concentration, up to 10 minutes",
+    "range": "Self",
+    "desc": "For the duration, you sense the presence of magical effects within 30 feet of yourself. If you sense such effects, you can take the Magic action to see a faint aura around any visible creature or object in the area that bears the magic, and if an effect was created by a spell, you learn the spell's school of magic."
+  },
+  "divine_smite": {
+    "name": "Divine Smite",
+    "duration": "Instantaneous",
+    "range": "Self",
+    "desc": "The target takes an extra 2d8 Radiant damage from the attack. The damage increases by 1d8 if the target is a Fiend or an Undead. The damage increases by 1d8 for each spell slot level above 1."
+  },
+  "ensnaring_strike": {
+    "name": "Ensnaring Strike",
+    "duration": "Concentration, up to 1 minute",
+    "range": "Self",
+    "desc": "As you hit the target, grasping vines appear on it, and it makes a Strength saving throw. A Large or larger creature has Advantage on this save. On a failed save, the target has the Restrained condition until the spell ends. While Restrained, the target takes 1d6 Piercing damage at the start of each of its turns."
+  },
+  "enhance_ability": {
+    "name": "Enhance Ability",
+    "duration": "Concentration, up to 1 hour",
+    "range": "Touch",
+    "desc": "You touch a creature and choose Strength, Dexterity, Constitution, Intelligence, Wisdom, or Charisma. For the duration, the target has Advantage on ability checks using the chosen ability. You can target one additional creature for each spell slot level above 1."
+  },
+  "feather_fall": {
+    "name": "Feather Fall",
+    "duration": "1 minute",
+    "range": "60 feet",
+    "desc": "Choose up to five falling creatures within range. A falling creature's rate of descent slows to 60 feet per round until the spell ends. If the creature lands before the spell ends, it takes no damage from the fall and can land on its feet, and the spell ends for that creature."
+  },
+  "hellish_rebuke": {
+    "name": "Hellish Rebuke",
+    "duration": "Instantaneous",
+    "range": "60 feet",
+    "desc": "The creature that dealt the damage to you is momentarily surrounded by hellish flames. The creature must make a Dexterity saving throw. It takes 2d10 Fire damage on a failed save, or half as much damage on a successful one. The damage increases by 1d10 for each spell slot level above 1."
+  },
+  "shield": {
+    "name": "Shield",
+    "duration": "1 round",
+    "range": "Self",
+    "desc": "An invisible barrier of magical force appears and protects you. Until the start of your next turn, you have a +5 bonus to AC, including against the triggering attack, and you take no damage from Magic Missile."
+  },
+  "aid": {
+    "name": "Aid",
+    "duration": "8 hours",
+    "range": "30 feet",
+    "desc": "Choose up to three creatures within range. Each target's Hit Point maximum and current Hit Points increase by 5 for the duration. Each target's Hit Points increase by 5 for each spell slot level above 2."
+  },
+  "darkvision": {
+    "name": "Darkvision",
+    "duration": "8 hours",
+    "range": "Touch",
+    "desc": "For the duration, a willing creature you touch has Darkvision with a range of 150 feet."
+  },
+  "geas": {
+    "name": "Geas",
+    "duration": "30 days",
+    "range": "60 feet",
+    "desc": "You give a verbal command to a creature that you can see within range, ordering it to carry out some service or refrain from some action or course of activity as you decide. The creature must succeed on a Wisdom saving throw or have the Charmed condition for the duration. The target automatically succeeds if it cannot understand your language or if your command is directly harmful to it. A Charmed target uses its actions to follow your instructions to the best of its ability. Each time the target takes damage, it makes a new Wisdom saving throw. On a success, the spell ends."
+  },
+  "hold_person": {
+    "name": "Hold Person",
+    "duration": "Concentration, up to 1 minute",
+    "range": "60 feet",
+    "desc": "Choose a Humanoid that you can see within range. The target must succeed on a Wisdom saving throw or have the Paralyzed condition for the duration. At the end of each of its turns, the target repeats the save, ending the spell on itself on a success. You can target one additional Humanoid for each spell slot level above 2."
+  },
+  "lesser_restoration": {
+    "name": "Lesser Restoration",
+    "duration": "Instantaneous",
+    "range": "Touch",
+    "desc": "You touch a creature and end one condition on it: Blinded, Deafened, Paralyzed, or Poisoned."
+  },
+  "locate_creature": {
+    "name": "Locate Creature",
+    "duration": "Concentration, up to 1 hour",
+    "range": "Self",
+    "desc": "Describe or name a creature that is familiar to you. You sense the direction to the creature's location, as long as that creature is within 1,000 feet of you. If the creature is moving, you know the direction of its movement. The spell can locate a specific creature known to you, or the nearest creature of a specific kind, so long as you have seen such a creature up close within 30 feet at least once. This spell cannot locate a creature if running water at least 10 feet wide blocks a direct path between you and the creature."
+  },
+  "locate_object": {
+    "name": "Locate Object",
+    "duration": "Concentration, up to 10 minutes",
+    "range": "Self",
+    "desc": "Describe or name an object that is familiar to you. You sense the direction to the object's location, as long as that object is within 1,000 feet of you. If the object is in motion, you know the direction of its movement. The spell can locate a specific object known to you, as long as you have seen it up close within 30 feet at least once. This spell cannot locate an object if any thickness of lead blocks a direct path between you and the object."
+  },
+  "magic_weapon": {
+    "name": "Magic Weapon",
+    "duration": "Concentration, up to 1 hour",
+    "range": "Touch",
+    "desc": "You touch a nonmagical weapon. Until the spell ends, that weapon becomes a magic weapon with a +1 bonus to attack rolls and damage rolls."
+  },
+  "searing_smite": {
+    "name": "Searing Smite",
+    "duration": "Concentration, up to 1 minute",
+    "range": "Self",
+    "desc": "As you hit the target, it takes an extra 2d6 Fire damage from the attack and starts burning. At the start of each of the burning creature's turns, it takes 2d6 Fire damage. The burning creature, or a creature within 5 feet of it, can take an action to extinguish the fire. The extra damage increases by 2d6 for each spell slot level above 2."
+  },
+  "shining_smite": {
+    "name": "Shining Smite",
+    "duration": "Concentration, up to 1 minute",
+    "range": "Self",
+    "desc": "As you hit the target, it takes an extra 2d6 Radiant damage from the attack, and the target emits dim light in a 5-foot radius and cannot be Invisible. At the end of each of its turns, the target repeats the saving throw. On a success, the spell ends on the target."
+  },
+  "suggestion": {
+    "name": "Suggestion",
+    "duration": "Concentration, up to 8 hours",
+    "range": "30 feet",
+    "desc": "You suggest a course of activity (limited to a sentence or two) and magically influence a creature you can see within range that can hear and understand you. The target must succeed on a Wisdom saving throw or have the Charmed condition until the spell ends or until you or your companions deal damage to the target. The suggested course of action must be worded in a manner that makes the activity sound reasonable."
+  },
+  "daylight": {
+    "name": "Daylight",
+    "duration": "1 hour",
+    "range": "60 feet",
+    "desc": "For the duration, sunlight spreads from a point within range and fills a 60-foot-radius Sphere. The sunlight's area is Bright Light and sheds Dim Light for an additional 60 feet. If any of this spell's area overlaps with an area of Darkness created by a spell of level 3 or lower, that other spell is dispelled."
+  },
+  "dispel_magic": {
+    "name": "Dispel Magic",
+    "duration": "Instantaneous",
+    "range": "120 feet",
+    "desc": "Choose one creature, object, or magical effect within range. Any ongoing spell of level 3 or lower on the target ends. For each ongoing spell of level 4 or higher on the target, make an ability check using your spellcasting ability (DC 10 plus that spell's level). On a successful check, the spell ends."
+  },
+  "tongues": {
+    "name": "Tongues",
+    "duration": "1 hour",
+    "range": "Touch",
+    "desc": "This spell grants the creature you touch the ability to understand any spoken or signed language it hears or sees. Moreover, when the target speaks or signs, any creature that knows at least one language and can hear or see the target understands what it says."
+  },
+  "water_breathing": {
+    "name": "Water Breathing",
+    "duration": "24 hours",
+    "range": "30 feet",
+    "desc": "This spell grants up to ten willing creatures you can see within range the ability to breathe underwater until the spell ends. Affected creatures also retain their normal mode of respiration."
+  },
+  "banishment": {
+    "name": "Banishment",
+    "duration": "Concentration, up to 1 minute",
+    "range": "30 feet",
+    "desc": "One creature that you can see within range must succeed on a Charisma saving throw or be transported to a harmless demiplane for the duration. While there, the target has the Incapacitated condition. When the spell ends, the target reappears in the space it left or in the nearest unoccupied space if that space is occupied. If you maintain concentration for the full duration, the target is permanently banished if it is not a native of the current plane of existence."
+  },
+  "hold_monster": {
+    "name": "Hold Monster",
+    "duration": "Concentration, up to 1 minute",
+    "range": "90 feet",
+    "desc": "Choose a creature that you can see within range. The target must succeed on a Wisdom saving throw or have the Paralyzed condition for the duration. At the end of each of its turns, the target repeats the save, ending the spell on itself on a success. You can target one additional creature for each spell slot level above 5."
+  },
+  "stoneskin": {
+    "name": "Stoneskin",
+    "duration": "1 hour",
+    "range": "Touch",
+    "desc": "Until the spell ends, one willing creature you touch has resistance to Bludgeoning, Piercing, and Slashing damage."
+  },
+  "greater_restoration": {
+    "name": "Greater Restoration",
+    "duration": "Instantaneous",
+    "range": "Touch",
+    "desc": "You imbue a creature you touch with positive energy to undo a debilitating effect. You can reduce the target's Exhaustion level by one, or end one of the following conditions on the target: Charmed, Cursed, Frightened, Paralyzed, or Petrified."
+  },
+  "planar_binding": {
+    "name": "Planar Binding",
+    "duration": "Concentration, up to 24 hours",
+    "range": "60 feet",
+    "desc": "You attempt to bind a Celestial, an Elemental, a Fey, or a Fiend to your service. The creature must be within range for the entire casting of the spell. At the completion of the casting, the target must succeed on a Charisma saving throw or be bound to serve you for the duration. While bound, the creature must follow your instructions to the best of its ability. The duration increases by 24 hours for each spell slot level above 5."
+  },
+  "plane_shift": {
+    "name": "Plane Shift",
+    "duration": "Instantaneous",
+    "range": "Touch",
+    "desc": "You and up to eight willing creatures who link hands in a circle are transported to a different plane of existence. You can specify a target destination in general terms, and you appear in or near that destination. Alternatively, if you know the sigil sequence of a teleportation circle on another plane of existence, you can use it to travel directly to that circle."
+  },
+  "true_seeing": {
+    "name": "True Seeing",
+    "duration": "1 hour",
+    "range": "Touch",
+    "desc": "You give the willing creature you touch the ability to see things as they actually are. For the duration, the creature has Truesight with a range of 120 feet."
+  },
+  "power_word_stun": {
+    "name": "Power Word Stun",
+    "duration": "Instantaneous",
+    "range": "60 feet",
+    "desc": "You speak a word of power that overwhelms the mind of one creature you can see within range. If the target has 150 Hit Points or fewer, it has the Stunned condition. Otherwise, the spell has no effect. The Stunned target makes a Constitution saving throw at the end of each of its turns, ending the condition on itself on a success."
+  },
+  "power_word_kill": {
+    "name": "Power Word Kill",
+    "duration": "Instantaneous",
+    "range": "60 feet",
+    "desc": "You speak a word of power that can compel one creature you can see within range to die instantly. If the creature you chose has 100 Hit Points or fewer, it dies. Otherwise, the target takes 12d12 Psychic damage."
   }
 }

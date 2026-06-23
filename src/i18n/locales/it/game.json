@@ -26,7 +26,7 @@
     "finesse": "You can use STR or DEX (whichever is higher) for attack and damage.",
     "light": "You can use this weapon in two-weapon fighting.",
     "heavy": "Small creatures have disadvantage on attack rolls.",
-    "versatile": "Puoi impugnarla con due mani per usare il dado danni indicato tra parentesi.",
+    "versatile": "You can wield it with two hands to use the damage die in parentheses.",
     "reach": "Adds 5 ft to your melee reach.",
     "thrown": "You can throw this weapon at range.",
     "ammunition": "Requires ammunition. You recover half after combat.",
@@ -38,8 +38,8 @@
     "dodge": "Until your next turn, attack rolls against you have disadvantage (if you can see the attacker)."
   },
   "notation": {
-    "attrHelp": "→ mod caratteristica",
-    "lvlHelp": "→ scala col livello",
-    "bonusHelp": "→ bonus equipaggiamento (digita @ per lista)"
+    "attrHelp": "→ ability modifier",
+    "lvlHelp": "→ scales with level",
+    "bonusHelp": "→ equipment bonus (type @ for list)"
   }
 }
