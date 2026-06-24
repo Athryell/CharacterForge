@@ -29,6 +29,7 @@ Claude Code deve leggere questo file prima di scrivere qualsiasi CSS o JSX.
 --c-accent       /* verde primario — azioni principali */
 --c-accent-light /* verde chiaro — sfondo accent */
 --c-accent-text  /* testo su accent */
+--c-success      /* verde successo — #3B6D11 */
 --c-warn         /* arancione warning */
 --c-warn-text    /* testo warning */
 --c-text         /* alias di --c-ink (legacy) */
@@ -428,10 +429,35 @@ Le formule `[countX]` sono risolte in `resolveNotations()` (Tooltip.jsx) prima d
 
 ## Problemi noti da risolvere
 
-- `.mod-btn` è definito **due volte** con valori inconsistenti (16px e 24px con `!important`) — unificare a 24px senza `!important`
+- ~~`.mod-btn` è definito **due volte** con valori inconsistenti~~ — **risolto in Fase 1** (unificato a 24px senza `!important`)
+- ~~Sezione TOUCH-FRIENDLY: 6 selettori globali con `!important` senza `.large-targets`~~ — **risolto in Fase 1** (spostati dentro `.large-targets`)
+- ~~`.tab-btn-wrapper` e `.pin-pip` definiti più volte~~ — **risolto in Fase 1** (unificati a 1 definizione ciascuno)
+- ~~`--font-mono` non definita in `:root`~~ — **risolto in Fase 1** (aggiunta a `:root`)
 - `--c-text` e `--c-warn` non sono definite nel `:root` — aggiungere
 - Vari bottoni hanno altezze implicite diverse — standardizzare con `min-height`
-- Alcune classi sono definite in più punti del file CSS — consolidare
+
+---
+
+## Changelog
+
+### 2026-06-22 — Refactor Fase 1
+- Rimossi 9 alias zombie `SRD_*` da 7 file dati
+- Rimosso `CLASSES` ridondante da `mechanics.js`
+- Eliminato `BonusTextarea.jsx` (shim non usato)
+- Fix CSS TOUCH-FRIENDLY: 6 selettori spostati dentro `.large-targets`
+- Unificati `.tab-btn-wrapper` (3→1) e `.pin-pip` (2→1)
+- Aggiunti `--font-mono` e `--c-success` al `:root`
+
+### 2026-06-22 — Refactor Fase 2
+- Esposti dati statici D&D via `dnd5eAdapter` (16 getter)
+- `dhAdapter` collegato a `dataManager`
+- `SPELL_CLASSES` derivato da `Object.keys(SPELLCASTING_CLASS)`
+- Fix `no-unused-vars` e BOM UTF-8 su 11 file
+- Placeholder hardcodati sostituiti con `t('placeholders.*')`
+
+### 2026-06-22 — Refactor Fase 3b
+- 7 componenti aggiornati per usare `adapter` invece di import diretti: `WeaponManager`, `SpellManager`, `ArmorManager`, `ConditionTracker`, `AlignmentPicker`, `DHWeaponManager`, `DHArmorManager`
+- Aggiunto `getWeaponPropertyDescs()` a `dnd5eAdapter`
 
 ---
 

@@ -60,6 +60,10 @@ const strPenaltyText = `${toDisplaySpeed(10)} ${speedUnit === 'sq' ? '□' : spe
 `localStorage` keys: `characterforge_chars_index`, `characterforge_char_${id}`, `characterforge_active`.  
 `saveCharState(id, state)` auto-aggiorna l'indice. `migrateLegacy()` converte il vecchio formato single-char al primo avvio.
 
+### File immutabili — NON modificare
+
+**`src/hooks/useCharacter.js`** e **`src/chars.js`** non vanno mai modificati. Gestiscono persistenza e stato del personaggio — qualsiasi modifica rischia di corrompere i dati salvati in localStorage.
+
 ### State management — `src/hooks/useCharacter.js`
 
 `useCharacter(charId)` è l'unica fonte di verità per il personaggio. Esporta:
@@ -81,20 +85,35 @@ Ogni sistema ha la propria cartella dati, layout widget e creatore personaggio.
 ### Data layer — `src/data/`
 
 **`src/data/dataManager.js`** — punto di accesso unificato SRD + homebrew:
-- `getSpells()`, `getWeapons()`, `getConditions()`, `getClasses()`, `getSpecies()`, `getBackgrounds()`
+- `getSpells()`, `getWeapons()`, `getConditions()`, `getClasses()`, `getSpecies()`, `getBackgrounds()` — accettano `systemId` opzionale (default `'dnd5e2024'`)
+- `getAdapter(systemId)` — restituisce l'adapter per il sistema; usato dai componenti per accedere a dati statici
 - `addSource(json)`, `removeSource(id)` — gestione sorgenti homebrew
 - Homebrew salvato in `localStorage` (`characterforge_homebrew`)
 
-**`src/data/systems/dnd5e/`**:
+**`src/data/systems/dnd5e2024/`**:
 - `mechanics.js` — `ABILITIES`, `SKILLS`, `ALIGNMENTS`, `SLOT_TABLE`, `SPELLCASTING_CLASS`, `createDefaultState()`
 - `classes.js` — `DND_CLASSES` con `levelData` (20 livelli × classe, SRD 5.2.1); `CLASS_FEATURES`, `CLASS_LEVEL_DATA`
 - `species.js`, `backgrounds.js`, `armors.js`, `weapons.js`, `spells.js`, `conditions.js`
+- `adapter.js` — espone tutti i dati statici via metodi (`getAbilities()`, `getSkills()`, `getWeaponProperties()`, `getSchools()`, ecc.)
 
 **`src/data/systems/daggerheart/`**:
 - `mechanics.js` — `createDHDefaultState()`, `DH_TRAITS`, `rollDualityDice()`, `getDHTier()`
 - `classes.js`, `weapons.js`, `armor.js`, `conditions.js`, `getters.js`
+- `adapter.js` — espone dati Daggerheart via metodi (`getWeapons()`, `getArmors()`, `getTraits()`, ecc.)
 
 **`src/data/bonuses.js`** — `BONUS_STAT_OPTIONS`: CA, INI, VEL, HP, FOR–CAR, TS-FOR–TS-CAR.
+
+### Pattern architetturale — accesso ai dati
+
+I componenti **non importano mai direttamente** da `src/data/systems/*/`. Usano sempre `dataManager.getAdapter(systemId)` per accedere ai dati di sistema:
+
+```js
+const { systemId } = useCharContext();
+const adapter = dataManager.getAdapter(systemId);
+const WEAPON_PROPERTIES = adapter.getWeaponProperties();
+```
+
+Per i componenti DH-specifici il `systemId` è hardcoded `'daggerheart'`. Le eccezioni attuali (App.jsx, LevelUpModal, DNDCharacterCreator) sono candidate per una fase di refactor futura.
 
 ### Widget system — `src/layout.js`
 
@@ -115,7 +134,7 @@ Componenti locali (definiti nel file prima di `CharacterApp`):
 - `DHPipRow`, `DHDomainCardForm` — UI specifica Daggerheart
 
 Struttura `CharacterApp`:
-- `CharContext` (React Context) — fornisce `{abilities, charLevel}` a componenti profondi
+- `CharContext` (React Context) — fornisce `{abilities, traitValues, charLevel, profBonus, systemId}` a componenti profondi
 - `renderWidget(id)` — switch su tutti i widget ID; accede a `layout` per variazioni responsive (es. traits 2×2 / 1×4)
 - `showLevelUp` / `showLevelDown` — state per i modal level up/down (solo `activeSystem === 'dnd5e'`)
 
@@ -169,7 +188,7 @@ Variabili in `:root` (`src/App.css`):
 - `--c-success`, `--c-warn`, `--c-warn-text`
 - `--r` (border-radius base: 9px), `--rl` (large: 14px)
 - `--shadow-card` (elevazione card)
-- `--font-display` (Cinzel), `--font-body` (Crimson Pro)
+- `--font-display` (Cinzel), `--font-body` (Crimson Pro), `--font-mono` (Consolas/monospace — codice, notazioni)
 
 Nuove variabili sempre in `:root`. Nessun file CSS aggiuntivo oltre `src/App.css`.
 
