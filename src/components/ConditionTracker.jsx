@@ -12,6 +12,9 @@ const CUSTOM_CONDITION_ICONS = [
   '👁️', '🌑', '💫', '🤕', '🧊', '☁️', '🌿', '⚔️',
 ];
 
+const MAX_PILLS = 3;
+const LS_KEY = 'characterforge_conditions_open';
+
 function ConditionIcon({ icon, size = 14 }) {
   const { iconMode } = useIconMode();
   if (iconMode === 'none') return null;
@@ -22,11 +25,24 @@ function ConditionIcon({ icon, size = 14 }) {
   return <span style={{ fontSize: size }}>{icon}</span>;
 }
 
-export default function ConditionTracker({ active = [], onChange, exhaustionLevel = 0, onExhaustionChange, conditions: conditionList, onAddCustom, onRemoveCustom }) {
+export default function ConditionTracker({
+  active = [],
+  onChange,
+  exhaustionLevel = 0,
+  onExhaustionChange,
+  customConditions,
+  onAddCustom,
+  onRemoveCustom,
+  collapsible = true,
+}) {
   const { t } = useTranslation();
   const { systemId } = useCharContext();
   const { iconMode } = useIconMode();
   const { toDisplaySpeed, speedUnit } = useUnits();
+
+  const [open, setOpen] = useState(
+    () => localStorage.getItem(LS_KEY) !== 'false'
+  );
   const [tooltip, setTooltip] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [formName, setFormName] = useState('');
@@ -35,8 +51,10 @@ export default function ConditionTracker({ active = [], onChange, exhaustionLeve
   const [nameError, setNameError] = useState(false);
 
   const adapter = dataManager.getAdapter(systemId);
-  const defaultConditions = adapter.getConditions?.() || [];
-  const conditions = conditionList || defaultConditions;
+  const baseConditions = adapter.getConditions?.() || [];
+  const conditions = customConditions
+    ? [...baseConditions, ...customConditions]
+    : baseConditions;
 
   function toggle(id) {
     if (active.includes(id)) onChange(active.filter(c => c !== id));
@@ -51,6 +69,22 @@ export default function ConditionTracker({ active = [], onChange, exhaustionLeve
   }
   function condDesc(c) {
     return c.desc || t(`data.conditions.${c.id}.desc`, '');
+  }
+
+  const allActive = [
+    ...active.map(cid => {
+      const c = conditions.find(cc => cc.id === cid);
+      return c ? condName(c) : cid;
+    }),
+    ...(exhaustionLevel > 0 ? [`${t('pinned.exhaustionShort')} ${exhaustionLevel}`] : []),
+  ];
+  const visiblePills = allActive.slice(0, MAX_PILLS);
+  const extraCount = allActive.length - MAX_PILLS;
+
+  function handleToggleOpen() {
+    const next = !open;
+    setOpen(next);
+    localStorage.setItem(LS_KEY, String(next));
   }
 
   function handleAddCustom() {
@@ -80,14 +114,15 @@ export default function ConditionTracker({ active = [], onChange, exhaustionLeve
     setNameError(false);
   }
 
-  return (
+  const body = (
     <div>
       <div className="condition-grid">
         {[...normalConditions].sort((a, b) => condName(a).localeCompare(condName(b))).map(c => {
           const isActive = active.includes(c.id);
           const isCustom = c.id.startsWith('custom_');
           return (
-            <div key={c.id}
+            <div
+              key={c.id}
               className={`condition-chip ${isActive ? 'active' : ''}`}
               onClick={() => toggle(c.id)}
               onMouseEnter={() => setTooltip(c)}
@@ -119,16 +154,24 @@ export default function ConditionTracker({ active = [], onChange, exhaustionLeve
             onMouseEnter={() => setTooltip(exhaustionDef)}
             onMouseLeave={() => setTooltip(null)}
           >
-            {iconMode !== 'none' && <span className="condition-icon"><Icon id={exhaustionDef.icon} size={14} fallback={exhaustionDef.icon} /></span>}
+            {iconMode !== 'none' && (
+              <span className="condition-icon">
+                <Icon id={exhaustionDef.icon} size={14} fallback={exhaustionDef.icon} />
+              </span>
+            )}
             <span className="condition-name">{condName(exhaustionDef)}</span>
             <div className="exhaustion-controls" onClick={e => e.stopPropagation()}>
-              <button className="exhaustion-btn"
+              <button
+                className="exhaustion-btn"
                 onClick={() => onExhaustionChange && onExhaustionChange(Math.max(0, exhaustionLevel - 1))}
-                disabled={exhaustionLevel <= 0}>−</button>
+                disabled={exhaustionLevel <= 0}
+              >−</button>
               <span className="exhaustion-level-val">{exhaustionLevel}</span>
-              <button className="exhaustion-btn"
+              <button
+                className="exhaustion-btn"
                 onClick={() => onExhaustionChange && onExhaustionChange(Math.min(6, exhaustionLevel + 1))}
-                disabled={exhaustionLevel >= 6}>+</button>
+                disabled={exhaustionLevel >= 6}
+              >+</button>
             </div>
           </div>
         )}
@@ -136,7 +179,10 @@ export default function ConditionTracker({ active = [], onChange, exhaustionLeve
 
       {tooltip && (
         <div className="condition-tooltip">
-          <strong>{iconMode !== 'none' && <Icon id={tooltip.icon} size={13} fallback={tooltip.icon} />} {condName(tooltip)}</strong>
+          <strong>
+            {iconMode !== 'none' && <Icon id={tooltip.icon} size={13} fallback={tooltip.icon} />}
+            {' '}{condName(tooltip)}
+          </strong>
           {tooltip.type === 'counter' && exhaustionLevel > 0 ? (
             <div style={{ marginTop: 4 }}>
               {exhaustionLevel >= 6
@@ -215,6 +261,39 @@ export default function ConditionTracker({ active = [], onChange, exhaustionLeve
           </div>
         </div>
       )}
+    </div>
+  );
+
+  return (
+    <div className="card">
+      {collapsible ? (
+        <button
+          className="card-title cond-collapse-header"
+          onClick={handleToggleOpen}
+          aria-expanded={open}
+        >
+          <Icon id="widget.conditions" /> {t('widgets.conditions')}
+          {!open && allActive.length > 0 && (
+            <span className="cond-pills-inline">
+              {visiblePills.map((name, i) => (
+                <span key={i} className="cond-pill-inline">{name}</span>
+              ))}
+              {extraCount > 0 && (
+                <span className="cond-pill-inline cond-pill-more">+{extraCount}</span>
+              )}
+            </span>
+          )}
+          <span className="cond-chevron">{open ? '▲' : '▾'}</span>
+        </button>
+      ) : (
+        <div className="card-title">
+          <Icon id="widget.conditions" /> {t('widgets.conditions')}
+        </div>
+      )}
+      {collapsible
+        ? <div className={`cond-collapsible${open ? ' open' : ''}`}>{body}</div>
+        : body
+      }
     </div>
   );
 }

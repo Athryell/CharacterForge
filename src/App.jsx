@@ -10,7 +10,6 @@ import {
   SPELLCASTING_CLASS, getMod, fmtMod, HIT_DICE,
   resolveResourceFormula, getProfBonus,
 } from './data/systems/dnd5e2024/mechanics';
-import { DND_CONDITIONS } from './data/systems/dnd5e2024/conditions';
 import dataManager from './data/dataManager';
 import SourceManager from './components/SourceManager';
 import HomebrewEditor from './components/HomebrewEditor';
@@ -38,7 +37,7 @@ import { SPECIES_FEATURES, getAutoFeatures } from './data/systems/dnd5e2024/spec
 import { BACKGROUND_FEATURES } from './data/systems/dnd5e2024/backgrounds';
 import { getDefaultLayoutForSystem, getWidgetsForTab, loadLayoutForSystem, saveLayoutForSystem, loadTabsForSystem, saveTabsForSystem, getDefaultTabsForSystem, getWidgetLabel } from './layout';
 import { DH_TRAITS, DH_TRAIT_NAMES, rollDualityDice, getDHTier, getDHProficiency } from './data/systems/daggerheart/mechanics';
-import { getDHClasses, getDHDomains, getDHAncestries, getDHCommunities, getDHConditions, getDHTraitUses } from './data/systems/daggerheart/getters';
+import { getDHClasses, getDHDomains, getDHAncestries, getDHCommunities, getDHTraitUses } from './data/systems/daggerheart/getters';
 import { SYSTEMS, DEFAULT_SYSTEM, getSystem } from './data/systems';
 import { useTheme, ACCENT_PRESETS } from './hooks/useTheme';
 import { useUnits, parseSpeedFt } from './hooks/useUnits';
@@ -310,7 +309,6 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
   const dhDomains    = useMemo(() => getDHDomains(i18n.language),    [i18n.language]);
   const dhAncestries = useMemo(() => getDHAncestries(i18n.language), [i18n.language]);
   const dhCommunities= useMemo(() => getDHCommunities(i18n.language),[i18n.language]);
-  const dhConditions = useMemo(() => getDHConditions(i18n.language), [i18n.language]);
   const dhTraitUses  = useMemo(() => getDHTraitUses(i18n.language),  [i18n.language]);
 
   // Layout state
@@ -384,7 +382,6 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
   const [concentrationCheck, setConcentrationCheck] = useState(null);
   const [editingCombat, setEditingCombat] = useState(false);
   const [editingResources, setEditingResources] = useState(false);
-  const [condOpen, setCondOpen] = useState(() => localStorage.getItem('characterforge_conditions_open') !== 'false');
   const [addingResource, setAddingResource] = useState(false);
   const [newResource, setNewResource] = useState({ name:'', icon:'d6', formula:'fixed:1', resetOn:'long', pinned:false });
   const { mode: themeMode, accentId, setThemeMode, setAccent } = useTheme();
@@ -1384,52 +1381,20 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
         const activeConds = state.conditions || [];
         const exhLvl = state.exhaustionLevel || 0;
         const customConds = state.customConditions || [];
-        const allActive = [
-          ...activeConds.map(cid => cid.startsWith('custom_')
-            ? (customConds.find(c => c.id === cid)?.name ?? cid)
-            : t(`data.conditions.${cid}.name`, cid)
-          ),
-          ...(exhLvl > 0 ? [`${t('pinned.exhaustionShort', 'Exh.')}${exhLvl}`] : []),
-        ];
-        const MAX_PILLS = 3;
-        const visiblePills = allActive.slice(0, MAX_PILLS);
-        const extraCount = allActive.length - MAX_PILLS;
         return (
-          <div className="card">
-            <button
-              className="card-title cond-collapse-header"
-              onClick={() => {
-                const next = !condOpen;
-                setCondOpen(next);
-                localStorage.setItem('characterforge_conditions_open', String(next));
-              }}
-              aria-expanded={condOpen}
-            >
-              <Icon id="widget.conditions" /> {t('widgets.conditions')}
-              {!condOpen && allActive.length > 0 && (
-                <span className="cond-pills-inline">
-                  {visiblePills.map((name, i) => <span key={i} className="cond-pill-inline">{name}</span>)}
-                  {extraCount > 0 && <span className="cond-pill-inline cond-pill-more">+{extraCount}</span>}
-                </span>
-              )}
-              <span className="cond-chevron">{condOpen ? '▲' : '▾'}</span>
-            </button>
-            <div className={`cond-collapsible${condOpen ? ' open' : ''}`}>
-              <ConditionTracker
-                active={activeConds}
-                onChange={conditions => update({ conditions })}
-                exhaustionLevel={exhLvl}
-                onExhaustionChange={level => update({ exhaustionLevel: level })}
-                conditions={[...DND_CONDITIONS, ...customConds]}
-                onAddCustom={cond => update({ customConditions: [...customConds, cond] })}
-                onRemoveCustom={id => update(prev => ({
-                  ...prev,
-                  customConditions: (prev.customConditions || []).filter(c => c.id !== id),
-                  conditions: (prev.conditions || []).filter(c => c !== id),
-                }))}
-              />
-            </div>
-          </div>
+          <ConditionTracker
+            active={activeConds}
+            onChange={conditions => update({ conditions })}
+            exhaustionLevel={exhLvl}
+            onExhaustionChange={level => update({ exhaustionLevel: level })}
+            customConditions={customConds}
+            onAddCustom={cond => update({ customConditions: [...customConds, cond] })}
+            onRemoveCustom={id => update(prev => ({
+              ...prev,
+              customConditions: (prev.customConditions || []).filter(c => c.id !== id),
+              conditions: (prev.conditions || []).filter(c => c !== id),
+            }))}
+          />
         );
       }
 
@@ -2054,14 +2019,10 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
       case 'dh-actions': return renderWidget('actions');
 
       case 'dh-conditions': return (
-        <div className="card">
-          <div className="card-title"><Icon id="widget.conditions" /> {t('dh.widgets.conditions','Conditions')}</div>
-          <ConditionTracker
-            active={state.conditions||[]}
-            onChange={conditions => update({ conditions })}
-            conditions={dhConditions}
-          />
-        </div>
+        <ConditionTracker
+          active={state.conditions || []}
+          onChange={conditions => update({ conditions })}
+        />
       );
 
       case 'dh-weapons': return (
