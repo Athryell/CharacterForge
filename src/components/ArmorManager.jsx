@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Icon } from '../config/icons';
 import dataManager from '../data/dataManager';
+import PresetBrowser from './PresetBrowser';
 import { TagPill, TagSelector } from './Tags';
 import { KeywordText } from './Tooltip';
 import NotationTextarea from './NotationTextarea';
@@ -178,13 +179,7 @@ export default function ArmorManager({ armors = [], desMod = 0, onUpdate, profic
   }
 
   const armorPresets = dataManager.getArmors().map(p => ({ ...p, type: 'armor', armorType: p.armorType || p.type }));
-  const allPresets = [...armorPresets, { ...SHIELD_PRESET }];
-  const grouped = {
-    light: allPresets.filter(p => p.type === 'armor' && p.armorType === 'light'),
-    medium: allPresets.filter(p => p.type === 'armor' && p.armorType === 'medium'),
-    heavy: allPresets.filter(p => p.type === 'armor' && p.armorType === 'heavy'),
-    shield: allPresets.filter(p => p.type === 'shield'),
-  };
+  const allPresets = [...armorPresets, { ...SHIELD_PRESET, armorType: 'shield' }];
 
   return (
     <div>
@@ -202,58 +197,47 @@ export default function ArmorManager({ armors = [], desMod = 0, onUpdate, profic
             <button className={`filter-chip ${addMode === 'custom' ? 'active' : ''}`} onClick={() => setAddMode('custom')}><Icon id="action.custom" size={12} /> {t('weapons.custom', 'Personalizzata')}</button>
           </div>
           {addMode === 'preset' ? (
-            <>
-              <input
-                className="spell-search"
-                placeholder={t('spells.searchPlaceholder', '🔍 Search by name...')}
-                value={presetSearch}
-                onChange={e => setPresetSearch(e.target.value)}
-                style={{ marginBottom: 8 }}
-              />
-              <div className="weapon-preset-list">
-                {Object.entries(grouped).map(([grp, items]) => {
-                  const filtered = presetSearch
-                    ? items.filter(p => p.name.toLowerCase().includes(presetSearch.toLowerCase()))
-                    : items;
-                  return filtered.length === 0 ? null : (
-                    <div key={grp}>
-                      <div style={{ fontSize: '0.667rem', color: 'var(--c-muted)', fontWeight: 600, marginBottom: 3, marginTop: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                        {grp === 'shield' ? t('armor.typeShield', 'Scudo') : t('data.armorTypes.' + grp, TYPE_LABEL[grp] || grp)}
-                      </div>
-                      {filtered.map(p => {
-                        const displayAC = p.type === 'shield' ? `+${p.acValue}` : calcArmorAC(p, desMod);
-                        const strNotMet = p.strReq > 0 && strScore < p.strReq;
-                        return (
-                          <div key={p.id} className="weapon-preset-item" onClick={() => addPreset(p)}>
-                            <div className="weapon-name">{p.name}</div>
-                            <div className="weapon-meta">
-                              <span className="weapon-prop">AC {displayAC}</span>
-                              {p.strReq > 0 && (
-                                <span
-                                  className={`armor-req-badge str-req${strNotMet ? ' unmet' : ''}`}
-                                  title={strNotMet ? t('armor.strReqNotMet', { penalty: strPenaltyText }) : undefined}>
-                                  {t('armor.strReq', { val: p.strReq })}
-                                </span>
-                              )}
-                              {p.maxDex === 0 && (
-                                <span className="armor-req-badge dex-limit">{t('armor.noDex')}</span>
-                              )}
-                              {p.maxDex === 2 && (
-                                <span className="armor-req-badge dex-limit">{t('armor.maxDex', { val: 2 })}</span>
-                              )}
-                              {p.weightKg != null && (
-                                <span className="weapon-prop" style={{ fontSize: '0.667rem' }}>{toWeightInUnit(p.weightKg, weightUnit)} {weightUnit}</span>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
+            <PresetBrowser
+              items={allPresets}
+              searchValue={presetSearch}
+              onSearchChange={setPresetSearch}
+              onSelect={addPreset}
+              onCancel={onAddClose}
+              groupBy="armorType"
+              groupLabel={key =>
+                key === 'shield'
+                  ? t('armor.typeShield', 'Scudo')
+                  : t('data.armorTypes.' + key, TYPE_LABEL[key] || key)
+              }
+              renderItem={p => {
+                const displayAC = p.type === 'shield' ? `+${p.acValue}` : calcArmorAC(p, desMod);
+                const strNotMet = p.strReq > 0 && strScore < p.strReq;
+                return (
+                  <>
+                    <div className="weapon-name">{p.name}</div>
+                    <div className="weapon-meta">
+                      <span className="weapon-prop">AC {displayAC}</span>
+                      {p.strReq > 0 && (
+                        <span
+                          className={`armor-req-badge str-req${strNotMet ? ' unmet' : ''}`}
+                          title={strNotMet ? t('armor.strReqNotMet', { penalty: strPenaltyText }) : undefined}>
+                          {t('armor.strReq', { val: p.strReq })}
+                        </span>
+                      )}
+                      {p.maxDex === 0 && (
+                        <span className="armor-req-badge dex-limit">{t('armor.noDex')}</span>
+                      )}
+                      {p.maxDex === 2 && (
+                        <span className="armor-req-badge dex-limit">{t('armor.maxDex', { val: 2 })}</span>
+                      )}
+                      {p.weightKg != null && (
+                        <span className="weapon-prop" style={{ fontSize: '0.667rem' }}>{toWeightInUnit(p.weightKg, weightUnit)} {weightUnit}</span>
+                      )}
                     </div>
-                  );
-                })}
-              </div>
-              <button className="io-btn" style={{ marginTop: 8 }} onClick={onAddClose}>{t('common.cancel', 'Annulla')}</button>
-            </>
+                  </>
+                );
+              }}
+            />
           ) : (
             <ArmorEditForm form={addForm} onChange={setAddForm} onSave={addCustom} onCancel={onAddClose} />
           )}

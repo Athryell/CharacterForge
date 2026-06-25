@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import dataManager from '../data/dataManager';
+import PresetBrowser from './PresetBrowser';
 import { TagPill, TagSelector } from './Tags';
 import { KeywordText } from './Tooltip';
 import NotationTextarea from './NotationTextarea';
@@ -302,59 +303,52 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
             <button className={`filter-chip ${addMode === 'custom' ? 'active' : ''}`} onClick={() => setAddMode('custom')}><Icon id="action.custom" size={12} /> {t('weapons.custom')}</button>
           </div>
           {addMode === 'preset' ? (
-            selectedPreset ? (
-              <div className="weapon-preset-confirm">
-                <div className="weapon-preset-confirm-name">{selectedPreset.name}</div>
-                <label className="weapon-preset-confirm-row">
-                  <input type="checkbox" checked={pendingProf} onChange={e => setPendingProf(e.target.checked)} />
-                  {t('weapons.confirmProficient')}
-                </label>
-                {selectedPreset.mastery && selectedPreset.mastery !== 'none' && (
+            <PresetBrowser
+              items={[...dataManager.getWeapons()].sort((a, b) => a.name.localeCompare(b.name))}
+              searchValue={presetSearch}
+              onSearchChange={setPresetSearch}
+              selectedItem={selectedPreset}
+              onSelect={selectPreset}
+              onAdd={addPreset}
+              onCancel={onAddClose}
+              addLabel={t('weapons.addBtn')}
+              renderItem={p => (
+                <>
+                  <div className="weapon-name">{p.name}</div>
+                  <div className="weapon-meta">
+                    {(p.properties || []).map(prop => (
+                      <span key={prop} className="weapon-prop">{t('data.weaponProps.' + prop, WEAPON_PROPERTIES[prop] || prop)}</span>
+                    ))}
+                    {p.mastery && p.mastery !== 'none' && (
+                      <span className="weapon-prop">{t('data.masteries.' + p.mastery, WEAPON_MASTERIES[p.mastery]?.label || p.mastery)}</span>
+                    )}
+                    {p.weightKg != null && (
+                      <span className="weapon-prop" style={{ fontSize: '0.667rem' }}>{toWeightInUnit(p.weightKg, weightUnit)} {weightUnit}</span>
+                    )}
+                    {p.throwable && (
+                      <span className="weapon-prop" style={{ fontSize: '0.667rem' }}>🏹 {formatPresetThrowable(p.throwable, toDisplaySpeed, speedUnit)}</span>
+                    )}
+                  </div>
+                </>
+              )}
+              renderDetail={p => (
+                <>
                   <label className="weapon-preset-confirm-row">
-                    <input type="checkbox" checked={pendingMastery} onChange={e => setPendingMastery(e.target.checked)} />
-                    {t('weapons.confirmMastery')} <em style={{ color: 'var(--c-muted)', marginLeft: 4 }}>— {t('data.masteries.' + selectedPreset.mastery, WEAPON_MASTERIES[selectedPreset.mastery]?.label || selectedPreset.mastery)}</em>
+                    <input type="checkbox" checked={pendingProf} onChange={e => setPendingProf(e.target.checked)} />
+                    {t('weapons.confirmProficient')}
                   </label>
-                )}
-                <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-                  <button className="io-btn" onClick={() => setSelectedPreset(null)}>{t('common.back')}</button>
-                  <button className="io-btn primary" onClick={addPreset}>{t('weapons.addBtn')}</button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <input
-                  className="spell-search"
-                  placeholder={t('spells.searchPlaceholder', '🔍 Search by name...')}
-                  value={presetSearch}
-                  onChange={e => setPresetSearch(e.target.value)}
-                  style={{ marginBottom: 8 }}
-                />
-                <div className="weapon-preset-list">
-                  {[...dataManager.getWeapons()]
-                    .filter(p => !presetSearch || p.name.toLowerCase().includes(presetSearch.toLowerCase()))
-                    .sort((a, b) => a.name.localeCompare(b.name)).map(p => (
-                    <div key={p.name} className="weapon-preset-item" onClick={() => selectPreset(p)}>
-                      <div className="weapon-name">{p.name}</div>
-                      <div className="weapon-meta">
-                        {(p.properties || []).map(prop => (
-                          <span key={prop} className="weapon-prop">{t("data.weaponProps." + prop, WEAPON_PROPERTIES[prop] || prop)}</span>
-                        ))}
-                        {p.mastery && p.mastery !== 'none' && (
-                          <span className="weapon-prop">{t("data.masteries." + p.mastery, WEAPON_MASTERIES[p.mastery]?.label || p.mastery)}</span>
-                        )}
-                        {p.weightKg != null && (
-                          <span className="weapon-prop" style={{ fontSize: '0.667rem' }}>{toWeightInUnit(p.weightKg, weightUnit)} {weightUnit}</span>
-                        )}
-                        {p.throwable && (
-                          <span className="weapon-prop" style={{ fontSize: '0.667rem' }}>🏹 {formatPresetThrowable(p.throwable, toDisplaySpeed, speedUnit)}</span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <button className="io-btn" style={{ marginTop: 8 }} onClick={onAddClose}>{t('common.cancel')}</button>
-              </>
-            )
+                  {p.mastery && p.mastery !== 'none' && (
+                    <label className="weapon-preset-confirm-row">
+                      <input type="checkbox" checked={pendingMastery} onChange={e => setPendingMastery(e.target.checked)} />
+                      {t('weapons.confirmMastery')}{' '}
+                      <em style={{ color: 'var(--c-muted)', marginLeft: 4 }}>
+                        — {t('data.masteries.' + p.mastery, WEAPON_MASTERIES[p.mastery]?.label || p.mastery)}
+                      </em>
+                    </label>
+                  )}
+                </>
+              )}
+            />
           ) : (
             <WeaponEditForm form={addForm} onChange={setAddForm} onSave={addCustom}
               onCancel={onAddClose} speedUnit={speedUnit} />
