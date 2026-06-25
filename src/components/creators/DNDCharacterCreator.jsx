@@ -1042,10 +1042,10 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
         </div>
 
         <div className="creator-footer">
-          <button className="io-btn" onClick={step === 0 ? onCancel : () => setStep(s => s - 1)}>
-            {step === 0 ? t('creator.cancel') : t('creator.back')}
-          </button>
-          <div style={{ flex:1 }} />
+          {step > 0
+            ? <button className="io-btn" onClick={() => setStep(s => s - 1)}>{t('creator.back')}</button>
+            : <div />
+          }
           {step < STEPS.length - 1 ? (
             <button className="io-btn primary"
               onClick={() => {
