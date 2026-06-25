@@ -20,12 +20,15 @@ function checkDraftHasContent() {
 function countLabel(counts) {
   const parts = [];
   if (counts.classes)     parts.push(`${counts.classes} classi`);
+  if (counts.subclasses)  parts.push(`${counts.subclasses} sottoclassi`);
   if (counts.species)     parts.push(`${counts.species} specie`);
   if (counts.backgrounds) parts.push(`${counts.backgrounds} background`);
   if (counts.spells)      parts.push(`${counts.spells} incantesimi`);
   if (counts.weapons)     parts.push(`${counts.weapons} armi`);
+  if (counts.armors)      parts.push(`${counts.armors} armature`);
   if (counts.items)       parts.push(`${counts.items} oggetti`);
   if (counts.conditions)  parts.push(`${counts.conditions} condizioni`);
+  if (counts.feats)       parts.push(`${counts.feats} talenti`);
   return parts.join(', ') || 'nessuna entità';
 }
 
@@ -215,12 +218,15 @@ export default function SourceManager({ onHomebrewChange }) {
           <div className="source-confirm-counts">
             {countLabel({
               classes:     (pending.classes     || []).length,
+              subclasses:  (pending.subclasses  || []).length,
               species:     (pending.species     || []).length,
               backgrounds: (pending.backgrounds || []).length,
               spells:      (pending.spells      || []).length,
               weapons:     (pending.weapons     || []).length,
+              armors:      (pending.armors      || []).length,
               items:       (pending.items       || []).length,
               conditions:  (pending.conditions  || []).length,
+              feats:       (pending.feats       || []).length,
             })}
           </div>
           <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>

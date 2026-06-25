@@ -160,6 +160,7 @@ export default function LevelUpModal({ currentLevel, charClass, charState, onCom
       desc: f.desc,
       source: f._subclass ? subclassName : charClass,
       sourceType: f._subclass ? 'subclass' : 'class',
+      isNew: true,
     }));
 
     choiceFeatures.forEach(f => {
@@ -173,6 +174,7 @@ export default function LevelUpModal({ currentLevel, charClass, charState, onCom
             desc: f.desc,
             source: charClass,
             sourceType: 'class',
+            isNew: true,
           });
         });
       } else {
@@ -184,6 +186,7 @@ export default function LevelUpModal({ currentLevel, charClass, charState, onCom
             desc: f.desc,
             source: charClass,
             sourceType: 'class',
+            isNew: true,
           });
         }
       }

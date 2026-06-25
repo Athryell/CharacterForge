@@ -13,6 +13,7 @@ import {
 import { DND_CONDITIONS } from './data/systems/dnd5e2024/conditions';
 import dataManager from './data/dataManager';
 import SourceManager from './components/SourceManager';
+import HomebrewEditor from './components/HomebrewEditor';
 import CharacterCreator from './components/CharacterCreator';
 import LevelUpModal from './components/LevelUpModal';
 import LevelDownModal from './components/LevelDownModal';
@@ -229,90 +230,30 @@ function DHPipRow({ current, max, pipClass, onToggle }) {
   );
 }
 
-function SubclassFeaturesEditor({ features, currentLevel, onChange }) {
-  const { t } = useTranslation();
-  function add() {
-    onChange([...(features || []), { id: `scf_${Date.now()}`, level: Math.min(20, currentLevel + 1), name: '', desc: '' }]);
-  }
-  function remove(id) { onChange((features || []).filter(f => f.id !== id)); }
-  function patch(id, obj) { onChange((features || []).map(f => f.id === id ? { ...f, ...obj } : f)); }
-  const sorted = [...(features || [])].sort((a, b) => a.level - b.level);
-  return (
-    <div>
-      {sorted.map(f => (
-        <div key={f.id} style={{ display: 'flex', gap: 6, marginBottom: 8, alignItems: 'flex-start' }}>
-          <div className="field" style={{ flex: '0 0 58px' }}>
-            <label>Lv.</label>
-            <input type="number" min="1" max="20" value={f.level}
-              onChange={e => patch(f.id, { level: Math.max(1, Math.min(20, parseInt(e.target.value) || 1)) })}
-              style={{ width: 50 }} />
-          </div>
-          <div className="field" style={{ flex: 1 }}>
-            <input value={f.name} placeholder={t('identity.subclassFeatureName')}
-              onChange={e => patch(f.id, { name: e.target.value })} />
-            <textarea value={f.desc} placeholder={t('identity.subclassFeatureDesc')}
-              onChange={e => patch(f.id, { desc: e.target.value })}
-              className="notes-area" style={{ minHeight: 44 }} />
-          </div>
-          <button onClick={() => remove(f.id)} className="mod-btn"
-            style={{ marginTop: 20, color: 'var(--c-warn)', fontSize: '1.067rem', lineHeight: 1 }}>×</button>
-        </div>
-      ))}
-      <button className="io-btn" style={{ fontSize: '0.8rem', marginTop: 2 }} onClick={add}>
-        <Icon id="action.add" size={12} /> {t('identity.addSubclassFeature')}
-      </button>
-    </div>
-  );
-}
-
-function SubclassSection({ state, update, t }) {
-  const knownSubs = getSubclassesForClass(
-    !state.charClass || state.charClass === '__custom__' ? '' : state.charClass
-  );
-  const isAlreadyCustom = Boolean(state.charSubclass) && !knownSubs.includes(state.charSubclass);
-  const [customMode, setCustomMode] = React.useState(isAlreadyCustom);
-  const isCustom = customMode || isAlreadyCustom;
-  const selectVal = isCustom ? '__custom__' : (state.charSubclass || '');
+function SubclassSection({ state, update, t, onOpenEditor }) {
+  const cls = !state.charClass || state.charClass === '__custom__' ? '' : state.charClass;
+  const knownSubs = [...getSubclassesForClass(cls), ...dataManager.getSubclasses(cls)];
+  const selectVal = knownSubs.includes(state.charSubclass) ? state.charSubclass : '';
 
   return (
-    <>
-      <Field label={t('identity.subclass')}>
-        <select
-          value={selectVal}
-          onChange={e => {
-            const sub = e.target.value;
-            if (sub === '__custom__') {
-              setCustomMode(true);
-              if (knownSubs.includes(state.charSubclass)) update({ charSubclass: '', subclassFeatures: [] });
-            } else {
-              setCustomMode(false);
-              update({ charSubclass: sub, subclassFeatures: [] });
-            }
-          }}
-          disabled={!state.charClass || state.charClass === '__custom__'}
-        >
-          <option value="">—</option>
-          {knownSubs.map(s => <option key={s} value={s}>{s}</option>)}
-          <option value="__custom__">{t('identity.subclassCustom')}</option>
-        </select>
-        {isCustom && (
-          <input style={{ marginTop: 4 }}
-            value={state.charSubclass}
-            onChange={e => update({ charSubclass: e.target.value })}
-            placeholder={t('identity.subclassCustomPlaceholder')} />
-        )}
-      </Field>
-      {isCustom && (
-        <div style={{ gridColumn: '1 / -1', marginTop: 4 }}>
-          <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--c-muted)', marginBottom: 6 }}>{t('identity.subclassFeatures')}</div>
-          <SubclassFeaturesEditor
-            features={state.subclassFeatures || []}
-            currentLevel={state.charLevel}
-            onChange={feats => update({ subclassFeatures: feats })}
-          />
-        </div>
-      )}
-    </>
+    <Field label={t('identity.subclass')}>
+      <select
+        value={selectVal}
+        onChange={e => {
+          const sub = e.target.value;
+          if (sub === '__custom__') {
+            onOpenEditor?.();
+          } else {
+            update({ charSubclass: sub, subclassFeatures: [] });
+          }
+        }}
+        disabled={!state.charClass || state.charClass === '__custom__'}
+      >
+        <option value="">—</option>
+        {knownSubs.map(s => <option key={s} value={s}>{s}</option>)}
+        <option value="__custom__">{t('identity.subclassCustom')}</option>
+      </select>
+    </Field>
   );
 }
 
@@ -435,6 +376,8 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
   const [addOpenFor, setAddOpenFor] = useState(null);
   const [homebrewVersion, setHomebrewVersion] = useState(0);
   const [showSources, setShowSources] = useState(false);
+  const [showHomebrewEditor, setShowHomebrewEditor] = useState(false);
+  const [homebrewEditorConfig, setHomebrewEditorConfig] = useState({ draft: null, section: 'info' });
   const [showNotations, setShowNotations] = useState(false);
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [showLevelDown, setShowLevelDown] = useState(false);
@@ -463,6 +406,26 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
     setToastAction(action);
     clearTimeout(toastTimer.current);
     toastTimer.current = setTimeout(() => { setToast(''); setToastAction(null); }, duration ?? (action ? 3000 : 2500));
+  }
+
+  function openHomebrewEditorFor(sectionKey) {
+    const systemNames = { dnd5e2024: 'D&D 5.5e', daggerheart: 'Daggerheart' };
+    const sourceId = `my-custom-data-${activeSystem}`;
+    const sourceName = `My Custom Data ${systemNames[activeSystem] || activeSystem}`;
+    const existing = dataManager.getSourceRaw(sourceId);
+    const draft = existing
+      ? { ...existing }
+      : {
+          id: sourceId,
+          name: sourceName,
+          system: activeSystem,
+          author: '',
+          description: '',
+          classes: [], subclasses: [], species: [], backgrounds: [],
+          spells: [], weapons: [], armors: [], items: [], conditions: [], feats: [],
+        };
+    setHomebrewEditorConfig({ draft, section: sectionKey });
+    setShowHomebrewEditor(true);
   }
 
   function handleConcentrationRoll(dc) {
@@ -832,14 +795,6 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
             )}
             {editingIdentity ? (() => {
                 const knownClasses = dataManager.getClasses();
-                const isCustomClass = !state.charClass ? false : !knownClasses.includes(state.charClass);
-                const classSelectVal = isCustomClass ? '__custom__' : (state.charClass || '');
-                const knownSpeciesIds = new Set(dataManager.getSpecies().map(r => r.id));
-                const isCustomRace = !!(state.charRace && state.charRace !== '__custom__' && !knownSpeciesIds.has(state.charRace));
-                const raceSelectVal = isCustomRace ? '__custom__' : (state.charRace || '');
-                const knownBgIds = new Set(dataManager.getBackgrounds().map(b => b.id || b.name));
-                const isCustomBg = !!(state.charBackground && state.charBackground !== '__custom__' && !knownBgIds.has(state.charBackground));
-                const bgSelectVal = isCustomBg ? '__custom__' : (state.charBackground || '');
                 return (
                   <div className="grid-2" style={{ flex:1 }}>
                     <div style={{ gridColumn: 'span 2' }}>
@@ -852,72 +807,55 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                       <input value={state.charName} onChange={e => update({ charName: e.target.value })} placeholder="Es. Aldric Voss" />
                     </Field>
                     <Field label={t('identity.class')}>
-                      <select value={classSelectVal} onChange={e => {
+                      <select value={state.charClass || ''} onChange={e => {
                         const cls = e.target.value;
                         if (cls === '__custom__') {
-                          update({ charClass: '__custom__', charClassCustom: isCustomClass ? state.charClass : '' });
+                          openHomebrewEditorFor('classes');
                         } else {
                           handleClassOrLevelChange({ charClass: cls });
                           const kept = (state.features||[]).filter(f => f.sourceType !== 'class');
-                          update({ features: [...kept, ...getAutoFeatures('class', cls, CLASS_FEATURES)] });
+                          update({ features: [...kept, ...getAutoFeatures('class', cls, CLASS_FEATURES)], charSubclass: '', subclassFeatures: [] });
                         }
                       }}>
                         <option value="">{t('identity.classPlaceholder')}</option>
                         {[...knownClasses].sort((a, b) => t(`data.classes.${a}`, a).localeCompare(t(`data.classes.${b}`, b))).map(c => <option key={c} value={c}>{t(`data.classes.${c}`, c)}</option>)}
                         <option value="__custom__">{t('identity.classCustom')}</option>
                       </select>
-                      {isCustomClass && (
-                        <input style={{ marginTop:4 }}
-                          value={state.charClass === '__custom__' ? (state.charClassCustom||'') : state.charClass}
-                          onChange={e => {
-                            if (state.charClass === '__custom__') update({ charClassCustom: e.target.value });
-                            else update({ charClass: e.target.value });
-                          }}
-                          placeholder={t('identity.classCustomPlaceholder')} />
-                      )}
                     </Field>
-                    <SubclassSection state={state} update={update} t={t} />
+                    <SubclassSection key={state.charClass} state={state} update={update} t={t} onOpenEditor={() => openHomebrewEditorFor('subclasses')} />
                     <Field label={t('identity.species')}>
-                      <select value={raceSelectVal} onChange={e => {
+                      <select value={state.charRace || ''} onChange={e => {
                         const race = e.target.value;
-                        if (race && race !== '__custom__') {
+                        if (race === '__custom__') {
+                          openHomebrewEditorFor('species');
+                        } else if (race) {
                           const kept = (state.features||[]).filter(f => f.sourceType !== 'species');
                           update({ charRace: race, features: [...kept, ...getAutoFeatures('species', race, SPECIES_FEATURES)] });
                         } else {
-                          update({ charRace: race });
+                          update({ charRace: '' });
                         }
                       }}>
                         <option value="">{t('identity.speciesPlaceholder')}</option>
                         {dataManager.getSpecies().slice().sort((a, b) => t(`data.species.${a.id}`, a.name).localeCompare(t(`data.species.${b.id}`, b.name))).map(r => <option key={r.id} value={r.id}>{t(`data.species.${r.id}`, r.name)}</option>)}
                         <option value="__custom__">{t('identity.speciesCustom')}</option>
                       </select>
-                      {(state.charRace === '__custom__' || isCustomRace) && (
-                        <input style={{ marginTop:4 }}
-                          value={isCustomRace ? state.charRace : (state.charRaceCustom||'')}
-                          onChange={e => isCustomRace ? update({ charRace: e.target.value }) : update({ charRaceCustom: e.target.value })}
-                          placeholder={t('identity.speciesCustomPlaceholder')} />
-                      )}
                     </Field>
                     <Field label={t('identity.background')}>
-                      <select value={bgSelectVal} onChange={e => {
+                      <select value={state.charBackground || ''} onChange={e => {
                         const bg = e.target.value;
-                        if (bg && bg !== '__custom__') {
+                        if (bg === '__custom__') {
+                          openHomebrewEditorFor('backgrounds');
+                        } else if (bg) {
                           const kept = (state.features||[]).filter(f => f.sourceType !== 'background');
                           update({ charBackground: bg, features: [...kept, ...getAutoFeatures('background', bg, BACKGROUND_FEATURES)] });
                         } else {
-                          update({ charBackground: bg });
+                          update({ charBackground: '' });
                         }
                       }}>
                         <option value="">{t('identity.backgroundPlaceholder')}</option>
                         {dataManager.getBackgrounds().slice().sort((a, b) => t(`data.backgrounds.${a.id || a.name}`, a.name).localeCompare(t(`data.backgrounds.${b.id || b.name}`, b.name))).map(b => <option key={b.id || b.name} value={b.id || b.name}>{t(`data.backgrounds.${b.id || b.name}`, b.name)}</option>)}
                         <option value="__custom__">{t('identity.backgroundCustom')}</option>
                       </select>
-                      {(state.charBackground === '__custom__' || isCustomBg) && (
-                        <input style={{ marginTop:4 }}
-                          value={isCustomBg ? state.charBackground : (state.charBackgroundCustom||'')}
-                          onChange={e => isCustomBg ? update({ charBackground: e.target.value }) : update({ charBackgroundCustom: e.target.value })}
-                          placeholder={t('identity.backgroundCustomPlaceholder')} />
-                      )}
                     </Field>
                     <Field label={t('identity.level')}>
                       <div className="hp-stepper" style={{ gap:4 }}>
@@ -952,8 +890,8 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                   ...(state.charSubclass ? [[t('identity.subclass'), state.charSubclass]] : []),
                   [t('identity.level'), state.charLevel],
                   [t('identity.profBonus'), `+${char.profBonus}`],
-                  [t('identity.species'), state.charRace === '__custom__' ? (state.charRaceCustom||'—') : (state.charRace ? t(`data.species.${state.charRace}`, state.charRace) : '—')],
-                  [t('identity.background'), state.charBackground === '__custom__' ? (state.charBackgroundCustom||'—') : (state.charBackground ? t(`data.backgrounds.${state.charBackground}`, state.charBackground) : '—')],
+                  [t('identity.species'), state.charRace ? t(`data.species.${state.charRace}`, state.charRace) : '—'],
+                  [t('identity.background'), state.charBackground ? t(`data.backgrounds.${state.charBackground}`, state.charBackground) : '—'],
                   [t('identity.alignment'), state.charAlignment ? t(`data.alignments.${state.charAlignment}`, state.charAlignment) : '—'],
                   ...(state.charXP ? [[t('identity.experienceShort'), state.charXP]] : []),
                 ].map(([label, val]) => (
@@ -2301,6 +2239,14 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
           </div>
         </div>
       )}
+
+      <HomebrewEditor
+        open={showHomebrewEditor}
+        onClose={() => setShowHomebrewEditor(false)}
+        onPublish={() => { setHomebrewVersion(v => v + 1); setShowHomebrewEditor(false); }}
+        initialDraft={homebrewEditorConfig.draft}
+        initialSection={homebrewEditorConfig.section}
+      />
 
       {showNotations && (() => {
         const menu = getNotationMenu(activeSystem || DEFAULT_SYSTEM);

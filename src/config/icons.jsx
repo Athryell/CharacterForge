@@ -32,6 +32,10 @@ export function IconModeProvider({ children }) {
   function changeIconMode(mode) {
     localStorage.setItem('characterforge_icon_mode', mode);
     setIconMode(mode);
+    if (mode === 'lucide') {
+      localStorage.setItem('characterforge_icon_accent', 'true');
+      setIconAccent(true);
+    }
   }
   function changeIconAccent(val) {
     localStorage.setItem('characterforge_icon_accent', String(val));

@@ -65,6 +65,7 @@ export const HOMEBREW_SCHEMA = {
     },
     subclasses: {
       label: 'Subclasses',
+      singular: 'Subclass',
       icon: 'tab.main',
       fields: [
         { id: 'class',    label: 'Class',    type: 'select',  optionsFrom: 'dnd5e.classNames', required: true },

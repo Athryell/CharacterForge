@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { MessageCircleWarning } from 'lucide-react';
 import { KeywordText } from './Tooltip';
 import NotationTextarea from './NotationTextarea';
 import { TagPill, TagSelector } from './Tags';
@@ -45,6 +46,9 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
     if (editingId === feature.id) return;
     if (editingId) cancelEdit();
     setExpanded(expanded === feature.id ? null : feature.id);
+    if (feature.isNew) {
+      onUpdate(features.map(f => f.id === feature.id ? { ...f, isNew: false } : f));
+    }
   }
 
   function removeFeature(id) { onUpdate(features.filter(f => f.id !== id)); }
@@ -120,6 +124,7 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
                         <div className="feature-name">{feature.name}</div>
+                        {feature.isNew && <MessageCircleWarning size={14} style={{ color: 'var(--c-warn)', flexShrink: 0 }} />}
                         {added && <span className="action-added-badge" title={t('common.inAction', 'In azioni')}><Icon id="widget.actions" size={12} /></span>}
                         {(feature.tags||[]).map(tag => <TagPill key={tag} tag={tag} allTags={allTags} small />)}
                       </div>

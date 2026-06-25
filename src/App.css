@@ -427,20 +427,6 @@ body.high-contrast *:focus-visible {
   font-size: 1.067rem !important;
 }
 
-/* Onboarding accessibility note */
-.onboarding-a11y-note {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  font-size: 0.867rem;
-  color: var(--c-ink);
-  background: var(--c-surface);
-  border: 0.5px solid var(--c-border-mid);
-  border-radius: var(--r);
-  padding: 10px 12px;
-  margin-top: 12px;
-  line-height: 1.5;
-}
 
 /* legacy (unused but kept for safety) */
 .template-chip.active {
@@ -3214,6 +3200,12 @@ input[type=number] {
   border-bottom: 1px solid var(--c-border);
   flex-shrink: 0;
 }
+.onboarding-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
 
 /* Language picker */
 .onboarding-lang-picker {
@@ -3300,7 +3292,7 @@ input[type=number] {
 }
 
 .onboarding-support-group {
-  display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
+  display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px;
   margin-top: 16px;
 }
 

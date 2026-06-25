@@ -235,13 +235,16 @@ const dataManager = {
         ...s,
         type: 'homebrew',
         counts: {
-          spells:      (s.spells || []).length,
-          weapons:     (s.weapons || []).length,
-          classes:     (s.classes || []).length,
-          species:     (s.species || []).length,
+          classes:     (s.classes     || []).length,
+          subclasses:  (s.subclasses  || []).length,
+          species:     (s.species     || []).length,
           backgrounds: (s.backgrounds || []).length,
-          conditions:  (s.conditions || []).length,
-          items:       (s.items || []).length,
+          spells:      (s.spells      || []).length,
+          weapons:     (s.weapons     || []).length,
+          armors:      (s.armors      || []).length,
+          items:       (s.items       || []).length,
+          conditions:  (s.conditions  || []).length,
+          feats:       (s.feats       || []).length,
         },
       })),
     ];
@@ -266,6 +269,10 @@ const dataManager = {
 
   removeSource(id) {
     saveHomebrew(loadHomebrew().filter(s => s.id !== id));
+  },
+
+  getSourceRaw(id) {
+    return loadHomebrew().find(s => s.id === id) || null;
   },
 
   exportSchema() {

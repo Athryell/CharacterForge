@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { AlertTriangle } from 'lucide-react';
 import { Icon } from '../../config/icons';
 import { ABILITIES, SKILLS, HIT_DICE, SPELLCASTING_CLASS, SLOT_TABLE } from '../../data/systems/dnd5e2024/mechanics';
 import AlignmentPicker from '../AlignmentPicker';
@@ -26,6 +27,7 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
     t('creator.steps.summary'),
   ];
   const [step, setStep] = useState(0);
+  const [nextAttempted, setNextAttempted] = useState(false);
   const [data, setData] = useState({
     charName: '', charRace: '', charBackground: '', charAlignment: 'Lawful Good',
     charClass: '',
@@ -273,7 +275,7 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
       saveProficiencies: effectiveSaveProfs,
       skillProficiencies: allSkills,
       skillExpertise: [],
-      features: [...classFeats, ...speciesFeats, ...bgFeats],
+      features: [...classFeats, ...speciesFeats, ...bgFeats].map(f => ({ ...f, isNew: true })),
       hpCurrent: calcHP(finalAbs, selectedCls, effectiveHitDie),
       hpMax: calcHP(finalAbs, selectedCls, effectiveHitDie),
       ac: 10 + Math.floor((finalAbs.DEX - 10) / 2),
@@ -327,8 +329,21 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
           {step === 0 && (
             <div className="creator-section">
               <div className="field" style={{ marginBottom: 12 }}>
-                <label>{t('creator.nameLabel')}</label>
-                <input value={data.charName} onChange={e => patch({ charName: e.target.value })} placeholder={t('creator.charNamePlaceholder')} autoFocus />
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  {t('creator.nameLabel')}
+                  {nextAttempted && !data.charName && (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, color: 'var(--c-warn)', fontSize: '0.8rem', fontWeight: 400 }}>
+                      <AlertTriangle size={12} /> {t('sources.nameRequired')}
+                    </span>
+                  )}
+                </label>
+                <input
+                  value={data.charName}
+                  onChange={e => { patch({ charName: e.target.value }); if (e.target.value) setNextAttempted(false); }}
+                  placeholder={t('creator.charNamePlaceholder')}
+                  autoFocus
+                  style={nextAttempted && !data.charName ? { borderColor: 'var(--c-warn)' } : undefined}
+                />
               </div>
               <div className="field" style={{ marginBottom: 16 }}>
                 <label>{t('identity.alignment')}</label>
@@ -1032,8 +1047,12 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
           </button>
           <div style={{ flex:1 }} />
           {step < STEPS.length - 1 ? (
-            <button className={`io-btn primary ${!canNextStep ? 'disabled' : ''}`}
-              onClick={() => canNextStep && setStep(s => s + 1)}>{t('creator.next')}</button>
+            <button className="io-btn primary"
+              onClick={() => {
+                if (!canNextStep) { setNextAttempted(true); return; }
+                setNextAttempted(false);
+                setStep(s => s + 1);
+              }}>{t('creator.next')}</button>
           ) : (
             <button className="io-btn primary" onClick={() => {
               window.umami?.track('character-created', { system: 'dnd5e2024', class: data.charClass });

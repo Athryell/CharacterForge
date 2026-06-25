@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { AlertTriangle } from 'lucide-react';
 import { Icon } from '../config/icons';
 import dataManager from '../data/dataManager';
 import { HOMEBREW_SCHEMA, resolveOptionsFrom } from '../config/homebrewSchema';
@@ -154,6 +155,7 @@ function renderField(field, value, onChange) {
 
     case 'list': {
       const listVal = Array.isArray(value) ? value : [];
+      const itemLabel = field.label.endsWith('s') ? field.label.slice(0, -1) : field.label;
       return (
         <div className="hbe-sublist">
           {listVal.map((sub, i) => (
@@ -185,7 +187,7 @@ function renderField(field, value, onChange) {
             style={{ fontSize: '0.8rem', marginTop: listVal.length > 0 ? 6 : 0 }}
             onClick={() => onChange([...listVal, Object.fromEntries(field.subfields.map(sf => [sf.id, '']))])}
           >
-            <Icon id="action.add" size={12} /> Add
+            <Icon id="action.add" size={12} /> Add {itemLabel}
           </button>
         </div>
       );
@@ -198,17 +200,26 @@ function renderField(field, value, onChange) {
 
 // ── Info section ──────────────────────────────────────────────────────────────
 
-function InfoSection({ draft, updateDraft, onClear, t }) {
+function InfoSection({ draft, updateDraft, onClear, showErrors, t }) {
+  const nameInvalid = showErrors && !draft.name.trim();
   return (
     <div className="hbe-section">
       <div className="field">
-        <label>{t('sources.nameLabel')} *</label>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          {t('sources.nameLabel')} *
+          {nameInvalid && (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, color: 'var(--c-warn)', fontSize: '0.8rem', fontWeight: 400 }}>
+              <AlertTriangle size={12} /> {t('sources.nameRequired')}
+            </span>
+          )}
+        </label>
         <input
           type="text"
           value={draft.name}
           onChange={e => updateDraft({ name: e.target.value })}
           placeholder={t('placeholders.homebrewName')}
           autoFocus
+          style={nameInvalid ? { borderColor: 'var(--c-warn)' } : undefined}
         />
       </div>
       <div className="field">
@@ -279,10 +290,8 @@ function EntitySection({ sectionKey, sectionDef, draft, updateDraft }) {
     ? !sectionDef.fields.some(f => f.required && !form[f.id])
     : false;
 
-  // Cheap pluralization for "Add Weapon" / "Add Spells" etc.
-  const singularLabel = sectionDef.label.endsWith('s')
-    ? sectionDef.label.slice(0, -1)
-    : sectionDef.label;
+  const singularLabel = sectionDef.singular ||
+    (sectionDef.label.endsWith('s') ? sectionDef.label.slice(0, -1) : sectionDef.label);
 
   return (
     <div className="hbe-section">
@@ -356,11 +365,12 @@ function EntitySection({ sectionKey, sectionDef, draft, updateDraft }) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export default function HomebrewEditor({ open, onClose, onPublish, initialDraft = null }) {
+export default function HomebrewEditor({ open, onClose, onPublish, initialDraft = null, initialSection = null }) {
   const { t } = useTranslation();
   const [draft, setDraft] = useState(createEmptyDraft);
   const [activeSection, setActiveSection] = useState('info');
   const [showConfirm, setShowConfirm] = useState(false);
+  const [publishAttempted, setPublishAttempted] = useState(false);
   const saveTimerRef = useRef(null);
 
   useEffect(() => {
@@ -370,9 +380,10 @@ export default function HomebrewEditor({ open, onClose, onPublish, initialDraft 
     } else {
       setDraft(loadDraft());
     }
-    setActiveSection('info');
+    setActiveSection(initialSection || 'info');
     setShowConfirm(false);
-  }, [open, initialDraft]);
+    setPublishAttempted(false);
+  }, [open, initialDraft, initialSection]);
 
   const systemSchema = HOMEBREW_SCHEMA[draft.system] || {};
   const sectionEntries = Object.entries(systemSchema);
@@ -438,9 +449,14 @@ export default function HomebrewEditor({ open, onClose, onPublish, initialDraft 
           <span className="hbe-title">{t('sources.editorTitle')}</span>
           <button
             className="io-btn primary"
-            disabled={!canPublish}
-            onClick={() => setShowConfirm(true)}
-            title={canPublish ? undefined : t('sources.noName')}
+            onClick={() => {
+              if (!canPublish) {
+                setPublishAttempted(true);
+                setActiveSection('info');
+              } else {
+                setShowConfirm(true);
+              }
+            }}
           >
             {t('sources.publish')} →
           </button>
@@ -456,6 +472,9 @@ export default function HomebrewEditor({ open, onClose, onPublish, initialDraft 
               onClick={() => setActiveSection('info')}
             >
               📋 <span className="hbe-nav-label">Info</span>
+              {publishAttempted && !draft.name.trim() && (
+                <AlertTriangle size={12} style={{ color: 'var(--c-warn)', flexShrink: 0 }} />
+              )}
             </button>
 
             {sectionEntries.length > 0 && (
@@ -487,6 +506,7 @@ export default function HomebrewEditor({ open, onClose, onPublish, initialDraft 
                 draft={draft}
                 updateDraft={updateDraft}
                 onClear={handleClearDraft}
+                showErrors={publishAttempted && !draft.name.trim()}
                 t={t}
               />
             ) : systemSchema[activeSection] ? (

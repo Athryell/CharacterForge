@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { HelpCircle } from 'lucide-react';
 import { CharContext } from './CharContext';
 import { KeywordText } from './Tooltip';
 import { TagPill } from './Tags';
+import { useAccessibility } from '../hooks/useAccessibility';
 
 export const NOTION_FEEDBACK_URL = 'https://athryell.notion.site/3725e8a752d38094a5bac638b19360e7?pvs=105';
 export const KOFI_URL = 'https://ko-fi.com/athryell';
@@ -75,6 +77,7 @@ function SupportGroup({ t }) {
 }
 
 function LanguagePicker({ i18n }) {
+  const { t } = useTranslation();
   return (
     <div className="onboarding-lang-picker">
       {LANGUAGES.map(({ code, flagCode, label }) => (
@@ -88,6 +91,81 @@ function LanguagePicker({ i18n }) {
           <span className="onboarding-lang-name">{label}</span>
         </button>
       ))}
+      <span className="hint-text">{t('onboarding.andMore')}</span>
+    </div>
+  );
+}
+
+function A11yPanel({ a11y, setA11y, onClose, t }) {
+  return (
+    <div className="onboarding-screen">
+      <div className="onboarding-header">
+        <h2 className="onboarding-title">{t('accessibility.title')}</h2>
+      </div>
+      <div className="onboarding-body">
+        <div className="hmenu-section">
+          <div className="hmenu-label">{t('accessibility.font')}</div>
+          <div className="hmenu-row">
+            {[
+              { value: 'default',      label: t('accessibility.fontDefault') },
+              { value: 'atkinson',     label: 'Atkinson Hyperlegible' },
+              { value: 'opendyslexic', label: 'OpenDyslexic' },
+            ].map(opt => (
+              <button key={opt.value}
+                className={`hmenu-item ${a11y.font === opt.value ? 'active' : ''}`}
+                onClick={() => setA11y('font', opt.value)}>
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="hmenu-section">
+          <div className="hmenu-label">{t('accessibility.textSize')}</div>
+          <div className="hmenu-row">
+            {[
+              { value: 'small',  label: t('accessibility.sizeSmall')  },
+              { value: 'normal', label: t('accessibility.sizeNormal') },
+              { value: 'large',  label: t('accessibility.sizeLarge')  },
+              { value: 'xlarge', label: t('accessibility.sizeXLarge') },
+            ].map(opt => (
+              <button key={opt.value}
+                className={`hmenu-item ${a11y.textSize === opt.value ? 'active' : ''}`}
+                onClick={() => setA11y('textSize', opt.value)}>
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="hmenu-section">
+          <div className="hmenu-label">{t('accessibility.contrast')}</div>
+          <div className="hmenu-row">
+            {[
+              { value: 'default', label: t('accessibility.contrastDefault') },
+              { value: 'high',    label: t('accessibility.contrastHigh')    },
+            ].map(opt => (
+              <button key={opt.value}
+                className={`hmenu-item ${a11y.contrast === opt.value ? 'active' : ''}`}
+                onClick={() => setA11y('contrast', opt.value)}>
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div style={{ padding: '4px 0 8px' }}>
+          <label className="hmenu-toggle">
+            <input type="checkbox"
+              checked={a11y.largeTargets}
+              onChange={e => setA11y('largeTargets', e.target.checked)} />
+            <span>{t('accessibility.largeTargets')}</span>
+          </label>
+        </div>
+      </div>
+      <div className="onboarding-footer">
+        <div />
+        <button className="onboarding-btn onboarding-btn-accent" onClick={onClose}>
+          {t('common.done', 'Done')}
+        </button>
+      </div>
     </div>
   );
 }
@@ -103,8 +181,10 @@ function DemoBox({ label, children }) {
 
 export default function Onboarding({ onClose, onRoll: externalOnRoll }) {
   const { t, i18n } = useTranslation();
+  const { prefs: a11y, setPref: setA11y } = useAccessibility();
   const [mode, setMode] = useState('welcome');
   const [step, setStep] = useState(0);
+  const [showA11yPanel, setShowA11yPanel] = useState(false);
   const [demoMsg, setDemoMsg] = useState('');
   const [demoCounters, setDemoCounters] = useState({});
   const overlayRef = useRef();
@@ -201,7 +281,7 @@ export default function Onboarding({ onClose, onRoll: externalOnRoll }) {
             <DemoBox label={t('onboarding.demoLabel')}>
               <p className="onboarding-demo-text">
                 <KeywordText
-                  text={"Attack: 1d20+[PRO]+[STR]\nBardic Inspiration: [CAR][LVL:d6,5:d8]\nCharges: [3]\nArmor bonus: +2@[AC]"}
+                  text={"Attack: 1d20+[PRO]+[STR]\nBardic Inspiration: uses [CHA], die [LVL=1:d6,5:d8]\nCharges: [3]\nArmor bonus: +2@[AC]"}
                   onRoll={handleDemoRoll}
                   label="Demo"
                   counters={demoCounters}
@@ -214,7 +294,7 @@ export default function Onboarding({ onClose, onRoll: externalOnRoll }) {
             <p className="onboarding-notation-sidebar-hint">💡 {t('notation.slashHint')}</p>
             <ul className="onboarding-notation-sidebar-list">
               <li><code>[STR] [DEX]… [PRO]</code> → {t('notation.attrHelp')}</li>
-              <li><code>[LVL:1d6,5:1d8]</code> → {t('notation.lvlHelp')}</li>
+              <li><code>[LVL=1:1d6,5:1d8]</code> → {t('notation.lvlHelp')}</li>
               <li><code>[3]</code> → {t('notation.counterHelp')}</li>
               <li><code>+2@[AC]</code> → {t('notation.bonusHelp')}</li>
             </ul>
@@ -263,61 +343,75 @@ export default function Onboarding({ onClose, onRoll: externalOnRoll }) {
   return (
     <div className="onboarding-overlay" ref={overlayRef} onClick={handleOverlayClick}>
       <div className="onboarding-modal" role="dialog" aria-modal="true">
-        <button
-          className="onboarding-close-x"
-          onClick={close}
-          ref={closeRef}
-          aria-label={t('onboarding.close')}
-        >
-          ×
-        </button>
+        {!showA11yPanel && (
+          <button
+            className="onboarding-close-x"
+            onClick={close}
+            ref={closeRef}
+            aria-label={t('onboarding.close')}
+          >
+            ×
+          </button>
+        )}
 
-        {mode === 'welcome' ? (
+        {showA11yPanel ? (
+          <A11yPanel a11y={a11y} setA11y={setA11y} onClose={() => setShowA11yPanel(false)} t={t} />
+        ) : mode === 'welcome' ? (
           <div className="onboarding-screen">
             <div className="onboarding-header">
-              <h2 className="onboarding-title">{t('onboarding.welcome.title')}</h2>
+              <div className="onboarding-header-top">
+                <h2 className="onboarding-title">{t('onboarding.welcome.title')}</h2>
+                <button className="filter-chip" onClick={() => setShowA11yPanel(true)}>
+                  ♿ {t('onboarding.a11yTag')}
+                </button>
+              </div>
               <LanguagePicker i18n={i18n} />
-              <a href={CROWDIN_URL} target="_blank" rel="noopener noreferrer" className="onboarding-translate-link">
+              <a href={CROWDIN_URL} target="_blank" rel="noopener noreferrer" className="filter-chip" style={{ marginTop: 10, display: 'inline-flex' }}>
                 {t('onboarding.welcome.translateLink')}
               </a>
             </div>
             <div className="onboarding-body">
-              <p className="onboarding-intro">{t('onboarding.welcome.intro')}</p>
+              <p className="onboarding-intro"><strong>{t('onboarding.whyTitle')}</strong></p>
+              <p className="onboarding-intro">{t('onboarding.whyIntro')}</p>
               <div className="onboarding-features">
-                {t('onboarding.welcome.features', { returnObjects: true }).map((f, i) => (
-                  <div key={i} className="onboarding-feature-row">
-                    <span className="onboarding-feature-icon">{f.icon}</span>
+                {[
+                  { icon: '🎲', titleKey: 'why1title', descKey: 'why1desc' },
+                  { icon: '⚡', titleKey: 'why2title', descKey: 'why2desc' },
+                  { icon: '♿', titleKey: 'why3title', descKey: 'why3desc' },
+                  { icon: '🎨', titleKey: 'why4title', descKey: 'why4desc' },
+                  { icon: '🧙', titleKey: 'why5title', descKey: 'why5desc' },
+                ].map(({ icon, titleKey, descKey }) => (
+                  <div key={titleKey} className="onboarding-feature-row">
+                    <span className="onboarding-feature-icon">{icon}</span>
                     <div>
-                      <strong>{f.title}</strong>
-                      <span> — {f.desc}</span>
+                      <strong>{t(`onboarding.${titleKey}`)}</strong>
+                      <span> — {t(`onboarding.${descKey}`)}</span>
                     </div>
                   </div>
                 ))}
               </div>
-              <p className="onboarding-feedback-note">{t('onboarding.welcome.feedbackNote')}</p>
+              <p className="onboarding-feedback-note">{t('onboarding.whyOutro')}</p>
               <div className="onboarding-support-group">
                 <a href={NOTION_FEEDBACK_URL} target="_blank" rel="noopener noreferrer" className="onboarding-btn onboarding-btn-accent" onClick={() => window.umami?.track('feedback-clicked')}>
                   {t('onboarding.welcome.feedbackBtn')}
                 </a>
               </div>
-              <div className="onboarding-a11y-note">
-                <span>♿</span>
-                <span>{t('onboarding.welcome.a11yNote')}</span>
-              </div>
             </div>
             <div className="onboarding-footer">
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                <button className="onboarding-btn-ghost" onClick={close}>
+                  {t('onboarding.welcome.skipBtn')}
+                </button>
+                <p className="onboarding-skip-hint">
+                  {t('onboarding.skipHint')} <HelpCircle size={12} style={{ display: 'inline', verticalAlign: 'middle' }} />
+                </p>
+              </div>
               <button
-                className="onboarding-btn onboarding-btn-secondary"
+                className="onboarding-btn onboarding-btn-accent"
                 onClick={() => { setMode('tutorial'); setStep(0); }}
               >
                 {t('onboarding.welcome.tutorialBtn')}
               </button>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <button className="onboarding-btn-ghost" onClick={close}>
-                  {t('onboarding.welcome.skipBtn')}
-                </button>
-                <p className="onboarding-skip-hint">{t('onboarding.welcome.skipHint')}</p>
-              </div>
             </div>
           </div>
         ) : (
