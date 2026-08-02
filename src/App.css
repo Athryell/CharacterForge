@@ -14,6 +14,8 @@
   --c-accent-light: #E8F4DC;
   --c-accent-text: #1A4708;
   --c-success: #3B6D11;
+  --c-bar-red: #B91C1C;
+  --c-bar-blue: #1D4ED8;
   --c-warn-text: #7A4A00;
   --c-text: #111827;
   --c-warn: #854F0B;
@@ -38,6 +40,8 @@
   --c-warn-text: #FBBF24;
   --c-text: #F0F2F8;
   --c-warn: #FBBF24;
+  --c-bar-red: #F87171;
+  --c-bar-blue: #60A5FA;
   /* accent defaults (green) — overridden at runtime by useTheme.js via inline style */
   --c-accent: #6BBF45;
   --c-accent-light: #182A0A;
@@ -58,6 +62,8 @@
     --c-warn-text: #FBBF24;
     --c-text: #F0F2F8;
     --c-warn: #FBBF24;
+    --c-bar-red: #F87171;
+    --c-bar-blue: #60A5FA;
     /* accent defaults (green) — overridden at runtime by useTheme.js via inline style */
     --c-accent: #6BBF45;
     --c-accent-light: #182A0A;
@@ -188,7 +194,6 @@ body {
 .system-selector-btn:hover { border-color: var(--c-border-mid); }
 .system-selector-caret { font-size: 0.667rem; opacity: 0.6; }
 .system-dropdown {
-  position: absolute; top: calc(100% + 4px); left: 0;
   min-width: 220px;
   background: var(--c-bg);
   border: 1px solid var(--c-border);
@@ -3179,6 +3184,7 @@ input[type=number] {
 }
 .source-badge.srd { background: #d4edda; color: #155724; }
 .source-badge.homebrew { background: #cce5ff; color: #004085; }
+.source-badge.system { background: var(--c-border-mid); color: var(--c-muted); }
 .source-name { font-size: 0.933rem; font-weight: 600; color: var(--c-ink); }
 .source-author { font-size: 0.8rem; color: var(--c-muted); }
 .source-counts { font-size: 0.733rem; color: var(--c-muted); margin-top: 4px; }

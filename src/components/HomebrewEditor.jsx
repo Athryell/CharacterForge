@@ -240,9 +240,12 @@ function InfoSection({ draft, updateDraft, onClear, showErrors, t }) {
       </div>
       <div className="field">
         <label>{t('sources.systemLabel')}</label>
+        {/* Only systems with a declared schema can hold homebrew content.
+            The custom system shares layouts via template export instead. */}
         <select value={draft.system} onChange={e => updateDraft({ system: e.target.value })}>
-          <option value="dnd5e2024">D&D 5.5e</option>
-          <option value="daggerheart">Daggerheart</option>
+          {Object.keys(HOMEBREW_SCHEMA).map(sysId => (
+            <option key={sysId} value={sysId}>{t(`system.${sysId}`, sysId)}</option>
+          ))}
         </select>
       </div>
       <div style={{ marginTop: 16, paddingTop: 16, borderTop: '0.5px solid var(--c-border-mid)' }}>
@@ -479,7 +482,7 @@ export default function HomebrewEditor({ open, onClose, onPublish, initialDraft 
 
             {sectionEntries.length > 0 && (
               <div className="hbe-nav-divider">
-                {draft.system === 'dnd5e2024' ? 'D&D 5.5e' : 'Daggerheart'}
+                {t(`system.${draft.system}`, draft.system)}
               </div>
             )}
 

@@ -1,5 +1,6 @@
 // Widget layout system
 // Each widget: id, tab, col (0=left,1=right), order, visible, fullWidth
+import { createCustomDefaultState } from './data/systems/custom/mechanics';
 
 export const WIDGET_DEFS = [
   { id: 'identity',      label: 'widgets.identity',      defaultTab: 'main',      defaultCol: 0, defaultFullWidth: false },
@@ -88,6 +89,7 @@ export function getWidgetsForTab(layout, tab) {
 
 export function getWidgetLabel(id) {
   if (id.startsWith('dh-')) return DH_WIDGET_DEFS.find(w => w.id === id)?.label || id;
+  if (id.startsWith('w_')) return id;
   return WIDGET_DEFS.find(w => w.id === id)?.label || id;
 }
 
@@ -122,13 +124,24 @@ export function getDefaultLayoutDaggerheart() {
   }));
 }
 
+export function getDefaultLayoutCustom() {
+  const { widgets } = createCustomDefaultState();
+  return widgets.map((w, i) => ({
+    id: w.id, tab: w.tab, col: w.col,
+    order: w.order ?? i, visible: true, fullWidth: false,
+  }));
+}
+
 export function getDefaultLayoutForSystem(systemId) {
   if (systemId === 'daggerheart') return getDefaultLayoutDaggerheart();
+  if (systemId === 'custom') return getDefaultLayoutCustom();
   return getDefaultLayout();
 }
 
 export function getDefaultTabsForSystem(systemId) {
-  return systemId === 'daggerheart' ? [...DH_DEFAULT_TABS] : [...DEFAULT_TABS];
+  if (systemId === 'daggerheart') return [...DH_DEFAULT_TABS];
+  if (systemId === 'custom') return [...createCustomDefaultState().tabs];
+  return [...DEFAULT_TABS];
 }
 
 export function loadLayoutForSystem(systemId) {
@@ -145,13 +158,19 @@ export function loadLayoutForSystem(systemId) {
     } catch (e) {}
     return getDefaultLayoutDaggerheart();
   }
+  if (systemId === 'custom') {
+    try {
+      const saved = JSON.parse(localStorage.getItem('characterforge_layout_custom'));
+      if (saved && Array.isArray(saved)) return saved;
+    } catch (e) {}
+    return getDefaultLayoutCustom();
+  }
   return loadLayout();
 }
 
 export function saveLayoutForSystem(systemId, layout) {
-  const key = systemId === 'daggerheart'
-    ? 'characterforge_layout_daggerheart'
-    : 'characterforge_layout';
+  const keys = { daggerheart: 'characterforge_layout_daggerheart', custom: 'characterforge_layout_custom' };
+  const key = keys[systemId] || 'characterforge_layout';
   try { localStorage.setItem(key, JSON.stringify(layout)); } catch (e) {}
 }
 
@@ -163,12 +182,18 @@ export function loadTabsForSystem(systemId) {
     } catch (e) {}
     return [...DH_DEFAULT_TABS];
   }
+  if (systemId === 'custom') {
+    try {
+      const saved = JSON.parse(localStorage.getItem('characterforge_tabs_custom'));
+      if (saved && Array.isArray(saved) && saved.length) return saved;
+    } catch (e) {}
+    return [...createCustomDefaultState().tabs];
+  }
   return loadTabs();
 }
 
 export function saveTabsForSystem(systemId, tabs) {
-  const key = systemId === 'daggerheart'
-    ? 'characterforge_tabs_daggerheart'
-    : 'characterforge_tabs';
+  const keys = { daggerheart: 'characterforge_tabs_daggerheart', custom: 'characterforge_tabs_custom' };
+  const key = keys[systemId] || 'characterforge_tabs';
   try { localStorage.setItem(key, JSON.stringify(tabs)); } catch (e) {}
 }

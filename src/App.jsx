@@ -17,6 +17,8 @@ import CharacterCreator from './components/CharacterCreator';
 import LevelUpModal from './components/LevelUpModal';
 import LevelDownModal from './components/LevelDownModal';
 import ConditionTracker from './components/ConditionTracker';
+import CustomWidget from './components/custom/CustomWidget';
+import WidgetEditor from './components/custom/WidgetEditor';
 import WeaponManager from './components/WeaponManager';
 import ArmorManager from './components/ArmorManager';
 import { calcArmorAC, DND_ARMOR_PRESETS } from './data/systems/dnd5e2024/armors';
@@ -154,16 +156,27 @@ function SpellSlots({ slots, onToggle }) {
 function SystemSelector({ activeSystem, onChange }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const [dropPos, setDropPos] = useState({ top: 0, left: 0 });
+  const btnRef = useRef();
   const sys = getSystem(activeSystem);
+
+  function handleOpen() {
+    if (!open && btnRef.current) {
+      const r = btnRef.current.getBoundingClientRect();
+      setDropPos({ top: r.bottom + 4, left: r.left });
+    }
+    setOpen(v => !v);
+  }
+
   return (
     <div className="system-selector">
-      <button className="system-selector-btn" onClick={() => setOpen(v => !v)}>
+      <button ref={btnRef} className="system-selector-btn" onClick={handleOpen}>
         {sys.icon} {t(`system.${sys.id}`, sys.shortName)} <span className="system-selector-caret">▾</span>
       </button>
-      {open && (
+      {open && createPortal(
         <>
           <div className="hamburger-backdrop" onClick={() => setOpen(false)} />
-          <div className="system-dropdown">
+          <div className="system-dropdown" style={{ position: 'fixed', top: dropPos.top, left: dropPos.left }}>
             {SYSTEMS.map(s => (
               <button
                 key={s.id}
@@ -175,7 +188,8 @@ function SystemSelector({ activeSystem, onChange }) {
               </button>
             ))}
           </div>
-        </>
+        </>,
+        document.body
       )}
     </div>
   );
@@ -316,6 +330,10 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
   const [editMode, setEditMode] = useState(false);
   const [tabs, setTabs] = useState(() => loadTabsForSystem(activeSystem || DEFAULT_SYSTEM));
 
+  // Custom system widget editor
+  const [showWidgetEditor, setShowWidgetEditor] = useState(false);
+  const [editingWidgetId, setEditingWidgetId] = useState(null);
+
   useEffect(() => {
     setLayout(loadLayoutForSystem(activeSystem || DEFAULT_SYSTEM));
     setTabs(loadTabsForSystem(activeSystem || DEFAULT_SYSTEM));
@@ -396,6 +414,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
   const { weightUnit, speedUnit, setPref: setUnitPref, toDisplayWeight, toDisplaySpeed, fromDisplaySpeed } = useUnits();
   const { prefs: a11y, setPref: setA11y } = useAccessibility();
   const fileInputRef = useRef();
+  const templateFileInputRef = useRef();
   const toastTimer = useRef();
 
   function showToast(msg, action = null, duration = null) {
@@ -555,6 +574,33 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
 
   function createTag() {}
 
+  // In the custom system the tab list lives in two places: the per-system layout
+  // storage AND state.tabs, which is what exportCustomTemplate serialises.
+  // Every mutation must go through here or the two silently diverge.
+  function commitTabs(next) {
+    setTabs(next);
+    saveTabsForSystem(activeSystem || DEFAULT_SYSTEM, next);
+    if (activeSystem === 'custom') update({ tabs: next });
+  }
+
+  function resetLayoutAndTabs() {
+    const sysId = activeSystem || DEFAULT_SYSTEM;
+    const nextLayout = getDefaultLayoutForSystem(sysId);
+    setLayout(nextLayout);
+    saveLayoutForSystem(sysId, nextLayout);
+    if (sysId === 'custom') {
+      // Custom widgets live in character state and the default layout references
+      // the default widget ids — restoring one without the other leaves every
+      // shell empty, because renderWidget finds no matching widget.
+      const base = dataManager.getAdapter('custom').createDefaultState();
+      update({ widgets: base.widgets, tabs: base.tabs });
+      setTabs(base.tabs);
+      saveTabsForSystem(sysId, base.tabs);
+      return;
+    }
+    commitTabs(getDefaultTabsForSystem(sysId));
+  }
+
   function handleTabChange(id) {
     if (id.startsWith('__toggle__')) {
       const tabId = id.replace('__toggle__', '');
@@ -563,13 +609,59 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
       if (!tab) return;
       if (tab.visible && (visibleCount <= 1 || tabId === activeTab)) return;
       const next = tabs.map(t => t.id === tabId ? { ...t, visible: !t.visible } : t);
-      setTabs(next); saveTabsForSystem(activeSystem || DEFAULT_SYSTEM, next);
+      commitTabs(next);
       if (tabId === activeTab) {
         const first = next.find(t => t.visible && t.id !== tabId);
         if (first) setActiveTab(first.id);
       }
     } else {
       setActiveTab(id);
+    }
+  }
+
+  // ── Custom widget handlers ─────────────────────────────────────
+  function handleAddWidget({ type, config }) {
+    const newWidget = {
+      id: `w_${Date.now()}`, type, tab: activeTab, col: 0,
+      order: (state.widgets || []).filter(w => w.tab === activeTab).length,
+      config,
+    };
+    update({ widgets: [...(state.widgets || []), newWidget] });
+    const newEntry = { id: newWidget.id, tab: activeTab, col: 0, order: newWidget.order, visible: true, fullWidth: false };
+    const nextLayout = [...layout, newEntry];
+    setLayout(nextLayout);
+    saveLayoutForSystem('custom', nextLayout);
+    setShowWidgetEditor(false);
+  }
+
+  function handleEditWidget(widgetId, { config }) {
+    update({ widgets: (state.widgets || []).map(w => w.id === widgetId ? { ...w, config } : w) });
+    setShowWidgetEditor(false);
+    setEditingWidgetId(null);
+  }
+
+  function handleRemoveWidget(widgetId) {
+    if (!window.confirm(t('customWidgets.removeWidgetConfirm'))) return;
+    update({ widgets: (state.widgets || []).filter(w => w.id !== widgetId) });
+    const nextLayout = layout.filter(w => w.id !== widgetId);
+    setLayout(nextLayout);
+    saveLayoutForSystem('custom', nextLayout);
+  }
+
+  function handleAddTab() {
+    const newTab = { id: `tab_${Date.now()}`, label: t('customWidgets.newTab'), icon: 'layout', visible: true };
+    commitTabs([...tabs, newTab]);
+  }
+
+  function handleRemoveTab(tabId) {
+    const hasWidgets = (state.widgets || []).some(w => w.tab === tabId);
+    if (hasWidgets) { window.alert(t('customWidgets.tabHasWidgets')); return; }
+    if (tabs.length <= 1) return;
+    const next = tabs.filter(tab => tab.id !== tabId);
+    commitTabs(next);
+    if (activeTab === tabId) {
+      const first = next.find(tab => tab.visible);
+      if (first) setActiveTab(first.id);
     }
   }
 
@@ -738,6 +830,62 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
     a.click(); URL.revokeObjectURL(url);
     window.umami?.track('character-exported');
   }
+
+  function exportCustomTemplate() {
+    const template = {
+      templateName: state.systemName || 'Custom Template',
+      version: '1.0',
+      tabs: state.tabs,
+      widgets: state.widgets.map(w => {
+        const out = { ...w };
+        delete out.id;
+        return out;
+      }),
+    };
+    const blob = new Blob([JSON.stringify(template, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${template.templateName.toLowerCase().replace(/\s+/g, '-')}-template.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    window.umami?.track('custom-template-exported', { name: template.templateName });
+  }
+
+  function importCustomTemplate(file) {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const template = JSON.parse(ev.target.result);
+        if (!template.tabs || !template.widgets) {
+          showToast(t('customWidgets.importError'));
+          return;
+        }
+        if (!window.confirm(t('customWidgets.importWarning'))) return;
+        const widgets = template.widgets.map(w => ({
+          ...w,
+          id: `w_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        }));
+        update({
+          systemName: template.templateName || state.systemName,
+          tabs: template.tabs,
+          widgets,
+        });
+        const newLayoutEntries = widgets.map((w, i) => ({
+          id: w.id, tab: w.tab, col: w.col ?? 0, order: w.order ?? i, visible: true, fullWidth: false,
+        }));
+        setLayout(newLayoutEntries);
+        saveLayoutForSystem('custom', newLayoutEntries);
+        setTabs(template.tabs);
+        saveTabsForSystem('custom', template.tabs);
+        window.umami?.track('custom-template-imported', { name: template.templateName });
+        showToast(t('customWidgets.importSuccess'));
+      } catch {
+        showToast(t('customWidgets.importError'));
+      }
+    };
+    reader.readAsText(file);
+  }
   const hasSpells = !!SPELLCASTING_CLASS[state.charClass];
 
   // ── Layout management ──────────────────────────────────────────
@@ -774,6 +922,11 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
     combatStats: editingCombat,
   };
   function renderWidget(id) {
+    if (activeSystem === 'custom') {
+      const w = (state.widgets || []).find(w => w.id === id);
+      if (w) return <CustomWidget widget={w} state={state} update={update} editMode={editMode} />;
+      return null;
+    }
     const ce = contentEditMap[id] ? ' content-editing' : '';
     switch (id) {
 
@@ -2142,15 +2295,30 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
 
   return (
     <CharContext.Provider value={{
-      abilities:   activeSystem === 'daggerheart' ? (state.traits || {}) : effectiveAbilities,
-      traitValues: activeSystem === 'daggerheart' ? (state.traits || {}) : effectiveAbilities,
-      charLevel:   state.charLevel,
-      profBonus:   activeSystem === 'daggerheart' ? getDHProficiency(state.charLevel) : char.profBonus,
-      systemId:    activeSystem || 'dnd5e2024',
+      abilities:    activeSystem === 'daggerheart' ? (state.traits || {}) : effectiveAbilities,
+      traitValues:  activeSystem === 'daggerheart' ? (state.traits || {}) : effectiveAbilities,
+      charLevel:    state.charLevel,
+      profBonus:    activeSystem === 'daggerheart' ? getDHProficiency(state.charLevel) : char.profBonus,
+      systemId:     activeSystem || 'dnd5e2024',
+      customFields: state.customFields || {},
     }}>
     <div className="sheet">
       <Toast message={toast} action={toastAction} />
       {showCreator && <CharacterCreator onComplete={handleCreatorComplete} onCancel={() => setShowCreator(false)} systemId={activeSystem || DEFAULT_SYSTEM} />}
+      {showWidgetEditor && activeSystem === 'custom' && (() => {
+        const editingWidget = editingWidgetId ? (state.widgets || []).find(w => w.id === editingWidgetId) : null;
+        return (
+          <WidgetEditor
+            initialType={editingWidget?.type ?? null}
+            initialConfig={editingWidget?.config ?? null}
+            onAdd={editingWidgetId
+              ? cfg => handleEditWidget(editingWidgetId, cfg)
+              : handleAddWidget
+            }
+            onClose={() => { setShowWidgetEditor(false); setEditingWidgetId(null); }}
+          />
+        );
+      })()}
       {showLevelUp && activeSystem === 'dnd5e2024' && (
         <LevelUpModal
           currentLevel={state.charLevel}
@@ -2250,7 +2418,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
         {editMode && (
           <>
             <button className="io-btn" style={{ fontSize: '0.8rem', padding: '4px 10px' }}
-              onClick={() => { const d = getDefaultLayoutForSystem(activeSystem || DEFAULT_SYSTEM); setLayout(d); saveLayoutForSystem(activeSystem || DEFAULT_SYSTEM, d); const dt = getDefaultTabsForSystem(activeSystem || DEFAULT_SYSTEM); setTabs(dt); saveTabsForSystem(activeSystem || DEFAULT_SYSTEM, dt); }}>
+              onClick={resetLayoutAndTabs}>
               {t('nav.reset')}
             </button>
             <button className="io-btn primary" style={{ fontSize: '0.8rem', padding: '4px 10px' }}
@@ -2281,11 +2449,9 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                 onClick={() => { setEditMode(v => !v); setShowMenu(false); }}>
                 {editMode ? t('menu.doneLayout') : t('menu.editLayout')}
               </button>
-              <button className="hmenu-item" onClick={() => {
-                const d = getDefaultLayoutForSystem(activeSystem || DEFAULT_SYSTEM); setLayout(d); saveLayoutForSystem(activeSystem || DEFAULT_SYSTEM, d);
-                const dt = getDefaultTabsForSystem(activeSystem || DEFAULT_SYSTEM); setTabs(dt); saveTabsForSystem(activeSystem || DEFAULT_SYSTEM, dt);
-                setShowMenu(false);
-              }}>{t('menu.resetLayout')}</button>
+              <button className="hmenu-item" onClick={() => { resetLayoutAndTabs(); setShowMenu(false); }}>
+                {t('menu.resetLayout')}
+              </button>
             </div>
             <div className="hmenu-divider" />
             <HMenuGroup label={t('menu.groupStyle')}>
@@ -2432,6 +2598,16 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
               <div className="hmenu-label">{t('menu.data')}</div>
               <button className="hmenu-item" onClick={() => { handleExport(); setShowMenu(false); }}>{t('menu.exportChar')}</button>
               <button className="hmenu-item" onClick={() => { fileInputRef.current?.click(); setShowMenu(false); }}>{t('menu.importChar')}</button>
+              {activeSystem === 'custom' && (
+                <>
+                  <button className="hmenu-item" onClick={() => { exportCustomTemplate(); setShowMenu(false); }}>
+                    {t('customWidgets.exportTemplate')}
+                  </button>
+                  <button className="hmenu-item" onClick={() => { templateFileInputRef.current?.click(); setShowMenu(false); }}>
+                    {t('customWidgets.importTemplate')}
+                  </button>
+                </>
+              )}
               <button className="hmenu-item" onClick={() => { setShowSources(true); setShowMenu(false); }}><Icon id="tab.sources" /> {t('menu.sources')}</button>
               <button className="hmenu-item" onClick={() => { setShowNotations(true); setShowMenu(false); }}>📖 {t('menu.notations')}</button>
             </div>
@@ -2439,14 +2615,17 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
         </>
       )}
       <input ref={fileInputRef} type="file" accept=".json" style={{ display:'none' }} onChange={handleImport} />
+      <input ref={templateFileInputRef} type="file" accept=".json" style={{ display:'none' }} onChange={e => { const f = e.target.files[0]; if (f) importCustomTemplate(f); e.target.value = ''; }} />
 
       <TabBar
         tabs={tabs}
         activeTab={activeTab}
         onTabChange={handleTabChange}
         editMode={editMode}
-        onReorderTabs={next => { setTabs(next); saveTabsForSystem(activeSystem || DEFAULT_SYSTEM, next); }}
+        onReorderTabs={commitTabs}
         systemName={t(`system.${activeSystem || DEFAULT_SYSTEM}`, getSystem(activeSystem || DEFAULT_SYSTEM).shortName)}
+        onAddTab={activeSystem === 'custom' ? handleAddTab : undefined}
+        onRemoveTab={activeSystem === 'custom' ? handleRemoveTab : undefined}
       />
 
       <PinnedBar
@@ -2464,6 +2643,15 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
       {editMode && (
         <div className="layout-edit-banner">
           {t('layout.editBanner')}
+          {activeSystem === 'custom' && (
+            <button
+              className="io-btn primary"
+              style={{ marginLeft: 12, fontSize: '0.8rem', padding: '4px 12px' }}
+              onClick={() => { setEditingWidgetId(null); setShowWidgetEditor(true); }}
+            >
+              + {t('customWidgets.addWidget')}
+            </button>
+          )}
         </div>
       )}
 
@@ -2473,8 +2661,13 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
           editMode={editMode}
           onLayoutChange={handleLayoutChange}
           renderWidget={renderWidget}
-          hiddenWidgets={hiddenWidgets}
+          hiddenWidgets={activeSystem === 'custom' ? [] : hiddenWidgets}
           onRestoreWidget={restoreWidget}
+          extraShellProps={activeSystem === 'custom' && editMode ? {
+            systemId: 'custom',
+            onEdit: id => { setEditingWidgetId(id); setShowWidgetEditor(true); },
+            onRemove: id => handleRemoveWidget(id),
+          } : {}}
         />
       </div>
     </div>
@@ -2548,7 +2741,9 @@ export default function App() {
 
   function handleCreatorComplete(newState) {
     const id = generateCharId();
-    saveCharState(id, { ...createDefaultState(), ...newState, system: newState.system || activeSystem });
+    const system = newState.system || activeSystem;
+    const base = system === 'custom' ? {} : createDefaultState();
+    saveCharState(id, { ...base, ...newState, system });
     setActiveCharId(id);
     setActive(id);
     setChars(loadCharsIndex());

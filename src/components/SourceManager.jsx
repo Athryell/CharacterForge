@@ -17,19 +17,16 @@ function checkDraftHasContent() {
   } catch { return false; }
 }
 
-function countLabel(counts) {
-  const parts = [];
-  if (counts.classes)     parts.push(`${counts.classes} classi`);
-  if (counts.subclasses)  parts.push(`${counts.subclasses} sottoclassi`);
-  if (counts.species)     parts.push(`${counts.species} specie`);
-  if (counts.backgrounds) parts.push(`${counts.backgrounds} background`);
-  if (counts.spells)      parts.push(`${counts.spells} incantesimi`);
-  if (counts.weapons)     parts.push(`${counts.weapons} armi`);
-  if (counts.armors)      parts.push(`${counts.armors} armature`);
-  if (counts.items)       parts.push(`${counts.items} oggetti`);
-  if (counts.conditions)  parts.push(`${counts.conditions} condizioni`);
-  if (counts.feats)       parts.push(`${counts.feats} talenti`);
-  return parts.join(', ') || 'nessuna entità';
+const COUNT_KEYS = [
+  'classes', 'subclasses', 'ancestries', 'communities', 'species', 'backgrounds',
+  'spells', 'weapons', 'armors', 'items', 'conditions', 'feats',
+];
+
+function countLabel(counts, t) {
+  const parts = COUNT_KEYS
+    .filter(k => counts[k])
+    .map(k => `${counts[k]} ${t(`sources.entities.${k}`, { count: counts[k] })}`);
+  return parts.join(', ') || t('sources.entities.none');
 }
 
 function ExportSourcesModal({ sources, onClose, t }) {
@@ -211,6 +208,9 @@ export default function SourceManager({ onHomebrewChange }) {
           <div className="source-confirm-info">
             <strong>{pending.name || pending.id}</strong>
             {pending.author && <span> · {pending.author}</span>}
+            <span className="source-badge system" style={{ marginLeft: 6 }}>
+              {t(`system.${pending.system || 'dnd5e2024'}`, pending.system || 'dnd5e2024')}
+            </span>
           </div>
           {pending.description && (
             <div className="source-confirm-desc">{pending.description}</div>
@@ -227,7 +227,7 @@ export default function SourceManager({ onHomebrewChange }) {
               items:       (pending.items       || []).length,
               conditions:  (pending.conditions  || []).length,
               feats:       (pending.feats       || []).length,
-            })}
+            }, t)}
           </div>
           <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
             <button className="io-btn primary" onClick={confirmImport}>
@@ -242,7 +242,7 @@ export default function SourceManager({ onHomebrewChange }) {
       {importStatus && (
         <div className={`source-status ${importStatus.ok ? 'ok' : 'err'}`}>
           {importStatus.ok
-            ? `✓ "${importStatus.name}" importato — ${countLabel(importStatus.counts || {})}.`
+            ? `✓ "${importStatus.name}" importato — ${countLabel(importStatus.counts || {}, t)}.`
             : importStatus.errors.map((e, i) => <div key={i}><Icon id="action.remove" size={13} /> {e}</div>)
           }
         </div>
@@ -255,6 +255,9 @@ export default function SourceManager({ onHomebrewChange }) {
             <div className="source-item-header">
               <span className={`source-badge ${src.type}`}>
                 {src.type === 'srd' ? 'SRD' : 'Homebrew'}
+              </span>
+              <span className="source-badge system">
+                {t(`system.${src.system || 'dnd5e2024'}`, src.system || 'dnd5e2024')}
               </span>
               <span className="source-name">{src.name}</span>
               {src.author && <span className="source-author">— {src.author}</span>}
@@ -277,7 +280,7 @@ export default function SourceManager({ onHomebrewChange }) {
                 </div>
               )}
             </div>
-            <div className="source-counts">{countLabel(src.counts || {})}</div>
+            <div className="source-counts">{countLabel(src.counts || {}, t)}</div>
             {src.description && <div className="source-desc">{src.description}</div>}
           </div>
         ))}

@@ -8,10 +8,12 @@ export default function WidgetShell({
   onDragStart, onDragOver, onDrop,
   onMoveToTab, onToggleVisible, onToggleFullWidth, onToggleBottomFull,
   isDragOver,
+  systemId, onEdit, onRemove,
 }) {
   const { t } = useTranslation();
   const [showMenu, setShowMenu] = useState(false);
   const label = t(getWidgetLabel(id));
+  const isCustom = systemId === 'custom';
 
   return (
     <div
@@ -38,22 +40,38 @@ export default function WidgetShell({
             </button>
           )}
 
-          <div style={{ position:'relative' }}>
-            <button className="widget-action-btn" onClick={() => setShowMenu(v => !v)}>{t('layout.moveTo')}</button>
-            {showMenu && (
-              <div className="widget-tab-menu">
-                <div className="widget-tab-menu-title">{t('layout.moveToTitle')}</div>
-                {ALL_TABS.map(tab => (
-                  <button key={tab.id} className="widget-tab-menu-item"
-                    onClick={() => { onMoveToTab(id, tab.id); setShowMenu(false); }}>
-                    {tab.icon} {t(tab.label)}
-                  </button>
-                ))}
+          {isCustom ? (
+            <>
+              {onEdit && (
+                <button className="widget-action-btn" onClick={() => onEdit(id)}>
+                  {t('customWidgets.editWidget')}
+                </button>
+              )}
+              {onRemove && (
+                <button className="widget-action-btn danger" onClick={() => onRemove(id)}>
+                  {t('customWidgets.removeWidget')}
+                </button>
+              )}
+            </>
+          ) : (
+            <>
+              <div style={{ position:'relative' }}>
+                <button className="widget-action-btn" onClick={() => setShowMenu(v => !v)}>{t('layout.moveTo')}</button>
+                {showMenu && (
+                  <div className="widget-tab-menu">
+                    <div className="widget-tab-menu-title">{t('layout.moveToTitle')}</div>
+                    {ALL_TABS.map(tab => (
+                      <button key={tab.id} className="widget-tab-menu-item"
+                        onClick={() => { onMoveToTab(id, tab.id); setShowMenu(false); }}>
+                        {tab.icon} {t(tab.label)}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-
-          <button className="widget-action-btn danger" onClick={() => onToggleVisible(id)}>{t('layout.hide')}</button>
+              <button className="widget-action-btn danger" onClick={() => onToggleVisible(id)}>{t('layout.hide')}</button>
+            </>
+          )}
         </div>
       )}
       <div className="widget-content">{children}</div>

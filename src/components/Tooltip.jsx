@@ -40,7 +40,7 @@ const COUNT_NOTATION_RE = /\[count(CHA|STR|DEX|CON|INT|WIS|PRO|LVL\/2|LVL\*\d+|L
 
 // Resolve [ATTR], [PRO], [LVL], [LVL/2], [LVL=N:...] and +[PRO]@[STAT] notations.
 // Supports D&D ([STR],[FOR],...) and DH ([AGI],[FIN],...) traits via optional traitMap.
-export function resolveNotations(text, abilities, charLevel, profBonus, traitMap = null) {
+export function resolveNotations(text, abilities, charLevel, profBonus, traitMap = null, customFields = null) {
   if (!text) return text;
 
   // Helper: resolve a bracketed value token
@@ -102,7 +102,20 @@ export function resolveNotations(text, abilities, charLevel, profBonus, traitMap
   );
 
   // 4. Cleanup double signs
-  return result.replace(/\+-/g, '-').replace(/--/g, '+');
+  result = result.replace(/\+-/g, '-').replace(/--/g, '+');
+
+  // 5. Custom fields — [FIELDID], [FIELDID.current], [FIELDID.max]
+  if (customFields) {
+    result = result.replace(/\[([A-Z][A-Z0-9_]*)(?:\.(max|current))?\]/gi, (match, id, prop) => {
+      const field = customFields[id.toUpperCase()];
+      if (field === undefined) return match;
+      if (prop === 'max')     return typeof field === 'object' ? String(field.max     ?? 0) : match;
+      if (prop === 'current') return typeof field === 'object' ? String(field.current ?? 0) : match;
+      return typeof field === 'object' ? String(field.current ?? 0) : String(field);
+    });
+  }
+
+  return result;
 }
 
 // Small hint bar shown below description textareas
@@ -179,7 +192,7 @@ const COUNTER_NOTATION_PARSE = /^\[(\d+)\]$/;
 
 export function KeywordText({ text, onRoll, label, counters, onCounterChange }) {
   const { t: tUi } = useTranslation();
-  const { abilities, traitValues, charLevel, profBonus, systemId } = useCharContext();
+  const { abilities, traitValues, charLevel, profBonus, systemId, customFields } = useCharContext();
   const glossary = useKeywordGlossary();
 
   const traitMap = systemId === 'daggerheart'
@@ -200,7 +213,7 @@ export function KeywordText({ text, onRoll, label, counters, onCounterChange }) 
   }, [glossary]);
 
   const hasDynamic = DYNAMIC_NOTATION_RE.test(text || '');
-  const resolved = resolveNotations(text, abilities, charLevel, profBonus, traitMap);
+  const resolved = resolveNotations(text, abilities, charLevel, profBonus, traitMap, customFields || null);
   if (!resolved) return null;
 
   const DICE_REGEX = /(\d*d\d+(?:\s*[+-]\s*\d+)*)/gi;

@@ -4,6 +4,7 @@
 
 import dnd5eAdapter   from './systems/dnd5e2024/adapter';
 import dhAdapter      from './systems/daggerheart/adapter';
+import customAdapter  from './systems/custom/adapter';
 
 // Raw data for SRD counts in getSources()
 import { DND_SPELLS }      from './systems/dnd5e2024/spells';
@@ -14,6 +15,13 @@ import { DND_ARMOR_PRESETS } from './systems/dnd5e2024/armors';
 import { SRD_ITEMS }        from './systems/dnd5e2024/items';
 import { DND_SPECIES }     from './systems/dnd5e2024/species';
 import { DND_BACKGROUNDS } from './systems/dnd5e2024/backgrounds';
+
+// Raw data for Daggerheart Core counts in getSources()
+import { DH_CLASSES, DH_SUBCLASSES } from './systems/daggerheart/classes';
+import { DH_WEAPONS as DH_WEAPONS_RAW } from './systems/daggerheart/weapons';
+import { DH_ARMORS }     from './systems/daggerheart/armor';
+import { DH_CONDITIONS as DH_CONDITIONS_RAW } from './systems/daggerheart/conditions';
+import { DH_ANCESTRIES, DH_COMMUNITIES } from './systems/daggerheart/mechanics';
 
 // ── i18n — D&D 5e (da nuova posizione) ──────────────────────────────────────
 import spellsEN      from './systems/dnd5e2024/i18n/spells.i18n.json';
@@ -59,6 +67,7 @@ const I18N = {
 const ADAPTERS = {
   dnd5e2024:   dnd5eAdapter,
   daggerheart: dhAdapter,
+  custom:      customAdapter,
 };
 
 const HOMEBREW_KEY   = 'characterforge_homebrew';
@@ -85,6 +94,10 @@ function saveHomebrew(sources) {
   catch (e) { console.error('dataManager: failed to save homebrew', e); }
 }
 
+function loadHomebrewForSystem(systemId) {
+  return loadHomebrew().filter(s => (s.system || 'dnd5e2024') === systemId);
+}
+
 function getCurrentLang() {
   try { return window.__i18n_lang__ || 'en'; }
   catch { return 'en'; }
@@ -100,7 +113,7 @@ const dataManager = {
   getSpells(lang = getCurrentLang(), systemId = 'dnd5e2024') {
     const adapter = this.getAdapter(systemId);
     const tr = loadI18n('spells', lang);
-    const hb = loadHomebrew().flatMap(s => s.spells || []);
+    const hb = loadHomebrewForSystem(systemId).flatMap(s => s.spells || []);
     const srd = adapter.getSpells?.(lang, tr) || [];
     return adapter.mergeHomebrew ? adapter.mergeHomebrew(srd, hb, 'spells') : srd;
   },
@@ -109,7 +122,7 @@ const dataManager = {
   getWeapons(lang = getCurrentLang(), systemId = 'dnd5e2024') {
     const adapter = this.getAdapter(systemId);
     const tr = loadI18n('weapons', lang);
-    const hb = loadHomebrew().flatMap(s => s.weapons || []);
+    const hb = loadHomebrewForSystem(systemId).flatMap(s => s.weapons || []);
     const srd = adapter.getWeapons?.(lang, tr) || [];
     return adapter.mergeHomebrew ? adapter.mergeHomebrew(srd, hb, 'weapons') : srd;
   },
@@ -118,7 +131,7 @@ const dataManager = {
   getConditions(lang = getCurrentLang(), systemId = 'dnd5e2024') {
     const adapter = this.getAdapter(systemId);
     const tr = loadI18n('conditions', lang);
-    const hb = loadHomebrew().flatMap(s => s.conditions || []);
+    const hb = loadHomebrewForSystem(systemId).flatMap(s => s.conditions || []);
     const srd = adapter.getConditions?.(lang, tr) || [];
     return adapter.mergeHomebrew ? adapter.mergeHomebrew(srd, hb, 'conditions') : srd;
   },
@@ -127,7 +140,7 @@ const dataManager = {
   getClasses(lang = getCurrentLang(), systemId = 'dnd5e2024') {
     const adapter = this.getAdapter(systemId);
     if (systemId !== 'dnd5e2024') return adapter.getClasses?.() || [];
-    const hbNames = loadHomebrew()
+    const hbNames = loadHomebrewForSystem('dnd5e2024')
       .flatMap(s => (s.classes || []).map(c => c.name))
       .filter(n => !DND_CLASS_NAMES.includes(n));
     return [...adapter.getClasses(), ...hbNames];
@@ -139,7 +152,7 @@ const dataManager = {
     const tr = loadI18n('classes', lang);
     const cls = adapter.getClassData(name, tr);
     if (cls) return cls;
-    for (const src of loadHomebrew()) {
+    for (const src of loadHomebrewForSystem('dnd5e2024')) {
       const hbCls = (src.classes || []).find(c => c.name === name);
       if (hbCls) return { ...hbCls, _homebrew: true };
     }
@@ -151,7 +164,7 @@ const dataManager = {
     const tr = loadI18n('species', lang);
     const srd = dnd5eAdapter.getSpecies(lang, tr);
     const srdIds = DND_SPECIES.map(s => s.id);
-    const hbExtra = loadHomebrew()
+    const hbExtra = loadHomebrewForSystem('dnd5e2024')
       .flatMap(s => s.species || [])
       .filter(sp => !srdIds.includes(sp.id || sp.name))
       .map(sp => ({ id: sp.id || sp.name, name: sp.name, _homebrew: true }));
@@ -162,7 +175,7 @@ const dataManager = {
     const tr = loadI18n('species', lang);
     const srd = DND_SPECIES.find(s => s.id === id);
     if (srd) return { ...srd, ...(tr[id] || {}) };
-    for (const src of loadHomebrew()) {
+    for (const src of loadHomebrewForSystem('dnd5e2024')) {
       const sp = (src.species || []).find(s => s.id === id || s.name === id);
       if (sp) return { ...sp, _homebrew: true };
     }
@@ -174,7 +187,7 @@ const dataManager = {
     const tr = loadI18n('backgrounds', lang);
     const srd = dnd5eAdapter.getBackgrounds(lang, tr);
     const srdIds = DND_BACKGROUNDS.map(b => b.id);
-    const hbExtra = loadHomebrew()
+    const hbExtra = loadHomebrewForSystem('dnd5e2024')
       .flatMap(s => s.backgrounds || [])
       .filter(b => !srdIds.includes(b.id))
       .map(b => ({ ...b, _homebrew: true }));
@@ -186,7 +199,7 @@ const dataManager = {
     const adapter = this.getAdapter(systemId);
     if (systemId !== 'dnd5e2024') return adapter.getArmors?.() || [];
     const srdIds = DND_ARMOR_PRESETS.map(a => a.id);
-    const hbExtra = loadHomebrew()
+    const hbExtra = loadHomebrewForSystem('dnd5e2024')
       .flatMap(s => s.armors || [])
       .filter(a => !srdIds.includes(a.id || a.name))
       .map(a => ({ ...a, id: a.id || a.name, _homebrew: true }));
@@ -196,7 +209,7 @@ const dataManager = {
   // ── Oggetti ──────────────────────────────────────────────────────────────
   getItems() {
     const srdIds = SRD_ITEMS.map(i => i.id);
-    const hbExtra = loadHomebrew()
+    const hbExtra = loadHomebrewForSystem('dnd5e2024')
       .flatMap(s => s.items || [])
       .filter(i => !srdIds.includes(i.id || i.name))
       .map(i => ({ ...i, id: i.id || i.name, _homebrew: true }));
@@ -205,12 +218,12 @@ const dataManager = {
 
   // ── Sottoclassi ──────────────────────────────────────────────────────────
   getSubclasses(cls) {
-    return loadHomebrew()
+    return loadHomebrewForSystem('dnd5e2024')
       .flatMap(s => (s.subclasses || []).filter(sc => sc.class === cls).map(sc => sc.name));
   },
 
   getSubclassDetails(charClass, subclassName) {
-    for (const src of loadHomebrew()) {
+    for (const src of loadHomebrewForSystem('dnd5e2024')) {
       const sc = (src.subclasses || []).find(s => s.class === charClass && s.name === subclassName);
       if (sc) return sc;
     }
@@ -229,8 +242,18 @@ const dataManager = {
       conditions:  DND_CONDITIONS.length,
       items:       SRD_ITEMS.length,
     };
+    const dhCoreCounts = {
+      classes:    DH_CLASSES.length,
+      subclasses: Object.keys(DH_SUBCLASSES).length,
+      ancestries: DH_ANCESTRIES.length,
+      communities: DH_COMMUNITIES.length,
+      weapons:    DH_WEAPONS_RAW.length,
+      armors:     DH_ARMORS.length,
+      conditions: DH_CONDITIONS_RAW.length,
+    };
     return [
-      { id: 'srd', name: 'SRD 5.2.1', author: 'Wizards of the Coast', type: 'srd', counts: srdCounts },
+      { id: 'srd', name: 'SRD 5.2.1', author: 'Wizards of the Coast', system: 'dnd5e2024', type: 'srd', counts: srdCounts },
+      { id: 'dh-core', name: 'Daggerheart Core', author: 'Darrington Press', system: 'daggerheart', type: 'srd', counts: dhCoreCounts },
       ...hb.map(s => ({
         ...s,
         type: 'homebrew',
@@ -282,6 +305,7 @@ const dataManager = {
       name: 'Il mio Homebrew',
       author: '',
       description: '',
+      system: 'dnd5e2024',
       classes: [],
       subclasses: [],
       species: [],

@@ -1,18 +1,40 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCharContext } from './CharContext';
 import { getNotationMenu } from '../config/notationMenus';
 
+const FIELD_GROUP = 'notation.group.customFields';
+
+// Custom-system fields are per-character, so they can't live in a static menu.
+// Labels are raw ids — t() passes unknown keys through unchanged.
+function customFieldItems(customFields) {
+  if (!customFields) return [];
+  return Object.entries(customFields).flatMap(([id, val]) => {
+    const items = [{
+      label: id, desc: 'notation.desc.customField',
+      insert: `[${id}]`, preview: `[${id}]`, group: FIELD_GROUP,
+    }];
+    if (val && typeof val === 'object') {
+      items.push({
+        label: `${id}.max`, desc: 'notation.desc.customFieldMax',
+        insert: `[${id}.max]`, preview: `[${id}.max]`, group: FIELD_GROUP,
+      });
+    }
+    return items;
+  });
+}
+
 export default function NotationTextarea({ value, onChange, className, style, ...props }) {
-  const { systemId } = useCharContext();
+  const { systemId, customFields } = useCharContext();
   const { t } = useTranslation();
   const [menu, setMenu] = useState(null);
   const [highlighted, setHighlighted] = useState(0);
   const ref = useRef();
 
-  const allItems = getNotationMenu(systemId).flatMap(g =>
-    g.items.map(item => ({ ...item, group: g.group }))
-  );
+  const allItems = useMemo(() => [
+    ...getNotationMenu(systemId).flatMap(g => g.items.map(item => ({ ...item, group: g.group }))),
+    ...customFieldItems(customFields),
+  ], [systemId, customFields]);
 
   function getQuery(text, cursorPos) {
     const before = text.slice(0, cursorPos);

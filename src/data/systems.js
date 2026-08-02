@@ -16,6 +16,14 @@ export const SYSTEMS = [
     icon: '🗡',
     defaultLayoutKey: 'daggerheart',
   },
+  {
+    id: 'custom',
+    name: 'Custom',
+    shortName: 'Custom',
+    description: 'Custom system — build your own sheet',
+    icon: 'dice-6',
+    defaultLayoutKey: 'custom',
+  },
 ];
 
 export const DEFAULT_SYSTEM = 'dnd5e2024';

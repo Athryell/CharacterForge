@@ -48,7 +48,8 @@
   "system": {
     "selector": "Game System",
     "dnd5e2024": "D&D 5.5e 2024",
-    "daggerheart": "Daggerheart"
+    "daggerheart": "Daggerheart",
+    "custom": "Custom"
   },
   "nav": {
     "newCharacter": "⚔ New",
@@ -381,7 +382,8 @@
       "bonuses": "Equipment bonuses",
       "saves": "Saving throw bonuses",
       "skills": "Skill bonuses",
-      "dynamic": "Dynamic bonuses"
+      "dynamic": "Dynamic bonuses",
+      "customFields": "Sheet fields"
     },
     "item": {
       "diceRoll": "Dice roll",
@@ -454,7 +456,9 @@
       "counter": "Toggleable pips (e.g. spell charges)",
       "counterDyn": "Counter whose size resolves from a formula",
       "bonus": "Passive bonus applied to this stat",
-      "dynamic": "Bonus whose value resolves from a formula (e.g. proficiency)"
+      "dynamic": "Bonus whose value resolves from a formula (e.g. proficiency)",
+      "customField": "Current value of this sheet field",
+      "customFieldMax": "Maximum value of this sheet field"
     }
   },
   "weapons": {
@@ -1243,6 +1247,21 @@
     }
   },
   "sources": {
+    "entities": {
+      "none": "no entities",
+      "classes_one": "class",           "classes_other": "classes",
+      "subclasses_one": "subclass",     "subclasses_other": "subclasses",
+      "ancestries_one": "ancestry",     "ancestries_other": "ancestries",
+      "communities_one": "community",   "communities_other": "communities",
+      "species_one": "species",         "species_other": "species",
+      "backgrounds_one": "background",  "backgrounds_other": "backgrounds",
+      "spells_one": "spell",            "spells_other": "spells",
+      "weapons_one": "weapon",          "weapons_other": "weapons",
+      "armors_one": "armor",            "armors_other": "armors",
+      "items_one": "item",              "items_other": "items",
+      "conditions_one": "condition",    "conditions_other": "conditions",
+      "feats_one": "feat",              "feats_other": "feats"
+    },
     "addData": "Add data",
     "importPackage": "Import package",
     "emptyTemplate": "Empty JSON template",
@@ -1279,6 +1298,65 @@
     "spellName": "E.g. Flame of Vengeance",
     "creatorSpeed": "18 m",
     "homebrewName": "My Homebrew",
-    "epicBoonName": "Boon of Combat Prowess"
+    "epicBoonName": "Boon of Combat Prowess",
+    "widgetLabel": "Widget label"
+  },
+  "customWidgets": {
+    "identity": "Identity",
+    "bar": "Bar",
+    "statGrid": "Stats",
+    "counter": "Counter",
+    "text": "Text Field",
+    "list": "List",
+    "toggleList": "Toggle List",
+    "inventory": "Inventory",
+    "notes": "Notes",
+    "log": "Log",
+    "addWidget": "Add widget",
+    "editWidget": "Edit widget",
+    "removeWidget": "Remove widget",
+    "fieldId": "Field ID (for notation)",
+    "fieldIdHint": "Optional. If set, use [ID] in text fields to reference this value.",
+    "noWidgets": "No widgets yet. Click + to add one.",
+    "systemName": "System name",
+    "systemNameHint": "e.g. Blades in the Dark, PbtA, OSR...",
+    "setFieldId": "Set a Field ID to enable notation",
+    "editMax": "Max",
+    "addStat": "+ Add stat",
+    "statLabel": "Label",
+    "statId": "ID (optional)",
+    "addItem": "+ Add item",
+    "emptyList": "No items yet",
+    "emptyToggleList": "No options yet. Add in edit mode.",
+    "addOption": "+ Add option",
+    "noConfig": "No configuration needed for this widget type.",
+    "chooseType": "Choose type",
+    "configure": "Color",
+    "colorAccent": "Accent",
+    "colorRed": "Red",
+    "colorBlue": "Blue",
+    "colorGreen": "Green",
+    "icon": "Icon",
+    "multiline": "Multiline (textarea)",
+    "itemFields": "Item fields",
+    "field_name": "Name",
+    "field_desc": "Description",
+    "field_value": "Value",
+    "field_notes": "Notes",
+    "addToSheet": "Add to sheet",
+    "removeWidgetConfirm": "Remove this widget?",
+    "addTab": "Add tab",
+    "removeTab": "Remove tab",
+    "tabHasWidgets": "This tab has widgets. Move or remove them first.",
+    "newTab": "New Tab",
+    "exportTemplate": "Export template",
+    "importTemplate": "Import template",
+    "importSuccess": "Template imported successfully",
+    "importError": "Invalid template file",
+    "importWarning": "Importing a template will replace your current layout. Character data will be preserved.",
+    "tabCharacter": "Character",
+    "tabInventory": "Inventory",
+    "tabNotes": "Notes",
+    "tabLog": "Log"
   }
 }

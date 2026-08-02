@@ -85,7 +85,8 @@
   "system": {
     "selector": "Game System",
     "dnd5e2024": "D&D 5.5e 2024",
-    "daggerheart": "Daggerheart"
+    "daggerheart": "Daggerheart",
+    "custom": "Custom"
   },
   "nav": {
     "newCharacter": "⚔ Nuovo",
@@ -418,7 +419,8 @@
       "bonuses": "Equipment bonuses",
       "saves": "Saving throw bonuses",
       "skills": "Skill bonuses",
-      "dynamic": "Dynamic bonuses"
+      "dynamic": "Dynamic bonuses",
+      "customFields": "Campi della scheda"
     },
     "item": {
       "diceRoll": "Dice roll",
@@ -491,7 +493,9 @@
       "counter": "Toggleable pips (e.g. spell charges)",
       "counterDyn": "Counter whose size resolves from a formula",
       "bonus": "Passive bonus applied to this stat",
-      "dynamic": "Bonus whose value resolves from a formula (e.g. proficiency)"
+      "dynamic": "Bonus whose value resolves from a formula (e.g. proficiency)",
+      "customField": "Valore corrente di questo campo della scheda",
+      "customFieldMax": "Valore massimo di questo campo della scheda"
     }
   },
   "weapons": {
@@ -1292,6 +1296,21 @@
     }
   },
   "sources": {
+    "entities": {
+      "none": "nessuna entità",
+      "classes_one": "classe",           "classes_other": "classi",
+      "subclasses_one": "sottoclasse",   "subclasses_other": "sottoclassi",
+      "ancestries_one": "ascendenza",    "ancestries_other": "ascendenze",
+      "communities_one": "comunità",     "communities_other": "comunità",
+      "species_one": "specie",           "species_other": "specie",
+      "backgrounds_one": "background",   "backgrounds_other": "background",
+      "spells_one": "incantesimo",       "spells_other": "incantesimi",
+      "weapons_one": "arma",             "weapons_other": "armi",
+      "armors_one": "armatura",          "armors_other": "armature",
+      "items_one": "oggetto",            "items_other": "oggetti",
+      "conditions_one": "condizione",    "conditions_other": "condizioni",
+      "feats_one": "talento",            "feats_other": "talenti"
+    },
     "addData": "Add data",
     "importPackage": "Import package",
     "emptyTemplate": "Empty JSON template",
@@ -1328,6 +1347,65 @@
     "spellName": "E.g. Flame of Vengeance",
     "creatorSpeed": "18 m",
     "homebrewName": "My Homebrew",
-    "epicBoonName": "Boon of Combat Prowess"
+    "epicBoonName": "Boon of Combat Prowess",
+    "widgetLabel": "Etichetta widget"
+  },
+  "customWidgets": {
+    "identity": "Identità",
+    "bar": "Barra",
+    "statGrid": "Statistiche",
+    "counter": "Contatore",
+    "text": "Campo testo",
+    "list": "Lista",
+    "toggleList": "Lista a spunta",
+    "inventory": "Inventario",
+    "notes": "Note",
+    "log": "Diario",
+    "addWidget": "Aggiungi widget",
+    "editWidget": "Modifica widget",
+    "removeWidget": "Rimuovi widget",
+    "fieldId": "ID campo (per notazione)",
+    "fieldIdHint": "Opzionale. Se impostato, usa [ID] nei campi testo per riferire questo valore.",
+    "noWidgets": "Nessun widget. Clicca + per aggiungerne uno.",
+    "systemName": "Nome del sistema",
+    "systemNameHint": "es. Blades in the Dark, PbtA, OSR...",
+    "setFieldId": "Imposta un Field ID per abilitare la notazione",
+    "editMax": "Max",
+    "addStat": "+ Aggiungi stat",
+    "statLabel": "Etichetta",
+    "statId": "ID (opzionale)",
+    "addItem": "+ Aggiungi voce",
+    "emptyList": "Nessuna voce",
+    "emptyToggleList": "Nessuna opzione. Aggiungine in modalità modifica.",
+    "addOption": "+ Aggiungi opzione",
+    "noConfig": "Nessuna configurazione necessaria per questo tipo di widget.",
+    "chooseType": "Scegli tipo",
+    "configure": "Colore",
+    "colorAccent": "Accento",
+    "colorRed": "Rosso",
+    "colorBlue": "Blu",
+    "colorGreen": "Verde",
+    "icon": "Icona",
+    "multiline": "Multiriga (textarea)",
+    "itemFields": "Campi voce",
+    "field_name": "Nome",
+    "field_desc": "Descrizione",
+    "field_value": "Valore",
+    "field_notes": "Note",
+    "addToSheet": "Aggiungi alla scheda",
+    "removeWidgetConfirm": "Rimuovere questo widget?",
+    "addTab": "Aggiungi tab",
+    "removeTab": "Rimuovi tab",
+    "tabHasWidgets": "Questo tab ha widget. Spostali o rimuovili prima.",
+    "newTab": "Nuova tab",
+    "exportTemplate": "Esporta template",
+    "importTemplate": "Importa template",
+    "importSuccess": "Template importato con successo",
+    "importError": "File template non valido",
+    "importWarning": "Importare un template sostituirà il layout attuale. I dati del personaggio saranno preservati.",
+    "tabCharacter": "Personaggio",
+    "tabInventory": "Inventario",
+    "tabNotes": "Note",
+    "tabLog": "Diario"
   }
 }

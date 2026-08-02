@@ -136,8 +136,60 @@ const strPenaltyText = `${toDisplaySpeed(10)} ${speedUnit === 'sq' ? '□' : spe
 
 ### Multi-system support — `src/data/systems.js`
 
-L'app gestisce due sistemi (`dnd5e2024`, `daggerheart`). `activeSystem` è memorizzato in `localStorage`.
+L'app gestisce tre sistemi (`dnd5e2024`, `daggerheart`, `custom`). `activeSystem` è memorizzato in `localStorage`.
 Ogni sistema ha la propria cartella dati, layout widget e creatore personaggio.
+
+### Custom system — `src/data/systems/custom/`
+
+Il sistema `custom` permette di creare schede agnostiche senza regole predefinite.
+Non ha character creator — la scheda si apre direttamente con widget di default.
+
+**`mechanics.js`** — `CUSTOM_WIDGET_TYPES`, `createCustomDefaultState()`
+**`adapter.js`** — stub per compatibilità con dataManager; `getWidgetTypes()`
+
+**Tipi di widget disponibili:**
+`identity`, `bar`, `stat-grid`, `counter`, `text`, `list`, `toggle-list`, `inventory`, `notes`, `log`
+Definiti in `CUSTOM_WIDGET_TYPES` — aggiungere nuovi tipi qui e in `CustomWidget.jsx`.
+
+**Struttura state personaggio custom:**
+
+- `state.widgets` — array di widget configurati `{id, type, tab, col, order, config}`
+- `state.tabs` — tab configurate dall'utente `{id, label, icon, visible}`
+- `state.customFields` — valori dei campi `{ FIELDID: N | { current, max } }`
+
+⚠ **`col` accetta solo `0` (colonna sinistra) e `1` (destra).** `WidgetGrid` filtra
+esattamente su questi due valori: un widget con `col: 2` e `fullWidth: false` non
+finisce in nessuna colonna e **non viene renderizzato affatto**, senza errori.
+
+⚠ **Le tab del sistema custom hanno due fonti di verità**: lo state React `tabs`
+(persistito in `characterforge_tabs_custom`) e `state.tabs` nel personaggio, che è
+ciò che `exportCustomTemplate` serializza. Ogni mutazione deve passare da
+`commitTabs()` in `App.jsx`, che aggiorna entrambe — altrimenti divergono in silenzio
+e l'export del template perde le modifiche.
+
+`label` delle tab di default è una chiave i18n (`customWidgets.tab*`); le tab create
+dall'utente contengono un literale già tradotto. `TabBar` fa `t(tab.label)`, che
+restituisce invariate le chiavi sconosciute, quindi entrambi i casi funzionano.
+
+**Notazione custom fields:**
+Se un widget ha `config.fieldId = 'MANA'`:
+
+- `[MANA]` → valore corrente (number) o current se `{ current, max }`
+- `[MANA.max]` → max se il campo è `{ current, max }`
+- I custom fields appaiono nel menu `/` come gruppo dinamico, generato da
+  `customFieldItems()` in `NotationTextarea.jsx` leggendo `customFields` dal
+  `CharContext` — non da `notationMenus.js`, che per `custom` contiene solo dadi e counter
+
+**Export/import template:**
+
+- Template = `{ templateName, tabs, widgets }` — solo struttura, senza dati personaggio
+- Disponibile nel menu hamburger quando `activeSystem === 'custom'`
+- Import sostituisce layout mantenendo `customFields`, `inventory`, `log`, `charName`
+
+**Il sistema custom non supporta homebrew.** Il dropdown di `HomebrewEditor` è
+generato da `Object.keys(HOMEBREW_SCHEMA)`, che ha solo `dnd5e2024` e `daggerheart`:
+un sistema senza schema non può essere selezionato. La condivisione per `custom`
+avviene tramite export/import di template.
 
 ### Data layer — `src/data/`
 
@@ -213,6 +265,11 @@ Ogni widget ha un `renderWidget(id)` corrispondente in `App.jsx`.
 
 Tab D&D 5e: `main`, `combat`, `spells`, `inventory`, `notes`, `log`.
 
+Il sistema `custom` non usa `WIDGET_DEFS` fissi. I widget sono definiti in `state.widgets`
+e renderizzati dinamicamente da `CustomWidget`. `WidgetGrid` e `WidgetShell` sono riutilizzati
+invariati. In edit mode `WidgetEditor` permette di aggiungere/rimuovere/configurare widget
+e `TabBar` permette di aggiungere/rimuovere tab.
+
 ### Main component — `src/App.jsx`
 
 Componenti locali (definiti nel file prima di `CharacterApp`):
@@ -260,9 +317,12 @@ L'editor (`SubclassFeaturesEditor`) è nel widget Identità (edit mode). LevelUp
 
 - `AlignmentPicker.jsx` — griglia 3×3 per la selezione allineamento (usato in identity widget + creator D&D)
 - `FeatureManager.jsx` — feature di classe/specie/sottoclasse con badge `Lv. N` se `acquiredAtLevel` è impostato
+- `PresetBrowser.jsx` — browser preset generico riutilizzabile; prop `groupBy` per raggruppare per chiave; usato da `WeaponManager`, `ArmorManager`, `InventoryManager`
 - `SpellManager.jsx`, `WeaponManager.jsx`, `ArmorManager.jsx`, `InventoryManager.jsx` — manager con badge livello e pattern preset-browser
 - `DHWeaponManager.jsx`, `DHArmorManager.jsx` — versioni Daggerheart degli stessi manager
-- `ConditionTracker.jsx` — tracker condizioni, usato da DnD e DH (da unificare in Fase refactor futura)
+- `ConditionTracker.jsx` — tracker condizioni unificato per DnD e DH; prop `collapsible` (default `true`), stato aperto/chiuso in `localStorage`
+- `custom/CustomWidget.jsx` — renderer generico per widget custom; switch su `widget.type`
+- `custom/WidgetEditor.jsx` — modale per aggiungere/configurare widget in edit mode
 - `LevelUpModal.jsx`, `LevelDownModal.jsx` — vedi sopra
 - `Tooltip.jsx` — `resolveNotations()`, `KeywordText`, `NotationHelpBar`, `KEYWORD_GLOSSARY`
 - `NotationTextarea.jsx` — textarea con menu slash-command per la notazione
@@ -276,7 +336,7 @@ L'editor (`SubclassFeaturesEditor`) è nel widget Identità (edit mode). LevelUp
 
 ### Notation system — `src/components/Tooltip.jsx`
 
-`resolveNotations(text, abilities, charLevel, profBonus, traitMap?)` — risolve:
+`resolveNotations(text, abilities, charLevel, profBonus, traitMap?, customFields?)` — risolve:
 
 ```
 [STR][DEX][CON][INT][WIS][CHA]   → modificatore abilità
@@ -302,6 +362,12 @@ Esempio:
 
 `KeywordText` usa `useCharContext()` senza prop drilling.
 `NotationHelpBar` mostra la reference rapida della sintassi — aggiornala se aggiungi nuovi token.
+
+**Custom fields** — quando `activeSystem === 'custom'`:
+`resolveNotations` riceve `customFields` da `CharContext`.
+`[FIELDID]` → valore grezzo dal campo custom (non applica modificatori)
+`[FIELDID.max]` → max del campo se è `{ current, max }`
+`[FIELDID.current]` → alias di `[FIELDID]`
 
 ### Homebrew system — `src/utils/homebrewSync.js`
 
@@ -376,3 +442,11 @@ Eventi principali: `system-selected`, `creator-opened`, `character-created`, `ch
 - 7 componenti aggiornati per usare adapter invece di import diretti:
   `WeaponManager`, `SpellManager`, `ArmorManager`, `ConditionTracker`, `AlignmentPicker`, `DHWeaponManager`, `DHArmorManager`
 - `ActionManager`: `SCHOOLS` via adapter
+
+### 2026-06-26 — Refactor Fase 3a + sistema custom
+
+- Estratto `PresetBrowser` generico, applicato a `WeaponManager`, `ArmorManager`, `InventoryManager`
+- `ConditionTracker` unificato per DnD e DH — collapsible, pills, adapter-aware
+- Sistema `custom` aggiunto: `CustomWidget`, `WidgetEditor`, export/import template
+- Notazione estesa con `customFields` — `[FIELDID]`, `[FIELDID.max]`
+- Aggiunte variabili CSS `--c-bar-red`, `--c-bar-blue` per i colori widget custom
