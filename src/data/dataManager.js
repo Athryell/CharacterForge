@@ -2,26 +2,26 @@
 // Singleton che fonde dati SRD built-in con pacchetti homebrew salvati in localStorage.
 // I pacchetti homebrew NON vanno mai nel codice sorgente o nel repo.
 
-import dnd5eAdapter   from './systems/dnd5e2024/adapter';
-import dhAdapter      from './systems/daggerheart/adapter';
-import customAdapter  from './systems/custom/adapter';
+import dnd5eAdapter   from '../systems/dnd5e2024/data/adapter';
+import dhAdapter      from '../systems/daggerheart/data/adapter';
+import customAdapter  from '../systems/custom/data/adapter';
 
 // Raw data for SRD counts in getSources()
-import { DND_SPELLS }      from './systems/dnd5e2024/spells';
-import { DND_WEAPONS }     from './systems/dnd5e2024/weapons';
-import { DND_CONDITIONS }  from './systems/dnd5e2024/conditions';
-import { DND_CLASS_NAMES } from './systems/dnd5e2024/classes';
-import { DND_ARMOR_PRESETS } from './systems/dnd5e2024/armors';
-import { SRD_ITEMS }        from './systems/dnd5e2024/items';
-import { DND_SPECIES }     from './systems/dnd5e2024/species';
-import { DND_BACKGROUNDS } from './systems/dnd5e2024/backgrounds';
+import { DND_SPELLS }      from '../systems/dnd5e2024/data/spells';
+import { DND_WEAPONS }     from '../systems/dnd5e2024/data/weapons';
+import { DND_CONDITIONS }  from '../systems/dnd5e2024/data/conditions';
+import { DND_CLASS_NAMES } from '../systems/dnd5e2024/data/classes';
+import { DND_ARMOR_PRESETS } from '../systems/dnd5e2024/data/armors';
+import { SRD_ITEMS }        from '../systems/dnd5e2024/data/items';
+import { DND_SPECIES }     from '../systems/dnd5e2024/data/species';
+import { DND_BACKGROUNDS } from '../systems/dnd5e2024/data/backgrounds';
 
 // Raw data for Daggerheart Core counts in getSources()
-import { DH_CLASSES, DH_SUBCLASSES } from './systems/daggerheart/classes';
-import { DH_WEAPONS as DH_WEAPONS_RAW } from './systems/daggerheart/weapons';
-import { DH_ARMORS }     from './systems/daggerheart/armor';
-import { DH_CONDITIONS as DH_CONDITIONS_RAW } from './systems/daggerheart/conditions';
-import { DH_ANCESTRIES, DH_COMMUNITIES } from './systems/daggerheart/mechanics';
+import { DH_CLASSES, DH_SUBCLASSES } from '../systems/daggerheart/data/classes';
+import { DH_WEAPONS as DH_WEAPONS_RAW } from '../systems/daggerheart/data/weapons';
+import { DH_ARMORS }     from '../systems/daggerheart/data/armor';
+import { DH_CONDITIONS as DH_CONDITIONS_RAW } from '../systems/daggerheart/data/conditions';
+import { DH_ANCESTRIES, DH_COMMUNITIES } from '../systems/daggerheart/data/mechanics';
 
 // ── i18n — D&D 5e (da nuova posizione) ──────────────────────────────────────
 import spellsEN      from './systems/dnd5e2024/i18n/spells.i18n.json';

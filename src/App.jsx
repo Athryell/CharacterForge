@@ -9,19 +9,19 @@ import {
   createDefaultState, ABILITIES, SKILLS,
   SPELLCASTING_CLASS, getMod, fmtMod, HIT_DICE,
   resolveResourceFormula, getProfBonus,
-} from './data/systems/dnd5e2024/mechanics';
+} from './systems/dnd5e2024/data/mechanics';
 import dataManager from './data/dataManager';
 import SourceManager from './components/SourceManager';
 import HomebrewEditor from './components/HomebrewEditor';
 import CharacterCreator from './components/CharacterCreator';
-import LevelUpModal from './components/LevelUpModal';
-import LevelDownModal from './components/LevelDownModal';
+import LevelUpModal from './systems/dnd5e2024/components/LevelUpModal';
+import LevelDownModal from './systems/dnd5e2024/components/LevelDownModal';
 import ConditionTracker from './components/ConditionTracker';
-import CustomWidget from './components/custom/CustomWidget';
-import WidgetEditor from './components/custom/WidgetEditor';
+import CustomWidget from './systems/custom/components/CustomWidget';
+import WidgetEditor from './systems/custom/components/WidgetEditor';
 import WeaponManager from './components/WeaponManager';
 import ArmorManager from './components/ArmorManager';
-import { calcArmorAC, DND_ARMOR_PRESETS } from './data/systems/dnd5e2024/armors';
+import { calcArmorAC, DND_ARMOR_PRESETS } from './systems/dnd5e2024/data/armors';
 import TabBar from './components/TabBar';
 import SpellManager from './components/SpellManager';
 import InventoryManager from './components/InventoryManager';
@@ -32,14 +32,14 @@ import PinnedBar, { loadPinned, savePinned } from './components/PinnedBar';
 import FeatureManager from './components/FeatureManager';
 import ActionManager from './components/ActionManager';
 import AlignmentPicker from './components/AlignmentPicker';
-import DHWeaponManager from './components/DHWeaponManager';
-import DHArmorManager from './components/DHArmorManager';
-import { CLASS_FEATURES, DND_CLASSES, getSubclassesForClass } from './data/systems/dnd5e2024/classes';
-import { SPECIES_FEATURES, getAutoFeatures } from './data/systems/dnd5e2024/species';
-import { BACKGROUND_FEATURES } from './data/systems/dnd5e2024/backgrounds';
+import DHWeaponManager from './systems/daggerheart/components/DHWeaponManager';
+import DHArmorManager from './systems/daggerheart/components/DHArmorManager';
+import { CLASS_FEATURES, DND_CLASSES, getSubclassesForClass } from './systems/dnd5e2024/data/classes';
+import { SPECIES_FEATURES, getAutoFeatures } from './systems/dnd5e2024/data/species';
+import { BACKGROUND_FEATURES } from './systems/dnd5e2024/data/backgrounds';
 import { getDefaultLayoutForSystem, getWidgetsForTab, loadLayoutForSystem, saveLayoutForSystem, loadTabsForSystem, saveTabsForSystem, getDefaultTabsForSystem, getWidgetLabel } from './layout';
-import { DH_TRAITS, DH_TRAIT_NAMES, rollDualityDice, getDHTier, getDHProficiency } from './data/systems/daggerheart/mechanics';
-import { getDHClasses, getDHDomains, getDHAncestries, getDHCommunities, getDHTraitUses } from './data/systems/daggerheart/getters';
+import { DH_TRAITS, DH_TRAIT_NAMES, rollDualityDice, getDHTier, getDHProficiency } from './systems/daggerheart/data/mechanics';
+import { getDHClasses, getDHDomains, getDHAncestries, getDHCommunities, getDHTraitUses } from './systems/daggerheart/data/getters';
 import { SYSTEMS, DEFAULT_SYSTEM, getSystem } from './data/systems';
 import { useTheme, ACCENT_PRESETS } from './hooks/useTheme';
 import { useUnits, parseSpeedFt } from './hooks/useUnits';

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import dataManager from '../data/dataManager';
+import dataManager from '../../../data/dataManager';
 
 function PipRow({ current, max, pipClass, onToggle, numeric }) {
   if (numeric) {

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Heart, Shield, Zap, Star, Flame, Droplets, Wind, Brain, Target, Clock } from 'lucide-react';
-import { Icon } from '../../config/icons';
-import InventoryManager from '../InventoryManager';
+import { Icon } from '../../../config/icons';
+import InventoryManager from '../../../components/InventoryManager';
 
 // Lucide icons available for bar widget config
 const BAR_ICON_MAP = {

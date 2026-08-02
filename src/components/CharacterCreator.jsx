@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import DNDCharacterCreator from './creators/DNDCharacterCreator';
-import DHCharacterCreator from './creators/DHCharacterCreator';
-import { createCustomDefaultState } from '../data/systems/custom/mechanics';
+import DNDCharacterCreator from '../systems/dnd5e2024/components/DNDCharacterCreator';
+import DHCharacterCreator from '../systems/daggerheart/components/DHCharacterCreator';
+import { createCustomDefaultState } from '../systems/custom/data/mechanics';
 
 function CustomCreatorBridge({ onComplete }) {
   useEffect(() => {

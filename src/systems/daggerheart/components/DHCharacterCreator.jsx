@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AlertTriangle } from 'lucide-react';
-import { Icon } from '../../config/icons';
-import { DH_TRAIT_ARRAY, DH_ANCESTRY_DATA, DH_COMMUNITY_DATA, createDHDefaultState, getDHProficiency } from '../../data/systems/daggerheart/mechanics';
-import { DH_CLASSES, DH_SUBCLASSES } from '../../data/systems/daggerheart/classes';
+import { Icon } from '../../../config/icons';
+import { DH_TRAIT_ARRAY, DH_ANCESTRY_DATA, DH_COMMUNITY_DATA, createDHDefaultState, getDHProficiency } from '../data/mechanics';
+import { DH_CLASSES, DH_SUBCLASSES } from '../data/classes';
 
 const DH_TRAITS_ORDER = ['AGI','STR','FIN','INS','PRE','KNO'];
 const DH_TRAIT_LABELS = { AGI:'Agility', STR:'Strength', FIN:'Finesse', INS:'Instinct', PRE:'Presence', KNO:'Knowledge' };

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
-import { Icon } from '../../config/icons';
-import { CUSTOM_WIDGET_TYPES } from '../../data/systems/custom/mechanics';
+import { Icon } from '../../../config/icons';
+import { CUSTOM_WIDGET_TYPES } from '../data/mechanics';
 
 const TYPES_REQUIRING_LABEL = new Set(['bar', 'counter', 'text', 'list', 'toggle-list']);
 const NO_CONFIG_TYPES = new Set(['identity', 'stat-grid', 'inventory', 'notes', 'log']);

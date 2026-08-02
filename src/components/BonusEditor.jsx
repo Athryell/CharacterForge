@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Icon } from '../config/icons';
-import { BONUS_STAT_OPTIONS } from '../data/bonuses';
+import { BONUS_STAT_OPTIONS } from '../systems/dnd5e2024/bonuses';
 
 export default function BonusEditor({ bonuses, onChange }) {
   const { t } = useTranslation();

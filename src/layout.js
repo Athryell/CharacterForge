@@ -1,6 +1,6 @@
 // Widget layout system
 // Each widget: id, tab, col (0=left,1=right), order, visible, fullWidth
-import { createCustomDefaultState } from './data/systems/custom/mechanics';
+import { createCustomDefaultState } from './systems/custom/data/mechanics';
 
 export const WIDGET_DEFS = [
   { id: 'identity',      label: 'widgets.identity',      defaultTab: 'main',      defaultCol: 0, defaultFullWidth: false },

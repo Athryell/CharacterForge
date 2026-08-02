@@ -1,7 +1,7 @@
 import React, { useState, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCharContext } from './CharContext';
-import { BONUS_STAT_OPTIONS } from '../data/bonuses';
+import { BONUS_STAT_OPTIONS } from '../systems/dnd5e2024/bonuses';
 
 // Hook: returns the keyword glossary for the active language.
 export function useKeywordGlossary() {

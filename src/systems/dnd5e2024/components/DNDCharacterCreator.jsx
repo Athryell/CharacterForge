@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AlertTriangle } from 'lucide-react';
-import { Icon } from '../../config/icons';
-import { ABILITIES, SKILLS, HIT_DICE, SPELLCASTING_CLASS, SLOT_TABLE } from '../../data/systems/dnd5e2024/mechanics';
-import AlignmentPicker from '../AlignmentPicker';
-import { CLASS_FEATURES, CLASS_SAVE_PROFS, CLASS_SKILL_COUNT, CLASS_SKILL_OPTIONS } from '../../data/systems/dnd5e2024/classes';
-import { DND_SPECIES, SPECIES_FEATURES, getAutoFeatures, getSpeciesData } from '../../data/systems/dnd5e2024/species';
-import { BACKGROUND_FEATURES } from '../../data/systems/dnd5e2024/backgrounds';
-import { ORIGIN_FEATS } from '../../data/systems/dnd5e2024/feats';
-import dataManager from '../../data/dataManager';
-import { syncCustomToDraft } from '../../utils/homebrewSync';
+import { Icon } from '../../../config/icons';
+import { ABILITIES, SKILLS, HIT_DICE, SPELLCASTING_CLASS, SLOT_TABLE } from '../data/mechanics';
+import AlignmentPicker from '../../../components/AlignmentPicker';
+import { CLASS_FEATURES, CLASS_SAVE_PROFS, CLASS_SKILL_COUNT, CLASS_SKILL_OPTIONS } from '../data/classes';
+import { DND_SPECIES, SPECIES_FEATURES, getAutoFeatures, getSpeciesData } from '../data/species';
+import { BACKGROUND_FEATURES } from '../data/backgrounds';
+import { ORIGIN_FEATS } from '../data/feats';
+import dataManager from '../../../data/dataManager';
+import { syncCustomToDraft } from '../../../utils/homebrewSync';
 
 
 const POINT_BUY_COSTS = { 8:0,9:1,10:2,11:3,12:4,13:5,14:7,15:9 };

@@ -64,7 +64,7 @@ No test suite. No linter script — ESLint runs via react-scripts.
 - Spaziature: multipli di 4px
 
 ### Accesso ai dati
-- MAI import diretti da `src/data/systems/*/` nei componenti
+- MAI import diretti da `src/systems/*/data/` nei componenti
 - Usa sempre `dataManager.getAdapter(systemId)` per i dati di sistema
 - `systemId` viene da `useCharContext()` — non hardcodarlo tranne nei componenti DH-specifici
 
@@ -139,7 +139,7 @@ const strPenaltyText = `${toDisplaySpeed(10)} ${speedUnit === 'sq' ? '□' : spe
 L'app gestisce tre sistemi (`dnd5e2024`, `daggerheart`, `custom`). `activeSystem` è memorizzato in `localStorage`.
 Ogni sistema ha la propria cartella dati, layout widget e creatore personaggio.
 
-### Custom system — `src/data/systems/custom/`
+### Custom system — `src/systems/custom/data/`
 
 Il sistema `custom` permette di creare schede agnostiche senza regole predefinite.
 Non ha character creator — la scheda si apre direttamente con widget di default.
@@ -191,6 +191,27 @@ generato da `Object.keys(HOMEBREW_SCHEMA)`, che ha solo `dnd5e2024` e `daggerhea
 un sistema senza schema non può essere selezionato. La condivisione per `custom`
 avviene tramite export/import di template.
 
+### Struttura per sistema — `src/systems/<id>/`
+
+Ogni sistema di gioco è una cartella auto-contenuta. Aggiungerne uno significa creare
+una cartella, non spargere `if (systemId === ...)` nel core.
+
+```text
+src/systems/<id>/
+  data/         # tabelle SRD + adapter — l'adapter è la sola API pubblica
+  components/   # componenti che esistono solo per questo sistema
+  bonuses.js    # (solo dnd5e2024) BONUS_STAT_OPTIONS
+
+src/data/
+  dataManager.js         # façade sugli adapter — resta condivisa
+  systems.js             # registry dei sistemi
+  systems/<id>/i18n/     # SOLO i JSON i18n, lasciati qui perché ancorati da crowdin.yml
+```
+
+I JSON i18n non sono stati spostati insieme al resto: `crowdin.yml` ne ancora i path e
+muoverli richiede di ri-mappare le sorgenti sul progetto Crowdin. `getters.js` di
+Daggerheart li raggiunge con `../../../data/systems/daggerheart/i18n/`.
+
 ### Data layer — `src/data/`
 
 **`src/data/dataManager.js`** — punto di accesso unificato SRD + homebrew:
@@ -199,7 +220,7 @@ avviene tramite export/import di template.
 - `addSource(json)`, `removeSource(id)` — gestione sorgenti homebrew
 - Homebrew salvato in `localStorage` (`characterforge_homebrew`)
 
-**`src/data/systems/dnd5e2024/adapter.js`** espone tutti i dati statici via metodi:
+**`src/systems/dnd5e2024/data/adapter.js`** espone tutti i dati statici via metodi:
 - `getAbilities()`, `getSkills()`, `getAlignments()`, `getHitDice()`, `getSlotTable()`
 - `getSpellcastingClass()`, `getSchools()`, `getSpellClasses()`, `filterSpells`
 - `getWeaponProperties()`, `getWeaponPropertyDescs()`, `getWeaponMasteries()`, `getAbilityOptions()`
@@ -207,17 +228,17 @@ avviene tramite export/import di template.
 - `getDefaultActions()`, `getClassFeatures(className)`
 - `getClasses()`, `getClassData(name)`, `getSpecies()`, `getBackgrounds()`, `getWeapons()`, `getArmors()`, `getConditions()`
 
-**`src/data/systems/daggerheart/adapter.js`** espone:
+**`src/systems/daggerheart/data/adapter.js`** espone:
 - `getTraits()`, `getTraitMap()`, `getAncestries()`, `getCommunities()`
 - `getClasses()`, `getClassData(name)`, `getWeapons()`, `getArmors()`, `getConditions()`
 - `getProficiency()`, `rollDuality()`, `calcThresholds()`, `createDefaultState()`
 
-**`src/data/systems/dnd5e2024/`**:
+**`src/systems/dnd5e2024/data/`**:
 - `mechanics.js` — `ABILITIES`, `SKILLS`, `ALIGNMENTS`, `SLOT_TABLE`, `SPELLCASTING_CLASS`, `DEFAULT_ACTIONS`, `createDefaultState()`
 - `classes.js` — `DND_CLASSES` con `levelData` (livelli × classe, SRD 5.2.1); `CLASS_FEATURES`, `CLASS_LEVEL_DATA`
 - `species.js`, `backgrounds.js`, `armors.js`, `weapons.js`, `spells.js`, `conditions.js`, `feats.js`, `items.js`
 
-**`src/data/systems/daggerheart/`**:
+**`src/systems/daggerheart/data/`**:
 - `mechanics.js` — `createDHDefaultState()`, `DH_TRAITS`, `DH_TRAIT_ARRAY`, `DH_ANCESTRIES`, `DH_COMMUNITIES`, `rollDualityDice()`, `getDHTier()`
   - `DH_ANCESTRY_DATA` — array 18 oggetti `{name, desc, features: [{name, desc}, {name, desc}]}`
   - `DH_COMMUNITY_DATA` — array 9 oggetti `{name, desc, feature: {name, desc}}`
@@ -225,7 +246,7 @@ avviene tramite export/import di template.
 - `classes.js` — `DH_CLASSES` con `suggestedTraits: {AGI,STR,FIN,INS,PRE,KNO}`; `DH_SUBCLASSES` — dizionario `{[subclassName]: {class, spellcastTrait?, foundation[], specialization[], mastery[]}}`
 - `weapons.js`, `armor.js`, `conditions.js`
 
-**`src/data/bonuses.js`** — `BONUS_STAT_OPTIONS`: CA, INI, VEL, HP, FOR–CAR, TS-FOR–TS-CAR.
+**`src/systems/dnd5e2024/bonuses.js`** — `BONUS_STAT_OPTIONS`: CA, INI, VEL, HP, FOR–CAR, TS-FOR–TS-CAR.
 
 **Nota post-refactor Fase 1-3b:**
 - Tutti gli alias `SRD_*` sono stati rimossi — usa solo i nomi canonici (`DND_CLASSES`, `DND_WEAPONS`, ecc.)
@@ -235,7 +256,7 @@ avviene tramite export/import di template.
 
 ### Pattern architetturale — accesso ai dati
 
-I componenti **non importano mai direttamente** da `src/data/systems/*/`. Usano sempre `dataManager.getAdapter(systemId)`:
+I componenti **non importano mai direttamente** da `src/systems/*/data/`. Usano sempre `dataManager.getAdapter(systemId)`:
 
 ```js
 const { systemId } = useCharContext();
@@ -250,10 +271,15 @@ const adapter = dataManager.getAdapter('daggerheart');
 const DH_WEAPONS = adapter.getWeapons();
 ```
 
-Eccezioni attuali con import diretti (candidate per refactor futuro — Fase 4):
-- `App.jsx` — importa da `dnd5e2024/*` direttamente
-- `LevelUpModal.jsx` — importa classi, meccaniche, specie, feats direttamente
-- `creators/DNDCharacterCreator.jsx` — importa meccaniche, classi, specie, background direttamente
+Eccezioni attuali con import diretti:
+
+- `App.jsx` — importa da `systems/dnd5e2024/data/*` e `systems/daggerheart/data/*` direttamente
+- `hooks/useCharacter.js` — importa `systems/dnd5e2024/data/mechanics`
+- `components/Tooltip.jsx` e `components/BonusEditor.jsx` — importano `systems/dnd5e2024/bonuses`
+- `components/ActionManager.jsx` — importa `SCHOOLS` da `systems/dnd5e2024/data/spells`
+
+I componenti **dentro** `src/systems/<id>/components/` importano invece liberamente da
+`../data/*`: sono parte del proprio sistema, quindi l'accesso diretto è corretto.
 
 ### Widget system — `src/layout.js`
 
@@ -293,9 +319,9 @@ Struttura `CharacterApp`:
 
 ### Level up/down system (D&D 5e only)
 
-**`src/components/LevelUpModal.jsx`** — wizard multi-step: HP → Feature → Scelte → ASI/Feat → Incantesimi → Riepilogo. Salta step vuoti. Legge `CLASS_LEVEL_DATA[classe][livello]` + `charState.subclassFeatures` per le feature di sottoclasse personalizzate.
+**`src/systems/dnd5e2024/components/LevelUpModal.jsx`** — wizard multi-step: HP → Feature → Scelte → ASI/Feat → Incantesimi → Riepilogo. Salta step vuoti. Legge `CLASS_LEVEL_DATA[classe][livello]` + `charState.subclassFeatures` per le feature di sottoclasse personalizzate.
 
-**`src/components/LevelDownModal.jsx`** — mostra cosa verrà rimosso da `levelHistory[livelloCorrente]`; checkbox per mantenere feature/spell singole.
+**`src/systems/dnd5e2024/components/LevelDownModal.jsx`** — mostra cosa verrà rimosso da `levelHistory[livelloCorrente]`; checkbox per mantenere feature/spell singole.
 
 ### Custom subclass (D&D 5e)
 
@@ -303,10 +329,10 @@ Struttura `CharacterApp`:
 `subclassFeatures: [{id, level, name, desc}]` — feature per livello, inclusi livelli futuri.
 L'editor (`SubclassFeaturesEditor`) è nel widget Identità (edit mode). LevelUpModal inietta automaticamente le feature del livello target durante il level up.
 
-### Character creators — `src/components/creators/`
+### Character creators — `src/systems/<id>/components/`
 
-- `DNDCharacterCreator.jsx` — wizard D&D 5e: nome/allineamento → specie (+ lineage) → background → classe → abilità → equipaggiamento
-- `DHCharacterCreator.jsx` — wizard Daggerheart, step: Identity → Heritage → Traits → Experiences → Summary
+- `dnd5e2024/components/DNDCharacterCreator.jsx` — wizard D&D 5e: nome/allineamento → specie (+ lineage) → background → classe → abilità → equipaggiamento
+- `daggerheart/components/DHCharacterCreator.jsx` — wizard Daggerheart, step: Identity → Heritage → Traits → Experiences → Summary
   - Identity: nome + classe + sottoclasse (tutti obbligatori). La sottoclasse selezionata mostra `DHSubclassPreview` con foundation (piena), specialization (40% opacity), mastery (25% opacity), spellcast trait se presente
   - Heritage: fino a 2 ancestries (1 → entrambe le feature auto-assegnate; 2 → feat1 da una, feat2 dall'altra, toggle con tasto Swap in `--c-warn`); 1 community. Descrizioni mostrate solo dopo selezione, non sulle card.
   - Traits: assegnazione `DH_TRAIT_ARRAY [2,1,1,0,0,-1]` + bottone "Use Suggested Traits" da `dhClass.suggestedTraits`

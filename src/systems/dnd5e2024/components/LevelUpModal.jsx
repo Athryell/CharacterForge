@@ -1,11 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DND_CLASSES, SUBCLASS_DATA } from '../data/systems/dnd5e2024/classes';
-import dataManager from '../data/dataManager';
-import { ABILITIES, SKILLS } from '../data/systems/dnd5e2024/mechanics';
-import { getSpeciesData } from '../data/systems/dnd5e2024/species';
-import { ALL_DND_FEATS } from '../data/systems/dnd5e2024/feats';
-import { Icon } from '../config/icons';
+import { DND_CLASSES, SUBCLASS_DATA } from '../data/classes';
+import dataManager from '../../../data/dataManager';
+import { ABILITIES, SKILLS } from '../data/mechanics';
+import { getSpeciesData } from '../data/species';
+import { ALL_DND_FEATS } from '../data/feats';
+import { Icon } from '../../../config/icons';
 
 
 const FIGHTING_STYLE_CLASSES = ['Fighter', 'Paladin', 'Ranger'];

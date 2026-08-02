@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Icon } from '../config/icons';
-import dataManager from '../data/dataManager';
+import { Icon } from '../../../config/icons';
+import dataManager from '../../../data/dataManager';
 
 const RANGES = ['Melee', 'Very Close', 'Close', 'Far', 'Very Far'];
 const TRAITS = ['AGI', 'STR', 'FIN', 'INS', 'PRE', 'KNO'];

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Icon } from '../config/icons';
+import { Icon } from '../../../config/icons';
 
 export default function LevelDownModal({ currentLevel, charState, onConfirm, onCancel }) {
   const { t } = useTranslation();
