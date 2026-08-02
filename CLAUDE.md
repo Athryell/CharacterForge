@@ -17,6 +17,26 @@ npm run deploy     # build + push to gh-pages branch (GitHub Pages)
 
 No test suite. No linter script — ESLint runs via react-scripts.
 
+### Browser checks — `scripts/browser.mjs`
+
+```bash
+npm start                                              # dev server must be up
+node scripts/browser.mjs scripts/checks/<name>.mjs     # run a scenario
+```
+
+Drives Chrome over the DevTools Protocol using Node's built-in `WebSocket` and
+`fetch` — **zero dependencies**, nothing added to `package.json`. A scenario
+default-exports `async (page, baseUrl) => {}` and gets `goto`, `eval`, `click`,
+`text`, `shot`, `errors`, `wait`. Screenshots land in `scripts/shots/` (gitignored).
+
+- Use `page.click()`, not `el.click()` inside an `eval` — the latter reads the DOM
+  before React has flushed `setState` and produces false negatives
+- The driver seeds `characterforge_onboarding_seen` so a fresh profile doesn't
+  render the tour over every screenshot
+- **Assert on what you'd look at, not just on presence.** Two systems mapped to
+  the same Lucide glyph passed every "an icon rendered" check and still left the
+  dropdown unreadable; only comparing the glyphs caught it
+
 ## Stack
 
 - React 18, Create React App, no TypeScript
