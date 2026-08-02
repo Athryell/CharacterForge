@@ -33,8 +33,18 @@ No test suite. No linter script — ESLint runs via react-scripts.
 
 ### Icone
 - MAI emoji hardcodate nei componenti JSX — usa sempre `<Icon id="..." fallback="..." />`
-- MAI aggiungere icone senza aggiornarle in `ICON_MAP` in `src/config/icons.jsx`
-- Se aggiungi una nuova categoria di icone, aggiungi anche il mapping emoji/Lucide in `ICON_MAP`
+- Il vocabolario **condiviso** sta in `CORE_ICONS` in `src/config/icons.jsx`: tutto ciò che
+  un sistema qualunque vorrebbe con quel nome (`widget.*`, `tab.*`, `action.*`, `resource.*`,
+  e la palette `cond.*`, che è generica per i GDR — Daggerheart ne riusa 3 così com'è)
+- Un sistema dichiara in `src/systems/<id>/icons.js` **solo ciò che il core non sa nominare**
+  (es. `game.hope` per DH, `game.concentration` per D&D). Usare un id del core non richiede
+  di ridichiararlo: basta `<Icon id="widget.armor" />`
+- Un plugin può aggiungere id nuovi o sovrascrivere i propri, **mai** rivendicare un id
+  condiviso. Due plugin sullo stesso id producono un `console.warn` in sviluppo
+- Il **prefisso è semantico**: `Icon` fa `id.startsWith('action.')` per tenere visibili i
+  controlli in modalità `none`. Non inventare prefissi nuovi
+- `fallback` è una rete per i tab creati dall'utente, **non** una strategia: quel ramo
+  ignora `iconMode` e mostra emoji anche a chi ha scelto Lucide o `none`
 
 ### i18n
 - MAI stringhe UI hardcodate in JSX — usa sempre `t('chiave')`
@@ -134,10 +144,35 @@ const strPenaltyText = `${toDisplaySpeed(10)} ${speedUnit === 'sq' ? '□' : spe
 
 `levelHistory: { [level]: { hpGained, features: [id], spells: [name], subclass, feat, abilityScoreImprovement } }` — default `{}` per retrocompatibilità.
 
-### Multi-system support — `src/data/systems.js`
+### Multi-system support — `src/systems/registry.js`
 
-L'app gestisce tre sistemi (`dnd5e2024`, `daggerheart`, `custom`). `activeSystem` è memorizzato in `localStorage`.
-Ogni sistema ha la propria cartella dati, layout widget e creatore personaggio.
+`activeSystem` è memorizzato in `localStorage`. **`registry.js` è l'unico file del core che
+nomina sistemi concreti**: aggiungerne uno significa una riga lì più la sua cartella.
+
+```js
+import { getPlugin, supports, SYSTEM_METAS, DEFAULT_SYSTEM } from './systems/registry';
+
+const sys = getPlugin(activeSystem);       // mai un if su systemId
+if (sys.capabilities.rests) { … }          // chiedi cosa supporta, non chi è
+```
+
+**Regola:** nel codice condiviso non si scrive `if (systemId === 'daggerheart')`. Si aggiunge
+una capability in `CAPABILITY_DEFAULTS` (`src/systems/contract.js`) e si interroga quella.
+`defineSystem()` rifiuta le capability non dichiarate: un refuso diventa un errore all'avvio
+invece di leggersi come `false` per sempre.
+
+Un id sconosciuto risolve a `src/systems/unknown.js`, che ha tutte le capability a `false`.
+**Non ricade su D&D**: il vecchio `getAdapter()` restituiva l'adapter D&D per qualsiasi id,
+ed è così che un id sbagliato diventa corruzione silenziosa dei dati.
+
+Campi del contratto già popolati: `meta`, `capabilities`, `icons`, `notation`, `homebrew`,
+`data` (l'adapter), `creator`. `layout`, `state`, `rules`, `widgets`, `modals`, `menu` e
+`pins` arrivano nelle fasi successive; `defineSystem` non richiede che esistano.
+
+⚠ `src/config/icons.jsx` importa il registry, e i plugin importano i componenti creator,
+che importano `icons.jsx`: è un ciclo. Per questo `getIconMap()` costruisce la mappa **alla
+prima chiamata** e non a livello di modulo — leggere `PLUGINS` durante la valutazione
+esploderebbe o no a seconda di quale lato del ciclo viene caricato per primo.
 
 ### Custom system — `src/systems/custom/data/`
 

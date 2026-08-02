@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
+import { collectPluginIcons } from '../systems/registry';
 import {
   Sword, Shield, Heart, Star, Zap, BookOpen, Scroll,
   Package, StickyNote, User, Users, Dices, Flame, Skull,
@@ -52,8 +53,17 @@ export function IconModeProvider({ children }) {
 // Each entry: { emoji, lucide, gameIcon?, label }
 // gameIcon = filename (without .svg) from public/icons/game-icons/
 // Source game-icons.net: CC BY 3.0 — Lorc, Delapouite et al.
-
-export const ICON_MAP = {
+//
+// CORE_ICONS is the SHARED visual vocabulary: anything a character sheet of any
+// system would plausibly want under this name. A game system only declares what
+// this map cannot name (see src/systems/<id>/icons.js) — it never redeclares an
+// id it merely uses. The cond.* block in particular is a generic RPG condition
+// palette, not a D&D table: Daggerheart reuses restrained, frightened and
+// unconscious from it directly.
+//
+// The prefix is semantic, not decorative: Icon() below branches on `action.` to
+// keep controls visible in 'none' mode. Plugins must reuse these prefixes.
+const CORE_ICONS = {
   // ── Tabs ──────────────────────────────────────────────────────────────────
   'tab.main':       { emoji: '👤', lucide: User,          label: 'Character'    },
   'tab.combat':     { emoji: '⚔',  lucide: Sword,         gameIcon: 'crossed-swords',   label: 'Combat'       },
@@ -110,11 +120,8 @@ export const ICON_MAP = {
   'game.longRest':      { emoji: '🛏',  lucide: Moon,        label: 'Long Rest'    },
   'game.shortRest':     { emoji: '🌙',  lucide: Sun,         label: 'Short Rest'   },
   'game.roll':          { emoji: '🎲',  lucide: Dices,       label: 'Roll'         },
-  'game.inspiration':   { emoji: '⭐',  lucide: Star,        label: 'Inspiration', alwaysLucide: true },
-  'game.concentration': { emoji: '🎯',  lucide: Target,      label: 'Concentration', alwaysLucide: true },
-  'game.hope':          { emoji: '⭐',  lucide: Star,        label: 'Hope'         },
-  'game.fear':          { emoji: '💀',  lucide: Skull,       label: 'Fear'         },
-  'game.exhaustion':    { emoji: '😓',  lucide: Activity,    label: 'Exhaustion'   },
+  // inspiration / concentration / exhaustion (D&D) and hope / fear (Daggerheart)
+  // are declared by their own systems — see src/systems/<id>/icons.js
   'game.damage':        { emoji: '⚔',   lucide: Sword,       label: 'Damage'       },
   'game.heal':          { emoji: '❤',   lucide: Heart,       label: 'Heal'         },
   'game.tempHp':        { emoji: '🛡',  lucide: Shield,      label: 'Temp HP'      },
@@ -183,6 +190,20 @@ export const EMOJI_TO_LUCIDE = {
   '⚔️': Sword,
 };
 
+// ── Assembled map ────────────────────────────────────────────────────────────
+// Built on first use, not at module scope, and that is load-bearing: this module
+// imports the system registry, whose plugins pull in creator components, which
+// import this module back. Reading PLUGINS during module evaluation would blow
+// up or not, depending purely on which side of the cycle loaded first. Deferring
+// to first render — by which point every module is evaluated — removes the
+// ordering hazard entirely.
+let _iconMap = null;
+
+export function getIconMap() {
+  if (!_iconMap) _iconMap = { ...CORE_ICONS, ...collectPluginIcons() };
+  return _iconMap;
+}
+
 // ── Components ───────────────────────────────────────────────────────────────
 
 // GameIcon — loads SVG from public/icons/game-icons/ (CC BY 3.0 game-icons.net)
@@ -201,7 +222,7 @@ export function GameIcon({ name, size = 20, className = '', accent = false }) {
 // Icon — renders the right variant based on iconMode from context
 export function Icon({ id, size = 16, className = '', fallback }) {
   const { iconMode, iconAccent } = useIconMode();
-  const entry = ICON_MAP[id];
+  const entry = getIconMap()[id];
 
   if (!entry) return fallback != null ? <span>{fallback}</span> : null;
 

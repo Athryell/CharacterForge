@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Icon, ICON_MAP, useIconMode } from '../config/icons';
+import { Icon, getIconMap, useIconMode } from '../config/icons';
 
 const DICE_ICONS = ['d4','d6','d8','d10','d12','d20'];
 
 function ResourceIcon({ icon, size = 13 }) {
   const { iconMode } = useIconMode();
   if (DICE_ICONS.includes(icon)) return <span className="resource-dice-icon">{icon}</span>;
-  const entry = ICON_MAP[`resource.${icon}`];
+  const entry = getIconMap()[`resource.${icon}`];
   if (!entry || iconMode === 'none') return null;
   if (iconMode === 'lucide' && entry.lucide) { const L = entry.lucide; return <L size={size} />; }
   return <span>{entry.emoji}</span>;

@@ -40,11 +40,11 @@ import { BACKGROUND_FEATURES } from './systems/dnd5e2024/data/backgrounds';
 import { getDefaultLayoutForSystem, getWidgetsForTab, loadLayoutForSystem, saveLayoutForSystem, loadTabsForSystem, saveTabsForSystem, getDefaultTabsForSystem, getWidgetLabel } from './layout';
 import { DH_TRAITS, DH_TRAIT_NAMES, rollDualityDice, getDHTier, getDHProficiency } from './systems/daggerheart/data/mechanics';
 import { getDHClasses, getDHDomains, getDHAncestries, getDHCommunities, getDHTraitUses } from './systems/daggerheart/data/getters';
-import { SYSTEMS, DEFAULT_SYSTEM, getSystem } from './data/systems';
+import { SYSTEM_METAS, DEFAULT_SYSTEM, getPlugin } from './systems/registry';
 import { useTheme, ACCENT_PRESETS } from './hooks/useTheme';
 import { useUnits, parseSpeedFt } from './hooks/useUnits';
 import { useAccessibility } from './hooks/useAccessibility';
-import { Icon, ICON_MAP, useIconMode } from './config/icons';
+import { Icon, getIconMap, useIconMode } from './config/icons';
 import { getNotationMenu } from './config/notationMenus';
 import { Shield as ShieldIcon } from 'lucide-react';
 import './App.css';
@@ -158,7 +158,7 @@ function SystemSelector({ activeSystem, onChange }) {
   const [open, setOpen] = useState(false);
   const [dropPos, setDropPos] = useState({ top: 0, left: 0 });
   const btnRef = useRef();
-  const sys = getSystem(activeSystem);
+  const sys = getPlugin(activeSystem).meta;
 
   function handleOpen() {
     if (!open && btnRef.current) {
@@ -171,19 +171,19 @@ function SystemSelector({ activeSystem, onChange }) {
   return (
     <div className="system-selector">
       <button ref={btnRef} className="system-selector-btn" onClick={handleOpen}>
-        {sys.icon} {t(`system.${sys.id}`, sys.shortName)} <span className="system-selector-caret">▾</span>
+        <Icon id={sys.iconId} /> {t(`system.${sys.id}`, sys.shortName)} <span className="system-selector-caret">▾</span>
       </button>
       {open && createPortal(
         <>
           <div className="hamburger-backdrop" onClick={() => setOpen(false)} />
           <div className="system-dropdown" style={{ position: 'fixed', top: dropPos.top, left: dropPos.left }}>
-            {SYSTEMS.map(s => (
+            {SYSTEM_METAS.map(s => (
               <button
                 key={s.id}
                 className={`system-dropdown-item ${activeSystem === s.id ? 'active' : ''}`}
                 onClick={() => { onChange(s.id); setOpen(false); }}
               >
-                <span>{s.icon} {t(`system.${s.id}`, s.name)}</span>
+                <span><Icon id={s.iconId} /> {t(`system.${s.id}`, s.name)}</span>
                 <span className="system-dropdown-desc">{s.description}</span>
               </button>
             ))}
@@ -291,7 +291,7 @@ function ResourceIcon({ icon, size = 16 }) {
   if (DICE_ICONS.includes(icon)) {
     return <span className="resource-dice-icon">{icon}</span>;
   }
-  const entry = ICON_MAP[`resource.${icon}`];
+  const entry = getIconMap()[`resource.${icon}`];
   if (!entry) return null;
   if (iconMode === 'none') return null;
   if (iconMode === 'lucide' && entry.lucide) {
@@ -1458,7 +1458,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                           {d}
                         </button>
                       ))}
-                      {Object.keys(ICON_MAP).filter(k => k.startsWith('resource.')).map(k => k.slice(9)).map(ic => (
+                      {Object.keys(getIconMap()).filter(k => k.startsWith('resource.')).map(k => k.slice(9)).map(ic => (
                         <button key={ic}
                           className={`filter-chip${newResource.icon === ic ? ' active' : ''}`}
                           onClick={() => setNewResource(r => ({ ...r, icon: ic }))}>
@@ -2623,7 +2623,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
         onTabChange={handleTabChange}
         editMode={editMode}
         onReorderTabs={commitTabs}
-        systemName={t(`system.${activeSystem || DEFAULT_SYSTEM}`, getSystem(activeSystem || DEFAULT_SYSTEM).shortName)}
+        systemName={t(`system.${activeSystem || DEFAULT_SYSTEM}`, getPlugin(activeSystem || DEFAULT_SYSTEM).meta.shortName)}
         onAddTab={activeSystem === 'custom' ? handleAddTab : undefined}
         onRemoveTab={activeSystem === 'custom' ? handleRemoveTab : undefined}
       />

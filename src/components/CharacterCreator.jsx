@@ -1,18 +1,11 @@
-import React, { useEffect } from 'react';
-import DNDCharacterCreator from '../systems/dnd5e2024/components/DNDCharacterCreator';
-import DHCharacterCreator from '../systems/daggerheart/components/DHCharacterCreator';
-import { createCustomDefaultState } from '../systems/custom/data/mechanics';
+import React from 'react';
+import { getPlugin, DEFAULT_SYSTEM } from '../systems/registry';
 
-function CustomCreatorBridge({ onComplete }) {
-  useEffect(() => {
-    onComplete(createCustomDefaultState());
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  return null;
-}
-
-export default function CharacterCreator({ onComplete, onCancel, systemId = 'dnd5e2024' }) {
-  if (systemId === 'daggerheart') return <DHCharacterCreator onComplete={onComplete} onCancel={onCancel} />;
-  if (systemId === 'custom')      return <CustomCreatorBridge onComplete={onComplete} />;
-  return <DNDCharacterCreator onComplete={onComplete} onCancel={onCancel} />;
+// Dispatches to whichever creator the active system declares. A system with no
+// creator renders nothing, which is the right answer for one that has no choices
+// to make at creation time.
+export default function CharacterCreator({ onComplete, onCancel, systemId = DEFAULT_SYSTEM }) {
+  const Creator = getPlugin(systemId).creator;
+  if (!Creator) return null;
+  return <Creator onComplete={onComplete} onCancel={onCancel} />;
 }
