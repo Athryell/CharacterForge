@@ -1299,7 +1299,8 @@
     "creatorSpeed": "18 m",
     "homebrewName": "My Homebrew",
     "epicBoonName": "Boon of Combat Prowess",
-    "widgetLabel": "Widget label"
+    "widgetLabel": "Widget label",
+    "charName": "e.g. Aldric Voss"
   },
   "customWidgets": {
     "identity": "Identity",

@@ -336,20 +336,48 @@ Eccezioni attuali con import diretti:
 I componenti **dentro** `src/systems/<id>/components/` importano invece liberamente da
 `../data/*`: sono parte del proprio sistema, quindi l'accesso diretto è corretto.
 
-### Widget system — `src/layout.js`
+### Widget system — `src/layout.js` + `src/systems/<id>/layout.js`
 
-22 `WIDGET_DEFS` (D&D 5e) + 12 `DH_WIDGET_DEFS` (Daggerheart), ciascuno con `{id, label, defaultTab, defaultCol, defaultFullWidth, defaultBottomFull?}`.
-Layout per-sistema: `loadLayoutForSystem(systemId)` / `saveLayoutForSystem(systemId, layout)`.
-`getDefaultLayoutForSystem(systemId)` — layout di default per sistema.
-`getWidgetsForTab(layout, tab)` — ritorna widget filtrati e ordinati per un tab.
-Ogni widget ha un `renderWidget(id)` corrispondente in `App.jsx`.
+Il catalogo dei widget e le tab di default vivono nel plugin:
 
-Tab D&D 5e: `main`, `combat`, `spells`, `inventory`, `notes`, `log`.
+```js
+// src/systems/<id>/layout.js
+export default {
+  storageSuffix: '<id>',     // → characterforge_layout_<id> / _tabs_<id>
+  widgetDefs:    [ { id, label, defaultTab, defaultCol, defaultFullWidth, defaultBottomFull } ],
+  defaultTabs:   [ { id, label, icon, visible } ],
+  renames:       { vecchioId: 'nuovoId' },  // opzionale, applicato al load
+  defaultLayout() { … },                    // opzionale — se il layout non deriva da widgetDefs
+};
+```
 
-Il sistema `custom` non usa `WIDGET_DEFS` fissi. I widget sono definiti in `state.widgets`
-e renderizzati dinamicamente da `CustomWidget`. `WidgetGrid` e `WidgetShell` sono riutilizzati
-invariati. In edit mode `WidgetEditor` permette di aggiungere/rimuovere/configurare widget
-e `TabBar` permette di aggiungere/rimuovere tab.
+`src/layout.js` non nomina più nessun sistema: è tutto lookup dal registry.
+`getWidgetLabel(id, systemId)` **richiede** il systemId — non si indovina più il
+sistema dal prefisso dell'id (`dh-`, `w_`).
+
+**Chiavi localStorage uniformi**: `characterforge_layout_<id>` e `characterforge_tabs_<id>`
+per tutti, D&D incluso, che prima usava la chiave legacy senza suffisso.
+
+⚠ `activeTab` si inizializza dalla **prima tab visibile del sistema**, non da `'main'`
+hardcodato: il sistema custom ha tab `identity/inventory/notes/log` e con `'main'`
+la scheda si apriva vuota.
+
+⚠ `WidgetShell` riceve `tabs` come prop e non importa più `ALL_TABS`: quelle erano
+le tab D&D, offerte dal menu "sposta su tab" **in ogni sistema**, per cui un widget
+Daggerheart poteva finire su una tab `spells` che DH non sa renderizzare.
+
+API di `src/layout.js`: `loadLayoutForSystem` / `saveLayoutForSystem`,
+`loadTabsForSystem` / `saveTabsForSystem`, `getDefaultLayoutForSystem` /
+`getDefaultTabsForSystem`, `getWidgetsForTab(layout, tab)`, `getWidgetLabel(id, systemId)`.
+
+Cataloghi attuali: 22 widget D&D (tab `main`, `combat`, `spells`, `inventory`, `notes`, `log`)
+e 12 Daggerheart (tab `main`, `combat`, `inventory`, `notes`). Ogni widget ha un
+`renderWidget(id)` corrispondente in `App.jsx` — finché la Fase 6 non lo sposta nei plugin.
+
+Il sistema `custom` ha `widgetDefs: []`: i widget stanno in `state.widgets`, li crea l'utente
+e li renderizza `CustomWidget`. `WidgetGrid` e `WidgetShell` sono riutilizzati invariati;
+`capabilities.userDefinedWidgets` fa mostrare a `WidgetShell` Modifica/Rimuovi invece di
+Sposta/Nascondi, e `capabilities.editableTabs` abilita aggiungi/rimuovi tab in `TabBar`.
 
 ### Main component — `src/App.jsx`
 

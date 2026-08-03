@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useCharacter } from './hooks/useCharacter';
-import { loadCharsIndex, saveCharsIndex, deleteChar, getActiveCharId, setActiveCharId, generateCharId, migrateLegacy, saveCharState } from './chars';
+import { loadCharsIndex, deleteChar, getActiveCharId, setActiveCharId, generateCharId, migrateLegacy, saveCharState } from './chars';
 import CharacterSelect from './components/CharacterSelect';
 import Onboarding, { CornerButtons, loadOnboardingSeen } from './components/Onboarding';
 import {
@@ -316,6 +316,7 @@ function updateFavicon(accentColor = '#6aaa2a') {
 // ── Character App (single character) ────────────────────────────
 function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSystemChange }) {
   const { t, i18n } = useTranslation();
+  const sys = getPlugin(activeSystem || DEFAULT_SYSTEM);
   const char = useCharacter(charId);
   const { state, update } = char;
 
@@ -377,7 +378,11 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
   }
 
   // UI state
-  const [activeTab, setActiveTab] = useState('main');
+  // Not hardcoded 'main': the custom system's tabs are identity/inventory/notes/log,
+  // so defaulting to a tab it doesn't have rendered an empty sheet on first open.
+  const [activeTab, setActiveTab] = useState(
+    () => tabs.find(tb => tb.visible !== false)?.id || 'main'
+  );
   const [toast, setToast] = useState('');
   const [toastAction, setToastAction] = useState(null);
   const [hpAmount, setHpAmount] = useState(0);
@@ -912,7 +917,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
   const tabWidgets = getWidgetsForTab(layout, activeTab);
   const hiddenWidgets = layout
     .filter(w => w.visible === false)
-    .map(w => ({ ...w, label: getWidgetLabel(w.id) }));
+    .map(w => ({ ...w, label: getWidgetLabel(w.id, activeSystem || DEFAULT_SYSTEM) }));
 
   // ── Widget renderer ────────────────────────────────────────────
   const contentEditMap = {
@@ -2661,10 +2666,12 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
           editMode={editMode}
           onLayoutChange={handleLayoutChange}
           renderWidget={renderWidget}
-          hiddenWidgets={activeSystem === 'custom' ? [] : hiddenWidgets}
+          systemId={activeSystem || DEFAULT_SYSTEM}
+          tabs={tabs}
+          hiddenWidgets={sys.capabilities.hiddenWidgetTray ? hiddenWidgets : []}
           onRestoreWidget={restoreWidget}
-          extraShellProps={activeSystem === 'custom' && editMode ? {
-            systemId: 'custom',
+          extraShellProps={sys.capabilities.userDefinedWidgets && editMode ? {
+            userDefined: true,
             onEdit: id => { setEditingWidgetId(id); setShowWidgetEditor(true); },
             onRemove: id => handleRemoveWidget(id),
           } : {}}
@@ -2680,31 +2687,6 @@ export default function App() {
   const [chars, setChars] = useState(() => loadCharsIndex());
   const [activeCharId, setActive] = useState(() => {
     migrateLegacy(createDefaultState);
-    // Migrate old system ID 'dnd5e' → 'dnd5e2024' in localStorage
-    try {
-      if (localStorage.getItem('characterforge_active_system') === 'dnd5e') {
-        localStorage.setItem('characterforge_active_system', 'dnd5e2024');
-      }
-      const idx = loadCharsIndex();
-      const needsMigration = idx.some(c => !c.system || c.system === 'dnd5e');
-      if (needsMigration) {
-        const updated = idx.map(c => (!c.system || c.system === 'dnd5e') ? { ...c, system: 'dnd5e2024' } : c);
-        saveCharsIndex(updated);
-        updated.forEach(c => {
-          if (c.system === 'dnd5e2024') {
-            const raw = localStorage.getItem(`characterforge_char_${c.id}`);
-            if (raw) {
-              try {
-                const cs = JSON.parse(raw);
-                if (!cs.system || cs.system === 'dnd5e') {
-                  localStorage.setItem(`characterforge_char_${c.id}`, JSON.stringify({ ...cs, system: 'dnd5e2024' }));
-                }
-              } catch {}
-            }
-          }
-        });
-      }
-    } catch {}
     return getActiveCharId();
   });
   const [showCreator, setShowCreator] = useState(false);
@@ -2774,7 +2756,10 @@ export default function App() {
         </>
       ) : (
         <CharacterApp
-          key={activeCharId}
+          // Remount on a system switch, not just a character switch: later phases
+          // let each plugin own React state via its own hooks, and swapping the
+          // hook set under a live component breaks the rules of hooks.
+          key={`${activeSystem}:${activeCharId}`}
           charId={activeCharId}
           onBackToSelect={() => { setActiveCharId(null); setActive(null); setChars(loadCharsIndex()); }}
           onNewChar={newState => { handleCreatorComplete(newState); }}

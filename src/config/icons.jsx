@@ -71,6 +71,7 @@ const CORE_ICONS = {
   'tab.inventory':  { emoji: '🎒', lucide: Package,       gameIcon: 'swap-bag',          label: 'Inventory'    },
   'tab.notes':      { emoji: '📝', lucide: StickyNote,    gameIcon: 'scroll-unfurled',   label: 'Notes'        },
   'tab.log':        { emoji: '📋', lucide: Scroll,        label: 'Log'          },
+  'tab.identity':   { emoji: '👤', lucide: User,          label: 'Identity'     },
   'tab.sources':    { emoji: '📦', lucide: Package,       label: 'Sources'      },
 
   // ── Widgets ───────────────────────────────────────────────────────────────

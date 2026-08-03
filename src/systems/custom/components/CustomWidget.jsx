@@ -44,7 +44,7 @@ function WidgetIdentity({ widget, state, update }) {
   const fieldRenderers = {
     name: (
       <div key="name" className="field">
-        <label>{t('identity.nameLabel')}</label>
+        <label>{t('identity.name')}</label>
         <input
           value={state.charName || ''}
           onChange={e => update({ charName: e.target.value })}

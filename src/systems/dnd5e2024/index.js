@@ -4,6 +4,7 @@ import capabilities from './capabilities';
 import icons        from './icons';
 import notation     from './notation';
 import homebrew     from './homebrew';
+import layout       from './layout';
 import adapter      from './data/adapter';
 import DNDCharacterCreator from './components/DNDCharacterCreator';
 
@@ -13,6 +14,7 @@ export default defineSystem({
   icons,
   notation,
   homebrew,
+  layout,
   data:    adapter,
   creator: DNDCharacterCreator,
 });

@@ -1348,7 +1348,8 @@
     "creatorSpeed": "18 m",
     "homebrewName": "My Homebrew",
     "epicBoonName": "Boon of Combat Prowess",
-    "widgetLabel": "Etichetta widget"
+    "widgetLabel": "Etichetta widget",
+    "charName": "Es. Aldric Voss"
   },
   "customWidgets": {
     "identity": "Identità",

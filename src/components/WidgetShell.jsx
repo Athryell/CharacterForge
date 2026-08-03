@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getWidgetLabel, ALL_TABS } from '../layout';
+import { getWidgetLabel } from '../layout';
 import { Icon } from '../config/icons';
 
 export default function WidgetShell({
@@ -8,12 +8,11 @@ export default function WidgetShell({
   onDragStart, onDragOver, onDrop,
   onMoveToTab, onToggleVisible, onToggleFullWidth, onToggleBottomFull,
   isDragOver,
-  systemId, onEdit, onRemove,
+  systemId, tabs = [], userDefined, onEdit, onRemove,
 }) {
   const { t } = useTranslation();
   const [showMenu, setShowMenu] = useState(false);
-  const label = t(getWidgetLabel(id));
-  const isCustom = systemId === 'custom';
+  const label = t(getWidgetLabel(id, systemId));
 
   return (
     <div
@@ -40,7 +39,7 @@ export default function WidgetShell({
             </button>
           )}
 
-          {isCustom ? (
+          {userDefined ? (
             <>
               {onEdit && (
                 <button className="widget-action-btn" onClick={() => onEdit(id)}>
@@ -60,7 +59,10 @@ export default function WidgetShell({
                 {showMenu && (
                   <div className="widget-tab-menu">
                     <div className="widget-tab-menu-title">{t('layout.moveToTitle')}</div>
-                    {ALL_TABS.map(tab => (
+                    {/* the active system's own tabs — offering D&D's to every
+                        system sent Daggerheart widgets to a spells tab it has
+                        no way to render */}
+                    {tabs.map(tab => (
                       <button key={tab.id} className="widget-tab-menu-item"
                         onClick={() => { onMoveToTab(id, tab.id); setShowMenu(false); }}>
                         {tab.icon} {t(tab.label)}
