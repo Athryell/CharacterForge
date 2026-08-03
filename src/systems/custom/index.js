@@ -5,6 +5,8 @@ import icons        from './icons';
 import notation     from './notation';
 import homebrew     from './homebrew';
 import layout       from './layout';
+import state        from './state';
+import rules        from './rules';
 import adapter      from './data/adapter';
 import CustomCreatorBridge from './components/CustomCreatorBridge';
 
@@ -15,6 +17,8 @@ export default defineSystem({
   notation,
   homebrew,
   layout,
+  state,
+  rules,
   data:    adapter,
   creator: CustomCreatorBridge,
 });

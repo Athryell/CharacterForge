@@ -6,7 +6,7 @@ import { loadCharsIndex, deleteChar, getActiveCharId, setActiveCharId, generateC
 import CharacterSelect from './components/CharacterSelect';
 import Onboarding, { CornerButtons, loadOnboardingSeen } from './components/Onboarding';
 import {
-  createDefaultState, ABILITIES, SKILLS,
+  ABILITIES, SKILLS,
   SPELLCASTING_CLASS, getMod, fmtMod, HIT_DICE,
   resolveResourceFormula, getProfBonus,
 } from './systems/dnd5e2024/data/mechanics';
@@ -532,8 +532,12 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
   }, [state.weapons, state.equipment, state.abilities, state.charLevel, char.profBonus]);
 
   const effectiveAbilities = useMemo(() => {
+    // Guarded because a non-D&D character no longer carries an `abilities`
+    // object at all: useCharacter used to merge the D&D default state into
+    // every sheet, which is what made this safe by accident.
+    const scores = state.abilities || {};
     const result = {};
-    ABILITIES.forEach(attr => { result[attr] = (state.abilities[attr] || 10) + (equipBonuses[attr] || 0); });
+    ABILITIES.forEach(attr => { result[attr] = (scores[attr] || 10) + (equipBonuses[attr] || 0); });
     return result;
   }, [state.abilities, equipBonuses]);
 
@@ -597,7 +601,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
       // Custom widgets live in character state and the default layout references
       // the default widget ids — restoring one without the other leaves every
       // shell empty, because renderWidget finds no matching widget.
-      const base = dataManager.getAdapter('custom').createDefaultState();
+      const base = getPlugin('custom').state.create();
       update({ widgets: base.widgets, tabs: base.tabs });
       setTabs(base.tabs);
       saveTabsForSystem(sysId, base.tabs);
@@ -765,33 +769,26 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
     setNewResource({ name:'', icon:'d6', formula:'fixed:1', resetOn:'long', pinned:false });
   }
 
-  function handleLongRest() {
-    char.longRest();
-    update({
-      hitDiceUsed: 0,
-      exhaustionLevel: Math.max(0, (state.exhaustionLevel || 0) - 1),
-      resources: (state.resources || []).map(r =>
-        r.resetOn === 'long' || r.resetOn === 'short' ? { ...r, current: r.max } : r
-      ),
-    });
-    showToast(t('toast.longRest'));
-    addLog('game.longRest', t('toast.longRest'));
-    window.umami?.track('long-rest');
+  // The rest itself belongs to the system's rules; this only reports on it.
+  // A descriptor is { messageKey, hintKey?, logKey?, logIcon?, analytics?, durationMs? }.
+  function runRest(action) {
+    const d = action?.();
+    if (!d) return;
+    if (d.hintKey) {
+      showToast(
+        <>{t(d.messageKey)} <em className="toast-hint">{t(d.hintKey)}</em></>,
+        { label: t('common.done'), onClick: () => { setToast(''); setToastAction(null); } },
+        d.durationMs
+      );
+    } else {
+      showToast(t(d.messageKey), null, d.durationMs);
+    }
+    if (d.logIcon) addLog(d.logIcon, t(d.logKey || d.messageKey));
+    if (d.analytics) window.umami?.track(d.analytics);
   }
-  function handleShortRest() {
-    char.shortRest();
-    update({
-      resources: (state.resources || []).map(r =>
-        r.resetOn === 'short' ? { ...r, current: r.max } : r
-      ),
-    });
-    showToast(
-      <>{t('toast.shortRestMain')} <em className="toast-hint">{t('toast.shortRestHint')}</em></>,
-      { label: t('common.done'), onClick: () => { setToast(''); setToastAction(null); } },
-      10000
-    );
-    addLog('game.shortRest', t('toast.shortRest'));
-  }
+
+  function handleLongRest()  { runRest(char.longRest); }
+  function handleShortRest() { runRest(char.shortRest); }
   function handleCastSpell(spell, level) {
     const updates = {};
     if (spell.level > 0 && level > 0) {
@@ -1071,9 +1068,9 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
           </div>
           <div className="grid-6">
             {ABILITIES.map(attr => (
-              <AbilityBox key={attr} attr={attr} score={state.abilities[attr]}
+              <AbilityBox key={attr} attr={attr} score={(state.abilities || {})[attr]}
                 effectiveScore={effectiveAbilities[attr]}
-                onAdjust={(a,d) => char.setAbility(a, (state.abilities[a]||10)+d)}
+                onAdjust={(a,d) => char.setAbility(a, ((state.abilities || {})[a]||10)+d)}
                 onInput={char.setAbility} editing={editingAbilities} onHover={setHoveredAttr}
                 onRoll={!editingAbilities ? (a, mod) => handleRoll(`1d20${mod >= 0 ? '+' : ''}${mod}`, t(`data.abilities.${a}`)) : undefined}
                 bonus={equipBonuses[attr] || 0}
@@ -2686,7 +2683,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
 export default function App() {
   const [chars, setChars] = useState(() => loadCharsIndex());
   const [activeCharId, setActive] = useState(() => {
-    migrateLegacy(createDefaultState);
+    migrateLegacy(getPlugin(DEFAULT_SYSTEM).state.create);
     return getActiveCharId();
   });
   const [showCreator, setShowCreator] = useState(false);
@@ -2724,8 +2721,10 @@ export default function App() {
   function handleCreatorComplete(newState) {
     const id = generateCharId();
     const system = newState.system || activeSystem;
-    const base = system === 'custom' ? {} : createDefaultState();
-    saveCharState(id, { ...base, ...newState, system });
+    const sys = getPlugin(system);
+    // Was `system === 'custom' ? {} : createDefaultState()`, which seeded every
+    // non-D&D character with the D&D default state.
+    saveCharState(id, { ...sys.state.create(), ...newState, system }, sys.state.charIndexEntry);
     setActiveCharId(id);
     setActive(id);
     setChars(loadCharsIndex());

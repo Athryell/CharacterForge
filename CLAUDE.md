@@ -147,22 +147,47 @@ const strPenaltyText = `${toDisplaySpeed(10)} ${speedUnit === 'sq' ? '□' : spe
 `localStorage` keys: `characterforge_chars_index`, `characterforge_char_${id}`, `characterforge_active`.
 `saveCharState(id, state)` auto-aggiorna l'indice. `migrateLegacy()` converte il vecchio formato single-char al primo avvio.
 
-### File immutabili — NON modificare mai
+### State management — `src/hooks/useCharacter.js` + `src/systems/<id>/{state,rules}.js`
 
-**`src/hooks/useCharacter.js`** e **`src/chars.js`** non vanno mai modificati. Gestiscono persistenza e stato del personaggio — qualsiasi modifica rischia di corrompere i dati salvati in localStorage.
+`useCharacter(charId)` è **agnostico**: gestisce solo storage, identità e mutazione
+generica di liste. Ogni valore che dipende dalle regole vive nel plugin.
 
-### State management — `src/hooks/useCharacter.js`
+```js
+// src/systems/<id>/state.js
+export default {
+  create:         () => ({ … }),   // stato di default del sistema
+  schemaVersion:  '1.0.0',
+  normalize:      saved => saved,  // opzionale, applicato al load
+  charIndexEntry: s => ({ … }),    // cosa mostra la lista personaggi
+};
 
-`useCharacter(charId)` è l'unica fonte di verità per il personaggio. Esporta:
-- `state` — oggetto completo del personaggio
-- `update(patch)` — merge superficiale + auto-save su localStorage
-- Derivati calcolati: `profBonus`, `initiative`, `passivePerception`, `hitDice`, `spellStat`, `spellSaveDC`, `spellAttackBonus`
-- Mutatori specializzati: `onClassOrLevelChange(patch)`, `onUpdateTags`, `onCreateTag`, `onAddAction`, `onRemoveAction`
-- `longRest()`, `shortRest()` — riposi con reset slot/HP
-- `levelUp(changes)` — applica HP, feature, ASI/feat, incantesimi; aggiorna `levelHistory`
-- `levelDown(keepIds)` — inverte il livello precedente, rimuove feature/spell tranne quelle in `keepIds`
+// src/systems/<id>/rules.js — riceve solo { state, update }
+export default function rules({ state, update }) {
+  return {
+    derived: { profBonus, spellSaveDC, … },  // opachi al core
+    actions: { longRest, levelUp, … },
+  };
+}
+```
 
-`levelHistory: { [level]: { hpGained, features: [id], spells: [name], subclass, feat, abilityScoreImprovement } }` — default `{}` per retrocompatibilità.
+Il core fa lo spread di `derived` e `actions` sull'oggetto ritornato e **non legge mai
+una chiave per nome**. Lo spread è transitorio: quando la Fase 6 sposterà i widget nei
+plugin, si passerà a `ctx.derived.profBonus` e si potrà toglierlo.
+
+**ResultDescriptor** — un mutatore su cui la UI deve riferire ritorna
+`{ messageKey, hintKey?, logKey?, logIcon?, analytics?, durationMs? }`. Il plugin non
+tocca mai `t()`, il toast o il log; `runRest()` in App.jsx consuma il descriptor.
+
+⚠ **Un personaggio non-D&D non ha più `state.abilities`.** Prima `useCharacter` fondeva
+lo stato di default D&D in *ogni* scheda, quindi `state.abilities.STR` era sicuro per
+caso. Qualsiasi codice condiviso che legge campi D&D deve guardarli — nei widget D&D,
+che la Fase 6 sposterà nel plugin, non serve.
+
+`levelHistory: { [level]: { hpGained, features: [id], spells: [name], subclass, feat, abilityScoreImprovement } }` — default `{}`.
+
+`chars.js` — `saveCharState(id, state, buildEntry)`: il terzo argomento lascia al sistema
+decidere cosa finisce nell'indice, che prima era D&D-shaped e portava `charClass` e
+`charLevel` anche per una scheda custom che non ne ha.
 
 ### Multi-system support — `src/systems/registry.js`
 
