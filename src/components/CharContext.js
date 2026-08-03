@@ -5,7 +5,7 @@ export const CharContext = createContext({
   traitValues: {},          // generico: per D&D = abilities, per DH = {AGI,FIN,...}
   charLevel:   1,
   profBonus:   2,
-  systemId:    'dnd5e2024',
+  systemId:    null,
 });
 
 export function useCharContext() { return useContext(CharContext); }

@@ -1,7 +1,6 @@
 import React, { useState, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCharContext } from './CharContext';
-import { BONUS_STAT_OPTIONS } from '../systems/dnd5e2024/bonuses';
 
 // Hook: returns the keyword glossary for the active language.
 export function useKeywordGlossary() {
@@ -22,7 +21,7 @@ export function parseTextBonuses(text = '') {
 }
 
 // Resolve a [countX] formula to a numeric pip count
-function resolveCountFormula(formula, abilities, charLevel, profBonus) {
+function resolveCountFormula(formula, abilities, charLevel, profBonus, scoresAreModifiers) {
   if (/^\d+$/.test(formula)) return parseInt(formula);
   if (formula === 'PRO') return profBonus ?? 2;
   if (formula === 'LVL') return charLevel ?? 1;
@@ -33,6 +32,9 @@ function resolveCountFormula(formula, abilities, charLevel, profBonus) {
   const IT_TO_EN = { FOR: 'STR', DES: 'DEX', COS: 'CON', SAG: 'WIS', CAR: 'CHA' };
   const key = IT_TO_EN[formula.toUpperCase()] || formula.toUpperCase();
   const score = (abilities || {})[key] ?? 10;
+  // In a trait-based system the stored value IS the modifier; running the D&D
+  // (n - 10) / 2 over a Daggerheart trait of 2 gave -4, clamped to 1.
+  if (scoresAreModifiers) return Math.max(1, score);
   return Math.max(1, Math.floor((score - 10) / 2));
 }
 
@@ -40,7 +42,7 @@ const COUNT_NOTATION_RE = /\[count(CHA|STR|DEX|CON|INT|WIS|PRO|LVL\/2|LVL\*\d+|L
 
 // Resolve [ATTR], [PRO], [LVL], [LVL/2], [LVL=N:...] and +[PRO]@[STAT] notations.
 // Supports D&D ([STR],[FOR],...) and DH ([AGI],[FIN],...) traits via optional traitMap.
-export function resolveNotations(text, abilities, charLevel, profBonus, traitMap = null, customFields = null) {
+export function resolveNotations(text, abilities, charLevel, profBonus, traitMap = null, customFields = null, scoresAreModifiers = false) {
   if (!text) return text;
 
   // Helper: resolve a bracketed value token
@@ -61,7 +63,7 @@ export function resolveNotations(text, abilities, charLevel, profBonus, traitMap
 
   // 0. [countX] → [N]
   let result = text.replace(COUNT_NOTATION_RE, (_, formula) => {
-    const n = resolveCountFormula(formula, abilities, charLevel, profBonus);
+    const n = resolveCountFormula(formula, abilities, charLevel, profBonus, scoresAreModifiers);
     return `[${n}]`;
   });
 
@@ -121,8 +123,9 @@ export function resolveNotations(text, abilities, charLevel, profBonus, traitMap
 // Small hint bar shown below description textareas
 export function NotationHelpBar() {
   const { t } = useTranslation();
-  const { systemId } = useCharContext();
-  const isDH = systemId === 'daggerheart';
+  const { traitMap } = useCharContext();
+  // Trait-based systems document their own tokens; ability-score systems the D&D ones.
+  const isDH = !!traitMap;
   return (
     <div className="notation-help-bar">
       <span className="notation-help-icon">💡</span>
@@ -192,13 +195,8 @@ const COUNTER_NOTATION_PARSE = /^\[(\d+)\]$/;
 
 export function KeywordText({ text, onRoll, label, counters, onCounterChange }) {
   const { t: tUi } = useTranslation();
-  const { abilities, traitValues, charLevel, profBonus, systemId, customFields } = useCharContext();
+  const { abilities, charLevel, profBonus, customFields, traitMap, bonusStats, scoresAreModifiers } = useCharContext();
   const glossary = useKeywordGlossary();
-
-  const traitMap = systemId === 'daggerheart'
-    ? { AGI: traitValues?.AGI, STR: traitValues?.STR, FIN: traitValues?.FIN,
-        INS: traitValues?.INS, PRE: traitValues?.PRE, KNO: traitValues?.KNO }
-    : null;
 
   const keywordRegex = useMemo(() => {
     const keys = Object.keys(glossary);
@@ -213,7 +211,7 @@ export function KeywordText({ text, onRoll, label, counters, onCounterChange }) 
   }, [glossary]);
 
   const hasDynamic = DYNAMIC_NOTATION_RE.test(text || '');
-  const resolved = resolveNotations(text, abilities, charLevel, profBonus, traitMap, customFields || null);
+  const resolved = resolveNotations(text, abilities, charLevel, profBonus, traitMap, customFields || null, scoresAreModifiers);
   if (!resolved) return null;
 
   const DICE_REGEX = /(\d*d\d+(?:\s*[+-]\s*\d+)*)/gi;
@@ -255,7 +253,7 @@ export function KeywordText({ text, onRoll, label, counters, onCounterChange }) 
         if (bonusMatch) {
           const value = Number(bonusMatch[1]);
           const stat = bonusMatch[2].toUpperCase();
-          const statLabel = BONUS_STAT_OPTIONS.find(o => o.value === stat)?.label || stat;
+          const statLabel = (bonusStats || []).find(o => o.value === stat)?.label || stat;
           return (
             <span key={`${keyPrefix}-${cSi}-b${si}`} className="bonus-inline-badge">
               {statLabel} {value >= 0 ? '+' : ''}{value}

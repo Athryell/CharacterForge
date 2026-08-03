@@ -1,3 +1,4 @@
+import { BONUS_STAT_OPTIONS } from './bonuses';
 import {
   getMod, getProfBonus, fmtMod,
   SPELLCASTING_CLASS, HIT_DICE, SLOT_TABLE, SKILLS,
@@ -219,5 +220,18 @@ export default function rules({ state, update }) {
         });
       },
     },
+  };
+}
+
+// Values the notation engine and shared components read from CharContext.
+// The keys are the engine's ABI, not D&D vocabulary: `profBonus` means "what
+// [PRO] resolves to", and each system fills it with whatever that is.
+export function contextValue(state, derived) {
+  return {
+    abilities:   derived.effectiveAbilities,
+    traitValues: derived.effectiveAbilities,
+    profBonus:   derived.profBonus,
+    traitMap:    null,
+    bonusStats:  BONUS_STAT_OPTIONS,
   };
 }

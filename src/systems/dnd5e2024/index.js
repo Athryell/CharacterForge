@@ -6,8 +6,10 @@ import notation     from './notation';
 import homebrew     from './homebrew';
 import layout       from './layout';
 import state        from './state';
-import rules        from './rules';
+import rules, { contextValue } from './rules';
+import pins         from './pins';
 import * as widgets from './widgets';
+import * as modals  from './modals';
 import adapter      from './data/adapter';
 import DNDCharacterCreator from './components/DNDCharacterCreator';
 
@@ -20,7 +22,10 @@ export default defineSystem({
   layout,
   state,
   rules,
+  contextValue,
+  pins,
   widgets,
+  modals,
   data:    adapter,
   creator: DNDCharacterCreator,
 });

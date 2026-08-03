@@ -29,3 +29,14 @@ export default function rules({ state, update }) {
     },
   };
 }
+
+export function contextValue(state, derived) {
+  const traits = state.traits || {};
+  return {
+    abilities:   traits,
+    traitValues: traits,
+    profBonus:   derived.profBonus,
+    // Trait values ARE the modifier here; Tooltip must not run (n - 10) / 2.
+    traitMap:    traits,
+  };
+}

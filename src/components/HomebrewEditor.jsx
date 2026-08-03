@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { DEFAULT_SYSTEM } from '../systems/registry';
 import { useTranslation } from 'react-i18next';
 import { AlertTriangle } from 'lucide-react';
 import { Icon } from '../config/icons';
@@ -13,7 +14,7 @@ function createEmptyDraft() {
     name: '',
     author: '',
     description: '',
-    system: 'dnd5e2024',
+    system: DEFAULT_SYSTEM,
     classes: [],
     subclasses: [],
     species: [],

@@ -32,7 +32,7 @@ export function saveCharState(id, state, buildEntry) {
       name: state.charName || 'Personaggio',
       ...extra,
       lastSaved: new Date().toISOString(),
-      system: state.system || 'dnd5e2024',
+      system: state.system || DEFAULT_SYSTEM,
     };
     const next = idx.find(c => c.id === id) ? idx.map(c => c.id === id ? entry : c) : [...idx, entry];
     saveCharsIndex(next);
@@ -40,7 +40,7 @@ export function saveCharState(id, state, buildEntry) {
 }
 
 export function getCharsBySystem(systemId) {
-  return loadCharsIndex().filter(c => (c.system || 'dnd5e2024') === systemId);
+  return loadCharsIndex().filter(c => (c.system || DEFAULT_SYSTEM) === systemId);
 }
 
 export function deleteChar(id) {

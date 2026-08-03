@@ -6,8 +6,9 @@ import notation     from './notation';
 import homebrew     from './homebrew';
 import layout       from './layout';
 import state        from './state';
-import rules        from './rules';
+import rules, { contextValue } from './rules';
 import * as widgets from './widgets';
+import * as modals  from './modals';
 import adapter      from './data/adapter';
 import CustomCreatorBridge from './components/CustomCreatorBridge';
 
@@ -20,7 +21,9 @@ export default defineSystem({
   layout,
   state,
   rules,
+  contextValue,
   widgets,
+  modals,
   data:    adapter,
   creator: CustomCreatorBridge,
 });

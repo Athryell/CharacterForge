@@ -14,9 +14,6 @@ import dataManager from './data/dataManager';
 import SourceManager from './components/SourceManager';
 import HomebrewEditor from './components/HomebrewEditor';
 import CharacterCreator from './components/CharacterCreator';
-import LevelUpModal from './systems/dnd5e2024/components/LevelUpModal';
-import LevelDownModal from './systems/dnd5e2024/components/LevelDownModal';
-import WidgetEditor from './systems/custom/components/WidgetEditor';
 import { DND_ARMOR_PRESETS } from './systems/dnd5e2024/data/armors';
 import TabBar from './components/TabBar';
 import { parseTextBonuses, resolveNotations } from './components/Tooltip';
@@ -25,7 +22,6 @@ import WidgetGrid from './components/WidgetGrid';
 import PinnedBar, { loadPinned, savePinned } from './components/PinnedBar';
 import { DND_CLASSES } from './systems/dnd5e2024/data/classes';
 import { getDefaultLayoutForSystem, getWidgetsForTab, loadLayoutForSystem, saveLayoutForSystem, loadTabsForSystem, saveTabsForSystem, getDefaultTabsForSystem, getWidgetLabel } from './layout';
-import { getDHProficiency } from './systems/daggerheart/data/mechanics';
 import { getDHClasses, getDHDomains, getDHAncestries, getDHCommunities, getDHTraitUses } from './systems/daggerheart/data/getters';
 import { SYSTEM_METAS, DEFAULT_SYSTEM, getPlugin } from './systems/registry';
 import { useTheme, ACCENT_PRESETS } from './hooks/useTheme';
@@ -224,7 +220,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
   }
 
   function openHomebrewEditorFor(sectionKey) {
-    const systemNames = { dnd5e2024: 'D&D 5.5e', daggerheart: 'Daggerheart' };
+    const systemNames = Object.fromEntries(SYSTEM_METAS.map(m => [m.id, m.shortName]));
     const sourceId = `my-custom-data-${activeSystem}`;
     const sourceName = `My Custom Data ${systemNames[activeSystem] || activeSystem}`;
     const existing = dataManager.getSourceRaw(sourceId);
@@ -337,7 +333,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
 
   const acDerivedData = useMemo(() => {
     const dexMod = getMod(effectiveAbilities.DEX);
-    const armors = activeSystem === 'dnd5e2024' ? (state.armors || []) : [];
+    const armors = sys.capabilities.armorAC ? (state.armors || []) : [];
     const ea = armors.find(a => a.type === 'armor' && a.equipped);
     const preset = ea?.presetId ? DND_ARMOR_PRESETS.find(p => p.id === ea.presetId) : null;
     const dexContrib = preset
@@ -348,18 +344,18 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
     const shields = armors.filter(a => a.type === 'shield' && a.equipped);
     const shieldBonus = shields.reduce((s, sh) => s + (sh.acValue || 2), 0);
     return { dexContrib, shieldBonus, hasShield: shields.length > 0, preset, ea, shields };
-  }, [state.armors, effectiveAbilities, activeSystem]);
+  }, [state.armors, effectiveAbilities, sys.capabilities.armorAC]);
 
   // STR speed penalty: 10 ft if equipped preset armor has strReq and STR < strReq
   const strSpeedPenaltyFt = useMemo(() => {
-    if (activeSystem !== 'dnd5e2024') return 0;
+    if (!sys.capabilities.encumbrance) return 0;
     const armors = state.armors || [];
     const ea = armors.find(a => a.type === 'armor' && a.equipped && a.presetId);
     if (!ea) return 0;
     const preset = DND_ARMOR_PRESETS.find(p => p.id === ea.presetId);
     if (!preset || !preset.strReq) return 0;
     return (effectiveAbilities.STR || 10) < preset.strReq ? 10 : 0;
-  }, [state.armors, effectiveAbilities.STR, activeSystem]);
+  }, [state.armors, effectiveAbilities.STR, sys.capabilities.encumbrance]);
 
   const strPenaltyText = `${toDisplaySpeed(10)} ${speedUnit === 'sq' ? '□' : speedUnit}`;
 
@@ -383,7 +379,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
   function commitTabs(next) {
     setTabs(next);
     saveTabsForSystem(activeSystem || DEFAULT_SYSTEM, next);
-    if (activeSystem === 'custom') update({ tabs: next });
+    if (sys.capabilities.userDefinedWidgets) update({ tabs: next });
   }
 
   function resetLayoutAndTabs() {
@@ -391,7 +387,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
     const nextLayout = getDefaultLayoutForSystem(sysId);
     setLayout(nextLayout);
     saveLayoutForSystem(sysId, nextLayout);
-    if (sysId === 'custom') {
+    if (getPlugin(sysId).capabilities.userDefinedWidgets) {
       // Custom widgets live in character state and the default layout references
       // the default widget ids — restoring one without the other leaves every
       // shell empty, because renderWidget finds no matching widget.
@@ -476,7 +472,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
       let suffix = '';
       if (result.natural === 20 && result.sides === 20) suffix = ` — ⭐ ${t('dice.natural20')}`;
       else if (result.natural === 1 && result.sides === 20) suffix = ` — 💀 ${t('dice.natural1')}`;
-      const exhaustionLvl = activeSystem === 'dnd5e2024' ? (state.exhaustionLevel || 0) : 0;
+      const exhaustionLvl = sys.capabilities.exhaustion ? (state.exhaustionLevel || 0) : 0;
       const penalty = result.sides === 20 && exhaustionLvl > 0 ? exhaustionLvl * 2 : 0;
       const finalTotal = result.total - penalty;
       const exhNote = penalty > 0 ? ` ${t('dice.exhaustionPenalty', { penalty })}` : '';
@@ -502,7 +498,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
 
   function handleClassOrLevelChange(patch) {
     char.onClassOrLevelChange(patch);
-    if (activeSystem !== 'dnd5e2024') return;
+    if (!sys.capabilities.levelProgression) return;
     const newClass = patch.charClass || state.charClass;
     const newLevel = patch.charLevel || state.charLevel;
     const classData = DND_CLASSES.find(c => c.name === newClass);
@@ -744,6 +740,10 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
       incrementResource, decrementResource, addCustomResource, removeResource,
       setShowLevelUp, setShowLevelDown, pinned, homebrewVersion,
       activityLog, setActivityLog, allTags,
+      // consumed by the plugins' modals.render()
+      showLevelUp, showLevelDown, t,
+      showWidgetEditor, setShowWidgetEditor, editingWidgetId, setEditingWidgetId,
+      handleAddWidget, handleEditWidget,
     },
     units: { toDisplaySpeed, fromDisplaySpeed, toDisplayWeight, speedUnit, weightUnit },
   };
@@ -753,65 +753,15 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
 
   return (
     <CharContext.Provider value={{
-      abilities:    activeSystem === 'daggerheart' ? (state.traits || {}) : effectiveAbilities,
-      traitValues:  activeSystem === 'daggerheart' ? (state.traits || {}) : effectiveAbilities,
-      charLevel:    state.charLevel,
-      profBonus:    activeSystem === 'daggerheart' ? getDHProficiency(state.charLevel) : char.profBonus,
-      systemId:     activeSystem || 'dnd5e2024',
-      customFields: state.customFields || {},
+      ...sys.contextValue(state, widgetCtx.derived),
+      charLevel: state.charLevel,
+      systemId:  activeSystem || DEFAULT_SYSTEM,
+      scoresAreModifiers: sys.capabilities.scoresAreModifiers,
     }}>
     <div className="sheet">
       <Toast message={toast} action={toastAction} />
       {showCreator && <CharacterCreator onComplete={handleCreatorComplete} onCancel={() => setShowCreator(false)} systemId={activeSystem || DEFAULT_SYSTEM} />}
-      {showWidgetEditor && activeSystem === 'custom' && (() => {
-        const editingWidget = editingWidgetId ? (state.widgets || []).find(w => w.id === editingWidgetId) : null;
-        return (
-          <WidgetEditor
-            initialType={editingWidget?.type ?? null}
-            initialConfig={editingWidget?.config ?? null}
-            onAdd={editingWidgetId
-              ? cfg => handleEditWidget(editingWidgetId, cfg)
-              : handleAddWidget
-            }
-            onClose={() => { setShowWidgetEditor(false); setEditingWidgetId(null); }}
-          />
-        );
-      })()}
-      {showLevelUp && activeSystem === 'dnd5e2024' && (
-        <LevelUpModal
-          currentLevel={state.charLevel}
-          charClass={state.charClass}
-          charState={state}
-          onComplete={changes => {
-            char.levelUp(changes);
-            const newLevel = (state.charLevel || 1) + 1;
-            const classData = DND_CLASSES.find(c => c.name === state.charClass);
-            if (classData?.resources?.length) {
-              const newProfBonus = getProfBonus(newLevel);
-              const customRes = (state.resources || []).filter(r => r.source === 'custom' || r.source === 'feat');
-              const classRes = classData.resources.map(r => {
-                const maxVal = (r.startLevel && newLevel < r.startLevel) ? 0 : resolveResourceFormula(r.formula, state.abilities, newLevel, newProfBonus);
-                const existing = (state.resources || []).find(er => er.id === r.id);
-                let resetOn = r.resetOn;
-                if (r.id === 'bardic_inspiration') resetOn = newLevel >= 5 ? 'short' : 'long';
-                return { ...r, resetOn, max: maxVal, current: existing ? Math.min(existing.current, maxVal) : maxVal, pinned: existing?.pinned ?? false };
-              });
-              update({ resources: [...classRes, ...customRes] });
-              if (state.charClass === 'Bard' && newLevel === 5) showToast(t('resources.bardInspirationShortRest'));
-            }
-            setShowLevelUp(false);
-          }}
-          onCancel={() => setShowLevelUp(false)}
-        />
-      )}
-      {showLevelDown && activeSystem === 'dnd5e2024' && (
-        <LevelDownModal
-          currentLevel={state.charLevel}
-          charState={state}
-          onConfirm={keepIds => { char.levelDown(keepIds); setShowLevelDown(false); }}
-          onCancel={() => setShowLevelDown(false)}
-        />
-      )}
+      {sys.modals?.render?.(widgetCtx)}
 
       {showSources && (
         <div className="creator-overlay" onClick={() => setShowSources(false)}>
@@ -1056,7 +1006,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
               <div className="hmenu-label">{t('menu.data')}</div>
               <button className="hmenu-item" onClick={() => { handleExport(); setShowMenu(false); }}>{t('menu.exportChar')}</button>
               <button className="hmenu-item" onClick={() => { fileInputRef.current?.click(); setShowMenu(false); }}>{t('menu.importChar')}</button>
-              {activeSystem === 'custom' && (
+              {sys.capabilities.templateIO && (
                 <>
                   <button className="hmenu-item" onClick={() => { exportCustomTemplate(); setShowMenu(false); }}>
                     {t('customWidgets.exportTemplate')}
@@ -1082,17 +1032,18 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
         editMode={editMode}
         onReorderTabs={commitTabs}
         systemName={t(`system.${activeSystem || DEFAULT_SYSTEM}`, getPlugin(activeSystem || DEFAULT_SYSTEM).meta.shortName)}
-        onAddTab={activeSystem === 'custom' ? handleAddTab : undefined}
-        onRemoveTab={activeSystem === 'custom' ? handleRemoveTab : undefined}
+        onAddTab={sys.capabilities.editableTabs ? handleAddTab : undefined}
+        onRemoveTab={sys.capabilities.editableTabs ? handleRemoveTab : undefined}
       />
 
       <PinnedBar
+        capabilities={sys.capabilities}
+        pinnable={sys.pins?.pinnable}
         state={state}
         editMode={editMode}
         pinned={pinned}
         onTogglePin={handleTogglePin}
         onUpdate={update}
-        system={activeSystem || DEFAULT_SYSTEM}
         onShortRest={handleShortRest}
         onLongRest={handleLongRest}
         onToggleResourcePip={toggleResourcePip}
@@ -1101,7 +1052,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
       {editMode && (
         <div className="layout-edit-banner">
           {t('layout.editBanner')}
-          {activeSystem === 'custom' && (
+          {sys.capabilities.userDefinedWidgets && (
             <button
               className="io-btn primary"
               style={{ marginLeft: 12, fontSize: '0.8rem', padding: '4px 12px' }}
@@ -1187,7 +1138,7 @@ export default function App() {
     setShowCreator(false);
   }
 
-  const filteredChars = chars.filter(c => (c.system || 'dnd5e2024') === activeSystem);
+  const filteredChars = chars.filter(c => (c.system || DEFAULT_SYSTEM) === activeSystem);
   const systemSelectorNode = <SystemSelector activeSystem={activeSystem} onChange={handleSystemChange} />;
 
   return (

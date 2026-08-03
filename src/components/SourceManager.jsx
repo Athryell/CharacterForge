@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { DEFAULT_SYSTEM } from '../systems/registry';
 import { useTranslation } from 'react-i18next';
 import dataManager from '../data/dataManager';
 import { Icon } from '../config/icons';
@@ -209,7 +210,7 @@ export default function SourceManager({ onHomebrewChange }) {
             <strong>{pending.name || pending.id}</strong>
             {pending.author && <span> · {pending.author}</span>}
             <span className="source-badge system" style={{ marginLeft: 6 }}>
-              {t(`system.${pending.system || 'dnd5e2024'}`, pending.system || 'dnd5e2024')}
+              {t(`system.${pending.system || DEFAULT_SYSTEM}`, pending.system || DEFAULT_SYSTEM)}
             </span>
           </div>
           {pending.description && (
@@ -257,7 +258,7 @@ export default function SourceManager({ onHomebrewChange }) {
                 {src.type === 'srd' ? 'SRD' : 'Homebrew'}
               </span>
               <span className="source-badge system">
-                {t(`system.${src.system || 'dnd5e2024'}`, src.system || 'dnd5e2024')}
+                {t(`system.${src.system || DEFAULT_SYSTEM}`, src.system || DEFAULT_SYSTEM)}
               </span>
               <span className="source-name">{src.name}</span>
               {src.author && <span className="source-author">— {src.author}</span>}

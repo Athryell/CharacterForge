@@ -11,3 +11,13 @@ export default function rules() {
     actions: {},
   };
 }
+
+export function contextValue(state) {
+  return {
+    abilities:    {},
+    traitValues:  {},
+    profBonus:    0,
+    traitMap:     null,
+    customFields: state.customFields || {},
+  };
+}
