@@ -427,8 +427,32 @@ API di `src/layout.js`: `loadLayoutForSystem` / `saveLayoutForSystem`,
 `getDefaultTabsForSystem`, `getWidgetsForTab(layout, tab)`, `getWidgetLabel(id, systemId)`.
 
 Cataloghi attuali: 22 widget D&D (tab `main`, `combat`, `spells`, `inventory`, `notes`, `log`)
-e 12 Daggerheart (tab `main`, `combat`, `inventory`, `notes`). Ogni widget ha un
-`renderWidget(id)` corrispondente in `App.jsx` — finché la Fase 6 non lo sposta nei plugin.
+e 12 Daggerheart (tab `main`, `combat`, `inventory`, `notes`).
+
+**Il rendering vive nel plugin**: `src/systems/<id>/widgets.jsx` esporta `render(id, ctx)`.
+`App.jsx` costruisce `ctx` una volta e delega — non sa quali id esistano.
+
+```js
+ctx = {
+  core:    { state, update, char, t, editMode, layout, activeSystem },
+  ui:      { …useState di edit-mode, memo dipendenti dalle unità },
+  derived: { effectiveAbilities, equipBonuses, acDerivedData, … },
+  shell:   { handleRoll, showToast, addLog, apri-modali, … },
+  units:   { toDisplaySpeed, toDisplayWeight, speedUnit, weightUnit },
+}
+```
+
+I pezzi presentazionali condivisi stanno in `src/components/sheet/`
+(`Field`, `Toast`, `HPBar`, `HMenuGroup`, `ResourceIcon`, `rollDice`, `DICE_ICONS`);
+quelli di un solo sistema in `src/systems/<id>/parts.jsx`.
+
+⚠ `dh-actions` **duplica** il case `actions` invece di riusarlo. Prima faceva
+`renderWidget('actions')`: il riuso cross-plugin metterebbe le mani di un plugin dentro
+un altro. È l'unico punto del refactor in cui "sposta" è diventato "sposta e duplica".
+
+⚠ **Lo stato UI e i memo derivati restano in `App.jsx`** e passano dal `ctx`:
+`effectiveAbilities` serve anche a `handleRoll` e al `CharContext`, quindi non poteva
+migrare in blocco. Li sposta la Fase 7 insieme a `contextValue`.
 
 Il sistema `custom` ha `widgetDefs: []`: i widget stanno in `state.widgets`, li crea l'utente
 e li renderizza `CustomWidget`. `WidgetGrid` e `WidgetShell` sono riutilizzati invariati;
