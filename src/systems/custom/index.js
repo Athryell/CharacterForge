@@ -11,6 +11,8 @@ import * as widgets from './widgets';
 import * as modals  from './modals';
 import adapter      from './data/adapter';
 import CustomCreatorBridge from './components/CustomCreatorBridge';
+import i18nEn from './i18n/ui.i18n.json';
+import i18nIt from './i18n/ui.i18n.it.json';
 
 export default defineSystem({
   meta,
@@ -26,4 +28,7 @@ export default defineSystem({
   modals,
   data:    adapter,
   creator: CustomCreatorBridge,
+  // No de/fr/es bundle yet — Crowdin hasn't caught up on these keys, so those
+  // locales fall through to English same as before the split.
+  i18n:    { bundles: { en: i18nEn, it: i18nIt } },
 });

@@ -1,9 +1,9 @@
 // Daggerheart — i18n-aware getter functions
-import dhEN from '../../../data/systems/daggerheart/i18n/daggerheart.i18n.json';
-import dhIT from '../../../data/systems/daggerheart/i18n/daggerheart.i18n.it.json';
-import dhDE from '../../../data/systems/daggerheart/i18n/daggerheart.i18n.de.json';
-import dhES from '../../../data/systems/daggerheart/i18n/daggerheart.i18n.es.json';
-import dhFR from '../../../data/systems/daggerheart/i18n/daggerheart.i18n.fr.json';
+import dhEN from '../i18n/daggerheart.i18n.json';
+import dhIT from '../i18n/daggerheart.i18n.it.json';
+import dhDE from '../i18n/daggerheart.i18n.de.json';
+import dhES from '../i18n/daggerheart.i18n.es.json';
+import dhFR from '../i18n/daggerheart.i18n.fr.json';
 
 import { DH_CLASSES, DH_DOMAINS } from './classes';
 import { DH_TRAITS, DH_ANCESTRIES, DH_COMMUNITIES, DH_TRAIT_USES } from './mechanics';

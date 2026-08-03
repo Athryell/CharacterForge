@@ -13,6 +13,11 @@ import * as widgets from './widgets';
 import * as modals  from './modals';
 import adapter      from './data/adapter';
 import DNDCharacterCreator from './components/DNDCharacterCreator';
+import i18nEn from './i18n/ui.i18n.json';
+import i18nIt from './i18n/ui.i18n.it.json';
+import i18nDe from './i18n/ui.i18n.de.json';
+import i18nFr from './i18n/ui.i18n.fr.json';
+import i18nEs from './i18n/ui.i18n.es.json';
 
 export default defineSystem({
   meta,
@@ -30,4 +35,5 @@ export default defineSystem({
   modals,
   data:    adapter,
   creator: DNDCharacterCreator,
+  i18n:    { bundles: { en: i18nEn, it: i18nIt, de: i18nDe, fr: i18nFr, es: i18nEs } },
 });

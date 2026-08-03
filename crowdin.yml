@@ -5,17 +5,9 @@ files:
     translation: /src/i18n/locales/%two_letters_code%/ui.json
   - source: /src/i18n/locales/en/game.json
     translation: /src/i18n/locales/%two_letters_code%/game.json
-  - source: /src/data/systems/dnd5e2024/i18n/weapons.i18n.json
-    translation: /src/data/systems/dnd5e2024/i18n/weapons.i18n.%two_letters_code%.json
-  - source: /src/data/systems/dnd5e2024/i18n/spells.i18n.json
-    translation: /src/data/systems/dnd5e2024/i18n/spells.i18n.%two_letters_code%.json
-  - source: /src/data/systems/dnd5e2024/i18n/conditions.i18n.json
-    translation: /src/data/systems/dnd5e2024/i18n/conditions.i18n.%two_letters_code%.json
-  - source: /src/data/systems/dnd5e2024/i18n/classes.i18n.json
-    translation: /src/data/systems/dnd5e2024/i18n/classes.i18n.%two_letters_code%.json
-  - source: /src/data/systems/dnd5e2024/i18n/species.i18n.json
-    translation: /src/data/systems/dnd5e2024/i18n/species.i18n.%two_letters_code%.json
-  - source: /src/data/systems/dnd5e2024/i18n/backgrounds.i18n.json
-    translation: /src/data/systems/dnd5e2024/i18n/backgrounds.i18n.%two_letters_code%.json
-  - source: /src/data/systems/daggerheart/i18n/daggerheart.i18n.json
-    translation: /src/data/systems/daggerheart/i18n/daggerheart.i18n.%two_letters_code%.json
+  # Every system's SRD data tables + its own UI string bundle share the same
+  # <name>.i18n.json / <name>.i18n.<lang>.json convention, so one wildcard
+  # covers dnd5e2024, daggerheart, and any future src/systems/<id>/ folder —
+  # no crowdin.yml edit needed to add a system.
+  - source: /src/systems/*/i18n/*.i18n.json
+    translation: /src/systems/**/i18n/%original_file_name%.%two_letters_code%.json

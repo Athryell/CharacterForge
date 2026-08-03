@@ -211,8 +211,11 @@ Un id sconosciuto risolve a `src/systems/unknown.js`, che ha tutte le capability
 ed è così che un id sbagliato diventa corruzione silenziosa dei dati.
 
 Campi del contratto già popolati: `meta`, `capabilities`, `icons`, `notation`, `homebrew`,
-`data` (l'adapter), `creator`. `layout`, `state`, `rules`, `widgets`, `modals`, `menu` e
-`pins` arrivano nelle fasi successive; `defineSystem` non richiede che esistano.
+`data` (l'adapter), `creator`, `layout`, `state`, `rules`, `widgets`, `pins`,
+`useWidgetState`, `i18n.bundles` (Fase 8 — vedi sezione i18n). `modals` e `menu` solo dove
+servono (D&D e custom hanno `modals`, DH no). `defineSystem` non richiede che nessuno di
+questi esista: un plugin che non dichiara `i18n` semplicemente non contribuisce stringhe
+oltre a `ui.json`.
 
 ⚠ `src/config/icons.jsx` importa il registry, e i plugin importano i componenti creator,
 che importano `icons.jsx`: è un ciclo. Per questo `getIconMap()` costruisce la mappa **alla
@@ -281,16 +284,19 @@ src/systems/<id>/
   data/         # tabelle SRD + adapter — l'adapter è la sola API pubblica
   components/   # componenti che esistono solo per questo sistema
   bonuses.js    # (solo dnd5e2024) BONUS_STAT_OPTIONS
+  i18n/         # <name>.i18n.json (SRD data) + ui.i18n.json (stringhe UI del plugin)
 
 src/data/
   dataManager.js         # façade sugli adapter — resta condivisa
-  systems.js             # registry dei sistemi
-  systems/<id>/i18n/     # SOLO i JSON i18n, lasciati qui perché ancorati da crowdin.yml
 ```
 
-I JSON i18n non sono stati spostati insieme al resto: `crowdin.yml` ne ancora i path e
-muoverli richiede di ri-mappare le sorgenti sul progetto Crowdin. `getters.js` di
-Daggerheart li raggiunge con `../../../data/systems/daggerheart/i18n/`.
+`src/data/systems/` non esiste più (Fase 8): i JSON i18n delle tabelle SRD sono stati
+spostati con `git mv` dentro `src/systems/<id>/i18n/`, a fianco del bundle di stringhe UI
+del plugin. `getters.js` di Daggerheart e `data/i18n.js` di D&D li raggiungono con
+`../i18n/`. Tutti i file in quella cartella seguono la stessa convenzione
+`<name>.i18n.json` (sorgente) / `<name>.i18n.<lang>.json` (traduzione), SRD e UI comprese:
+è quello che permette a `crowdin.yml` di coprirli con un solo wildcard invece di una riga
+per file (vedi sezione i18n più sotto).
 
 ### Data layer — `src/data/`
 
@@ -325,7 +331,8 @@ i18n dei dati, che sono **non tradotte**, perdendo le traduzioni reali di `game.
 
 ### Stato delle traduzioni dei dati
 
-⚠ Tutti i file in `src/data/systems/*/i18n/*.i18n.<lang>.json` sono attualmente **copie
+⚠ Tutti i file in `src/systems/*/i18n/*.i18n.<lang>.json` (le tabelle SRD, non il bundle
+`ui.i18n.*`) sono attualmente **copie
 identiche dell'inglese** in tutte e quattro le lingue, per entrambi i sistemi. La pipeline
 di traduzione dei dati SRD esiste e funziona, ma non ha ancora contenuto da Crowdin:
 qualsiasi verifica basata su "i nomi cambiano con la lingua" fallirà per questo motivo,
@@ -606,7 +613,37 @@ Sorgente EN in `src/i18n/locales/en/ui.json`.
 Traduzioni IT in `src/i18n/locales/it/ui.json`.
 DE, FR, ES gestite via Crowdin — aggiungere sempre le chiavi EN prima del push.
 
-Chiavi organizzate per namespace: `identity.*`, `levelUp.*`, `levelDown.*`, `common.*`, `data.alignments.*`, `data.weaponProps.*`, `data.masteries.*`, `placeholders.*`, `errors.*`, `notation.*`, `sources.*`, `onboarding.*`, ecc.
+Chiavi organizzate per namespace: `identity.*`, `common.*`, `placeholders.*`, `notation.*`,
+`sources.*`, `onboarding.*`, ecc.
+
+### Stringhe UI nei plugin (Fase 8)
+
+`ui.json` contiene solo il chrome davvero condiviso: navigazione, menu, form generici,
+il wizard di creazione (bottoni Back/Next/Create, non i suoi step), i widget riusati da
+più sistemi (`widgets.conditions`, `widgets.actions`). Il resto vive nel bundle del
+plugin: `src/systems/<id>/i18n/ui.i18n.json` (+ `ui.i18n.<lang>.json`), stessa forma di
+`ui.json` — chiave in cima uguale a quella che il componente già chiama con `t()`, perché
+i bundle vengono fusi con `deepMerge` dentro `src/i18n/index.js`, non caricati come
+namespace i18next separati. Un componente non cambia mai `t('combat.ac')` in
+`t('dnd.combat.ac')`: sposta solo il JSON che lo definisce.
+
+**Il criterio per decidere dove va una chiave è "chi chiama `t()` su di essa", non "a chi
+sembra appartenere concettualmente".** Se il chiamante vive dentro `src/systems/<id>/`,
+la chiave va nel bundle di quel plugin — anche se il codice che la chiama è generico
+(es. `armor.*`/`spells.*` sono chiamate solo da `ArmorManager`/`SpellManager`, componenti
+condivisi in `src/components/`, ma **oggi** solo D&D li usa: la chiave sta comunque nel
+bundle `dnd5e2024`, non in core). Se un top-level namespace è usato da **file di sistemi
+diversi con chiavi diverse** (es. `creator.nameLabel`/`back`/`next` da tutti e due i
+creator, `creator.speciesTitle` solo da quello D&D), si spacca: core tiene le chiavi
+davvero condivise, ogni plugin aggiunge le proprie sotto lo stesso namespace, e
+`deepMerge` li ricompone. Namespace il cui codice-chiamante è ancora centralizzato in un
+file core (es. `pinned.*`, che `PinnedBar.PinContent` gestisce con `if` su entrambi i
+sistemi — debito noto, vedi sotto) **restano interi in core**: spostare le stringhe prima
+del codice che le usa non avrebbe senso.
+
+`crowdin.yml` copre `src/systems/*/i18n/*.i18n.json` con un solo wildcard (source SRD e
+bundle UI condividono la stessa convenzione di nome file): aggiungere un sistema non
+tocca `crowdin.yml`.
 
 File dati i18n per sistema in `src/data/systems/dnd5e2024/i18n/` e `src/data/systems/daggerheart/i18n/` — sincronizzati via Crowdin. Aggiornare `crowdin.yml` se si aggiungono nuovi file.
 
@@ -656,3 +693,23 @@ Eventi principali: `system-selected`, `creator-opened`, `character-created`, `ch
 - Sistema `custom` aggiunto: `CustomWidget`, `WidgetEditor`, export/import template
 - Notazione estesa con `customFields` — `[FIELDID]`, `[FIELDID.max]`
 - Aggiunte variabili CSS `--c-bar-red`, `--c-bar-blue` per i colori widget custom
+
+### 2026-08-03 — Refactor Fase 8 (i18n nei plugin)
+
+- `src/data/systems/` eliminato: le tabelle i18n SRD si spostano con `git mv` dentro
+  `src/systems/<id>/i18n/`, a fianco del nuovo bundle di stringhe UI del plugin
+- `ui.json` (5 lingue) diviso in chrome condiviso + bundle per plugin: `dh.*` e
+  `customWidgets.*` interi, il vocabolario D&D non taggato (`combat`, `concentration`,
+  `deathSave`, `hp`, `senses`, `notes`, `currency`, `feats`, `levelUp`, `levelDown`,
+  `resources`, `armor`, `spells`, `data.*`), più le porzioni D&D/DH di `identity`,
+  `creator`, `widgets`, `placeholders` — core tiene solo le chiavi che due o più sistemi
+  chiamano davvero
+- Nuovo campo di contratto `i18n: { bundles: { en, it, de, fr, es } }`; `src/i18n/index.js`
+  smette di essere l'unico posto che nomina le lingue caricate e fonde (`deepMerge`) core +
+  bundle di ogni plugin nel registry — un plugin senza `i18n` semplicemente non contribuisce
+  nulla oltre al chrome
+- `crowdin.yml` passa da 9 entry a 3: core `ui.json`/`game.json` più un wildcard
+  `src/systems/*/i18n/*.i18n.json` che copre tabelle SRD e bundle UI di ogni sistema,
+  presente e futuro
+- Nuovo `scripts/checks/phase8.mjs`: 5 lingue × 3 sistemi, nessuna chiave i18n grezza in
+  nessuna tab né nel menu hamburger
