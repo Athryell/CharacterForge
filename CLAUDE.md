@@ -450,9 +450,17 @@ quelli di un solo sistema in `src/systems/<id>/parts.jsx`.
 `renderWidget('actions')`: il riuso cross-plugin metterebbe le mani di un plugin dentro
 un altro. È l'unico punto del refactor in cui "sposta" è diventato "sposta e duplica".
 
-⚠ **Lo stato UI e i memo derivati restano in `App.jsx`** e passano dal `ctx`:
-`effectiveAbilities` serve anche a `handleRoll` e al `CharContext`, quindi non poteva
-migrare in blocco. Li sposta la Fase 7 insieme a `contextValue`.
+**Lo stato UI e i derivati di un sistema stanno nel plugin**, in
+ — un hook, non , perché dipendono da
+state React e dalle preferenze di unità:
+
+\
+App fonde  e  nel  e non li nomina. È sicuro chiamarlo tramite
+variabile perché  si rimonta al cambio di sistema (la key della Fase 3);
+senza, scambiare il set di hook sotto un componente vivo violerebbe le regole degli hook.
+
+Restano in App.jsx solo gli affordance generici del foglio (,
+, , , ), usati dai widget di ogni sistema.
 
 Il sistema `custom` ha `widgetDefs: []`: i widget stanno in `state.widgets`, li crea l'utente
 e li renderizza `CustomWidget`. `WidgetGrid` e `WidgetShell` sono riutilizzati invariati;

@@ -1,28 +1,22 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useCharacter } from './hooks/useCharacter';
 import { loadCharsIndex, deleteChar, getActiveCharId, setActiveCharId, generateCharId, migrateLegacy, saveCharState } from './chars';
 import CharacterSelect from './components/CharacterSelect';
 import Onboarding, { CornerButtons, loadOnboardingSeen } from './components/Onboarding';
-import {
-  ABILITIES,
-  SPELLCASTING_CLASS, getMod, HIT_DICE,
-  resolveResourceFormula, getProfBonus,
-} from './systems/dnd5e2024/data/mechanics';
+import { HIT_DICE, resolveResourceFormula, getProfBonus } from './systems/dnd5e2024/data/mechanics';
 import dataManager from './data/dataManager';
 import SourceManager from './components/SourceManager';
 import HomebrewEditor from './components/HomebrewEditor';
 import CharacterCreator from './components/CharacterCreator';
-import { DND_ARMOR_PRESETS } from './systems/dnd5e2024/data/armors';
 import TabBar from './components/TabBar';
-import { parseTextBonuses, resolveNotations } from './components/Tooltip';
+import { resolveNotations } from './components/Tooltip';
 import { CharContext } from './components/CharContext';
 import WidgetGrid from './components/WidgetGrid';
 import PinnedBar, { loadPinned, savePinned } from './components/PinnedBar';
 import { DND_CLASSES } from './systems/dnd5e2024/data/classes';
 import { getDefaultLayoutForSystem, getWidgetsForTab, loadLayoutForSystem, saveLayoutForSystem, loadTabsForSystem, saveTabsForSystem, getDefaultTabsForSystem, getWidgetLabel } from './layout';
-import { getDHClasses, getDHDomains, getDHAncestries, getDHCommunities, getDHTraitUses } from './systems/daggerheart/data/getters';
 import { SYSTEM_METAS, DEFAULT_SYSTEM, getPlugin } from './systems/registry';
 import { useTheme, ACCENT_PRESETS } from './hooks/useTheme';
 import { useUnits } from './hooks/useUnits';
@@ -110,11 +104,6 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
   const char = useCharacter(charId);
   const { state, update } = char;
 
-  const dhClasses    = useMemo(() => getDHClasses(i18n.language),    [i18n.language]);
-  const dhDomains    = useMemo(() => getDHDomains(i18n.language),    [i18n.language]);
-  const dhAncestries = useMemo(() => getDHAncestries(i18n.language), [i18n.language]);
-  const dhCommunities= useMemo(() => getDHCommunities(i18n.language),[i18n.language]);
-  const dhTraitUses  = useMemo(() => getDHTraitUses(i18n.language),  [i18n.language]);
 
   // Layout state
   const [layout, setLayout] = useState(() => loadLayoutForSystem(activeSystem || DEFAULT_SYSTEM));
@@ -180,8 +169,6 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
   const [editingAbilities, setEditingAbilities] = useState(false);
   const [editingHP, setEditingHP] = useState(false);
   const [editingIdentity, setEditingIdentity] = useState(false);
-  const [editingDHEvasion, setEditingDHEvasion] = useState(false);
-  const [dhOpenFeature, setDhOpenFeature] = useState(null);
   const [showMenu, setShowMenu] = useState(false);
   const [hoveredAttr, setHoveredAttr] = useState(null);
   const [addOpenFor, setAddOpenFor] = useState(null);
@@ -192,11 +179,6 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
   const [showNotations, setShowNotations] = useState(false);
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [showLevelDown, setShowLevelDown] = useState(false);
-  const [concentrationCheck, setConcentrationCheck] = useState(null);
-  const [editingCombat, setEditingCombat] = useState(false);
-  const [editingResources, setEditingResources] = useState(false);
-  const [addingResource, setAddingResource] = useState(false);
-  const [newResource, setNewResource] = useState({ name:'', icon:'d6', formula:'fixed:1', resetOn:'long', pinned:false });
   const { mode: themeMode, accentId, setThemeMode, setAccent } = useTheme();
 
   useEffect(() => {
@@ -207,6 +189,20 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
 
   const { iconMode, setIconMode, iconAccent, setIconAccent } = useIconMode();
   const { weightUnit, speedUnit, setPref: setUnitPref, toDisplayWeight, toDisplaySpeed, fromDisplaySpeed } = useUnits();
+
+  // The active system's own UI state and derived values. Called through a
+  // variable, which is safe because CharacterApp remounts on a system switch.
+  const { ui: pluginUi = {}, derived: pluginDerived = {} } =
+    sys.useWidgetState?.({ state, char, units: { toDisplaySpeed, speedUnit, weightUnit } }) ?? {};
+
+  // What the notation engine resolves [STR] and friends against, per system.
+  const ctxValue = sys.contextValue(state, { ...char.derived, ...pluginDerived });
+
+  // Handlers below still touch a few of the plugin's own UI slots.
+  const {
+    setConcentrationCheck, newResource, setNewResource, setAddingResource,
+    editingCombat,
+  } = pluginUi;
   const { prefs: a11y, setPref: setA11y } = useAccessibility();
   const fileInputRef = useRef();
   const templateFileInputRef = useRef();
@@ -304,72 +300,6 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
     ...(state.features||[]).flatMap(f => f.tags||[]),
     ...(state.equipment||[]).flatMap(e => e.tags||[]),
   ])];
-  const actionNames = new Set((state.actions||[]).map(a => a.name));
-  const { equipBonuses, equipBonusesDetailed } = useMemo(() => {
-    const totals = {};
-    const detailed = {};
-    const add = (stat, value, name) => {
-      totals[stat] = (totals[stat] || 0) + Number(value);
-      detailed[stat] = detailed[stat] || [];
-      detailed[stat].push({ name, value: Number(value) });
-    };
-    [...(state.weapons||[]), ...(state.equipment||[])].forEach(item => {
-      (item.bonuses||[]).forEach(({ stat, value }) => add(stat, value, item.name));
-      const resolvedDesc = resolveNotations(item.desc, state.abilities, state.charLevel, char.profBonus);
-      parseTextBonuses(resolvedDesc).forEach(({ stat, value }) => add(stat, value, item.name));
-    });
-    return { equipBonuses: totals, equipBonusesDetailed: detailed };
-  }, [state.weapons, state.equipment, state.abilities, state.charLevel, char.profBonus]);
-
-  const effectiveAbilities = useMemo(() => {
-    // Guarded because a non-D&D character no longer carries an `abilities`
-    // object at all: useCharacter used to merge the D&D default state into
-    // every sheet, which is what made this safe by accident.
-    const scores = state.abilities || {};
-    const result = {};
-    ABILITIES.forEach(attr => { result[attr] = (scores[attr] || 10) + (equipBonuses[attr] || 0); });
-    return result;
-  }, [state.abilities, equipBonuses]);
-
-  const acDerivedData = useMemo(() => {
-    const dexMod = getMod(effectiveAbilities.DEX);
-    const armors = sys.capabilities.armorAC ? (state.armors || []) : [];
-    const ea = armors.find(a => a.type === 'armor' && a.equipped);
-    const preset = ea?.presetId ? DND_ARMOR_PRESETS.find(p => p.id === ea.presetId) : null;
-    const dexContrib = preset
-      ? (preset.type === 'heavy' ? 0 : Math.min(dexMod, preset.maxDex ?? 100))
-      : ea
-        ? (ea.armorType === 'heavy' ? 0 : ea.armorType === 'medium' ? Math.min(dexMod, 2) : dexMod)
-        : dexMod;
-    const shields = armors.filter(a => a.type === 'shield' && a.equipped);
-    const shieldBonus = shields.reduce((s, sh) => s + (sh.acValue || 2), 0);
-    return { dexContrib, shieldBonus, hasShield: shields.length > 0, preset, ea, shields };
-  }, [state.armors, effectiveAbilities, sys.capabilities.armorAC]);
-
-  // STR speed penalty: 10 ft if equipped preset armor has strReq and STR < strReq
-  const strSpeedPenaltyFt = useMemo(() => {
-    if (!sys.capabilities.encumbrance) return 0;
-    const armors = state.armors || [];
-    const ea = armors.find(a => a.type === 'armor' && a.equipped && a.presetId);
-    if (!ea) return 0;
-    const preset = DND_ARMOR_PRESETS.find(p => p.id === ea.presetId);
-    if (!preset || !preset.strReq) return 0;
-    return (effectiveAbilities.STR || 10) < preset.strReq ? 10 : 0;
-  }, [state.armors, effectiveAbilities.STR, sys.capabilities.encumbrance]);
-
-  const strPenaltyText = `${toDisplaySpeed(10)} ${speedUnit === 'sq' ? '□' : speedUnit}`;
-
-  const { currentWeightKg, maxWeightKg, coinWeightKg } = useMemo(() => {
-    const strScore = state.abilities?.STR || 10;
-    const inventoryW = (state.equipment || []).reduce((s, i) => s + (parseFloat(i.weight) || 0) * (i.qty || 1), 0);
-    const weaponW = (state.weapons || []).reduce((s, w) => s + (parseFloat(w.weight) || 0), 0);
-    const armorW = (state.armors || []).reduce((s, a) => s + (parseFloat(a.weight) || 0), 0);
-    const totalCoins = Object.values(state.currency || {}).reduce((s, v) => s + (parseInt(v) || 0), 0);
-    const coinW_raw = Math.floor(totalCoins / 50);
-    const coinW = weightUnit === 'lbs' ? coinW_raw * 2 : coinW_raw;
-    const maxW = weightUnit === 'lbs' ? strScore * 15 : strScore * 7;
-    return { currentWeightKg: inventoryW + weaponW + armorW + coinW, maxWeightKg: maxW, coinWeightKg: coinW };
-  }, [state.equipment, state.weapons, state.armors, state.currency, state.abilities, weightUnit]);
 
   function createTag() {}
 
@@ -465,7 +395,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
   }
 
   function handleRoll(notation, name) {
-    const resolved = resolveNotations(notation, effectiveAbilities, state.charLevel, char.profBonus);
+    const resolved = resolveNotations(notation, ctxValue.abilities, state.charLevel, ctxValue.profBonus);
     const result = rollDice(resolved);
     if (result !== null) {
       const display = resolved !== notation ? `${notation} → ${resolved}` : notation;
@@ -678,7 +608,6 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
     };
     reader.readAsText(file);
   }
-  const hasSpells = !!SPELLCASTING_CLASS[state.charClass];
 
   // ── Layout management ──────────────────────────────────────────
   function handleLayoutChange(newWidgets, action) {
@@ -719,20 +648,13 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
   const widgetCtx = {
     core: { state, update, char, t, editMode, layout, activeSystem },
     ui: {
+      // generic sheet affordances every system's widgets use
       editingIdentity, setEditingIdentity, editingAbilities, setEditingAbilities,
       editingHP, setEditingHP, hpAmount, setHpAmount,
-      editingCombat, setEditingCombat, editingResources, setEditingResources,
-      addOpenFor, setAddOpenFor, addingResource, setAddingResource,
-      newResource, setNewResource, hoveredAttr, setHoveredAttr,
-      concentrationCheck, setConcentrationCheck, contentEditMap,
-      editingDHEvasion, setEditingDHEvasion, dhOpenFeature, setDhOpenFeature,
-      dhClasses, dhDomains, dhAncestries, dhCommunities, dhTraitUses,
-      currentWeightKg, maxWeightKg, coinWeightKg,
+      addOpenFor, setAddOpenFor, hoveredAttr, setHoveredAttr, contentEditMap,
+      ...pluginUi,
     },
-    derived: {
-      effectiveAbilities, equipBonuses, equipBonusesDetailed, acDerivedData,
-      hasSpells, actionNames, strSpeedPenaltyFt, strPenaltyText,
-    },
+    derived: { ...char.derived, ...pluginDerived },
     shell: {
       handleRoll, handleCastSpell, handleClassOrLevelChange, handleConcentrationRoll,
       handleDeathSaveRoll, handleHitDiceRoll, addLog, showToast, createTag,
@@ -753,7 +675,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
 
   return (
     <CharContext.Provider value={{
-      ...sys.contextValue(state, widgetCtx.derived),
+      ...ctxValue,
       charLevel: state.charLevel,
       systemId:  activeSystem || DEFAULT_SYSTEM,
       scoresAreModifiers: sys.capabilities.scoresAreModifiers,

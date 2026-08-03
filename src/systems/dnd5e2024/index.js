@@ -8,6 +8,7 @@ import layout       from './layout';
 import state        from './state';
 import rules, { contextValue } from './rules';
 import pins         from './pins';
+import useWidgetState from './useWidgetState';
 import * as widgets from './widgets';
 import * as modals  from './modals';
 import adapter      from './data/adapter';
@@ -24,6 +25,7 @@ export default defineSystem({
   rules,
   contextValue,
   pins,
+  useWidgetState,
   widgets,
   modals,
   data:    adapter,
