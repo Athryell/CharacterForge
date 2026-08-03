@@ -1,0 +1,98 @@
+{
+  "Barbarian": {
+    "name": "Barbarian",
+    "primaryAbility": "STR",
+    "subclassName": "Primal Path",
+    "srdSubclasses": [
+      "Path of the Berserker"
+    ]
+  },
+  "Bard": {
+    "name": "Bard",
+    "primaryAbility": "CHA",
+    "subclassName": "Bard College",
+    "srdSubclasses": [
+      "College of Lore"
+    ]
+  },
+  "Cleric": {
+    "name": "Cleric",
+    "primaryAbility": "WIS",
+    "subclassName": "Divine Order",
+    "srdSubclasses": [
+      "Life Domain"
+    ]
+  },
+  "Druid": {
+    "name": "Druid",
+    "primaryAbility": "WIS",
+    "subclassName": "Druid Circle",
+    "srdSubclasses": [
+      "Circle of the Land"
+    ]
+  },
+  "Fighter": {
+    "name": "Fighter",
+    "primaryAbility": "STR or DEX",
+    "subclassName": "Martial Archetype",
+    "srdSubclasses": [
+      "Champion"
+    ]
+  },
+  "Monk": {
+    "name": "Monk",
+    "primaryAbility": "STR or DEX",
+    "subclassName": "Monastic Tradition",
+    "srdSubclasses": [
+      "Warrior of the Open Hand"
+    ]
+  },
+  "Paladin": {
+    "name": "Paladin",
+    "primaryAbility": "STR",
+    "subclassName": "Sacred Oath",
+    "srdSubclasses": [
+      "Oath of Devotion"
+    ]
+  },
+  "Ranger": {
+    "name": "Ranger",
+    "primaryAbility": "DEX or STR",
+    "subclassName": "Ranger Conclave",
+    "srdSubclasses": [
+      "Hunter"
+    ]
+  },
+  "Rogue": {
+    "name": "Rogue",
+    "primaryAbility": "DEX",
+    "subclassName": "Roguish Archetype",
+    "srdSubclasses": [
+      "Thief"
+    ]
+  },
+  "Sorcerer": {
+    "name": "Sorcerer",
+    "primaryAbility": "CHA",
+    "subclassName": "Sorcerous Origin",
+    "srdSubclasses": [
+      "Draconic Bloodline"
+    ]
+  },
+  "Warlock": {
+    "name": "Warlock",
+    "primaryAbility": "CHA",
+    "subclassName": "Otherworldly Patron",
+    "srdSubclasses": [
+      "The Fiend"
+    ]
+  },
+  "Wizard": {
+    "name": "Wizard",
+    "primaryAbility": "INT",
+    "subclassName": "Arcane Tradition",
+    "srdSubclasses": [
+      "School of Evocation"
+    ]
+  }
+}
