@@ -451,16 +451,25 @@ quelli di un solo sistema in `src/systems/<id>/parts.jsx`.
 un altro. È l'unico punto del refactor in cui "sposta" è diventato "sposta e duplica".
 
 **Lo stato UI e i derivati di un sistema stanno nel plugin**, in
- — un hook, non , perché dipendono da
+`src/systems/<id>/useWidgetState.js` — un hook, non `rules.js`, perché dipendono da
 state React e dalle preferenze di unità:
 
-\
-App fonde  e  nel  e non li nomina. È sicuro chiamarlo tramite
-variabile perché  si rimonta al cambio di sistema (la key della Fase 3);
+```js
+export default function useWidgetState({ state, char, units }) {
+  return { ui: { /* useState + memo */ }, derived: { /* valori calcolati */ } };
+}
+```
+
+App fonde `ui` e `derived` nel `ctx` e non li nomina. È sicuro chiamarlo tramite
+variabile perché `CharacterApp` si rimonta al cambio di sistema (la key della Fase 3);
 senza, scambiare il set di hook sotto un componente vivo violerebbe le regole degli hook.
 
-Restano in App.jsx solo gli affordance generici del foglio (,
-, , , ), usati dai widget di ogni sistema.
+Restano in App.jsx solo gli affordance generici del foglio (`editingIdentity`,
+`editingHP`, `hpAmount`, `addOpenFor`, `hoveredAttr`), usati dai widget di ogni sistema.
+
+⚠ Il campo `useWidgetState` è **opzionale**: un sistema che non ne ha bisogno non lo
+dichiara, e App non tocca nulla. È questo che permette di aggiungere un sistema senza
+modificare `App.jsx`.
 
 Il sistema `custom` ha `widgetDefs: []`: i widget stanno in `state.widgets`, li crea l'utente
 e li renderizza `CustomWidget`. `WidgetGrid` e `WidgetShell` sono riutilizzati invariati;
