@@ -245,7 +245,7 @@ function DHPipRow({ current, max, pipClass, onToggle }) {
 
 function SubclassSection({ state, update, t, onOpenEditor }) {
   const cls = !state.charClass || state.charClass === '__custom__' ? '' : state.charClass;
-  const knownSubs = [...getSubclassesForClass(cls), ...dataManager.getSubclasses(cls)];
+  const knownSubs = [...getSubclassesForClass(cls), ...dataManager.getSubclasses('dnd5e2024', cls)];
   const selectVal = knownSubs.includes(state.charSubclass) ? state.charSubclass : '';
 
   return (
@@ -949,7 +949,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                 onError={e => { e.target.style.display='none'; }} />
             )}
             {editingIdentity ? (() => {
-                const knownClasses = dataManager.getClasses();
+                const knownClasses = dataManager.getClasses(activeSystem);
                 return (
                   <div className="grid-2" style={{ flex:1 }}>
                     <div style={{ gridColumn: 'span 2' }}>
@@ -991,7 +991,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                         }
                       }}>
                         <option value="">{t('identity.speciesPlaceholder')}</option>
-                        {dataManager.getSpecies().slice().sort((a, b) => t(`data.species.${a.id}`, a.name).localeCompare(t(`data.species.${b.id}`, b.name))).map(r => <option key={r.id} value={r.id}>{t(`data.species.${r.id}`, r.name)}</option>)}
+                        {dataManager.getSpecies(activeSystem).slice().sort((a, b) => t(`data.species.${a.id}`, a.name).localeCompare(t(`data.species.${b.id}`, b.name))).map(r => <option key={r.id} value={r.id}>{t(`data.species.${r.id}`, r.name)}</option>)}
                         <option value="__custom__">{t('identity.speciesCustom')}</option>
                       </select>
                     </Field>
@@ -1008,7 +1008,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
                         }
                       }}>
                         <option value="">{t('identity.backgroundPlaceholder')}</option>
-                        {dataManager.getBackgrounds().slice().sort((a, b) => t(`data.backgrounds.${a.id || a.name}`, a.name).localeCompare(t(`data.backgrounds.${b.id || b.name}`, b.name))).map(b => <option key={b.id || b.name} value={b.id || b.name}>{t(`data.backgrounds.${b.id || b.name}`, b.name)}</option>)}
+                        {dataManager.getBackgrounds(activeSystem).slice().sort((a, b) => t(`data.backgrounds.${a.id || a.name}`, a.name).localeCompare(t(`data.backgrounds.${b.id || b.name}`, b.name))).map(b => <option key={b.id || b.name} value={b.id || b.name}>{t(`data.backgrounds.${b.id || b.name}`, b.name)}</option>)}
                         <option value="__custom__">{t('identity.backgroundCustom')}</option>
                       </select>
                     </Field>

@@ -34,4 +34,13 @@ i18n
     interpolation: { escapeValue: false },
   });
 
+// dataManager reads this to pick translation tables for SRD data. It was read
+// but never assigned, so every call that didn't pass a language explicitly
+// silently returned English — spell and weapon names included.
+function publishLang(lng) {
+  try { window.__i18n_lang__ = lng; } catch { /* no window — ignore */ }
+}
+publishLang(i18n.language);
+i18n.on('languageChanged', publishLang);
+
 export default i18n;

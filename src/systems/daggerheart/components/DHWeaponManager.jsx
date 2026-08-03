@@ -36,8 +36,8 @@ function TypeBadge({ type, t }) {
 
 export default function DHWeaponManager({ weapons = [], proficiency = 1, onUpdate, onRoll, addOpen, onAddClose }) {
   const { t } = useTranslation();
-  const adapter = dataManager.getAdapter('daggerheart');
-  const DH_WEAPONS = adapter.getWeapons();
+  // Through dataManager, not the adapter: that is what merges homebrew packs in.
+  const DH_WEAPONS = dataManager.getWeapons('daggerheart');
   const [expanded, setExpanded] = useState(null);
   const [addMode, setAddMode] = useState('preset');
   const [handsFilter, setHandsFilter] = useState(null);

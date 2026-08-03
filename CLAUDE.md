@@ -269,11 +269,42 @@ Daggerheart li raggiunge con `../../../data/systems/daggerheart/i18n/`.
 
 ### Data layer — `src/data/`
 
-**`src/data/dataManager.js`** — punto di accesso unificato SRD + homebrew:
-- `getAdapter(systemId)` — restituisce l'adapter per il sistema attivo; è il metodo principale
-- `getSpells()`, `getWeapons()`, `getConditions()`, `getClasses()`, `getSpecies()`, `getBackgrounds()`, `getArmors()` — accettano `systemId` opzionale (default `'dnd5e2024'`)
-- `addSource(json)`, `removeSource(id)` — gestione sorgenti homebrew
-- Homebrew salvato in `localStorage` (`characterforge_homebrew`)
+**`src/data/dataManager.js`** — punto di accesso unificato SRD + homebrew.
+
+⚠ **`systemId` è sempre il PRIMO argomento**, le opzioni sono un oggetto:
+
+```js
+dataManager.getSpells(systemId)                 // lingua corrente
+dataManager.getWeapons(systemId, { lang: 'it' })
+dataManager.getClassData(systemId, 'Wizard')
+dataManager.getSubclasses(systemId, 'Wizard')
+```
+
+Prima `getArmors(systemId)` lo prendeva primo e `getSpells(lang, systemId)` secondo,
+e sei metodi non lo accettavano affatto, restituendo dati D&D a qualunque sistema.
+
+- `getAdapter(systemId)` — l'adapter del sistema; ritorna un adapter vuoto, mai quello D&D,
+  per un id sconosciuto
+- `getSources()` — deriva da `plugin.homebrew.sourceInfo()`, niente conteggi hardcodati
+- `exportSchema(systemId)` — deriva da `plugin.homebrew.exportTemplate()`
+- Homebrew in `localStorage` (`characterforge_homebrew`), filtrato per `system`
+
+**Il merge homebrew è generico**: una voce con la stessa chiave (`name`, o `id` per le
+condizioni) **sostituisce** quella SRD. Prima `mergeHomebrew` stava sull'adapter D&D,
+quindi i pacchetti Daggerheart venivano caricati e poi scartati in silenzio.
+
+⚠ **Un componente che chiama `adapter.getX()` invece di `dataManager.getX()` non riceve
+l'homebrew.** È il motivo per cui i manager DH non lo vedevano. `ConditionTracker` fa
+ancora così **di proposito**: passare da `dataManager` gli darebbe i nomi dalle tabelle
+i18n dei dati, che sono **non tradotte**, perdendo le traduzioni reali di `game.json`.
+
+### Stato delle traduzioni dei dati
+
+⚠ Tutti i file in `src/data/systems/*/i18n/*.i18n.<lang>.json` sono attualmente **copie
+identiche dell'inglese** in tutte e quattro le lingue, per entrambi i sistemi. La pipeline
+di traduzione dei dati SRD esiste e funziona, ma non ha ancora contenuto da Crowdin:
+qualsiasi verifica basata su "i nomi cambiano con la lingua" fallirà per questo motivo,
+non per un bug del codice.
 
 **`src/systems/dnd5e2024/data/adapter.js`** espone tutti i dati statici via metodi:
 - `getAbilities()`, `getSkills()`, `getAlignments()`, `getHitDice()`, `getSlotTable()`

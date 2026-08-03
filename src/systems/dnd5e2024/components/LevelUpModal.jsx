@@ -59,7 +59,7 @@ export default function LevelUpModal({ currentLevel, charClass, charState, onCom
     return [...withInitial, ...customSubclassFeatures];
   }, [ld, subclassLevelFeatures, customSubclassFeatures]);
   const choiceFeatures = useMemo(() => (ld.features || []).filter(f => !f.auto), [ld]);
-  const hbSubclasses = useMemo(() => dataManager.getSubclasses(charClass), [charClass]);
+  const hbSubclasses = useMemo(() => dataManager.getSubclasses('dnd5e2024', charClass), [charClass]);
   const isSpellcaster = !!classData?.spellcasting;
 
   const existingFeatIds = useMemo(
@@ -625,7 +625,7 @@ function SubclassFeaturePreview({ charClass, subclassName, targetLevel }) {
   const srdByLevel = SUBCLASS_DATA[charClass]?.[subclassName] || {};
 
   const hbByLevel = {};
-  const hbDetails = dataManager.getSubclassDetails(charClass, subclassName);
+  const hbDetails = dataManager.getSubclassDetails('dnd5e2024', charClass, subclassName);
   (hbDetails?.features || []).forEach(f => {
     const lv = parseInt(f.level) || 0;
     if (!lv || !f.name?.trim()) return;

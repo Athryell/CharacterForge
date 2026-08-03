@@ -7,16 +7,16 @@ import { DND_CLASSES, DND_CLASS_NAMES, CLASS_FEATURES } from './classes';
 import { DND_SPECIES } from './species';
 import { DND_BACKGROUNDS } from './backgrounds';
 import { DND_ARMOR_PRESETS, calcArmorAC, TYPE_LABEL } from './armors';
+import { SRD_ITEMS } from './items';
 import { getMod, getProfBonus, ABILITIES, SKILLS, ALIGNMENTS, HIT_DICE, SLOT_TABLE, SPELLCASTING_CLASS, DEFAULT_ACTIONS } from './mechanics';
-
-function mergeByKey(srdList, hbList, keyFn = item => item.name) {
-  const map = new Map(srdList.map(item => [keyFn(item), item]));
-  hbList.forEach(item => map.set(keyFn(item), { ...item, _homebrew: true }));
-  return Array.from(map.values());
-}
+import { getI18n } from './i18n';
 
 const dnd5eAdapter = {
   systemId: 'dnd5e2024',
+
+  // Translation tables for this system's data. dataManager asks for them by
+  // entity type and hands the result back to the getters below.
+  getI18n,
 
   // ── Dati base ────────────────────────────────────────────────────────────
 
@@ -66,6 +66,10 @@ const dnd5eAdapter = {
     return DND_ARMOR_PRESETS;
   },
 
+  getItems() {
+    return SRD_ITEMS;
+  },
+
   // ── Meccaniche ───────────────────────────────────────────────────────────
 
   getMod,
@@ -95,12 +99,9 @@ const dnd5eAdapter = {
   getDefaultActions:    () => DEFAULT_ACTIONS,
   getClassFeatures:     (className) => CLASS_FEATURES[className] || [],
 
-  // ── Homebrew merge ───────────────────────────────────────────────────────
-
-  mergeHomebrew(srdData, homebrew, type) {
-    const keyFn = type === 'conditions' ? item => item.id : item => item.name;
-    return mergeByKey(srdData, homebrew, keyFn);
-  },
+  // mergeHomebrew used to live here, which is why homebrew worked for D&D and
+  // was silently dropped for every other system. It is now one generic
+  // implementation in dataManager.
 };
 
 export default dnd5eAdapter;

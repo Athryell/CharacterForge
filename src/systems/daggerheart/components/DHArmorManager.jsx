@@ -33,8 +33,8 @@ export default function DHArmorManager({
   armorSlotsMax, armorSlots, charLevel, numericMode, onUpdate,
 }) {
   const { t } = useTranslation();
-  const adapter = dataManager.getAdapter('daggerheart');
-  const DH_ARMORS = adapter.getArmors();
+  // Through dataManager, not the adapter: that is what merges homebrew packs in.
+  const DH_ARMORS = dataManager.getArmors('daggerheart');
   const [changing, setChanging] = useState(false);
   const [changeMode, setChangeMode] = useState('preset');
   const [customForm, setCustomForm] = useState(BLANK_CUSTOM);

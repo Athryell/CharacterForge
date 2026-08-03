@@ -67,10 +67,10 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
 
   function patch(obj) { setData(prev => ({ ...prev, ...obj })); }
 
-  const allBackgrounds = dataManager.getBackgrounds();
+  const allBackgrounds = dataManager.getBackgrounds('dnd5e2024');
   const speciesList = [...DND_SPECIES, { id: CUSTOM_SENTINEL, name: CUSTOM_SENTINEL, label: t('identity.speciesCustom', 'Custom...') }];
   const bgList      = [...allBackgrounds, { id: CUSTOM_SENTINEL, name: CUSTOM_SENTINEL, label: t('identity.backgroundCustom', 'Custom...') }];
-  const classList   = [...dataManager.getClasses(), CUSTOM_SENTINEL];
+  const classList   = [...dataManager.getClasses('dnd5e2024'), CUSTOM_SENTINEL];
 
   const selectedBg  = data.charBackground === CUSTOM_SENTINEL ? null : allBackgrounds.find(b => (b.id || b.name) === data.charBackground);
   const selectedCls = data.charClass === CUSTOM_SENTINEL ? data.customClass : data.charClass;

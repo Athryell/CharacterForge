@@ -178,7 +178,7 @@ export default function ArmorManager({ armors = [], desMod = 0, onUpdate, profic
     setExpandedId(expandedId === a.id ? null : a.id);
   }
 
-  const armorPresets = dataManager.getArmors().map(p => ({ ...p, type: 'armor', armorType: p.armorType || p.type }));
+  const armorPresets = dataManager.getArmors(systemId).map(p => ({ ...p, type: 'armor', armorType: p.armorType || p.type }));
   const allPresets = [...armorPresets, { ...SHIELD_PRESET, armorType: 'shield' }];
 
   return (
@@ -292,7 +292,7 @@ export default function ArmorManager({ armors = [], desMod = 0, onUpdate, profic
             {isExpanded && !isEditing && (
               <div className="weapon-expanded-section" onClick={e => e.stopPropagation()}>
                 {!isShield && a.presetId && (() => {
-                  const preset = dataManager.getArmors().find(p => p.id === a.presetId);
+                  const preset = dataManager.getArmors(systemId).find(p => p.id === a.presetId);
                   if (!preset) return null;
                   const strNotMet = preset.strReq > 0 && strScore < preset.strReq;
                   const effDex = Math.min(desMod, preset.maxDex ?? 2);

@@ -1,7 +1,30 @@
 // Homebrew entity schema for daggerheart — drives the HomebrewEditor form.
 // Moved verbatim out of src/config/homebrewSchema.js.
 
+import { DH_CLASSES, DH_SUBCLASSES } from './data/classes';
+import { DH_WEAPONS } from './data/weapons';
+import { DH_ARMORS } from './data/armor';
+import { DH_CONDITIONS } from './data/conditions';
+import { DH_ANCESTRIES, DH_COMMUNITIES } from './data/mechanics';
+
 const homebrew = {
+  sourceInfo: () => ({
+    id: 'dh-core',
+    name: 'Daggerheart Core',
+    author: 'Darrington Press',
+    counts: {
+      classes:     DH_CLASSES.length,
+      subclasses:  Object.keys(DH_SUBCLASSES).length,
+      ancestries:  DH_ANCESTRIES.length,
+      communities: DH_COMMUNITIES.length,
+      weapons:     DH_WEAPONS.length,
+      armors:      DH_ARMORS.length,
+      conditions:  DH_CONDITIONS.length,
+    },
+  }),
+
+  exportTemplate: () => ({ weapons: [], armors: [], conditions: [] }),
+
   schema: {
     weapons: {
       label: 'Weapons',

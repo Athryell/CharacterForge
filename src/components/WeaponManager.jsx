@@ -304,7 +304,7 @@ export default function WeaponManager({ weapons = [], abilities, profBonus, onUp
           </div>
           {addMode === 'preset' ? (
             <PresetBrowser
-              items={[...dataManager.getWeapons()].sort((a, b) => a.name.localeCompare(b.name))}
+              items={[...dataManager.getWeapons(systemId)].sort((a, b) => a.name.localeCompare(b.name))}
               searchValue={presetSearch}
               onSearchChange={setPresetSearch}
               selectedItem={selectedPreset}

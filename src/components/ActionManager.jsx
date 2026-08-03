@@ -6,7 +6,8 @@ import { TagPill, TagSelector, TagFilterBar } from './Tags';
 import FilterSortBar from './FilterSortBar';
 import { useFilterSort } from '../hooks/useFilterSort';
 import { useUnits, parseSpeedFt } from '../hooks/useUnits';
-import { SCHOOLS } from '../systems/dnd5e2024/data/spells';
+import dataManager from '../data/dataManager';
+import { useCharContext } from './CharContext';
 import NotationTextarea from './NotationTextarea';
 
 const ACTION_TYPE_KEYS = ['action', 'bonus', 'reaction', 'free'];
@@ -19,7 +20,7 @@ const SCHOOL_SHORT = {
 const DEFAULT_FORM = { name: '', type: 'action', desc: '', dice: '' };
 const TYPE_ORDER = { action: 0, bonus: 1, reaction: 2, free: 3 };
 
-function buildFilters(t, toDisplaySpeed, speedUnit) {
+function buildFilters(t, toDisplaySpeed, speedUnit, schools) {
   return [
     {
       id: 'type',
@@ -42,7 +43,7 @@ function buildFilters(t, toDisplaySpeed, speedUnit) {
     {
       id: 'school',
       label: t('spells.filterSchool'),
-      options: SCHOOLS.map(s => ({ value: s, label: SCHOOL_SHORT[s] || s })),
+      options: schools.map(s => ({ value: s, label: SCHOOL_SHORT[s] || s })),
     },
     {
       id: 'prepared',
@@ -180,7 +181,9 @@ export default function ActionManager({ actions = [], spells = [], allTags = [],
 
   // Always build all filters so useFilterSort state is always fully initialized.
   // FilterSortBar only shows spell groups when hasSpellActions.
-  const allFilters = useMemo(() => buildFilters(t, toDisplaySpeed, speedUnit), [t, toDisplaySpeed, speedUnit]);
+  const { systemId } = useCharContext();
+  const schools = useMemo(() => dataManager.getAdapter(systemId).getSchools?.() || [], [systemId]);
+  const allFilters = useMemo(() => buildFilters(t, toDisplaySpeed, speedUnit, schools), [t, toDisplaySpeed, speedUnit, schools]);
   const visibleFilters = useMemo(
     () => hasSpellActions ? allFilters : allFilters.filter(f => f.id === 'type'),
     [allFilters, hasSpellActions]

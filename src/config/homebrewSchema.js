@@ -15,7 +15,7 @@ export function getHomebrewSystems() {
 }
 
 export function resolveOptionsFrom(key, systemId) {
-  if (key === 'dnd5e.classNames')   return dataManager.getClasses(undefined, systemId);
+  if (key === 'dnd5e.classNames')   return dataManager.getClasses(systemId);
   if (key === 'dnd5e.abilityNames') return ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'];
   return [];
 }

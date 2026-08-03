@@ -2,6 +2,14 @@
 // Moved verbatim out of src/config/homebrewSchema.js, along with the two option
 // lists it referenced from that file's module scope.
 
+import { DND_SPELLS } from './data/spells';
+import { DND_WEAPONS } from './data/weapons';
+import { DND_CONDITIONS } from './data/conditions';
+import { DND_CLASS_NAMES } from './data/classes';
+import { DND_SPECIES } from './data/species';
+import { DND_BACKGROUNDS } from './data/backgrounds';
+import { SRD_ITEMS } from './data/items';
+
 const ABILITY_OPTIONS = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'];
 
 const SKILL_OPTIONS = [
@@ -12,6 +20,28 @@ const SKILL_OPTIONS = [
 ];
 
 const homebrew = {
+  // The bundled ruleset, listed alongside imported packs in SourceManager.
+  sourceInfo: () => ({
+    id: 'srd',
+    name: 'SRD 5.2.1',
+    author: 'Wizards of the Coast',
+    counts: {
+      spells:      DND_SPELLS.length,
+      weapons:     DND_WEAPONS.length,
+      classes:     DND_CLASS_NAMES.length,
+      species:     DND_SPECIES.length,
+      backgrounds: DND_BACKGROUNDS.length,
+      conditions:  DND_CONDITIONS.length,
+      items:       SRD_ITEMS.length,
+    },
+  }),
+
+  // The empty pack offered by "Empty JSON template".
+  exportTemplate: () => ({
+    classes: [], subclasses: [], species: [], backgrounds: [],
+    spells: [], weapons: [], items: [], conditions: [], feats: [],
+  }),
+
   schema: {
     weapons: {
       label: 'Weapons',

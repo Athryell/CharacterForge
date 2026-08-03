@@ -24,7 +24,7 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
   function patchAdd(obj) { setAddForm(f => ({ ...f, ...obj })); }
   function patchEdit(obj) { setEditForm(f => ({ ...f, ...obj })); }
 
-  const dataItems = useMemo(() => dataManager.getItems(), []);
+  const dataItems = useMemo(() => dataManager.getItems(systemId), [systemId]);
   const filteredDataItems = useMemo(() => {
     let result = dataItems;
     if (categoryFilter) result = result.filter(i => i.category === categoryFilter);
