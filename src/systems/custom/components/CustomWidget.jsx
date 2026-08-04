@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Heart, Shield, Zap, Star, Flame, Droplets, Wind, Brain, Target, Clock } from 'lucide-react';
 import { Icon } from '../../../config/icons';
 import InventoryManager from '../../../components/InventoryManager';
+import { resolveNotations } from '../../../components/Tooltip';
 
 // Lucide icons available for bar widget config
 const BAR_ICON_MAP = {
@@ -33,6 +34,15 @@ function updateWidgetConfig(update, widgetId, newConfig) {
       w.id === widgetId ? { ...w, config: newConfig } : w
     ),
   }));
+}
+
+// Sums a plain chain of resolved +/- numbers (e.g. "3+2-1"). Anything that
+// doesn't reduce to that shape (dice notation, an unresolved token) is left
+// as text — this is deliberately not a general expression evaluator.
+function evalSimpleSum(text) {
+  const cleaned = String(text ?? '').replace(/\s+/g, '');
+  if (!/^[+-]?\d+([+-]\d+)*$/.test(cleaned)) return null;
+  return cleaned.match(/[+-]?\d+/g).reduce((sum, n) => sum + parseInt(n, 10), 0);
 }
 
 // ── Widget sub-components ──────────────────────────────────────────────────
@@ -582,9 +592,149 @@ function WidgetLog({ widget, state, update }) {
   );
 }
 
+function WidgetFormula({ widget, state }) {
+  const { t } = useTranslation();
+  const { label, notation = '' } = widget.config;
+
+  if (!notation.trim()) {
+    return (
+      <div className="card">
+        <div className="card-title">{label || t('customWidgets.formula')}</div>
+        <div className="hint-text">{t('customWidgets.setNotation')}</div>
+      </div>
+    );
+  }
+
+  const resolved = resolveNotations(notation, {}, 0, 0, null, state.customFields || {}, false);
+  const sum = evalSimpleSum(resolved);
+
+  return (
+    <div className="card">
+      <div className="card-title">{label || t('customWidgets.formula')}</div>
+      <div style={{ fontSize: '1.4rem', fontWeight: 700, textAlign: 'center' }}>
+        {sum !== null ? sum : resolved}
+      </div>
+    </div>
+  );
+}
+
+function WidgetRollButton({ widget, state, onRoll }) {
+  const { t } = useTranslation();
+  const { label, notation = '' } = widget.config;
+
+  if (!notation.trim()) {
+    return (
+      <div className="card">
+        <div className="card-title">{label || t('customWidgets.rollButton')}</div>
+        <div className="hint-text">{t('customWidgets.setNotation')}</div>
+      </div>
+    );
+  }
+
+  function handleClick() {
+    if (!onRoll) return;
+    const resolved = resolveNotations(notation, {}, 0, 0, null, state.customFields || {}, false);
+    onRoll(resolved, label || t('customWidgets.rollButton'));
+  }
+
+  return (
+    <div className="card">
+      <div className="card-title">{label || t('customWidgets.rollButton')}</div>
+      <button className="io-btn primary" style={{ width: '100%' }} onClick={handleClick}>
+        {t('customWidgets.rollLabel')} {notation}
+      </button>
+    </div>
+  );
+}
+
+function WidgetTable({ widget, state, update, editMode }) {
+  const { t } = useTranslation();
+  const { fieldId, label, columns = [] } = widget.config;
+  const rows = fieldId ? (getCustomField(state, fieldId) ?? []) : [];
+
+  function setRows(newRows) {
+    setCustomField(update, fieldId, newRows);
+  }
+
+  function addRow() {
+    const row = Object.fromEntries(columns.map(c => [c.id, c.type === 'number' ? 0 : '']));
+    row._id = String(Date.now());
+    setRows([...rows, row]);
+  }
+
+  function removeRow(idx) {
+    setRows(rows.filter((_, i) => i !== idx));
+  }
+
+  function updateCell(idx, col, val) {
+    const parsed = col.type === 'number' ? (parseInt(val) || 0) : val;
+    setRows(rows.map((r, i) => i === idx ? { ...r, [col.id]: parsed } : r));
+  }
+
+  if (!fieldId) {
+    return (
+      <div className="card">
+        <div className="card-title">{label || t('customWidgets.table')}</div>
+        <div className="hint-text">{t('customWidgets.setFieldId')}</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="card">
+      <div className="card-title" style={{ justifyContent: 'space-between' }}>
+        <span>{label || t('customWidgets.table')}</span>
+        {editMode && (
+          <button className="icon-btn" onClick={addRow}><Icon id="action.add" size={13} /></button>
+        )}
+      </div>
+      {rows.length === 0
+        ? <div className="hint-text">{t('customWidgets.emptyList')}</div>
+        : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--c-border-mid)' }}>
+                  {columns.map(col => (
+                    <th key={col.id} style={{ textAlign: 'left', padding: 4, color: 'var(--c-muted)', fontWeight: 600 }}>
+                      {col.label}
+                    </th>
+                  ))}
+                  {editMode && <th style={{ width: 24 }} />}
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((row, idx) => (
+                  <tr key={row._id || idx} style={{ borderBottom: '1px solid var(--c-border)' }}>
+                    {columns.map(col => (
+                      <td key={col.id} style={{ padding: 4 }}>
+                        <input
+                          type={col.type === 'number' ? 'number' : 'text'}
+                          value={row[col.id] ?? (col.type === 'number' ? 0 : '')}
+                          onChange={e => updateCell(idx, col, e.target.value)}
+                          style={{ width: '100%', background: 'none', border: 'none', color: 'var(--c-ink)' }}
+                        />
+                      </td>
+                    ))}
+                    {editMode && (
+                      <td style={{ padding: 4 }}>
+                        <button className="mod-btn" style={{ fontSize: '0.667rem' }} onClick={() => removeRow(idx)}>✕</button>
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )
+      }
+    </div>
+  );
+}
+
 // ── Main export ────────────────────────────────────────────────────────────
 
-export default function CustomWidget({ widget, state, update, editMode }) {
+export default function CustomWidget({ widget, state, update, editMode, onRoll }) {
   switch (widget.type) {
     case 'identity':     return <WidgetIdentity     widget={widget} state={state} update={update} editMode={editMode} />;
     case 'bar':          return <WidgetBar           widget={widget} state={state} update={update} editMode={editMode} />;
@@ -596,6 +746,9 @@ export default function CustomWidget({ widget, state, update, editMode }) {
     case 'inventory':    return <WidgetInventory     widget={widget} state={state} update={update} editMode={editMode} />;
     case 'notes':        return <WidgetNotes         widget={widget} state={state} update={update} editMode={editMode} />;
     case 'log':          return <WidgetLog           widget={widget} state={state} update={update} editMode={editMode} />;
+    case 'formula':      return <WidgetFormula       widget={widget} state={state} />;
+    case 'roll-button':  return <WidgetRollButton    widget={widget} state={state} onRoll={onRoll} />;
+    case 'table':        return <WidgetTable         widget={widget} state={state} update={update} editMode={editMode} />;
     default:
       return (
         <div className="card">

@@ -88,8 +88,24 @@ character creator — la scheda si apre direttamente con widget di default.
 `adapter.js` — stub per compatibilità con dataManager; `getWidgetTypes()`.
 
 **Tipi di widget:** `identity`, `bar`, `stat-grid`, `counter`, `text`, `list`, `toggle-list`,
-`inventory`, `notes`, `log` — definiti in `CUSTOM_WIDGET_TYPES`, aggiungere nuovi tipi qui
-e in `CustomWidget.jsx`.
+`inventory`, `notes`, `log`, `formula`, `roll-button`, `table` — definiti in
+`CUSTOM_WIDGET_TYPES`, aggiungere nuovi tipi qui e in `CustomWidget.jsx`.
+
+`formula` e `roll-button` risolvono `config.notation` contro `state.customFields` con
+`resolveNotations()` (`components/Tooltip.jsx`), passando `abilities`/`profBonus`/`charLevel`
+a zero — coerente con `rules.js`, che per il sistema custom li azzera già. `formula` prova
+poi a sommare il risultato se si riduce a una catena di `+`/`-` fra numeri
+(`evalSimpleSum` in `CustomWidget.jsx`); non è un valutatore di espressioni generico — una
+notazione a dadi (`1d6+3`) resta testo risolto, non viene tirata. `roll-button` passa la
+notazione risolta a `onRoll` (= `ctx.shell.handleRoll`, inoltrato da `custom/widgets.jsx` —
+è l'unico punto in cui il render generico del sistema custom ha bisogno di qualcosa oltre
+a `state`/`update`/`editMode`).
+
+`table` colma il limite di `list` (solo campi testo): `config.columns` è
+`[{id, label, type: 'text'|'number'}]`, le righe sono un array in
+`state.customFields[fieldId]`, stesso pattern di storage di `list`. Le colonne si
+definiscono alla creazione nel `WidgetEditor` e non sono modificabili dopo — stesso vincolo
+di `list.itemFields`.
 
 **Struttura state:**
 - `state.widgets` — array di widget configurati `{id, type, tab, col, order, config}`

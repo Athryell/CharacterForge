@@ -49,6 +49,27 @@ export const CUSTOM_WIDGET_TYPES = {
     icon: 'book-open',
     defaultConfig: {},
   },
+  'formula': {
+    label: 'customWidgets.formula',
+    icon: 'sigma',
+    defaultConfig: { label: '', notation: '' },
+  },
+  'roll-button': {
+    label: 'customWidgets.rollButton',
+    icon: 'dices',
+    defaultConfig: { label: '', notation: '' },
+  },
+  'table': {
+    label: 'customWidgets.table',
+    icon: 'table',
+    defaultConfig: {
+      label: '', fieldId: '',
+      columns: [
+        { id: 'name',  label: 'Name',  type: 'text'   },
+        { id: 'value', label: 'Value', type: 'number' },
+      ],
+    },
+  },
 };
 
 export function createCustomDefaultState() {

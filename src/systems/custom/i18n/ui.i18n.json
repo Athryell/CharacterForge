@@ -10,6 +10,9 @@
     "inventory": "Inventory",
     "notes": "Notes",
     "log": "Log",
+    "formula": "Formula",
+    "rollButton": "Roll Button",
+    "table": "Table",
     "addWidget": "Add widget",
     "editWidget": "Edit widget",
     "removeWidget": "Remove widget",
@@ -19,6 +22,14 @@
     "systemName": "System name",
     "systemNameHint": "e.g. Blades in the Dark, PbtA, OSR...",
     "setFieldId": "Set a Field ID to enable notation",
+    "setNotation": "Set a notation to enable this widget",
+    "notation": "Notation",
+    "rollLabel": "Roll",
+    "columns": "Columns",
+    "columnLabel": "Column label",
+    "colTypeText": "Text",
+    "colTypeNumber": "Number",
+    "addColumn": "+ Add column",
     "editMax": "Max",
     "addStat": "+ Add stat",
     "statLabel": "Label",
@@ -59,6 +70,7 @@
   },
   "placeholders": {
     "widgetLabel": "Widget label",
-    "charName": "e.g. Aldric Voss"
+    "charName": "e.g. Aldric Voss",
+    "notation": "e.g. 1d20+[STR]"
   }
 }

@@ -3,6 +3,31 @@
 History of the incremental refactor phases. See [CLAUDE.md](../CLAUDE.md) for current
 rules and [ARCHITECTURE.md](ARCHITECTURE.md) for how the code works today.
 
+### 2026-08-04 — Refactor Fase 10 (tre nuovi tipi di widget custom)
+
+Tre nuovi tipi in `CUSTOM_WIDGET_TYPES`/`CustomWidget.jsx`, isolati al sistema `custom` —
+nessuna modifica a `dnd5e2024`/`daggerheart`:
+
+- `formula` — valore di sola lettura, risolve `config.notation` contro `state.customFields`
+  con `resolveNotations()` (già agganciato per il sistema custom via `rules.js`, non
+  richiedeva lavoro sul motore); somma il risultato se si riduce a una catena `+`/`-` di
+  numeri, altrimenti mostra il testo risolto com'è (niente valutatore di espressioni, niente
+  `eval`)
+- `roll-button` — bottone che risolve la notazione e la passa a `handleRoll`
+  (`ctx.shell.handleRoll`, ora inoltrato da `custom/widgets.jsx` a `CustomWidget` come
+  `onRoll` — l'unica cosa che il dispatch generico del sistema custom non passava già)
+- `table` — lista strutturata a colonne tipizzate (`text`/`number`), storage in
+  `state.customFields[fieldId]` come array di righe, stesso pattern di `list`; colma il
+  limite di `list` (solo campi testo flat)
+
+Scartata la visibilità condizionale (valutata e respinta in fase di design): il sistema
+custom non ha un motore di regole per definizione, condizionare su un altro `customFields`
+impostato dall'utente è nascondi-se-vero senza logica dietro — non valeva la complessità.
+
+Nuovo `scripts/checks/phaseB.mjs`: formula/roll-button/table renderizzati e funzionanti su
+un personaggio custom seedato, più uno smoke test sul form di `WidgetEditor` per i tre nuovi
+tipi.
+
 ### 2026-08-03 — Refactor Fase 9 (quarto sistema, la prova — verificata e scartata)
 
 Costruito `src/systems/fate/` (Fate Core: 3 widget, 2 tab, capabilities tutte false,

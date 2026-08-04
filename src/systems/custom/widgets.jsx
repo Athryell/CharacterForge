@@ -7,5 +7,5 @@ export function render(id, ctx) {
   const { state, update, editMode } = ctx.core;
   const widget = (state.widgets || []).find(w => w.id === id);
   if (!widget) return null;
-  return <CustomWidget widget={widget} state={state} update={update} editMode={editMode} />;
+  return <CustomWidget widget={widget} state={state} update={update} editMode={editMode} onRoll={ctx.shell.handleRoll} />;
 }
