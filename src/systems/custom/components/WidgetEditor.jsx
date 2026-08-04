@@ -51,7 +51,7 @@ export default function WidgetEditor({ onAdd, onClose, initialType = null, initi
     } else if (selectedType === 'text') {
       config = { ...config, label: label.trim(), fieldId: fieldId.trim(), multiline };
     } else if (selectedType === 'list') {
-      config = { ...config, label: label.trim(), itemFields: itemFields.length ? itemFields : ['name'] };
+      config = { ...config, label: label.trim(), fieldId: fieldId.trim(), itemFields: itemFields.length ? itemFields : ['name'] };
     } else if (selectedType === 'toggle-list') {
       config = { ...config, label: label.trim(), fieldId: fieldId.trim() };
     } else if (selectedType === 'table') {
@@ -106,8 +106,8 @@ export default function WidgetEditor({ onAdd, onClose, initialType = null, initi
           />
         </div>
 
-        {/* Field ID — bar/counter/text/toggle-list/table */}
-        {!['list', 'formula', 'roll-button'].includes(selectedType) && (
+        {/* Field ID — bar/counter/text/list/toggle-list/table */}
+        {!['formula', 'roll-button'].includes(selectedType) && (
           <div className="field" style={{ marginBottom: 12 }}>
             <label>{t('customWidgets.fieldId')}</label>
             <input
@@ -151,7 +151,7 @@ export default function WidgetEditor({ onAdd, onClose, initialType = null, initi
                     onClick={() => setBarIcon(ic)}
                     title={ic}
                   >
-                    <Icon id={ic} fallback={ic} />
+                    <Icon id={`barIcon.${ic}`} fallback={ic} />
                   </button>
                 ))}
               </div>

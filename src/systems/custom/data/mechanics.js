@@ -1,67 +1,67 @@
 export const CUSTOM_WIDGET_TYPES = {
   'identity': {
     label: 'customWidgets.identity',
-    icon: 'user',
+    icon: 'widgetType.identity',
     defaultConfig: { fields: ['name', 'image', 'pronouns'] },
   },
   'bar': {
     label: 'customWidgets.bar',
-    icon: 'bar-chart-2',
+    icon: 'widgetType.bar',
     defaultConfig: { label: '', fieldId: '', color: '--c-accent', icon: 'heart' },
   },
   'stat-grid': {
     label: 'customWidgets.statGrid',
-    icon: 'grid-3x3',
+    icon: 'widgetType.statGrid',
     defaultConfig: { stats: [] },
   },
   'counter': {
     label: 'customWidgets.counter',
-    icon: 'circle-dot',
+    icon: 'widgetType.counter',
     defaultConfig: { label: '', fieldId: '', max: 10, resetOn: 'manual' },
   },
   'text': {
     label: 'customWidgets.text',
-    icon: 'type',
+    icon: 'widgetType.text',
     defaultConfig: { label: '', fieldId: '', multiline: false },
   },
   'list': {
     label: 'customWidgets.list',
-    icon: 'list',
+    icon: 'widgetType.list',
     defaultConfig: { label: '', itemFields: ['name', 'desc'] },
   },
   'toggle-list': {
     label: 'customWidgets.toggleList',
-    icon: 'check-square',
+    icon: 'widgetType.toggleList',
     defaultConfig: { label: '', items: [] },
   },
   'inventory': {
     label: 'customWidgets.inventory',
-    icon: 'backpack',
+    icon: 'widgetType.inventory',
     defaultConfig: {},
   },
   'notes': {
     label: 'customWidgets.notes',
-    icon: 'scroll',
+    icon: 'widgetType.notes',
     defaultConfig: {},
   },
   'log': {
     label: 'customWidgets.log',
-    icon: 'book-open',
+    icon: 'widgetType.log',
     defaultConfig: {},
   },
   'formula': {
     label: 'customWidgets.formula',
-    icon: 'sigma',
+    icon: 'widgetType.formula',
     defaultConfig: { label: '', notation: '' },
   },
   'roll-button': {
     label: 'customWidgets.rollButton',
-    icon: 'dices',
+    icon: 'widgetType.rollButton',
     defaultConfig: { label: '', notation: '' },
   },
   'table': {
     label: 'customWidgets.table',
-    icon: 'table',
+    icon: 'widgetType.table',
     defaultConfig: {
       label: '', fieldId: '',
       columns: [

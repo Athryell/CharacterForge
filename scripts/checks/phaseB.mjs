@@ -38,7 +38,7 @@ const has = (page, sel) => page.eval(`!!document.querySelector(${JSON.stringify(
 async function clickText(page, sel, re) {
   const ok = await page.eval(`
     (() => {
-      const el = [...document.querySelectorAll(${JSON.stringify(sel)})].find(b => ${re}.test(b.textContent));
+      const el = [...document.querySelectorAll(${JSON.stringify(sel)})].find(b => ${re}.test(b.textContent.trim()));
       if (el) { el.click(); return true; }
       return false;
     })()
@@ -100,10 +100,7 @@ export default async function (page, baseUrl) {
   await clickText(page, 'button', '/add widget|aggiungi widget/i');
   await page.wait(300);
 
-  // Icon ids on the type-picker chips ('sigma', 'dices', 'table', ...) have no
-  // matching entry in CORE_ICONS, so every chip renders the "?" fallback ahead
-  // of its label (a pre-existing quirk, not something this phase introduces) —
-  // match on the label substring, not the full (locale-dependent) text.
+  // Match on the label substring, not the full (locale-dependent) text.
   async function checkTypeForm(name, typeRe, hasFieldFn) {
     const clicked = await clickText(page, '.creator-modal .filter-chip', typeRe);
     await page.wait(150);
@@ -122,6 +119,58 @@ export default async function (page, baseUrl) {
     [...document.querySelectorAll('.creator-modal button')]
       .some(el => /Add column|Aggiungi colonna/.test(el.textContent))
   `));
+
+  // ── pre-existing bug fix #1: "list" never had a settable Field ID ──────────
+  const listFieldIdVisible = await has(page, '.creator-modal input[placeholder="HP"]');
+  const listChipClicked = await clickText(page, '.creator-modal .filter-chip', '/^Lista$|^List$/');
+  await page.wait(150);
+  const listFieldIdVisibleAfterSelect = await has(page, '.creator-modal input[placeholder="HP"]');
+  check('WidgetEditor now shows a Field ID input for "list"', listChipClicked && listFieldIdVisibleAfterSelect,
+    `before selecting list: ${listFieldIdVisible}`);
+
+  await page.eval(`
+    (() => {
+      const setNative = (el, val) => {
+        const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+        setter.call(el, val);
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+      };
+      const modal = document.querySelector('.creator-modal');
+      const labelInput = [...modal.querySelectorAll('input')].find(i => i.placeholder && i.placeholder !== 'HP');
+      const fieldIdInput = modal.querySelector('input[placeholder="HP"]');
+      if (labelInput) setNative(labelInput, 'Items');
+      if (fieldIdInput) setNative(fieldIdInput, 'ITEMS');
+    })()
+  `);
+  await clickText(page, '.creator-modal button', '/Add to sheet|Aggiungi alla scheda/');
+  await page.wait(300);
+
+  const listResult = await page.eval(`
+    (() => {
+      const card = [...document.querySelectorAll('.card')]
+        .find(c => c.querySelector('.card-title')?.textContent.includes('Items'));
+      if (!card) return { found: false };
+      return { found: true, noHint: !/Set a Field ID|Imposta un Field ID/.test(card.textContent) };
+    })()
+  `);
+  check('list widget created with a Field ID no longer shows the "set a field id" hint',
+    listResult.found && listResult.noHint, JSON.stringify(listResult));
+
+  if (listResult.found && listResult.noHint) {
+    const itemsBefore = await page.eval(`document.querySelectorAll('.inventory-item').length`);
+    await page.click('.card .icon-btn');
+    const itemsAfter = await page.eval(`document.querySelectorAll('.inventory-item').length`);
+    check('list widget add-item works once its Field ID is set', itemsAfter === itemsBefore + 1, `${itemsBefore} -> ${itemsAfter}`);
+  }
+
+  // ── pre-existing bug fix #2: widget-type picker chips fell back to "?" ─────
+  await seed(page, baseUrl, [], {});
+  await enterEditMode(page);
+  await clickText(page, 'button', '/add widget|aggiungi widget/i');
+  await page.wait(300);
+  const chipTexts = await page.eval(`[...document.querySelectorAll('.creator-modal .filter-chip')].map(b => b.textContent.trim())`);
+  const stillFallsBack = chipTexts.some(t => t.startsWith('?'));
+  check('widget-type picker chips no longer fall back to "?"', chipTexts.length > 0 && !stillFallsBack, JSON.stringify(chipTexts));
 
   check('no console errors / uncaught exceptions during the scenario', page.errors().length === 0, JSON.stringify(page.errors()));
 
