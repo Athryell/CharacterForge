@@ -151,7 +151,7 @@
       "saves": "Saving throw bonuses",
       "skills": "Skill bonuses",
       "dynamic": "Dynamic bonuses",
-      "customFields": "Campi della scheda"
+      "customFields": "Sheet fields"
     },
     "item": {
       "diceRoll": "Dice roll",
@@ -487,7 +487,7 @@
       "tutorialBtn": "Start the tutorial →",
       "skipBtn": "Skip, start now",
       "skipHint": "You can reopen this guide anytime with the ? button.",
-      "translateLink": "🌍 Aiuta a tradurre CharacterForge",
+      "translateLink": "🌍 Help translate CharacterForge",
       "a11yNote": "Accessibility options available in the ☰ menu — font, text size, contrast and more."
     },
     "demoLabel": "Try it →",
@@ -598,8 +598,8 @@
     "clearDraftConfirm": "Are you sure? This will delete all unsaved data.",
     "editSource": "Edit",
     "draftSaved": "Draft saved automatically",
-    "noName": "Inserisci un nome prima di pubblicare",
-    "nameRequired": "Obbligatorio",
+    "noName": "Enter a source name to publish",
+    "nameRequired": "Required",
     "exportSelected": "Export selected",
     "exportSeparate": "Export as separate files",
     "selectAll": "Select all",

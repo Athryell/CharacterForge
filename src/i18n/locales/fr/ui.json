@@ -3,7 +3,8 @@
   "system": {
     "selector": "Game System",
     "dnd5e2024": "D&D 5.5e 2024",
-    "daggerheart": "Daggerheart"
+    "daggerheart": "Daggerheart",
+    "custom": "Custom"
   },
   "nav": {
     "newCharacter": "⚔ New",
@@ -149,7 +150,8 @@
       "bonuses": "Equipment bonuses",
       "saves": "Saving throw bonuses",
       "skills": "Skill bonuses",
-      "dynamic": "Dynamic bonuses"
+      "dynamic": "Dynamic bonuses",
+      "customFields": "Sheet fields"
     },
     "item": {
       "diceRoll": "Dice roll",
@@ -222,7 +224,9 @@
       "counter": "Toggleable pips (e.g. spell charges)",
       "counterDyn": "Counter whose size resolves from a formula",
       "bonus": "Passive bonus applied to this stat",
-      "dynamic": "Bonus whose value resolves from a formula (e.g. proficiency)"
+      "dynamic": "Bonus whose value resolves from a formula (e.g. proficiency)",
+      "customField": "Current value of this sheet field",
+      "customFieldMax": "Maximum value of this sheet field"
     }
   },
   "weapons": {
@@ -476,7 +480,7 @@
       "tutorialBtn": "Start the tutorial →",
       "skipBtn": "Skip, start now",
       "skipHint": "You can reopen this guide anytime with the ? button.",
-      "translateLink": "🌍 Help us translate CharacterForge into your language",
+      "translateLink": "🌍 Help translate CharacterForge",
       "a11yNote": "Accessibility options available in the ☰ menu — font, text size, contrast and more."
     },
     "demoLabel": "Try it →",
@@ -529,9 +533,53 @@
       "Death saves reset automatically after a long rest"
     ],
     "step8Title": "Help us improve",
-    "step8Text": "CharacterForge is a free project in continuous evolution. If you find a bug, have a feature idea, or want to request support for a specific RPG system, use the feedback form — every report is read. You can reopen this guide anytime from the ? button in the menu."
+    "step8Text": "CharacterForge is a free project in continuous evolution. If you find a bug, have a feature idea, or want to request support for a specific RPG system, use the feedback form — every report is read. You can reopen this guide anytime from the ? button in the menu.",
+    "andMore": "and more...",
+    "a11yTag": "Accessibility options",
+    "whyTitle": "Why CharacterForge? 🤔",
+    "whyIntro": "I run many different RPGs, prepare pregens for one-shots, and introduce players of all ages and backgrounds. I needed something that:",
+    "why1title": "Supports multiple systems",
+    "why1desc": "D&D, Daggerheart and more — same familiar layout",
+    "why2title": "Makes character creation fast",
+    "why2desc": "Level 1 characters in minutes, easy to consult at the table",
+    "why3title": "Works for everyone",
+    "why3desc": "Accessibility, multiple languages, flexible layouts",
+    "why4title": "Fully customizable",
+    "why4desc": "Colors, tabs, widgets — tailor it to how your brain works",
+    "why5title": "Supports custom content",
+    "why5desc": "Yes, even the giant's sunglasses (Resistant to Radiant, +1 STR if you lift with your back straight)",
+    "whyOutro": "Built from my experience as a GM — and I need your help to make it better! CharacterForge is free (and always will be) and open-source.",
+    "translateBtn": "🌍 Help translate",
+    "skipHint": "Return here anytime using"
   },
   "sources": {
+    "entities": {
+      "none": "no entities",
+      "classes_one": "class",
+      "classes_other": "classes",
+      "subclasses_one": "subclass",
+      "subclasses_other": "subclasses",
+      "ancestries_one": "ancestry",
+      "ancestries_other": "ancestries",
+      "communities_one": "community",
+      "communities_other": "communities",
+      "species_one": "species",
+      "species_other": "species",
+      "backgrounds_one": "background",
+      "backgrounds_other": "backgrounds",
+      "spells_one": "spell",
+      "spells_other": "spells",
+      "weapons_one": "weapon",
+      "weapons_other": "weapons",
+      "armors_one": "armor",
+      "armors_other": "armors",
+      "items_one": "item",
+      "items_other": "items",
+      "conditions_one": "condition",
+      "conditions_other": "conditions",
+      "feats_one": "feat",
+      "feats_other": "feats"
+    },
     "addData": "Add data",
     "importPackage": "Import package",
     "emptyTemplate": "Empty JSON template",
@@ -544,6 +592,7 @@
     "editSource": "Edit",
     "draftSaved": "Draft saved automatically",
     "noName": "Enter a source name to publish",
+    "nameRequired": "Required",
     "exportSelected": "Export selected",
     "exportSeparate": "Export as separate files",
     "selectAll": "Select all",
