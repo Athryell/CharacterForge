@@ -1,5 +1,7 @@
 // Multi-character storage helpers
 
+import { DEFAULT_SYSTEM } from './systems/registry';
+
 const INDEX_KEY  = 'characterforge_chars_index';
 const CHAR_KEY   = id => `characterforge_char_${id}`;
 const ACTIVE_KEY = 'characterforge_active';

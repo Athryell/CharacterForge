@@ -153,7 +153,7 @@ export default function SourceManager({ onHomebrewChange }) {
   }
 
   function exportSchema() {
-    const schema = dataManager.exportSchema(draft?.system);
+    const schema = dataManager.exportSchema();
     const blob = new Blob([JSON.stringify(schema, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
