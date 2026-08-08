@@ -1,0 +1,94 @@
+{
+  "dh": {
+    "widgets": {
+      "identity": "Identity",
+      "traits": "Traits",
+      "experiences": "Experiences",
+      "domains": "Domain Cards",
+      "vitals": "Vitals",
+      "evasion": "Evasion & Armor",
+      "actions": "Actions",
+      "conditions": "Conditions",
+      "weapons": "Weapons",
+      "inventory": "Inventory",
+      "gold": "Gold",
+      "notes": "Notes"
+    },
+    "traits": {
+      "AGI": "Agility",
+      "STR": "Strength",
+      "FIN": "Finesse",
+      "INS": "Instinct",
+      "PRE": "Presence",
+      "KNO": "Knowledge"
+    },
+    "stress": "Stress",
+    "hope": "Hope",
+    "evasion": "Evasion",
+    "armorScore": "Armor Score",
+    "thresholds": {
+      "minor": "Minor",
+      "major": "Major",
+      "severe": "Severe"
+    },
+    "experiences": "Experiences",
+    "domains": "Domain Cards",
+    "ancestry": "Ancestry",
+    "community": "Community",
+    "gold": "Gold (Handfuls)",
+    "proficiency": "Proficiency",
+    "subclass": "Subclass",
+    "classFeatures": "Class Features",
+    "roll": {
+      "critical": "Critical! Both dice show {{val}} = {{total}}",
+      "hope": "{{trait}}: Hope {{hope}} + Fear {{fear}} = {{total}} → Success with Hope!",
+      "fear": "{{trait}}: Fear {{fear}} + Hope {{hope}} = {{total}} → Success with Fear!",
+      "fail": "{{trait}}: {{total}} → Failure"
+    },
+    "weapons": {
+      "name": "Name",
+      "trait": "Trait",
+      "range": "Range",
+      "dmgDie": "Damage Die",
+      "dmgType": "Type",
+      "hands": "Hands",
+      "feature": "Feature",
+      "phy": "PHY",
+      "mag": "MAG",
+      "oneHanded": "One-handed",
+      "twoHanded": "Two-handed",
+      "secondary": "SEC",
+      "none": "No weapons. Add one with +.",
+      "featurePlaceholder": "Reach, Thrown, special effect…",
+      "ranges": {
+        "Melee": "Melee",
+        "Very Close": "Very Close",
+        "Close": "Close",
+        "Far": "Far",
+        "Very Far": "Very Far"
+      }
+    },
+    "armor": {
+      "thresholds": "Thresholds",
+      "minor": "Minor",
+      "major": "Major",
+      "score": "Armor Score",
+      "feature": "Feature",
+      "levelNote": "Base thresholds + your level ({{level}})",
+      "none": "No Armor",
+      "select": "Select armor preset",
+      "name": "Armor name",
+      "custom": "Custom armor"
+    }
+  },
+  "creator": {
+    "charNameDHPlaceholder": "E.g. Rael Ashborn",
+    "dhBgDescPlaceholder": "e.g. Former soldier, Herbalist…"
+  },
+  "placeholders": {
+    "dhWeaponName": "E.g. Blade of the Moon...",
+    "dhWeaponDie": "d8",
+    "armorName": "E.g. Magic Leather...",
+    "armorFeature": "E.g. Flexible: +1 to Evasion..."
+  }
+}

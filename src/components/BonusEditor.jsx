@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
+import { useCharContext } from './CharContext';
 import { useTranslation } from 'react-i18next';
 import { Icon } from '../config/icons';
-import { BONUS_STAT_OPTIONS } from '../data/bonuses';
 
 export default function BonusEditor({ bonuses, onChange }) {
+  // The stat vocabulary belongs to the system, not to this editor.
+  const { bonusStats } = useCharContext();
+  const BONUS_STAT_OPTIONS = bonusStats || [];
   const { t } = useTranslation();
   const [stat, setStat] = useState('AC');
   const [value, setValue] = useState(1);

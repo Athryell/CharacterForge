@@ -4,7 +4,7 @@ import { Icon } from '../config/icons';
 
 const MAX_BOTTOM_TABS = 5;
 
-export default function TabBar({ tabs, activeTab, onTabChange, editMode, onReorderTabs, systemName }) {
+export default function TabBar({ tabs, activeTab, onTabChange, editMode, onReorderTabs, systemName, onAddTab, onRemoveTab }) {
   const { t } = useTranslation();
   const dragIdx     = useRef(null);
   const dragOverIdx = useRef(null);
@@ -76,16 +76,33 @@ export default function TabBar({ tabs, activeTab, onTabChange, editMode, onReord
                   {editMode && <span className="drag-handle"><Icon id="action.layout" size={12} fallback="⠿" /></span>}
                   <Icon id={`tab.${tab.id}`} fallback={tab.icon} /> {t(tab.label)}
                 </button>
-                {editMode && (
+                {editMode && !onRemoveTab && (
                   <button className={`tab-eye ${tab.visible ? 'on' : 'off'}`}
                     onClick={e => { e.stopPropagation(); onTabChange('__toggle__' + tab.id); }}
                     title={tab.visible ? 'Nascondi tab' : 'Mostra tab'}>
                     <Icon id={tab.visible ? 'action.show' : 'action.hide'} size={12} fallback={tab.visible ? '👁' : '🚫'} />
                   </button>
                 )}
+                {editMode && onRemoveTab && (
+                  <button className="tab-eye off"
+                    onClick={e => { e.stopPropagation(); onRemoveTab(tab.id); }}
+                    title={t('customWidgets.removeTab')}>
+                    <Icon id="action.remove" size={12} fallback="✕" />
+                  </button>
+                )}
               </div>
             ))}
           </div>
+          {editMode && onAddTab && (
+            <button
+              className="tab-btn"
+              style={{ flexShrink: 0, color: 'var(--c-accent)', borderStyle: 'dashed' }}
+              onClick={onAddTab}
+              title={t('customWidgets.addTab')}
+            >
+              + {t('customWidgets.addTab')}
+            </button>
+          )}
         </div>
       </div>
 

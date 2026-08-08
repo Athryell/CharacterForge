@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { DEFAULT_SYSTEM } from '../systems/registry';
 import { useTranslation } from 'react-i18next';
 import { AlertTriangle } from 'lucide-react';
 import { Icon } from '../config/icons';
 import dataManager from '../data/dataManager';
-import { HOMEBREW_SCHEMA, resolveOptionsFrom } from '../config/homebrewSchema';
+import { getHomebrewSchema, getHomebrewSystems, resolveOptionsFrom } from '../config/homebrewSchema';
 
 const DRAFT_KEY = 'characterforge_homebrew_draft';
 
@@ -13,7 +14,7 @@ function createEmptyDraft() {
     name: '',
     author: '',
     description: '',
-    system: 'dnd5e2024',
+    system: DEFAULT_SYSTEM,
     classes: [],
     subclasses: [],
     species: [],
@@ -72,7 +73,7 @@ function buildEmptyItem(fields) {
 
 // ── Generic field renderer ────────────────────────────────────────────────────
 
-function renderField(field, value, onChange) {
+function renderField(field, value, onChange, systemId) {
   switch (field.type) {
     case 'number':
       return (
@@ -108,7 +109,7 @@ function renderField(field, value, onChange) {
 
     case 'select': {
       const opts = field.optionsFrom
-        ? resolveOptionsFrom(field.optionsFrom)
+        ? resolveOptionsFrom(field.optionsFrom, systemId)
         : (field.options || []);
       return (
         <select value={value ?? ''} onChange={e => onChange(e.target.value)}>
@@ -120,7 +121,7 @@ function renderField(field, value, onChange) {
 
     case 'multiselect': {
       const opts = field.optionsFrom
-        ? resolveOptionsFrom(field.optionsFrom)
+        ? resolveOptionsFrom(field.optionsFrom, systemId)
         : (field.options || []);
       const selected = Array.isArray(value) ? value : [];
       return (
@@ -168,7 +169,8 @@ function renderField(field, value, onChange) {
                   >
                     <label>{sf.label}</label>
                     {renderField(sf, sub[sf.id], v =>
-                      onChange(listVal.map((s, j) => j === i ? { ...s, [sf.id]: v } : s))
+                      onChange(listVal.map((s, j) => j === i ? { ...s, [sf.id]: v } : s)),
+                      systemId
                     )}
                   </div>
                 ))}
@@ -240,9 +242,12 @@ function InfoSection({ draft, updateDraft, onClear, showErrors, t }) {
       </div>
       <div className="field">
         <label>{t('sources.systemLabel')}</label>
+        {/* Only systems with a declared schema can hold homebrew content.
+            The custom system shares layouts via template export instead. */}
         <select value={draft.system} onChange={e => updateDraft({ system: e.target.value })}>
-          <option value="dnd5e2024">D&D 5.5e</option>
-          <option value="daggerheart">Daggerheart</option>
+          {getHomebrewSystems().map(m => (
+            <option key={m.id} value={m.id}>{t(`system.${m.id}`, m.shortName)}</option>
+          ))}
         </select>
       </div>
       <div style={{ marginTop: 16, paddingTop: 16, borderTop: '0.5px solid var(--c-border-mid)' }}>
@@ -344,7 +349,8 @@ function EntitySection({ sectionKey, sectionDef, draft, updateDraft }) {
               >
                 <label>{field.label}{field.required ? ' *' : ''}</label>
                 {renderField(field, form[field.id], v =>
-                  setForm(prev => ({ ...prev, [field.id]: v }))
+                  setForm(prev => ({ ...prev, [field.id]: v })),
+                  draft.system
                 )}
               </div>
             ))}
@@ -385,7 +391,7 @@ export default function HomebrewEditor({ open, onClose, onPublish, initialDraft 
     setPublishAttempted(false);
   }, [open, initialDraft, initialSection]);
 
-  const systemSchema = HOMEBREW_SCHEMA[draft.system] || {};
+  const systemSchema = getHomebrewSchema(draft.system);
   const sectionEntries = Object.entries(systemSchema);
   const canPublish = !!draft.name.trim();
 
@@ -479,7 +485,7 @@ export default function HomebrewEditor({ open, onClose, onPublish, initialDraft 
 
             {sectionEntries.length > 0 && (
               <div className="hbe-nav-divider">
-                {draft.system === 'dnd5e2024' ? 'D&D 5.5e' : 'Daggerheart'}
+                {t(`system.${draft.system}`, draft.system)}
               </div>
             )}
 

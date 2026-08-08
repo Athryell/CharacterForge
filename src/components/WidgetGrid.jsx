@@ -39,6 +39,8 @@ function LineZone({ zoneKey, children, insertKey, dragId, onHover, onCommitDrop 
 export default function WidgetGrid({
   widgets, editMode, onLayoutChange, renderWidget,
   hiddenWidgets = [], onRestoreWidget,
+  systemId, tabs = [],
+  extraShellProps = {},
 }) {
   const { t } = useTranslation();
   const [dragId,      setDragId]      = useState(null);
@@ -128,6 +130,9 @@ export default function WidgetGrid({
       },
       bottomFull: w.bottomFull || false,
       isDragOver: false,
+      systemId,
+      tabs,
+      ...extraShellProps,
     };
   }
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getWidgetLabel, ALL_TABS } from '../layout';
+import { getWidgetLabel } from '../layout';
 import { Icon } from '../config/icons';
 
 export default function WidgetShell({
@@ -8,10 +8,11 @@ export default function WidgetShell({
   onDragStart, onDragOver, onDrop,
   onMoveToTab, onToggleVisible, onToggleFullWidth, onToggleBottomFull,
   isDragOver,
+  systemId, tabs = [], userDefined, onEdit, onRemove,
 }) {
   const { t } = useTranslation();
   const [showMenu, setShowMenu] = useState(false);
-  const label = t(getWidgetLabel(id));
+  const label = t(getWidgetLabel(id, systemId));
 
   return (
     <div
@@ -29,6 +30,7 @@ export default function WidgetShell({
           <div style={{ flex:1 }} />
 
           <button className="widget-action-btn" onClick={() => onToggleFullWidth(id)}>
+            <Icon id={fullWidth ? 'action.shrink' : 'action.expand'} size={14} />
             {fullWidth ? t('layout.halfWidth') : t('layout.fullWidth')}
           </button>
 
@@ -38,22 +40,53 @@ export default function WidgetShell({
             </button>
           )}
 
-          <div style={{ position:'relative' }}>
-            <button className="widget-action-btn" onClick={() => setShowMenu(v => !v)}>{t('layout.moveTo')}</button>
-            {showMenu && (
-              <div className="widget-tab-menu">
-                <div className="widget-tab-menu-title">{t('layout.moveToTitle')}</div>
-                {ALL_TABS.map(tab => (
-                  <button key={tab.id} className="widget-tab-menu-item"
-                    onClick={() => { onMoveToTab(id, tab.id); setShowMenu(false); }}>
-                    {tab.icon} {t(tab.label)}
-                  </button>
-                ))}
+          {userDefined ? (
+            <>
+              {onEdit && (
+                <button className="widget-action-btn" onClick={() => onEdit(id)}>
+                  {t('customWidgets.editWidget')}
+                </button>
+              )}
+              {onRemove && (
+                <button
+                  className="widget-action-btn danger icon-only"
+                  onClick={() => onRemove(id)}
+                  title={t('customWidgets.removeWidget')}
+                  aria-label={t('customWidgets.removeWidget')}
+                >
+                  <Icon id="action.remove" size={14} />
+                </button>
+              )}
+            </>
+          ) : (
+            <>
+              <div style={{ position:'relative' }}>
+                <button className="widget-action-btn" onClick={() => setShowMenu(v => !v)}>{t('layout.moveTo')}</button>
+                {showMenu && (
+                  <div className="widget-tab-menu">
+                    <div className="widget-tab-menu-title">{t('layout.moveToTitle')}</div>
+                    {/* the active system's own tabs — offering D&D's to every
+                        system sent Daggerheart widgets to a spells tab it has
+                        no way to render */}
+                    {tabs.map(tab => (
+                      <button key={tab.id} className="widget-tab-menu-item"
+                        onClick={() => { onMoveToTab(id, tab.id); setShowMenu(false); }}>
+                        {tab.icon} {t(tab.label)}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-
-          <button className="widget-action-btn danger" onClick={() => onToggleVisible(id)}>{t('layout.hide')}</button>
+              <button
+                className="widget-action-btn danger icon-only"
+                onClick={() => onToggleVisible(id)}
+                title={t('layout.hideWidget')}
+                aria-label={t('layout.hideWidget')}
+              >
+                <Icon id="action.hide" size={14} />
+              </button>
+            </>
+          )}
         </div>
       )}
       <div className="widget-content">{children}</div>

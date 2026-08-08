@@ -1,29 +1,42 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import {
-  createDefaultState, getMod, getProfBonus, fmtMod,
-  SPELLCASTING_CLASS, HIT_DICE, SLOT_TABLE, SKILLS, JSON_SCHEMA_VERSION,
-} from '../data/systems/dnd5e2024/mechanics';
+import { getPlugin, DEFAULT_SYSTEM } from '../systems/registry';
 import { saveCharState, loadCharState } from '../chars';
+
 const LEGACY_KEY = 'characterforge_state';
+
+// Storage, identity and generic list mutation. Everything rule-shaped —
+// proficiency, spell slots, rests, level up — lives in the active system's
+// rules.js and is spread onto the returned object without the core ever reading
+// a key by name.
+
+function pluginFor(charState) {
+  return getPlugin(charState?.system || DEFAULT_SYSTEM);
+}
+
+function hydrate(saved) {
+  const sys = pluginFor(saved);
+  const base = sys.state?.create?.() ?? {};
+  const merged = { ...base, ...saved, system: saved.system || sys.meta.id };
+  return sys.state?.normalize ? sys.state.normalize(merged) : merged;
+}
 
 function loadFromStorage(charId) {
   try {
     if (charId) {
       const saved = loadCharState(charId);
-      if (saved) return { ...createDefaultState(), ...saved };
+      if (saved) return hydrate(saved);
     } else {
       const raw = localStorage.getItem(LEGACY_KEY);
-      if (raw) return { ...createDefaultState(), ...JSON.parse(raw) };
+      if (raw) return hydrate(JSON.parse(raw));
     }
-  } catch { /* ignore */ }
-  return createDefaultState();
+  } catch { /* fall through to a fresh sheet */ }
+  return getPlugin(DEFAULT_SYSTEM).state.create();
 }
 
 export function useCharacter(charId) {
   const charIdRef = useRef(charId);
   const [state, setState] = useState(() => loadFromStorage(charId));
 
-  // Reload state when charId changes
   useEffect(() => {
     if (charId !== charIdRef.current) {
       charIdRef.current = charId;
@@ -31,239 +44,38 @@ export function useCharacter(charId) {
     }
   }, [charId]);
 
-  const update = useCallback((patch) => {
-    setState(prev => {
-      const next = typeof patch === 'function' ? patch(prev) : { ...prev, ...patch };
-      const id = charIdRef.current;
-      if (id) saveCharState(id, next);
-      else { try { localStorage.setItem(LEGACY_KEY, JSON.stringify(next)); } catch {} }
-      return next;
-    });
+  const persist = useCallback(next => {
+    const id = charIdRef.current;
+    if (id) saveCharState(id, next, pluginFor(next).state?.charIndexEntry);
+    else { try { localStorage.setItem(LEGACY_KEY, JSON.stringify(next)); } catch { /* quota */ } }
   }, []);
 
-  // ── Derived values ──────────────────────────────────────────────
-  const level = state.charLevel || 1;
-  const profBonus = getProfBonus(level);
-
-  function abilityMod(attr) {
-    return getMod(state.abilities[attr] || 10);
-  }
-
-  function calcSaveMod(attr) {
-    const base = abilityMod(attr);
-    const prof = state.saveProficiencies.includes(attr) ? profBonus : 0;
-    return base + prof;
-  }
-
-  function calcSkillMod(skill) {
-    const base = abilityMod(skill.attr);
-    if (state.skillExpertise.includes(skill.id)) return base + profBonus * 2;
-    if (state.skillProficiencies.includes(skill.id)) return base + profBonus;
-    return base;
-  }
-
-  const passivePerception = 10 + calcSkillMod(SKILLS.find(s => s.id === 'perception'));
-  const initiative = fmtMod(abilityMod('DEX'));
-  const hitDice = `${level}× ${HIT_DICE[state.charClass] || 'd8'}`;
-
-  // Spellcasting
-  const spellStat = SPELLCASTING_CLASS[state.charClass];
-  const spellMod = spellStat ? abilityMod(spellStat) : 0;
-  const spellSaveDC = spellStat ? 8 + profBonus + spellMod : null;
-  const spellAttackBonus = spellStat ? fmtMod(profBonus + spellMod) : null;
-
-  // ── Mutators ────────────────────────────────────────────────────
-  function setAbility(attr, value) {
-    update(prev => ({
-      ...prev,
-      abilities: { ...prev.abilities, [attr]: Math.max(3, Math.min(30, parseInt(value) || 10)) },
-    }));
-  }
-
-  function toggleSaveProficiency(attr) {
-    update(prev => {
-      const half = (prev.saveHalfProficiency || []).includes(attr);
-      const prof = prev.saveProficiencies.includes(attr);
-      if (!half && !prof) return { ...prev, saveHalfProficiency: [...(prev.saveHalfProficiency || []), attr] };
-      if (half) return { ...prev, saveHalfProficiency: (prev.saveHalfProficiency || []).filter(a => a !== attr), saveProficiencies: [...prev.saveProficiencies, attr] };
-      return { ...prev, saveProficiencies: prev.saveProficiencies.filter(a => a !== attr) };
+  const update = useCallback(patch => {
+    setState(prev => {
+      const next = typeof patch === 'function' ? patch(prev) : { ...prev, ...patch };
+      persist(next);
+      return next;
     });
-  }
+  }, [persist]);
 
-  function toggleSkillProficiency(skillName) {
-    update(prev => {
-      const half = (prev.skillHalfProficiency || []).includes(skillName);
-      const prof = prev.skillProficiencies.includes(skillName);
-      const exp = prev.skillExpertise.includes(skillName);
-      if (!half && !prof) return { ...prev, skillHalfProficiency: [...(prev.skillHalfProficiency || []), skillName] };
-      if (half) return { ...prev, skillHalfProficiency: (prev.skillHalfProficiency || []).filter(s => s !== skillName), skillProficiencies: [...prev.skillProficiencies, skillName] };
-      if (!exp)  return { ...prev, skillExpertise: [...prev.skillExpertise, skillName] };
-      return {
-        ...prev,
-        skillProficiencies: prev.skillProficiencies.filter(s => s !== skillName),
-        skillExpertise: prev.skillExpertise.filter(s => s !== skillName),
-      };
-    });
-  }
+  const sys = pluginFor(state);
+  const { derived = {}, actions = {} } = sys.rules?.({ state, update }) ?? {};
 
-  function modHP(delta) {
-    update(prev => {
-      const next = Math.max(0, Math.min(prev.hpMax, prev.hpCurrent + delta));
-      return { ...prev, hpCurrent: next };
-    });
-  }
+  // ── Generic list mutation ───────────────────────────────────────────────
+  const addTo = useCallback((listKey, item) => {
+    update(prev => ({ ...prev, [listKey]: [...(prev[listKey] || []), item] }));
+  }, [update]);
 
-  function longRest() {
-    update(prev => {
-      const slots = (SLOT_TABLE[prev.charLevel] || SLOT_TABLE[1]).map(max => ({ max, used: 0 }));
-      return { ...prev, hpCurrent: prev.hpMax, spellSlots: slots };
-    });
-  }
+  const removeFrom = useCallback((listKey, predicate) => {
+    update(prev => ({ ...prev, [listKey]: (prev[listKey] || []).filter(predicate) }));
+  }, [update]);
 
-  function shortRest() {
-    // Subclasses like Fighter/Warlock recover differently; base: nothing by default
-    // Hook returns a message — caller can extend
-    return 'Riposo breve completato. Usa i dadi vita per recuperare HP.';
-  }
-
-  function onClassOrLevelChange(patch) {
-    update(prev => {
-      const next = { ...prev, ...patch };
-      const level = next.charLevel || 1;
-      const slots = (SLOT_TABLE[level] || SLOT_TABLE[1]).map(max => ({ max, used: 0 }));
-      return { ...next, spellSlots: slots };
-    });
-  }
-
-  function toggleSpellSlot(levelIdx, pipIdx) {
-    update(prev => {
-      const slots = prev.spellSlots.map((s, i) => {
-        if (i !== levelIdx) return s;
-        const used = pipIdx < s.used ? pipIdx : pipIdx + 1;
-        return { ...s, used };
-      });
-      return { ...prev, spellSlots: slots };
-    });
-  }
-
-  function toggleSpellPrepared(spellName) {
-    update(prev => ({
-      ...prev,
-      spells: prev.spells.map(s =>
-        s.name === spellName ? { ...s, prepared: !s.prepared } : s
-      ),
-    }));
-  }
-
-  function addAction(action) {
-    update(prev => ({ ...prev, actions: [...prev.actions, action] }));
-  }
-
-  function removeAction(id) {
-    update(prev => ({ ...prev, actions: prev.actions.filter(a => a.id !== id) }));
-  }
-
-  function addSpell(spell) {
-    update(prev => ({ ...prev, spells: [...prev.spells, spell] }));
-  }
-
-  function removeSpell(name) {
-    update(prev => ({ ...prev, spells: prev.spells.filter(s => s.name !== name) }));
-  }
-
-  function addEquipment(item) {
-    update(prev => ({ ...prev, equipment: [...prev.equipment, item] }));
-  }
-
-  function removeEquipment(idx) {
-    update(prev => ({ ...prev, equipment: prev.equipment.filter((_, i) => i !== idx) }));
-  }
-
-  function levelUp(changes) {
-    update(prev => {
-      const newLevel = prev.charLevel + 1;
-      const newHistory = {
-        ...prev.levelHistory,
-        [newLevel]: {
-          hpGained: changes.hpGained,
-          features: (changes.features || []).map(f => f.id),
-          spells: (changes.spells || []).map(s => s.name),
-          subclass: changes.subclass || null,
-          feat: changes.feat || changes.epicBoon || null,
-          abilityScoreImprovement: changes.asi || null,
-        },
-      };
-      const newFeatures = [
-        ...prev.features,
-        ...(changes.features || []).map(f => ({ ...f, acquiredAtLevel: newLevel })),
-      ];
-      const newSpells = [
-        ...prev.spells,
-        ...(changes.spells || []).map(s => ({ ...s, acquiredAtLevel: newLevel })),
-      ];
-      const newAbilities = changes.asi
-        ? Object.fromEntries(Object.entries(prev.abilities).map(([k, v]) => [k, v + (changes.asi[k] || 0)]))
-        : prev.abilities;
-      const slots = (SLOT_TABLE[newLevel] || SLOT_TABLE[1]).map(max => ({ max, used: 0 }));
-      return {
-        ...prev,
-        charLevel: newLevel,
-        hpMax: prev.hpMax + changes.hpGained,
-        hpCurrent: Math.min(prev.hpCurrent + changes.hpGained, prev.hpMax + changes.hpGained),
-        abilities: newAbilities,
-        features: newFeatures,
-        spells: newSpells,
-        spellSlots: slots,
-        levelHistory: newHistory,
-      };
-    });
-  }
-
-  function levelDown(keepIds = []) {
-    update(prev => {
-      if (prev.charLevel <= 1) return prev;
-      const removingLevel = prev.charLevel;
-      const history = (prev.levelHistory || {})[removingLevel] || {};
-      const newFeatures = prev.features.filter(f =>
-        f.acquiredAtLevel !== removingLevel || keepIds.includes(f.id)
-      );
-      const newSpells = prev.spells.filter(s =>
-        s.acquiredAtLevel !== removingLevel || keepIds.includes(s.name)
-      );
-      const removedAsi = history.abilityScoreImprovement;
-      const newAbilities = removedAsi
-        ? Object.fromEntries(Object.entries(prev.abilities).map(([k, v]) => [k, v - (removedAsi[k] || 0)]))
-        : prev.abilities;
-      const hpGained = history.hpGained || 0;
-      const newHistory = { ...(prev.levelHistory || {}) };
-      delete newHistory[removingLevel];
-      const newLevel = prev.charLevel - 1;
-      const slots = (SLOT_TABLE[newLevel] || SLOT_TABLE[1]).map(max => ({ max, used: 0 }));
-      const newHpMax = Math.max(1, prev.hpMax - hpGained);
-      return {
-        ...prev,
-        charLevel: newLevel,
-        hpMax: newHpMax,
-        hpCurrent: Math.min(prev.hpCurrent, newHpMax),
-        abilities: newAbilities,
-        features: newFeatures,
-        spells: newSpells,
-        spellSlots: slots,
-        levelHistory: newHistory,
-      };
-    });
-  }
-
-  function save(s) {
-    const id = charIdRef.current;
-    if (id) saveCharState(id, s);
-    else { try { localStorage.setItem(LEGACY_KEY, JSON.stringify(s)); } catch {} }
-  }
+  function save(s) { persist(s); }
 
   function importState(imported) {
-    const merged = { ...createDefaultState(), ...imported, schemaVersion: JSON_SCHEMA_VERSION };
+    const merged = hydrate({ ...imported, schemaVersion: sys.state?.schemaVersion });
     setState(merged);
-    save(merged);
+    persist(merged);
   }
 
   function exportState() {
@@ -271,34 +83,31 @@ export function useCharacter(charId) {
   }
 
   function resetState() {
-    const fresh = createDefaultState();
+    const fresh = sys.state.create();
     setState(fresh);
-    save(fresh);
+    persist(fresh);
   }
 
   return {
-    state, update,
-    // derived
-    profBonus, initiative, passivePerception, hitDice,
-    spellStat, spellSaveDC, spellAttackBonus,
-    // calculators
-    abilityMod, calcSaveMod, calcSkillMod, fmtMod,
-    // mutators
-    setAbility, toggleSaveProficiency, toggleSkillProficiency,
-    modHP, longRest, shortRest, onClassOrLevelChange,
-    levelUp, levelDown,
-    toggleSpellSlot, toggleSpellPrepared,
-    addAction, removeAction, addSpell, removeSpell,
-    addEquipment, removeEquipment,
-    importState, exportState, resetState,
-  };
-}
+    state, update, save,
+    addTo, removeFrom,
 
-// Patch for new features — appended
-export function extendState(state) {
-  return {
-    conditions: [],
-    weapons: [],
-    ...state,
+    // Named list mutators kept for the existing call sites.
+    addAction:     a   => addTo('actions', a),
+    removeAction:  id  => removeFrom('actions', a => a.id !== id),
+    addSpell:      s   => addTo('spells', s),
+    removeSpell:   n   => removeFrom('spells', s => s.name !== n),
+    addEquipment:  i   => addTo('equipment', i),
+    removeEquipment: idx => update(prev => ({
+      ...prev, equipment: (prev.equipment || []).filter((_, i) => i !== idx),
+    })),
+
+    importState, exportState, resetState,
+
+    // The active system's rules, opaque to this hook.
+    derived, actions,
+    // Transitional: keeps char.profBonus resolving at ~30 existing call sites.
+    // Drop once the widgets move into the plugins and read ctx.derived instead.
+    ...derived, ...actions,
   };
 }

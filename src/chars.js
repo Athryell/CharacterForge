@@ -17,19 +17,30 @@ export function loadCharState(id) {
   try { const v = localStorage.getItem(CHAR_KEY(id)); return v ? JSON.parse(v) : null; } catch { return null; }
 }
 
-export function saveCharState(id, state) {
+// buildEntry lets the active system decide what the character list shows about
+// it — the index used to be D&D-shaped, carrying charClass and charLevel even
+// for a custom sheet that has neither. Same injection pattern as migrateLegacy.
+export function saveCharState(id, state, buildEntry) {
   try { localStorage.setItem(CHAR_KEY(id), JSON.stringify(state)); } catch {}
-  // update index entry
   try {
     const idx = loadCharsIndex();
-    const entry = { id, name: state.charName || 'Personaggio', charClass: state.charClass || '', charLevel: state.charLevel || 1, lastSaved: new Date().toISOString(), system: state.system || 'dnd5e2024' };
+    const extra = buildEntry
+      ? buildEntry(state)
+      : { charClass: state.charClass || '', charLevel: state.charLevel || 1 };
+    const entry = {
+      id,
+      name: state.charName || 'Personaggio',
+      ...extra,
+      lastSaved: new Date().toISOString(),
+      system: state.system || DEFAULT_SYSTEM,
+    };
     const next = idx.find(c => c.id === id) ? idx.map(c => c.id === id ? entry : c) : [...idx, entry];
     saveCharsIndex(next);
   } catch {}
 }
 
 export function getCharsBySystem(systemId) {
-  return loadCharsIndex().filter(c => (c.system || 'dnd5e2024') === systemId);
+  return loadCharsIndex().filter(c => (c.system || DEFAULT_SYSTEM) === systemId);
 }
 
 export function deleteChar(id) {

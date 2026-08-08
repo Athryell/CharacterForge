@@ -1,31 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Icon, ICON_MAP, useIconMode } from '../config/icons';
+import { Icon, getIconMap, useIconMode } from '../config/icons';
 
 const DICE_ICONS = ['d4','d6','d8','d10','d12','d20'];
 
 function ResourceIcon({ icon, size = 13 }) {
   const { iconMode } = useIconMode();
   if (DICE_ICONS.includes(icon)) return <span className="resource-dice-icon">{icon}</span>;
-  const entry = ICON_MAP[`resource.${icon}`];
+  const entry = getIconMap()[`resource.${icon}`];
   if (!entry || iconMode === 'none') return null;
   if (iconMode === 'lucide' && entry.lucide) { const L = entry.lucide; return <L size={size} />; }
   return <span>{entry.emoji}</span>;
 }
 
+// Fallback for a system that declares no pins.
 const PINNABLE_DND = [
   { id: 'hp',            labelKey: 'pinned.hp' },
   { id: 'inspiration',   labelKey: 'pinned.inspiration' },
   { id: 'concentration', labelKey: 'pinned.concentration' },
   { id: 'conditions',    labelKey: 'pinned.conditions' },
   { id: 'deathSaves',    labelKey: 'pinned.deathSaves' },
-];
-
-const PINNABLE_DH = [
-  { id: 'hp',       labelKey: 'pinned.hp' },
-  { id: 'dh-armor', labelKey: 'pinned.dhArmor' },
-  { id: 'dh-hope',  labelKey: 'pinned.dhHope' },
-  { id: 'dh-fear',  labelKey: 'pinned.dhFear' },
 ];
 
 const STORAGE_KEY = 'characterforge_pinned';
@@ -42,9 +36,9 @@ export function savePinned(pinned) {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(pinned)); } catch {}
 }
 
-export default function PinnedBar({ state, editMode, pinned, onTogglePin, onUpdate, system, onShortRest, onLongRest, onToggleResourcePip }) {
+export default function PinnedBar({ state, editMode, pinned, onTogglePin, onUpdate, capabilities, pinnable, onShortRest, onLongRest, onToggleResourcePip }) {
   const { t } = useTranslation();
-  const showRestBtns = !editMode && system === 'dnd5e2024';
+  const showRestBtns = !editMode && capabilities?.rests;
   const pinnedResources = (state?.resources || []).filter(r => r.pinned);
   const [restMenuOpen, setRestMenuOpen] = useState(false);
   const restRef = useRef(null);
@@ -60,7 +54,7 @@ export default function PinnedBar({ state, editMode, pinned, onTogglePin, onUpda
 
   if (!editMode && pinned.length === 0 && !showRestBtns && pinnedResources.length === 0) return null;
 
-  const PINNABLE = system === 'daggerheart' ? PINNABLE_DH : PINNABLE_DND;
+  const PINNABLE = pinnable || PINNABLE_DND;
   const items = editMode ? PINNABLE : PINNABLE.filter(p => pinned.includes(p.id));
 
   return (

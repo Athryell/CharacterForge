@@ -304,11 +304,11 @@ export default function SpellManager({ spells = [], charClass, onUpdate, onRoll,
   ];
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const srdByName = useMemo(() => Object.fromEntries(dataManager.getSpells().map(s => [s.name, s])), [homebrewKey]);
+  const srdByName = useMemo(() => Object.fromEntries(dataManager.getSpells(systemId).map(s => [s.name, s])), [homebrewKey]);
   const knownNames = useMemo(() => new Set(spells.map(s => s.name)), [spells]);
 
   const browsedSpells = useMemo(() => filterSpells({
-    spells: dataManager.getSpells(),
+    spells: dataManager.getSpells(systemId),
     level: filterLevel !== '' ? parseInt(filterLevel) : undefined,
     school: filterSchool || undefined,
     cls: filterClass || undefined,

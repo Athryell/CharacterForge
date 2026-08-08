@@ -1,7 +1,11 @@
-import DNDCharacterCreator from './creators/DNDCharacterCreator';
-import DHCharacterCreator from './creators/DHCharacterCreator';
+import React from 'react';
+import { getPlugin, DEFAULT_SYSTEM } from '../systems/registry';
 
-export default function CharacterCreator({ onComplete, onCancel, systemId = 'dnd5e2024' }) {
-  if (systemId === 'daggerheart') return <DHCharacterCreator onComplete={onComplete} onCancel={onCancel} />;
-  return <DNDCharacterCreator onComplete={onComplete} onCancel={onCancel} />;
+// Dispatches to whichever creator the active system declares. A system with no
+// creator renders nothing, which is the right answer for one that has no choices
+// to make at creation time.
+export default function CharacterCreator({ onComplete, onCancel, systemId = DEFAULT_SYSTEM }) {
+  const Creator = getPlugin(systemId).creator;
+  if (!Creator) return null;
+  return <Creator onComplete={onComplete} onCancel={onCancel} />;
 }

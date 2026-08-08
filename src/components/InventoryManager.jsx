@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { KeywordText } from './Tooltip';
+import PresetBrowser from './PresetBrowser';
 import NotationTextarea from './NotationTextarea';
 import { TagPill, TagSelector } from './Tags';
 import { Icon } from '../config/icons';
@@ -23,7 +24,7 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
   function patchAdd(obj) { setAddForm(f => ({ ...f, ...obj })); }
   function patchEdit(obj) { setEditForm(f => ({ ...f, ...obj })); }
 
-  const dataItems = useMemo(() => dataManager.getItems(), []);
+  const dataItems = useMemo(() => dataManager.getItems(systemId), [systemId]);
   const filteredDataItems = useMemo(() => {
     let result = dataItems;
     if (categoryFilter) result = result.filter(i => i.category === categoryFilter);
@@ -73,11 +74,7 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
   function removeItem(id) { onUpdate(items.filter(i => i.id !== id)); }
 
   function adjustQty(id, delta) {
-    onUpdate(items.map(i => {
-      if (i.id !== id) return i;
-      const next = Math.max(0, (i.qty || 1) + delta);
-      return next === 0 ? null : { ...i, qty: next };
-    }).filter(Boolean));
+    onUpdate(items.map(i => i.id === id ? { ...i, qty: Math.max(0, (i.qty || 1) + delta) } : i));
   }
 
   function handleRowClick(item) {
@@ -126,29 +123,23 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
                   </button>
                 ))}
               </div>
-              <input
-                className="spell-search"
-                placeholder={t('spells.searchPlaceholder')}
-                value={dataSearch}
-                onChange={e => setDataSearch(e.target.value)}
-                style={{ marginBottom: 8 }}
-              />
-              {filteredDataItems.length === 0 ? (
-                <div className="hint-text" style={{ padding: '6px 0' }}>{t('inventory.noDataItems')}</div>
-              ) : (
-                <div className="weapon-preset-list">
-                  {filteredDataItems.map((item, i) => (
-                    <div key={i} className="weapon-preset-item" onClick={() => addFromData(item)}>
-                      <div className="weapon-name">{item.name}</div>
-                      <div className="weapon-meta">
-                        {item.desc && <span className="weapon-prop">{item.desc}</span>}
-                        {item.weight && item.weight !== '—' && <span className="weapon-prop" style={{ fontSize: '0.667rem' }}>{item.weight}</span>}
-                      </div>
+              <PresetBrowser
+                items={filteredDataItems}
+                searchValue={dataSearch}
+                onSearchChange={setDataSearch}
+                onSelect={addFromData}
+                onCancel={() => { onAddClose?.(); setDataSearch(''); setCategoryFilter(''); }}
+                emptyLabel={t('inventory.noDataItems')}
+                renderItem={item => (
+                  <>
+                    <div className="weapon-name">{item.name}</div>
+                    <div className="weapon-meta">
+                      {item.desc && <span className="weapon-prop">{item.desc}</span>}
+                      {item.weight && item.weight !== '—' && <span className="weapon-prop" style={{ fontSize: '0.667rem' }}>{item.weight}</span>}
                     </div>
-                  ))}
-                </div>
-              )}
-              <button className="io-btn" style={{ marginTop: 8 }} onClick={() => { onAddClose && onAddClose(); setDataSearch(''); setCategoryFilter(''); }}>{t('common.cancel')}</button>
+                  </>
+                )}
+              />
             </>
           ) : (
             <>

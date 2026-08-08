@@ -1,9 +1,10 @@
+import { DEFAULT_SYSTEM } from '../systems/registry';
 const DRAFT_KEY = 'characterforge_homebrew_draft';
 
 // Adds an item to the homebrew draft in localStorage.
 // type: 'weapons'|'spells'|'conditions'|'items'|'feats'|'classes'|'subclasses'|'species'|'backgrounds'
 // _fromSheet: true marks items synced from the sheet (shown as badge in HomebrewEditor)
-export function syncCustomToDraft(type, item, system = 'dnd5e2024') {
+export function syncCustomToDraft(type, item, system = DEFAULT_SYSTEM) {
   try {
     const raw = localStorage.getItem(DRAFT_KEY);
     const draft = raw ? JSON.parse(raw) : {
