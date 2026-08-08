@@ -208,7 +208,7 @@ export function render(id, ctx) {
           <div className="check-list">
             {ABILITIES.map(attr => {
               const saveHalf = (state.saveHalfProficiency || []).includes(attr);
-              const prof = state.saveProficiencies.includes(attr);
+              const prof = (state.saveProficiencies || []).includes(attr);
               const saveProfMod = prof ? char.profBonus : saveHalf ? Math.floor(char.profBonus / 2) : 0;
               const effMod = getMod(effectiveAbilities[attr]) + saveProfMod + (equipBonuses[`SAV-${attr}`] || 0);
               const tsBonus = equipBonuses[`SAV-${attr}`] || 0;
@@ -234,8 +234,8 @@ export function render(id, ctx) {
           <div className="check-list">
             {SKILLS.map(sk => {
               const skillHalf = (state.skillHalfProficiency || []).includes(sk.id);
-              const prof = state.skillProficiencies.includes(sk.id);
-              const exp = state.skillExpertise.includes(sk.id);
+              const prof = (state.skillProficiencies || []).includes(sk.id);
+              const exp = (state.skillExpertise || []).includes(sk.id);
               const skillProfMod = exp ? char.profBonus*2 : prof ? char.profBonus : skillHalf ? Math.floor(char.profBonus / 2) : 0;
               const effSkMod = getMod(effectiveAbilities[sk.attr]) + skillProfMod;
               return (

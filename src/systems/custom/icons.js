@@ -1,6 +1,6 @@
 import {
-  Dices, User, BarChart2, Grid3x3, CircleDot, Type, List, CheckSquare,
-  Backpack, ScrollText, BookOpen, Sigma, Table,
+  Dices, User, BarChart2, Grid3x3, CircleDot, Type, ListTree,
+  Backpack, ScrollText, BookOpen, Sigma, ToggleLeft,
   Heart, Shield, Zap, Star, Flame, Droplets,
 } from 'lucide-react';
 
@@ -16,14 +16,12 @@ const icons = {
   'widgetType.statGrid':   { emoji: '🔢', lucide: Grid3x3,     label: 'Stats'       },
   'widgetType.counter':    { emoji: '⭕', lucide: CircleDot,   label: 'Counter'     },
   'widgetType.text':       { emoji: '📝', lucide: Type,        label: 'Text Field'  },
-  'widgetType.list':       { emoji: '📋', lucide: List,        label: 'List'        },
-  'widgetType.toggleList': { emoji: '☑',  lucide: CheckSquare, label: 'Toggle List' },
+  'widgetType.features':   { emoji: '📋', lucide: ListTree,    label: 'Features'    },
   'widgetType.inventory':  { emoji: '🎒', lucide: Backpack,    label: 'Inventory'   },
   'widgetType.notes':      { emoji: '📜', lucide: ScrollText,  label: 'Notes'       },
   'widgetType.log':        { emoji: '📖', lucide: BookOpen,    label: 'Log'         },
   'widgetType.formula':    { emoji: '∑',  lucide: Sigma,       label: 'Formula'     },
-  'widgetType.rollButton': { emoji: '🎲', lucide: Dices,       label: 'Roll Button' },
-  'widgetType.table':      { emoji: '▦',  lucide: Table,       label: 'Table'       },
+  'widgetType.toggleList': { emoji: '🔘', lucide: ToggleLeft,  label: 'Toggle List' },
 
   'barIcon.heart':    { emoji: '❤',  lucide: Heart,    label: 'Heart'    },
   'barIcon.shield':   { emoji: '🛡',  lucide: Shield,   label: 'Shield'   },

@@ -74,11 +74,7 @@ export default function InventoryManager({ items = [], onUpdate, onRoll, addOpen
   function removeItem(id) { onUpdate(items.filter(i => i.id !== id)); }
 
   function adjustQty(id, delta) {
-    onUpdate(items.map(i => {
-      if (i.id !== id) return i;
-      const next = Math.max(0, (i.qty || 1) + delta);
-      return next === 0 ? null : { ...i, qty: next };
-    }).filter(Boolean));
+    onUpdate(items.map(i => i.id === id ? { ...i, qty: Math.max(0, (i.qty || 1) + delta) } : i));
   }
 
   function handleRowClick(item) {

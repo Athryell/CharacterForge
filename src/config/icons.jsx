@@ -13,6 +13,7 @@ import {
   Bandage, Cloud, Leaf, Circle,
   PawPrint, HeartPulse, HandHeart, Layers,
   Music, DiamondPlus,
+  UnfoldHorizontal, FoldHorizontal,
 } from 'lucide-react';
 
 // ── Context ─────────────────────────────────────────────────────────────────
@@ -115,6 +116,8 @@ const CORE_ICONS = {
   'action.show':     { emoji: '👁',  lucide: Eye,          label: 'Show'         },
   'action.hide':     { emoji: '🚫', lucide: EyeClosed,    label: 'Hide'         },
   'action.allChars': { emoji: '👥', lucide: Users,        label: 'All characters', alwaysLucide: true },
+  'action.expand':   { emoji: '▬',  lucide: UnfoldHorizontal, label: 'Expand'    },
+  'action.shrink':   { emoji: '⬛', lucide: FoldHorizontal,   label: 'Shrink'    },
 
   // ── Game ──────────────────────────────────────────────────────────────────
   'game.rest':          { emoji: '☕',  lucide: Coffee,      label: 'Rest'         },

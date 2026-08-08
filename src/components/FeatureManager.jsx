@@ -15,7 +15,7 @@ const SOURCE_BADGE = {
   custom:     { labelKey: 'features.sourceCustom',     color: '#5f5e5a', bg: '#f0f0ee' },
 };
 
-const EMPTY_FORM = { name: '', desc: '' };
+const EMPTY_FORM = { name: '', desc: '', category: 'custom' };
 
 function detectActionType(text) {
   const lower = (text || '').toLowerCase();
@@ -55,12 +55,13 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
 
   function submitCustom() {
     if (!addForm.name.trim()) return;
+    const category = addForm.category || 'custom';
     onUpdate([...features, {
       id: `custom_${Date.now()}`,
       name: addForm.name.trim(),
       desc: addForm.desc.trim(),
-      source: t('features.sourceCustom', 'Custom'),
-      sourceType: 'custom',
+      ...(category === 'custom' ? { source: t('features.sourceCustom', 'Other') } : {}),
+      sourceType: category,
     }]);
     syncCustomToDraft('feats', { name: addForm.name.trim(), desc: addForm.desc.trim() }, systemId);
     setAddForm(EMPTY_FORM);
@@ -88,10 +89,18 @@ export default function FeatureManager({ features = [], onUpdate, onRoll, onAddA
               value={addForm.desc} onChange={e => setAddForm(f => ({ ...f, desc: e.target.value }))}
               placeholder={t('features.descPlaceholder', 'Feature description...')} />
           </div>
+          <div className="field" style={{ marginTop: 6 }}>
+            <label>{t('features.formCategory', 'Category')}</label>
+            <select value={addForm.category} onChange={e => setAddForm(f => ({ ...f, category: e.target.value }))}>
+              {['class', 'species', 'background', 'custom'].map(type => (
+                <option key={type} value={type}>{t(SOURCE_BADGE[type].labelKey, type)}</option>
+              ))}
+            </select>
+          </div>
           <div style={{ display: 'flex', gap: 8, marginTop: 8, justifyContent: 'flex-end' }}>
             <button className="io-btn" onClick={() => { onAddClose && onAddClose(); setAddForm(EMPTY_FORM); }}>{t('common.cancel', 'Cancel')}</button>
             <button className={`io-btn primary ${!addForm.name.trim() ? 'disabled' : ''}`}
-              onClick={submitCustom} disabled={!addForm.name.trim()}><Icon id="action.add" size={12} /> {t('common.add', 'Add')}</button>
+              onClick={submitCustom} disabled={!addForm.name.trim()}><Icon id="action.add" size={12} /> {t('common.addLabel', 'Add')}</button>
           </div>
         </div>
       )}

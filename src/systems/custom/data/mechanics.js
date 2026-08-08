@@ -12,7 +12,7 @@ export const CUSTOM_WIDGET_TYPES = {
   'stat-grid': {
     label: 'customWidgets.statGrid',
     icon: 'widgetType.statGrid',
-    defaultConfig: { stats: [] },
+    defaultConfig: { stats: [], showMod: true, showValue: true, diceNotation: '1d20' },
   },
   'counter': {
     label: 'customWidgets.counter',
@@ -24,15 +24,10 @@ export const CUSTOM_WIDGET_TYPES = {
     icon: 'widgetType.text',
     defaultConfig: { label: '', fieldId: '', multiline: false },
   },
-  'list': {
-    label: 'customWidgets.list',
-    icon: 'widgetType.list',
-    defaultConfig: { label: '', itemFields: ['name', 'desc'] },
-  },
-  'toggle-list': {
-    label: 'customWidgets.toggleList',
-    icon: 'widgetType.toggleList',
-    defaultConfig: { label: '', items: [] },
+  'features': {
+    label: 'customWidgets.features',
+    icon: 'widgetType.features',
+    defaultConfig: { label: '', fieldId: '' },
   },
   'inventory': {
     label: 'customWidgets.inventory',
@@ -52,23 +47,12 @@ export const CUSTOM_WIDGET_TYPES = {
   'formula': {
     label: 'customWidgets.formula',
     icon: 'widgetType.formula',
-    defaultConfig: { label: '', notation: '' },
+    defaultConfig: { label: '', boxes: [] },
   },
-  'roll-button': {
-    label: 'customWidgets.rollButton',
-    icon: 'widgetType.rollButton',
-    defaultConfig: { label: '', notation: '' },
-  },
-  'table': {
-    label: 'customWidgets.table',
-    icon: 'widgetType.table',
-    defaultConfig: {
-      label: '', fieldId: '',
-      columns: [
-        { id: 'name',  label: 'Name',  type: 'text'   },
-        { id: 'value', label: 'Value', type: 'number' },
-      ],
-    },
+  'toggle-list': {
+    label: 'customWidgets.toggleList',
+    icon: 'widgetType.toggleList',
+    defaultConfig: {},
   },
 };
 
@@ -140,5 +124,6 @@ export function createCustomDefaultState() {
     inventory: [],
     log: [],
     conditions: [],
+    resources: [],
   };
 }

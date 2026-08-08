@@ -1,4 +1,4 @@
-// Three new custom-system widget types: formula, roll-button, table.
+// Custom-system widget types: formula (incl. the active/rollable toggle).
 // Run:  node scripts/browser.mjs scripts/checks/phaseB.mjs
 
 let failures = 0;
@@ -54,9 +54,9 @@ async function enterEditMode(page) {
 }
 
 export default async function (page, baseUrl) {
-  // ── formula: resolves a customField, sums a plain +/- chain ────────────────
+  // ── formula: boxes are stat-grid style — resolves a customField, sums a plain +/- chain ──
   await seed(page, baseUrl,
-    [{ id: 'w_f', type: 'formula', tab: 'identity', col: 0, order: 0, config: { label: 'Total', notation: '[LUCK]+2' } }],
+    [{ id: 'w_f', type: 'formula', tab: 'identity', col: 0, order: 0, config: { label: 'Total', boxes: [{ _id: 'b1', label: 'Sum', notation: '[LUCK]+2', active: false }] } } ],
     { LUCK: 3 });
   const formulaOk = await page.eval(`
     (() => {
@@ -65,34 +65,98 @@ export default async function (page, baseUrl) {
       return !!card && card.textContent.includes('5');
     })()
   `);
-  check('formula widget resolves [LUCK]+2 against customFields and sums to 5', formulaOk);
+  check('formula box resolves [LUCK]+2 against customFields and sums to 5', formulaOk);
 
-  // ── roll-button: resolves a customField, fires handleRoll ──────────────────
+  // ── formula, inactive box: shows the resolved value but is not clickable ───
   await seed(page, baseUrl,
-    [{ id: 'w_r', type: 'roll-button', tab: 'identity', col: 0, order: 0, config: { label: 'Attack', notation: '1d20+[LUCK]' } }],
+    [{ id: 'w_r', type: 'formula', tab: 'identity', col: 0, order: 0, config: { label: 'Attack', boxes: [{ _id: 'b1', label: 'Hit', notation: '1d20+[LUCK]', active: false }] } }],
     { LUCK: 3 });
-  const clicked = await clickText(page, '.card button', '/1d20/');
+  const inactiveClickable = await has(page, '.card .clickable-stat');
+  check('inactive formula box is not clickable', !inactiveClickable);
+
+  // ── formula, active box + dice notation: clickable, fires handleRoll ───────
+  await seed(page, baseUrl,
+    [{ id: 'w_r', type: 'formula', tab: 'identity', col: 0, order: 0, config: { label: 'Attack', boxes: [{ _id: 'b1', label: 'Hit', notation: '1d20+[LUCK]', active: true }] } }],
+    { LUCK: 3 });
+  const clicked = await page.eval(`
+    (() => {
+      const card = [...document.querySelectorAll('.card')]
+        .find(c => c.querySelector('.card-title')?.textContent.includes('Attack'));
+      const target = card?.querySelector('.clickable-stat');
+      if (target) { target.click(); return true; }
+      return false;
+    })()
+  `);
   await page.wait(300);
   const toastOk = await has(page, '.toast.show');
-  check('roll-button click resolves customFields and fires a roll', clicked && toastOk);
+  check('active formula box with dice notation is clickable and fires a roll', clicked && toastOk);
 
-  // ── table: seeded rows render, add-row works in edit mode ──────────────────
+  // ── formula: boxes are added/removed inline via the card's own pencil toggle,
+  // independent of "edit layout" mode ─────────────────────────────────────────
   await seed(page, baseUrl,
-    [{
-      id: 'w_t', type: 'table', tab: 'identity', col: 0, order: 0, config: {
-        label: 'Weapons', fieldId: 'WEAPONS',
-        columns: [{ id: 'name', label: 'Name', type: 'text' }, { id: 'value', label: 'Value', type: 'number' }],
-      },
-    }],
-    { WEAPONS: [{ name: 'Sword', value: 5 }] });
-  const cells = await page.eval(`[...document.querySelectorAll('table input')].map(i => i.value)`);
-  check('table widget renders seeded row values', cells.includes('Sword') && cells.includes('5'), JSON.stringify(cells));
+    [{ id: 'w_i', type: 'formula', tab: 'identity', col: 0, order: 0, config: { label: 'Inline', boxes: [] } }],
+    {});
+  const inlineCard = () => `[...document.querySelectorAll('.card')].find(c => c.querySelector('.card-title')?.textContent.includes('Inline'))`;
+  await page.eval(`${inlineCard()}.querySelector('.card-title .icon-btn').click()`);
+  await page.wait(200);
+  const addBtnOk = await page.eval(`
+    (() => {
+      const card = ${inlineCard()};
+      return [...card.querySelectorAll('button')].some(b => /add formula|aggiungi formula/i.test(b.textContent));
+    })()
+  `);
+  check('formula card pencil toggle reveals the inline "add formula" box control', addBtnOk);
+  await page.eval(`
+    (() => {
+      const card = ${inlineCard()};
+      const btn = [...card.querySelectorAll('button')].find(b => /add formula|aggiungi formula/i.test(b.textContent));
+      btn.click();
+    })()
+  `);
+  await page.wait(200);
+  const boxAdded = await page.eval(`${inlineCard()}.querySelectorAll('.ability-box').length === 1`);
+  check('clicking "add formula" adds one inline box', boxAdded);
+  await page.eval(`${inlineCard()}.querySelector('.ability-box button').click()`);
+  await page.wait(200);
+  const boxRemoved = await page.eval(`${inlineCard()}.querySelectorAll('.ability-box').length === 0`);
+  check("the box's own ✕ removes it", boxRemoved);
 
+  // ── formula: "edit layout" mode only lets you rename the widget, boxes are
+  // untouched by that modal ───────────────────────────────────────────────────
+  await seed(page, baseUrl,
+    [{ id: 'w_e', type: 'formula', tab: 'identity', col: 0, order: 0, config: { label: 'Renamed', boxes: [{ _id: 'b1', label: 'Kept', notation: '1d6', active: true }] } }],
+    {});
   await enterEditMode(page);
-  const rowsBefore = await page.eval(`document.querySelectorAll('table tbody tr').length`);
-  await page.click('.card-title .icon-btn');
-  const rowsAfter = await page.eval(`document.querySelectorAll('table tbody tr').length`);
-  check('table add-row increments row count in edit mode', rowsAfter === rowsBefore + 1, `${rowsBefore} -> ${rowsAfter}`);
+  await page.eval(`
+    (() => {
+      const shell = [...document.querySelectorAll('.widget-shell')]
+        .find(s => s.querySelector('.widget-content .card-title')?.textContent.includes('Renamed'));
+      [...shell.querySelectorAll('.widget-action-btn')].find(b => /edit widget|modifica widget/i.test(b.textContent)).click();
+    })()
+  `);
+  await page.wait(300);
+  const editModalHasNoNotationField = !(await has(page, '.creator-modal textarea'));
+  const editModalHasOnlyLabelField = await page.eval(`document.querySelectorAll('.creator-modal input').length === 1`);
+  check('edit-layout "Edit widget" modal for formula shows only the name field, no box/notation editing',
+    editModalHasNoNotationField && editModalHasOnlyLabelField);
+  await page.eval(`
+    (() => {
+      const input = document.querySelector('.creator-modal input');
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+      setter.call(input, 'Renamed 2');
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    })()
+  `);
+  await clickText(page, '.creator-modal button', '/Save|Salva/');
+  await page.wait(300);
+  const renamedResult = await page.eval(`
+    (() => {
+      const card = [...document.querySelectorAll('.card')]
+        .find(c => c.querySelector('.card-title')?.textContent.includes('Renamed 2'));
+      return { found: !!card, keptBox: !!card && card.textContent.includes('Kept') };
+    })()
+  `);
+  check('renaming a formula widget via "Edit widget" preserves its boxes', renamedResult.found && renamedResult.keptBox, JSON.stringify(renamedResult));
 
   // ── WidgetEditor: config form shown per new type ────────────────────────────
   await seed(page, baseUrl, [], {});
@@ -100,33 +164,21 @@ export default async function (page, baseUrl) {
   await clickText(page, 'button', '/add widget|aggiungi widget/i');
   await page.wait(300);
 
-  // Match on the label substring, not the full (locale-dependent) text.
-  async function checkTypeForm(name, typeRe, hasFieldFn) {
-    const clicked = await clickText(page, '.creator-modal .filter-chip', typeRe);
-    await page.wait(150);
-    const hasField = await hasFieldFn();
-    const noConfigHint = await page.eval(`
-      [...document.querySelectorAll('.creator-modal .hint-text')]
-        .some(el => /no configuration needed|nessuna configurazione necessaria/i.test(el.textContent))
-    `);
-    check(`WidgetEditor shows the notation/column config for "${name}", not the no-config hint`,
-      clicked && hasField && !noConfigHint);
-  }
-
-  await checkTypeForm('formula', '/Formula/', () => has(page, '.creator-modal textarea'));
-  await checkTypeForm('roll-button', '/Roll Button|Bottone di tiro/', () => has(page, '.creator-modal textarea'));
-  await checkTypeForm('table', '/Table|Tabella/', () => page.eval(`
-    [...document.querySelectorAll('.creator-modal button')]
-      .some(el => /Add column|Aggiungi colonna/.test(el.textContent))
-  `));
-
-  // ── pre-existing bug fix #1: "list" never had a settable Field ID ──────────
-  const listFieldIdVisible = await has(page, '.creator-modal input[placeholder="HP"]');
-  const listChipClicked = await clickText(page, '.creator-modal .filter-chip', '/^Lista$|^List$/');
+  // formula no longer takes a notation in this modal — boxes are inline-only —
+  // so it gets its own check: a required label input, no notation textarea.
+  await clickText(page, '.creator-modal .filter-chip', '/Formula/');
   await page.wait(150);
-  const listFieldIdVisibleAfterSelect = await has(page, '.creator-modal input[placeholder="HP"]');
-  check('WidgetEditor now shows a Field ID input for "list"', listChipClicked && listFieldIdVisibleAfterSelect,
-    `before selecting list: ${listFieldIdVisible}`);
+  const formulaFormOk = await page.eval(`document.querySelectorAll('.creator-modal input').length === 1`)
+    && !(await has(page, '.creator-modal textarea'));
+  check('WidgetEditor shows only a name field for "formula", no notation/box config', formulaFormOk);
+
+  // ── pre-existing bug fix #1: "list" (now "features") never had a settable Field ID ──
+  const featuresFieldIdVisible = await has(page, '.creator-modal input[placeholder="HP"]');
+  const featuresChipClicked = await clickText(page, '.creator-modal .filter-chip', '/^Features$|^Feature$/');
+  await page.wait(150);
+  const featuresFieldIdVisibleAfterSelect = await has(page, '.creator-modal input[placeholder="HP"]');
+  check('WidgetEditor now shows a Field ID input for "features"', featuresChipClicked && featuresFieldIdVisibleAfterSelect,
+    `before selecting features: ${featuresFieldIdVisible}`);
 
   await page.eval(`
     (() => {
@@ -145,7 +197,7 @@ export default async function (page, baseUrl) {
   await clickText(page, '.creator-modal button', '/Add to sheet|Aggiungi alla scheda/');
   await page.wait(300);
 
-  const listResult = await page.eval(`
+  const featuresResult = await page.eval(`
     (() => {
       const card = [...document.querySelectorAll('.card')]
         .find(c => c.querySelector('.card-title')?.textContent.includes('Items'));
@@ -153,14 +205,28 @@ export default async function (page, baseUrl) {
       return { found: true, noHint: !/Set a Field ID|Imposta un Field ID/.test(card.textContent) };
     })()
   `);
-  check('list widget created with a Field ID no longer shows the "set a field id" hint',
-    listResult.found && listResult.noHint, JSON.stringify(listResult));
+  check('features widget created with a Field ID no longer shows the "set a field id" hint',
+    featuresResult.found && featuresResult.noHint, JSON.stringify(featuresResult));
 
-  if (listResult.found && listResult.noHint) {
-    const itemsBefore = await page.eval(`document.querySelectorAll('.inventory-item').length`);
-    await page.click('.card .icon-btn');
-    const itemsAfter = await page.eval(`document.querySelectorAll('.inventory-item').length`);
-    check('list widget add-item works once its Field ID is set', itemsAfter === itemsBefore + 1, `${itemsBefore} -> ${itemsAfter}`);
+  if (featuresResult.found && featuresResult.noHint) {
+    const itemsBefore = await page.eval(`document.querySelectorAll('.feature-item').length`);
+    await page.click('.card .card-title .icon-btn');
+    await page.wait(150);
+    await page.eval(`
+      (() => {
+        const setNative = (el, val) => {
+          const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+          setter.call(el, val);
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+        };
+        const nameInput = document.querySelector('.weapon-add-panel input');
+        if (nameInput) setNative(nameInput, 'Second Wind');
+      })()
+    `);
+    await clickText(page, '.weapon-add-panel button', '/Add|Aggiungi/');
+    await page.wait(200);
+    const itemsAfter = await page.eval(`document.querySelectorAll('.feature-item').length`);
+    check('features widget add-item works once its Field ID is set', itemsAfter === itemsBefore + 1, `${itemsBefore} -> ${itemsAfter}`);
   }
 
   // ── pre-existing bug fix #2: widget-type picker chips fell back to "?" ─────

@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X } from 'lucide-react';
 import { Icon } from '../../../config/icons';
 import { CUSTOM_WIDGET_TYPES } from '../data/mechanics';
-import NotationTextarea from '../../../components/NotationTextarea';
 
-const TYPES_REQUIRING_LABEL = new Set(['bar', 'counter', 'text', 'list', 'toggle-list', 'table']);
-const NO_CONFIG_TYPES = new Set(['identity', 'stat-grid', 'inventory', 'notes', 'log']);
-const NOTATION_TYPES = new Set(['formula', 'roll-button']);
+const TYPES_REQUIRING_LABEL = new Set(['bar', 'counter', 'text', 'features', 'formula']);
+const NO_CONFIG_TYPES = new Set(['identity', 'stat-grid', 'inventory', 'notes', 'log', 'toggle-list']);
 
 const COLOR_OPTIONS = [
   { value: '--c-accent',   labelKey: 'customWidgets.colorAccent' },
@@ -17,7 +14,6 @@ const COLOR_OPTIONS = [
 ];
 
 const BAR_ICONS = ['heart', 'shield', 'zap', 'star', 'flame', 'droplets'];
-const ITEM_FIELD_OPTIONS = ['name', 'desc', 'value', 'notes'];
 
 export default function WidgetEditor({ onAdd, onClose, initialType = null, initialConfig = null }) {
   const { t } = useTranslation();
@@ -31,14 +27,9 @@ export default function WidgetEditor({ onAdd, onClose, initialType = null, initi
   const [barIcon, setBarIcon]       = useState(initialConfig?.icon      ?? 'heart');
   const [counterMax, setCounterMax] = useState(initialConfig?.max       ?? 5);
   const [multiline, setMultiline]   = useState(initialConfig?.multiline ?? false);
-  const [itemFields, setItemFields] = useState(initialConfig?.itemFields ?? ['name', 'desc']);
-  const [notation, setNotation]     = useState(initialConfig?.notation ?? '');
-  const [columns, setColumns]       = useState(initialConfig?.columns ?? CUSTOM_WIDGET_TYPES.table.defaultConfig.columns);
 
-  const needsLabel    = TYPES_REQUIRING_LABEL.has(selectedType);
-  const needsNotation = NOTATION_TYPES.has(selectedType);
-  const canAdd = (!needsLabel || label.trim().length > 0)
-    && (!needsNotation || notation.trim().length > 0);
+  const needsLabel = TYPES_REQUIRING_LABEL.has(selectedType);
+  const canAdd = !needsLabel || label.trim().length > 0;
 
   function handleAdd() {
     if (!canAdd) return;
@@ -50,44 +41,35 @@ export default function WidgetEditor({ onAdd, onClose, initialType = null, initi
       config = { ...config, label: label.trim(), fieldId: fieldId.trim(), max: Math.max(1, Math.min(20, Number(counterMax) || 5)) };
     } else if (selectedType === 'text') {
       config = { ...config, label: label.trim(), fieldId: fieldId.trim(), multiline };
-    } else if (selectedType === 'list') {
-      config = { ...config, label: label.trim(), fieldId: fieldId.trim(), itemFields: itemFields.length ? itemFields : ['name'] };
-    } else if (selectedType === 'toggle-list') {
+    } else if (selectedType === 'features') {
       config = { ...config, label: label.trim(), fieldId: fieldId.trim() };
-    } else if (selectedType === 'table') {
-      const validColumns = columns.filter(c => c.label.trim()).map(c => ({ ...c, label: c.label.trim() }));
-      config = { ...config, label: label.trim(), fieldId: fieldId.trim(), columns: validColumns.length ? validColumns : config.columns };
-    } else if (selectedType === 'formula' || selectedType === 'roll-button') {
-      config = { ...config, label: label.trim(), notation: notation.trim() };
+    } else if (selectedType === 'formula') {
+      // boxes are managed inline on the widget card, not in this modal —
+      // edit layout mode only renames the widget, so preserve them here
+      config = { ...config, ...(initialConfig || {}), label: label.trim() };
+    } else if (NO_CONFIG_TYPES.has(selectedType)) {
+      // identity/stat-grid/inventory/notes/log manage their own config inline
+      // on the widget card — edit layout mode only renames the widget
+      config = { ...config, ...(initialConfig || {}), label: label.trim() };
     }
     onAdd({ type: selectedType, config });
   }
 
-  function toggleItemField(field) {
-    setItemFields(prev =>
-      prev.includes(field) ? prev.filter(f => f !== field) : [...prev, field]
-    );
-  }
-
-  function addColumn() {
-    setColumns(prev => [...prev, { id: `col_${Date.now()}`, label: '', type: 'text' }]);
-  }
-
-  function removeColumn(idx) {
-    setColumns(prev => prev.filter((_, i) => i !== idx));
-  }
-
-  function updateColumnLabel(idx, lbl) {
-    setColumns(prev => prev.map((c, i) => i === idx ? { ...c, label: lbl } : c));
-  }
-
-  function setColumnType(idx, type) {
-    setColumns(prev => prev.map((c, i) => i === idx ? { ...c, type } : c));
-  }
-
   function renderConfigFields() {
     if (NO_CONFIG_TYPES.has(selectedType)) {
-      return <p className="hint-text" style={{ margin: 0 }}>{t('customWidgets.noConfig')}</p>;
+      return (
+        <>
+          <div className="field" style={{ marginBottom: 12 }}>
+            <label>{t('customWidgets.statLabel')}</label>
+            <input
+              value={label}
+              onChange={e => setLabel(e.target.value)}
+              placeholder={t('placeholders.widgetLabel')}
+            />
+          </div>
+          <p className="hint-text" style={{ margin: 0 }}>{t('customWidgets.noConfig')}</p>
+        </>
+      );
     }
 
     return (
@@ -106,8 +88,8 @@ export default function WidgetEditor({ onAdd, onClose, initialType = null, initi
           />
         </div>
 
-        {/* Field ID — bar/counter/text/list/toggle-list/table */}
-        {!['formula', 'roll-button'].includes(selectedType) && (
+        {/* Field ID — bar/counter/text/list */}
+        {selectedType !== 'formula' && (
           <div className="field" style={{ marginBottom: 12 }}>
             <label>{t('customWidgets.fieldId')}</label>
             <input
@@ -190,72 +172,6 @@ export default function WidgetEditor({ onAdd, onClose, initialType = null, initi
           </div>
         )}
 
-        {/* List: item fields picker */}
-        {selectedType === 'list' && (
-          <div className="field" style={{ marginBottom: 12 }}>
-            <label>{t('customWidgets.itemFields')}</label>
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 4 }}>
-              {ITEM_FIELD_OPTIONS.map(f => (
-                <button
-                  key={f}
-                  className={`filter-chip${itemFields.includes(f) ? ' active' : ''}`}
-                  onClick={() => toggleItemField(f)}
-                >
-                  {t(`customWidgets.field_${f}`)}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Formula / roll-button: notation input, with the same slash menu as native notation fields */}
-        {needsNotation && (
-          <div className="field" style={{ marginBottom: 12 }}>
-            <label>
-              {t('customWidgets.notation')}{' '}
-              <span aria-hidden="true" style={{ color: 'var(--c-warn)' }}>*</span>
-            </label>
-            <NotationTextarea
-              value={notation}
-              onChange={e => setNotation(e.target.value)}
-              style={{ minHeight: 40, borderColor: !notation.trim() ? 'var(--c-warn)' : undefined }}
-              placeholder={t('placeholders.notation')}
-            />
-          </div>
-        )}
-
-        {/* Table: column builder */}
-        {selectedType === 'table' && (
-          <div className="field" style={{ marginBottom: 12 }}>
-            <label>{t('customWidgets.columns')}</label>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 4 }}>
-              {columns.map((col, idx) => (
-                <div key={col.id} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                  <input
-                    value={col.label}
-                    onChange={e => updateColumnLabel(idx, e.target.value)}
-                    placeholder={t('customWidgets.columnLabel')}
-                    style={{ flex: 1 }}
-                  />
-                  <button
-                    className={`filter-chip${col.type === 'text' ? ' active' : ''}`}
-                    onClick={() => setColumnType(idx, 'text')}
-                  >{t('customWidgets.colTypeText')}</button>
-                  <button
-                    className={`filter-chip${col.type === 'number' ? ' active' : ''}`}
-                    onClick={() => setColumnType(idx, 'number')}
-                  >{t('customWidgets.colTypeNumber')}</button>
-                  {columns.length > 1 && (
-                    <button className="mod-btn" style={{ fontSize: '0.667rem' }} onClick={() => removeColumn(idx)}>✕</button>
-                  )}
-                </div>
-              ))}
-            </div>
-            <button className="io-btn" style={{ marginTop: 8 }} onClick={addColumn}>
-              {t('customWidgets.addColumn')}
-            </button>
-          </div>
-        )}
       </>
     );
   }
@@ -271,7 +187,7 @@ export default function WidgetEditor({ onAdd, onClose, initialType = null, initi
             {isEdit ? t('customWidgets.editWidget') : t('customWidgets.addWidget')}
           </div>
           <button className="creator-close" onClick={onClose} aria-label={t('common.close')}>
-            <X size={16} />
+            <Icon id="action.remove" size={14} />
           </button>
         </div>
 

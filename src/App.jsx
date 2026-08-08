@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useCharacter } from './hooks/useCharacter';
 import { loadCharsIndex, deleteChar, getActiveCharId, setActiveCharId, generateCharId, migrateLegacy, saveCharState } from './chars';
-import CharacterSelect from './components/CharacterSelect';
+import CharacterSelect, { loadCharFilter, saveCharFilter } from './components/CharacterSelect';
+import SystemPicker from './components/SystemPicker';
 import Onboarding, { CornerButtons, loadOnboardingSeen } from './components/Onboarding';
 import { HIT_DICE, resolveResourceFormula, getProfBonus } from './systems/dnd5e2024/data/mechanics';
 import dataManager from './data/dataManager';
@@ -34,49 +34,6 @@ import './App.css';
 
 
 
-function SystemSelector({ activeSystem, onChange }) {
-  const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
-  const [dropPos, setDropPos] = useState({ top: 0, left: 0 });
-  const btnRef = useRef();
-  const sys = getPlugin(activeSystem).meta;
-
-  function handleOpen() {
-    if (!open && btnRef.current) {
-      const r = btnRef.current.getBoundingClientRect();
-      setDropPos({ top: r.bottom + 4, left: r.left });
-    }
-    setOpen(v => !v);
-  }
-
-  return (
-    <div className="system-selector">
-      <button ref={btnRef} className="system-selector-btn" onClick={handleOpen}>
-        <Icon id={sys.iconId} /> {t(`system.${sys.id}`, sys.shortName)} <span className="system-selector-caret">▾</span>
-      </button>
-      {open && createPortal(
-        <>
-          <div className="hamburger-backdrop" onClick={() => setOpen(false)} />
-          <div className="system-dropdown" style={{ position: 'fixed', top: dropPos.top, left: dropPos.left }}>
-            {SYSTEM_METAS.map(s => (
-              <button
-                key={s.id}
-                className={`system-dropdown-item ${activeSystem === s.id ? 'active' : ''}`}
-                onClick={() => { onChange(s.id); setOpen(false); }}
-              >
-                <span><Icon id={s.iconId} /> {t(`system.${s.id}`, s.name)}</span>
-                <span className="system-dropdown-desc">{s.description}</span>
-              </button>
-            ))}
-          </div>
-        </>,
-        document.body
-      )}
-    </div>
-  );
-}
-
-
 // ── Daggerheart helpers ─────────────────────────────────────────
 
 
@@ -98,7 +55,7 @@ function updateFavicon(accentColor = '#6aaa2a') {
 }
 
 // ── Character App (single character) ────────────────────────────
-function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSystemChange }) {
+function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem }) {
   const { t, i18n } = useTranslation();
   const sys = getPlugin(activeSystem || DEFAULT_SYSTEM);
   const char = useCharacter(charId);
@@ -313,6 +270,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
   }
 
   function resetLayoutAndTabs() {
+    if (!window.confirm(t('menu.resetLayoutConfirm'))) return;
     const sysId = activeSystem || DEFAULT_SYSTEM;
     const nextLayout = getDefaultLayoutForSystem(sysId);
     setLayout(nextLayout);
@@ -977,7 +935,7 @@ function CharacterApp({ charId, onBackToSelect, onNewChar, activeSystem, onSyste
           {sys.capabilities.userDefinedWidgets && (
             <button
               className="io-btn primary"
-              style={{ marginLeft: 12, fontSize: '0.8rem', padding: '4px 12px' }}
+              style={{ fontSize: '0.8rem', padding: '4px 12px' }}
               onClick={() => { setEditingWidgetId(null); setShowWidgetEditor(true); }}
             >
               + {t('customWidgets.addWidget')}
@@ -1016,15 +974,14 @@ export default function App() {
     return getActiveCharId();
   });
   const [showCreator, setShowCreator] = useState(false);
+  const [showSystemPicker, setShowSystemPicker] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(() => !loadOnboardingSeen());
-  const [activeSystem, setActiveSystem] = useState(() => {
-    try { return localStorage.getItem('characterforge_active_system') || DEFAULT_SYSTEM; } catch { return DEFAULT_SYSTEM; }
-  });
+  const [activeSystem, setActiveSystem] = useState(DEFAULT_SYSTEM);
+  const [charFilter, setCharFilter] = useState(loadCharFilter);
 
-  function handleSystemChange(systemId) {
-    setActiveSystem(systemId);
-    try { localStorage.setItem('characterforge_active_system', systemId); } catch {}
-    window.umami?.track('system-selected', { system: systemId });
+  function handleFilterChange(systemId) {
+    setCharFilter(systemId);
+    saveCharFilter(systemId);
   }
 
   // Keep chars list in sync after any save
@@ -1035,9 +992,22 @@ export default function App() {
   }, []);
 
   function handleSelect(id) {
+    const picked = chars.find(c => c.id === id);
+    setActiveSystem((picked?.system) || DEFAULT_SYSTEM);
     setActiveCharId(id);
     setActive(id);
     setChars(loadCharsIndex());
+  }
+
+  function handleCreateClick() {
+    setShowSystemPicker(true);
+  }
+
+  function handleSystemPicked(systemId) {
+    setActiveSystem(systemId);
+    setShowSystemPicker(false);
+    setShowCreator(true);
+    window.umami?.track('creator-opened', { system: systemId });
   }
 
   function handleDelete(id) {
@@ -1060,20 +1030,24 @@ export default function App() {
     setShowCreator(false);
   }
 
-  const filteredChars = chars.filter(c => (c.system || DEFAULT_SYSTEM) === activeSystem);
-  const systemSelectorNode = <SystemSelector activeSystem={activeSystem} onChange={handleSystemChange} />;
-
   return (
     <>
       {!activeCharId ? (
         <>
           <CharacterSelect
-            chars={filteredChars}
+            chars={chars}
+            filter={charFilter}
+            onFilterChange={handleFilterChange}
             onSelect={handleSelect}
-            onCreate={() => { setShowCreator(true); window.umami?.track('creator-opened', { system: activeSystem }); }}
+            onCreate={handleCreateClick}
             onDelete={handleDelete}
-            systemSelector={systemSelectorNode}
           />
+          {showSystemPicker && (
+            <SystemPicker
+              onSelect={handleSystemPicked}
+              onCancel={() => setShowSystemPicker(false)}
+            />
+          )}
           {showCreator && (
             <CharacterCreator
               onComplete={handleCreatorComplete}
@@ -1092,7 +1066,6 @@ export default function App() {
           onBackToSelect={() => { setActiveCharId(null); setActive(null); setChars(loadCharsIndex()); }}
           onNewChar={newState => { handleCreatorComplete(newState); }}
           activeSystem={activeSystem}
-          onSystemChange={handleSystemChange}
         />
       )}
       {showOnboarding && <Onboarding onClose={() => setShowOnboarding(false)} />}

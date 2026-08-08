@@ -29,7 +29,7 @@ export function DHDomainCardForm({ domains, onAdd, onCancel, t }) {
         <textarea rows={2} value={form.desc} onChange={e => setForm(f => ({...f, desc:e.target.value}))} placeholder="Card effect..." style={{ width:'100%' }} />
       </div>
       <div style={{ display:'flex', gap:6, marginTop:6 }}>
-        <button className="io-btn primary" onClick={() => form.name && onAdd(form)}><Icon id="action.add" size={12} /> {t('common.add','Add')}</button>
+        <button className="io-btn primary" onClick={() => form.name && onAdd(form)}><Icon id="action.add" size={12} /> {t('common.addLabel','Add')}</button>
         <button className="io-btn" onClick={onCancel}>{t('common.cancel','Cancel')}</button>
       </div>
     </div>

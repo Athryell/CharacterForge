@@ -351,7 +351,14 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
               </div>
 
               {/* SPECIE */}
-              <div className="creator-subtitle">{t('creator.speciesTitle')}</div>
+              <div className="creator-subtitle" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                {t('creator.speciesTitle')}
+                {nextAttempted && !data.charRace && (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, color: 'var(--c-warn)', fontSize: '0.733rem', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>
+                    <AlertTriangle size={11} /> {t('sources.nameRequired')}
+                  </span>
+                )}
+              </div>
               <div className="creator-grid">
                 {speciesList.map(r => {
                   const isCustom = (r.id || r.name) === CUSTOM_SENTINEL;
@@ -435,7 +442,14 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
               {/* LINEAGE — shown when selected species has legacies */}
               {selectedSpeciesData?.legacies && (
                 <div className="creator-info-box" style={{ marginTop: 12 }}>
-                  <strong>{t('creator.chooseLineage', { lineageLabel: selectedSpeciesData.legacyLabel })}</strong>
+                  <strong style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                    {t('creator.chooseLineage', { lineageLabel: selectedSpeciesData.legacyLabel })}
+                    {nextAttempted && !data.speciesLegacy && (
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, color: 'var(--c-warn)', fontSize: '0.733rem', fontWeight: 400 }}>
+                        <AlertTriangle size={11} /> {t('sources.nameRequired')}
+                      </span>
+                    )}
+                  </strong>
 
                   {selectedSpeciesData.fixedSpells?.length > 0 && (
                     <div className="hint-text" style={{ marginTop: 6, marginBottom: 4 }}>
@@ -502,7 +516,14 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
           {/* ── STEP 1 — Classe & BG ── */}
           {step === 1 && (
             <div className="creator-section">
-              <div className="creator-subtitle">{t('creator.classTitle')}</div>
+              <div className="creator-subtitle" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                {t('creator.classTitle')}
+                {nextAttempted && !data.charClass && (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, color: 'var(--c-warn)', fontSize: '0.733rem', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>
+                    <AlertTriangle size={11} /> {t('sources.nameRequired')}
+                  </span>
+                )}
+              </div>
               <div className="creator-grid">
                 {classList.map(cls => {
                   const isCustom = cls === CUSTOM_SENTINEL;
@@ -623,7 +644,14 @@ export default function DNDCharacterCreator({ onComplete, onCancel }) {
               </div>
 
               {/* BACKGROUND */}
-              <div className="creator-subtitle" style={{ marginTop: 16 }}>{t('creator.backgroundTitle')}</div>
+              <div className="creator-subtitle" style={{ marginTop: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+                {t('creator.backgroundTitle')}
+                {nextAttempted && !data.charBackground && (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, color: 'var(--c-warn)', fontSize: '0.733rem', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>
+                    <AlertTriangle size={11} /> {t('sources.nameRequired')}
+                  </span>
+                )}
+              </div>
               <div className="creator-grid">
                 {bgList.map(b => {
                   const isCustom = (b.id || b.name) === CUSTOM_SENTINEL;

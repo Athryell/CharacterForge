@@ -105,16 +105,24 @@ color: #c0392b
 Hover: `background: #c0392b`, `color: #fff`
 
 #### Icon button — `.icon-btn`
-Bottone con solo icona o testo breve (Layout, Modifica, Fine).
+Bottone con solo icona o testo breve (Layout, Modifica, Fine, **Rimuovi/Annulla**).
 ```
 padding: 5px 8px
 font-size: 12px
 border-radius: var(--r)
 min-height: 28px
 ```
+`.icon-btn.active` (stato "confermato"/checkmark): `border-color: var(--c-accent)`,
+`background: var(--c-accent-light)`. Ogni bottone icon-only che conferma, annulla o rimuove
+un elemento (✓/✕) usa **questa** classe con `<Icon id="action.done|action.edit|action.remove" />`
+— mai testo hardcodato (`✕`, `×`) e mai `.mod-btn`, così il bottone "conferma" e il bottone
+"annulla/rimuovi" accanto hanno le stesse dimensioni quadrate. `.mod-btn` è riservato allo
+stepper qui sotto.
 
 #### Stepper — `.mod-btn`
-Bottoni +/- per incrementare valori numerici.
+Bottoni +/- per incrementare valori numerici. **Non riusare per azioni remove/cancel** — quelle
+vanno su `.icon-btn` (vedi sopra), altrimenti il bottone "✕" risulta più piccolo e con un
+border-radius diverso rispetto al bottone "✓" a fianco.
 ```
 width: 24px
 height: 24px
@@ -217,6 +225,32 @@ font-size: 12px
 color: var(--c-hint)
 font-style: italic
 ```
+
+### Ability box / Stat box — `.ability-box`
+
+Box singolo per una statistica (D&D ability score, DH trait, custom `stat-grid`).
+```
+background: var(--c-surface)
+border: 0.5px solid var(--c-border-mid)
+border-radius: var(--rl)
+padding: 10px 4px      /* default D&D/DH */
+```
+Stato `.editing`: `border-color: var(--c-accent)`, `background: var(--c-accent-light)`.
+
+Contenuto interno:
+
+- `.ability-label` — nome/etichetta, uppercase, 10.67px, `--c-hint`, letter-spacing .11em
+- `.ability-mod` — modificatore, 23.5px, peso 600, sempre con segno esplicito (`+2`, `-1`, `+0`)
+- `.ability-score-static` — valore statico, 17px, peso 500, `--c-muted`, nessun segno
+
+**Variante widget custom "Statistiche"** (`stat-grid`, override inline in `CustomWidget.jsx`):
+```
+padding: 12px 16px
+min-width: 80px          /* view mode */
+min-width: 108px         /* edit mode — spazio per i campi ID mod/valore */
+```
+Container: `display:flex; flex-wrap:wrap; gap:6px` — i box hanno `flex: 0 0 auto`, non si stirano
+mai, occupano solo lo spazio necessario e vanno a capo quando non c'entrano in riga.
 
 ---
 
@@ -341,6 +375,46 @@ max-width: calc(100vw - 32px)
 
 ---
 
+## Banner di stato / notice
+
+Due pattern distinti, non intercambiabili. **Mai inventare uno schema colore nuovo** (es.
+`--c-ink` come sfondo + `--c-bg` come testo + `opacity` per smorzare) — usa uno dei due sotto.
+
+### Banner "modalità attiva" (es. edit mode) — sfondo accent pieno
+
+Segnala che l'utente è dentro una modalità che cambia il comportamento della pagina
+(modifica layout, editing di un widget). Sfondo pieno, non tinta trasparente.
+
+```css
+background: var(--c-accent);
+color: #fff;
+padding: 6px 16px;
+```
+
+Esempi: `.widget-edit-bar`, `.layout-edit-banner`. **Non** usare `opacity` per attenuare —
+riduce il contrasto testo/sfondo sotto WCAG AA. Se serve un tono più tenue, cambia colore
+(es. `--c-accent-light` + testo `--c-accent-text`), non aggiungere opacità su un banner a
+tinta piena.
+
+### Banner "avviso contestuale" (es. concentrazione attiva, warning) — tinta trasparente
+
+Segnala uno stato o rischio legato a un elemento specifico, senza occupare tutta
+l'attenzione. Sfondo colore semantico a bassa opacità + bordo sinistro pieno.
+
+```css
+background: rgba(<colore>, 0.08);       /* o color-mix(in srgb, var(--c-warn) 12%, transparent) */
+border: 1px solid rgba(<colore>, 0.25);
+border-left: 3px solid <colore>;
+border-radius: var(--r);
+color: <colore>;                         /* stesso colore del bordo sinistro, sul testo chiave */
+```
+
+Esempi: `.concentration-banner` (blu `#185FA5`), `.prof-change-warning` (`--c-warn`). Il
+colore comunica il tipo di avviso: usa `--c-warn`/`--c-warn-text` per warning, un colore
+semantico dedicato (come il blu concentrazione) per notice specifiche di funzionalità.
+
+---
+
 ## Stato dei componenti interattivi
 
 Ogni elemento interattivo deve avere stati visivi chiari:
@@ -367,6 +441,12 @@ Il sistema supporta tre modalità (gestite da `useIconMode`):
 
 Usare sempre `<Icon id="..." />` da `src/config/icons.jsx`.
 Mai hardcodare emoji direttamente nei componenti — aggiungere prima la voce in `ICON_MAP`.
+
+**Icona + testo, mai lo stesso glifo due volte.** Quando un bottone accosta `<Icon id="action.add|action.done|action.remove|..." />`
+a una stringa i18n, quella stringa non deve avere il glifo corrispondente hardcoded (`"+ Add"`, `"✓ Save"`, `"✕ Delete"`) —
+l'icona lo mostra già, e in modalità `lucide`/`none` il doppione resta visibile o rimane comunque un residuo testuale
+sbagliato. Le chiavi tipo `common.add` (`"+ Add"`) sono corrette **solo** per bottoni solo-testo, senza `<Icon>`
+accanto; per un bottone icona+testo usa una chiave pulita (es. `common.addLabel`: `"Add"`).
 
 ---
 

@@ -30,6 +30,7 @@ export default function WidgetShell({
           <div style={{ flex:1 }} />
 
           <button className="widget-action-btn" onClick={() => onToggleFullWidth(id)}>
+            <Icon id={fullWidth ? 'action.shrink' : 'action.expand'} size={14} />
             {fullWidth ? t('layout.halfWidth') : t('layout.fullWidth')}
           </button>
 
@@ -47,8 +48,13 @@ export default function WidgetShell({
                 </button>
               )}
               {onRemove && (
-                <button className="widget-action-btn danger" onClick={() => onRemove(id)}>
-                  {t('customWidgets.removeWidget')}
+                <button
+                  className="widget-action-btn danger icon-only"
+                  onClick={() => onRemove(id)}
+                  title={t('customWidgets.removeWidget')}
+                  aria-label={t('customWidgets.removeWidget')}
+                >
+                  <Icon id="action.remove" size={14} />
                 </button>
               )}
             </>
@@ -71,7 +77,14 @@ export default function WidgetShell({
                   </div>
                 )}
               </div>
-              <button className="widget-action-btn danger" onClick={() => onToggleVisible(id)}>{t('layout.hide')}</button>
+              <button
+                className="widget-action-btn danger icon-only"
+                onClick={() => onToggleVisible(id)}
+                title={t('layout.hideWidget')}
+                aria-label={t('layout.hideWidget')}
+              >
+                <Icon id="action.hide" size={14} />
+              </button>
             </>
           )}
         </div>
