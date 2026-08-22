@@ -34,11 +34,27 @@ export function Field({ label, children }) {
 }
 
 export function Toast({ message, action }) {
-  if (!message) return null;
+  const [shown, setShown] = React.useState(false);
+  const [display, setDisplay] = React.useState(null);
+  const hideTimer = React.useRef();
+
+  React.useEffect(() => {
+    if (message) {
+      clearTimeout(hideTimer.current);
+      setDisplay({ message, action });
+      const raf = requestAnimationFrame(() => setShown(true));
+      return () => cancelAnimationFrame(raf);
+    }
+    setShown(false);
+    hideTimer.current = setTimeout(() => setDisplay(null), 200);
+    return () => clearTimeout(hideTimer.current);
+  }, [message, action]);
+
+  if (!display) return null;
   return createPortal(
-    <div className="toast show">
-      <span>{message}</span>
-      {action && <button className="toast-action-btn" onClick={action.onClick}>{action.label}</button>}
+    <div className={`toast${shown ? ' show' : ''}`}>
+      <span>{display.message}</span>
+      {display.action && <button className="toast-action-btn" onClick={display.action.onClick}>{display.action.label}</button>}
     </div>,
     document.body
   );

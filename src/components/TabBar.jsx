@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Icon } from '../config/icons';
 
@@ -9,6 +9,8 @@ export default function TabBar({ tabs, activeTab, onTabChange, editMode, onReord
   const dragIdx     = useRef(null);
   const dragOverIdx = useRef(null);
   const groupRef    = useRef(null);
+  const indicatorRef = useRef(null);
+  const tabRefs     = useRef(new Map());
   const [overflows, setOverflows] = useState(false);
   const [isMobile, setIsMobile] = useState(() => window.matchMedia('(max-width: 599px)').matches);
   const [showMoreDrawer, setShowMoreDrawer] = useState(false);
@@ -20,15 +22,30 @@ export default function TabBar({ tabs, activeTab, onTabChange, editMode, onReord
   const bottomTabs = hasMore ? bottomNavTabs.slice(0, MAX_BOTTOM_TABS - 1) : bottomNavTabs;
   const moreTabs   = hasMore ? bottomNavTabs.slice(MAX_BOTTOM_TABS - 1) : [];
 
+  function moveIndicator() {
+    const groupEl = groupRef.current;
+    const indicator = indicatorRef.current;
+    const btn = tabRefs.current.get(activeTab);
+    if (!groupEl || !indicator || !btn) { if (indicator) indicator.style.opacity = '0'; return; }
+    const groupRect = groupEl.getBoundingClientRect();
+    const btnRect = btn.getBoundingClientRect();
+    indicator.style.transform = `translate(${btnRect.left - groupRect.left + groupEl.scrollLeft}px, ${btnRect.top - groupRect.top}px)`;
+    indicator.style.width = `${btnRect.width}px`;
+    indicator.style.height = `${btnRect.height}px`;
+    indicator.style.opacity = '1';
+  }
+
   useEffect(() => {
     const el = groupRef.current;
     if (!el) return;
-    const check = () => setOverflows(el.scrollWidth > el.clientWidth);
+    const check = () => { setOverflows(el.scrollWidth > el.clientWidth); moveIndicator(); };
     check();
     const ro = new ResizeObserver(check);
     ro.observe(el);
     return () => ro.disconnect();
   }, [displayTabs]);
+
+  useLayoutEffect(() => { moveIndicator(); }, [activeTab, displayTabs, isMobile]);
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 599px)');
@@ -60,6 +77,7 @@ export default function TabBar({ tabs, activeTab, onTabChange, editMode, onReord
         <div style={{ flex: 1 }} />
         <div className={`tab-group-wrap${overflows ? ' scrollable' : ''}`}>
           <div className="tab-group" ref={groupRef}>
+            <span className="tab-indicator" ref={indicatorRef} aria-hidden="true" />
             {displayTabs.map((tab, i) => (
               <div key={tab.id}
                 draggable={editMode}
@@ -69,6 +87,7 @@ export default function TabBar({ tabs, activeTab, onTabChange, editMode, onReord
                 className={`tab-btn-wrapper ${editMode ? 'edit-mode' : ''} ${!tab.visible ? 'tab-hidden' : ''}`}
               >
                 <button
+                  ref={el => { if (el) tabRefs.current.set(tab.id, el); else tabRefs.current.delete(tab.id); }}
                   className={`tab-btn ${activeTab === tab.id && tab.visible ? 'active' : ''}`}
                   onClick={() => !editMode && tab.visible && onTabChange(tab.id)}
                   style={{ opacity: !tab.visible ? 0.4 : 1, cursor: editMode ? 'grab' : 'pointer' }}
